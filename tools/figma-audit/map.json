@@ -1,0 +1,38 @@
+{
+  "_설명": "피그마 기준 노드와 웹 산출물의 매핑. audit.mjs가 이 파일을 읽어 검수한다.",
+  "figma": {
+    "fileKey": "LnT8TgFVBxky0bVyaF6Tob",
+    "canonicalSectionId": "6:147",
+    "canonicalSectionName": "v3",
+    "note": "기준 섹션이 바뀌면 canonicalSectionId를 반드시 갱신할 것. 옛 버전(v1=1:490, v2=1:749)은 검수 대상 아님."
+  },
+  "web": {
+    "html": "index.html"
+  },
+  "images": [
+    { "node": "6:181", "file": "assets/img-hero.png", "figmaName": "image 8",  "rawSha256": "dd9236d22e249fdb34269b53bb55973bc76c32506c05028db73471916ebbf68e", "shaVerified": true, "verifiedAt": "2026-07-31" },
+    { "node": "6:187", "file": "assets/img-apply.png", "figmaName": "image 10", "rawSha256": null, "shaVerified": false },
+    { "node": "6:197", "file": "assets/img-fomo.png", "figmaName": "image 6", "rawSha256": null, "shaVerified": false },
+    { "node": "6:205", "file": "assets/img-speed.png", "figmaName": "image 5", "rawSha256": null, "shaVerified": false },
+    { "node": "6:290", "file": "assets/img-save.png", "figmaName": "image 4", "rawSha256": null, "shaVerified": false },
+    { "node": "6:298", "file": "assets/img-personal.png", "figmaName": "image 7", "rawSha256": null, "shaVerified": false }
+  ],
+  "_lock설명": "세션 간에 확정된 값. 되돌아가면 즉시 FAIL. 결정이 바뀌면 여기와 피그마를 함께 고칠 것.",
+  "lockedStyles": [
+    { "id": "hl-strip",      "결정": "하이라이트 = Amber200 65% 스트립 (v8.9)", "figmaNode": "6:174", "mustMatch": "linear-gradient\\(transparent 65%, var\\(--amber-200\\) 65%\\)" },
+    { "id": "hl-line1-only", "결정": "하이라이트는 첫 줄만, 둘째 줄 없음 (v8.9)", "figmaNode": "6:177", "mustMatch": "<br>이직할 수 있을까\\?</h1>", "mustNotMatch": "<span class=\"hl\">이직할 수 있을까" },
+    { "id": "avatar-42",     "결정": "알림톡 프로필 아바타 42px", "mustMatch": "\\.alim-profile img\\{width:42px;height:42px" },
+    { "id": "step-radius-18","결정": "how-it-works 스텝 카드 radius 18px", "mustMatch": "border-radius:18px;padding:20px" },
+    { "id": "insight-head",  "결정": "인사이트 섹션 헤딩 27px·keep-all로 2줄 고정", "mustMatch": "font-size:27px;word-break:keep-all" },
+    { "id": "label-17-bold", "결정": "t-label = 17px Bold, 자간 1%", "mustMatch": "\\.t-label\\{font-size:17px;line-height:20px;font-weight:700;letter-spacing:0\\.01em\\}" }
+  ],
+  "_무시설명": "피그마에만 있고 웹에는 없는 게 정상인 문자열 (상태바 시계, 레이어용 더미 등).",
+  "ignoreFigmaText": ["9:41", "커리어코치 워드마크 (투톤, 아웃라인)", "커리어코치 로고 (원형)"],
+  "_웹전용설명": "웹에만 있고 피그마에는 없는 게 정상인 문자열 (SEO/접근성/약관 링크 등).",
+  "ignoreWebText": [
+    "커리어코치 — 매일 아침 8시, 내 직군의 새 공고를 카톡으로",
+    "이용약관",
+    "개인정보처리방침",
+    "|"
+  ]
+}
