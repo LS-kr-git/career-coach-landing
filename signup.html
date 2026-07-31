@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>회원가입 — 커리어코치</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root{
+    --amber-100:#FEF3C7; --amber-200:#FDE68A; --amber-500:#F59E0B; --amber-600:#D97706; --amber-700:#B45309;
+    --navy-500:#3B82F6; --navy-900:#1E3A8A;
+    --gray-50:#F8FAFC; --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-300:#CBD5E1; --gray-400:#94A3B8;
+    --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155; --gray-800:#1E293B;
+    --error-600:#DC2626;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;
+    background:var(--gray-100); color:var(--gray-800); -webkit-font-smoothing:antialiased;
+  }
+  .page{max-width:400px;margin:0 auto;background:#fff;min-height:100vh;
+    box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
+  header{display:flex;align-items:center;gap:10px;padding:24px}
+  .app-icon{width:29px;height:29px;border-radius:25%;background:linear-gradient(135deg,#F59E0B,#D97706);display:flex;align-items:center;justify-content:center}
+  header a{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--gray-800);font-weight:800;font-size:16px}
+
+  .container{padding:8px 24px 64px}
+  h1{font-size:24px;line-height:32px;font-weight:800;color:var(--navy-900);margin-bottom:8px}
+  .sub{font-size:14px;line-height:21px;color:var(--gray-600);margin-bottom:32px}
+
+  .field{margin-bottom:22px}
+  .field label{display:block;font-size:13px;font-weight:700;color:var(--gray-700);margin-bottom:8px}
+  .field label .req{color:var(--amber-600)}
+  input[type=text], input[type=tel], select{
+    width:100%;height:48px;padding:0 14px;border:1.5px solid var(--gray-200);border-radius:10px;
+    font:inherit;font-size:15px;color:var(--gray-800);background:#fff;appearance:none;
+  }
+  input:focus, select:focus{outline:none;border-color:var(--amber-500);box-shadow:0 0 0 3px var(--amber-100)}
+  input::placeholder{color:var(--gray-400)}
+  .row{display:flex;gap:8px}
+  .row > *{flex:1}
+  select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394A3B8' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:34px}
+
+  .seg{display:flex;gap:8px}
+  .seg input{position:absolute;opacity:0;pointer-events:none}
+  .seg label{flex:1;height:48px;display:flex;align-items:center;justify-content:center;margin:0;
+    border:1.5px solid var(--gray-200);border-radius:10px;font-size:15px;font-weight:600;color:var(--gray-600);cursor:pointer}
+  .seg input:checked + label{border-color:var(--amber-500);background:var(--amber-100);color:var(--amber-700)}
+
+  .hint{font-size:12px;color:var(--gray-400);margin-top:6px}
+  .age-badge{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:999px;
+    background:var(--gray-100);color:var(--gray-600);font-size:13px;font-weight:600}
+  .age-badge b{color:var(--navy-900)}
+
+  .consents{border-top:1px solid var(--gray-200);margin-top:30px;padding-top:22px}
+  .consent{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px}
+  .consent input{width:20px;height:20px;margin-top:1px;accent-color:var(--amber-500);flex:none}
+  .consent span{font-size:14px;line-height:21px;color:var(--gray-600)}
+  .consent a{color:var(--navy-500);text-decoration:underline}
+  .consent .req{color:var(--amber-600);font-weight:700}
+
+  .submit{
+    width:100%;height:56px;border:none;border-radius:14px;margin-top:24px;
+    background:var(--amber-500);color:#fff;font:inherit;font-size:16px;font-weight:700;cursor:pointer;
+    box-shadow:0 8px 20px rgba(245,158,11,.35);
+  }
+  .submit:active{transform:scale(.98)}
+  .err{font-size:12.5px;color:var(--error-600);margin-top:6px;display:none}
+
+  .done{display:none;text-align:center;padding:70px 0 40px}
+  .done .mark{width:64px;height:64px;border-radius:50%;background:var(--amber-100);margin:0 auto 20px;
+    display:flex;align-items:center;justify-content:center}
+  .done h2{font-size:21px;font-weight:800;color:var(--navy-900);margin-bottom:10px}
+  .done p{font-size:14.5px;line-height:22px;color:var(--gray-600);margin-bottom:28px}
+  .done a{display:inline-block;background:var(--amber-500);color:#fff;text-decoration:none;
+    padding:15px 28px;border-radius:12px;font-weight:700;font-size:15px}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <a href="./index.html">
+      <span class="app-icon"><svg width="19" height="19" viewBox="0 0 48 48" fill="none"><path d="M9 41 V34 H15.5 V27.5 H22 V21 H28.9" stroke="white" stroke-width="4"/><rect x="28.9" y="14.5" width="5.8" height="25" fill="white"/><path d="M31.8 4 L41.4 15.5 L22.2 15.5 Z" fill="white"/><path d="M5.5 41 H42.5" stroke="white" stroke-width="4" stroke-linecap="round"/></svg></span>
+      커리어코치
+    </a>
+  </header>
+
+  <div class="container">
+    <div id="formView">
+      <h1>회원가입</h1>
+      <p class="sub">매일 아침 8시, 맞춤 채용 브리핑을 받기 위한 기본 정보를 입력해 주세요.</p>
+
+      <form id="signupForm" novalidate>
+        <div class="field">
+          <label for="name">이름 <span class="req">*</span></label>
+          <input type="text" id="name" name="name" placeholder="홍길동" autocomplete="name" required>
+          <p class="err" id="err-name">이름을 입력해 주세요.</p>
+        </div>
+
+        <div class="field">
+          <label for="phone">휴대전화번호 <span class="req">*</span></label>
+          <input type="tel" id="phone" name="phone" placeholder="010-0000-0000" autocomplete="tel" inputmode="numeric" required>
+          <p class="hint">채용 브리핑 알림톡이 이 번호의 카카오톡으로 발송돼요.</p>
+          <p class="err" id="err-phone">올바른 휴대전화번호를 입력해 주세요.</p>
+        </div>
+
+        <div class="field">
+          <label>성별 <span class="req">*</span></label>
+          <div class="seg">
+            <input type="radio" id="g-f" name="gender" value="여성" required><label for="g-f">여성</label>
+            <input type="radio" id="g-m" name="gender" value="남성"><label for="g-m">남성</label>
+          </div>
+          <p class="err" id="err-gender">성별을 선택해 주세요.</p>
+        </div>
+
+        <div class="field">
+          <label>생년월일 <span class="req">*</span></label>
+          <div class="row">
+            <select id="byear" required><option value="">출생 연도</option></select>
+            <select id="bmonth" required><option value="">월</option></select>
+            <select id="bday" required><option value="">일</option></select>
+          </div>
+          <p class="hint" style="margin-top:10px">
+            <span class="age-badge">연령대 <b id="ageBand">—</b></span>
+          </p>
+          <p class="err" id="err-birth">생년월일을 모두 선택해 주세요.</p>
+        </div>
+
+        <div class="consents">
+          <div class="consent">
+            <input type="checkbox" id="c-terms" required>
+            <span><span class="req">[필수]</span> <a href="./terms.html" target="_blank">이용약관</a>에 동의합니다.</span>
+          </div>
+          <div class="consent">
+            <input type="checkbox" id="c-privacy" required>
+            <span><span class="req">[필수]</span> <a href="./privacy.html" target="_blank">개인정보 수집·이용</a>에 동의합니다.</span>
+          </div>
+          <p class="err" id="err-consent">필수 약관에 모두 동의해 주세요.</p>
+        </div>
+
+        <button type="submit" class="submit">가입하고 시작하기</button>
+      </form>
+    </div>
+
+    <div class="done" id="doneView">
+      <div class="mark"><svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M4 12.5 L9.5 18 L20 6.5" stroke="#D97706" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <h2>가입 정보가 접수됐어요!</h2>
+      <p>구독 시작을 위한 결제 안내는<br>입력하신 번호의 카카오톡으로 보내드릴게요.</p>
+      <a href="./index.html">홈으로 돌아가기</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 출생 연도/월/일 옵션
+  const byear = document.getElementById('byear'), bmonth = document.getElementById('bmonth'), bday = document.getElementById('bday');
+  const thisYear = new Date().getFullYear();
+  for (let y = thisYear - 14; y >= thisYear - 80; y--) byear.insertAdjacentHTML('beforeend', `<option value="${y}">${y}년</option>`);
+  for (let m = 1; m <= 12; m++) bmonth.insertAdjacentHTML('beforeend', `<option value="${m}">${m}월</option>`);
+  for (let d = 1; d <= 31; d++) bday.insertAdjacentHTML('beforeend', `<option value="${d}">${d}일</option>`);
+
+  // 연령대 자동 계산
+  byear.addEventListener('change', () => {
+    const band = document.getElementById('ageBand');
+    if (!byear.value) { band.textContent = '—'; return; }
+    const age = thisYear - parseInt(byear.value, 10);
+    band.textContent = Math.min(Math.floor(age / 10) * 10, 70) + '대';
+  });
+
+  // 전화번호 자동 하이픈
+  const phone = document.getElementById('phone');
+  phone.addEventListener('input', () => {
+    const d = phone.value.replace(/\D/g, '').slice(0, 11);
+    phone.value = d.length > 7 ? `${d.slice(0,3)}-${d.slice(3,7)}-${d.slice(7)}` : d.length > 3 ? `${d.slice(0,3)}-${d.slice(3)}` : d;
+  });
+
+  document.getElementById('signupForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    let ok = true;
+    const show = (id, bad) => { document.getElementById(id).style.display = bad ? 'block' : 'none'; if (bad) ok = false; };
+    show('err-name', !document.getElementById('name').value.trim());
+    show('err-phone', !/^01[016789]-\d{3,4}-\d{4}$/.test(phone.value));
+    show('err-gender', !document.querySelector('input[name=gender]:checked'));
+    show('err-birth', !(byear.value && bmonth.value && bday.value));
+    show('err-consent', !(document.getElementById('c-terms').checked && document.getElementById('c-privacy').checked));
+    if (!ok) return;
+
+    // TODO: 백엔드 연동 시 이 지점에서 API 호출 (fetch → Supabase/서버리스)
+    if (window.fbq) fbq('track', 'CompleteRegistration');
+    document.getElementById('formView').style.display = 'none';
+    document.getElementById('doneView').style.display = 'block';
+    window.scrollTo(0, 0);
+  });
+</script>
+</body>
+</html>
