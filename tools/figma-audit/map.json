@@ -3,19 +3,19 @@
   "figma": {
     "fileKey": "LnT8TgFVBxky0bVyaF6Tob",
     "canonicalSectionId": "6:147",
-    "canonicalSectionName": "v3",
-    "note": "기준 섹션이 바뀌면 canonicalSectionId를 반드시 갱신할 것. 옛 버전(v1=1:490, v2=1:749)은 검수 대상 아님."
+    "canonicalSectionName": "PROD",
+    "note": "기준 섹션이 바뀌면 canonicalSectionId를 반드시 갱신할 것. 옛 버전(v1_archive=1:490, v2_archive=1:749)은 검수 대상 아님."
   },
   "web": {
     "html": "index.html"
   },
   "images": [
     { "node": "6:181", "file": "assets/img-hero.png", "figmaName": "image 8",  "rawSha256": "dd9236d22e249fdb34269b53bb55973bc76c32506c05028db73471916ebbf68e", "shaVerified": true, "verifiedAt": "2026-07-31" },
-    { "node": "6:187", "file": "assets/img-apply.png", "figmaName": "image 10", "rawSha256": null, "shaVerified": false },
-    { "node": "6:197", "file": "assets/img-fomo.png", "figmaName": "image 6", "rawSha256": null, "shaVerified": false },
-    { "node": "6:205", "file": "assets/img-speed.png", "figmaName": "image 5", "rawSha256": null, "shaVerified": false },
-    { "node": "6:290", "file": "assets/img-save.png", "figmaName": "image 4", "rawSha256": null, "shaVerified": false },
-    { "node": "6:298", "file": "assets/img-personal.png", "figmaName": "image 7", "rawSha256": null, "shaVerified": false }
+    { "node": "6:187", "file": "assets/img-apply.png", "figmaName": "image 10", "rawSha256": "f7029f6569957bdfda0cb1b6dc04850f2927e4b6b341398dc529450234a537ec", "shaVerified": true, "verifiedAt": "2026-07-31" },
+    { "node": "6:197", "file": "assets/img-fomo.png", "figmaName": "image 6", "rawSha256": "2052c34218acedb82febac4d220bd5ea6d0eab27a0be43e3dfd9794f9d809bd0", "shaVerified": true, "verifiedAt": "2026-07-31" },
+    { "node": "6:205", "file": "assets/img-speed.png", "figmaName": "image 5", "rawSha256": "8e10c025aeeefe3c84c1c7417fec3d3f5b4e43a51af915a05f4e1c1ffb98f5fb", "shaVerified": true, "verifiedAt": "2026-07-31" },
+    { "node": "6:290", "file": "assets/img-save.png", "figmaName": "image 4", "rawSha256": "1e10574dfade669ba7990b5ee7b18e1d2a93b5f00dcb671bed7a1e3162390fdc", "shaVerified": true, "verifiedAt": "2026-07-31" },
+    { "node": "6:298", "file": "assets/img-personal.png", "figmaName": "image 7", "rawSha256": "4313bdbecc83b9e00e28cacc35742b5c4c8bec30f26d2d6c8bc591ea79d79017", "shaVerified": true, "verifiedAt": "2026-07-31" }
   ],
   "_lock설명": "세션 간에 확정된 값. 되돌아가면 즉시 FAIL. 결정이 바뀌면 여기와 피그마를 함께 고칠 것.",
   "lockedStyles": [
@@ -25,6 +25,13 @@
     { "id": "step-radius-18","결정": "how-it-works 스텝 카드 radius 18px", "mustMatch": "border-radius:18px;padding:20px" },
     { "id": "insight-head",  "결정": "인사이트 섹션 헤딩 27px·keep-all로 2줄 고정", "mustMatch": "font-size:27px;word-break:keep-all" },
     { "id": "label-17-bold", "결정": "t-label = 17px Bold, 자간 1%", "mustMatch": "\\.t-label\\{font-size:17px;line-height:20px;font-weight:700;letter-spacing:0\\.01em\\}" }
+  ],
+  "_부호예외설명": "따옴표·말줄임표만 다르고 그 차이를 의도적으로 허용한 노드. 이유를 반드시 적을 것.",
+  "acceptedPunctDiffs": [
+    {
+      "node": "6:325",
+      "reason": "피그마는 곧은 작은따옴표 'UI Designer', 웹은 둥근 따옴표 ‘UI Designer’. 피그마 내 다른 노드는 둥근 따옴표를 쓰므로 웹(둥근 쪽)이 맞다. 피그마 텍스트 수정은 Pretendard Variable 폰트가 편집 환경에 없어 불가 → 웹 유지, 예외 처리. (2026-07-31)"
+    }
   ],
   "_무시설명": "피그마에만 있고 웹에는 없는 게 정상인 문자열 (상태바 시계, 레이어용 더미 등).",
   "ignoreFigmaText": ["9:41", "커리어코치 워드마크 (투톤, 아웃라인)", "커리어코치 로고 (원형)"],
