@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>커리어코치 — 매일 아침, 오늘의 새로운 기회를 카톡으로</title>
-<meta name="description" content="국내 15개 사이트의 모든 공고를 종합해, 내 직군·연차·지역에 맞는 새 공고를 매일 아침 8시 카톡으로 보내드려요. 월 990원.">
-<!-- ===== Meta Pixel (픽셀 ID 발급 후 아래 YOUR_PIXEL_ID 교체) =====
+<title>커리어코치 — 매일 아침 8시, 내 직군의 새 공고를 카톡으로</title>
+<meta name="description" content="매일 아침 8시, 내 직군·연차·지역에 맞는 어제의 새 채용공고와 면접용 업계 인사이트를 카카오 알림톡 하나로 받아보세요.">
+
+<!-- ===== Meta Pixel (픽셀 ID 발급 후 아래 YOUR_PIXEL_ID 교체 & 주석 해제) =====
 <script>
 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
@@ -16,490 +17,348 @@ fbq('init', 'YOUR_PIXEL_ID');
 fbq('track', 'PageView');
 </script>
 ===== -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
-  :root {
-    color-scheme: light;
-    --bg: #FAFBFC; /* 더 밝고 깨끗한 배경 */
-    --surface: #FFFFFF;
-    --ink-1: #1E293B; /* 더 깊은 네이비 */
-    --ink-2: #475569;
-    --muted: #94A3B8;
-    --grid: #E2E8F0;
-    --border: rgba(30, 41, 59, 0.08); /* 더 은은한 테두리 */
-    --brand: #F59E0B; /* 더 세련된 골드 */
-    --brand-deep: #D97706;
-    --brand-soft: #FEF3C7;
-    --accent: #FBBF24;
-    --navy: #1E3A8A; /* 더 밝고 신뢰감 있는 블루 */
-    --navy-soft: #DBEAFE;
-    --chip-bg: #F1F5F9;
-    --kakao: #FEE500;
-    --good: #10B981; /* 더 선명한 초록 */
+  :root{
+    /* careercoach tokens */
+    --amber-100:#FEF3C7; --amber-200:#FDE68A; --amber-500:#F59E0B; --amber-600:#D97706; --amber-700:#B45309;
+    --navy-500:#3B82F6; --navy-900:#1E3A8A;
+    --gray-50:#F8FAFC; --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-300:#CBD5E1; --gray-400:#94A3B8;
+    --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155; --gray-800:#1E293B; --gray-900:#0F172A;
+    --kakao:#FEE500; --kakao-text:#191919;
+    --shell:#24262C; --shell-edge:#4A4E58; --shell-notch:#17181C;
   }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  html { scroll-behavior:smooth; font-size: 16px; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background: var(--bg); color: var(--ink-1); line-height: 1.625;
-    -webkit-font-smoothing: antialiased;
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;
+    background:var(--gray-100); color:var(--gray-800);
+    -webkit-font-smoothing:antialiased;
   }
-  .wrap { max-width: 768px; margin:0 auto; padding: 0 24px; }
+  .page{max-width:400px;margin:0 auto;background:#fff;min-height:100vh;position:relative}
 
-  /* header */
-  header { padding: 24px 0; display:flex; align-items:center; justify-content:space-between; }
-  .logo { display:flex; align-items:center; gap: 10px; }
-  .logo-mark {
-    width: 36px; height: 36px; border-radius: 10px;
-    background:linear-gradient(135deg, var(--brand), var(--brand-deep));
-    color:#fff; font-weight:800; font-size: 18px;
-    display:flex; align-items:center; justify-content:center;
+  /* ===== 텍스트 스타일 (피그마 text/* 대응) ===== */
+  .t-display-l{font-size:36px;line-height:44px;font-weight:800;letter-spacing:-0.01em}
+  .t-display{font-size:28px;line-height:36px;font-weight:800;letter-spacing:-0.01em}
+  .t-h3{font-size:17px;line-height:24px;font-weight:600}
+  .t-body-l{font-size:16px;line-height:26px;font-weight:400}
+  .t-body{font-size:15px;line-height:23px;font-weight:400}
+  .t-body-strong{font-size:15px;line-height:23px;font-weight:600}
+  .t-body-s{font-size:14px;line-height:20px;font-weight:400}
+  .t-caption{font-size:13px;line-height:18px;font-weight:400}
+  .t-caption-strong{font-size:13px;line-height:18px;font-weight:600}
+  .t-label{font-size:14px;line-height:20px;font-weight:600;letter-spacing:0.06em}
+  .t-micro{font-size:11px;line-height:14px;font-weight:500}
+  .t-button{font-size:15px;line-height:20px;font-weight:600}
+
+  /* ===== 헤더 ===== */
+  header{display:flex;align-items:center;gap:10px;padding:24px}
+  .app-icon{width:29px;height:29px;border-radius:25%;background:linear-gradient(135deg,#F59E0B,#D97706);display:flex;align-items:center;justify-content:center}
+  .app-icon img{width:21px;height:21px;display:block}
+  header .wordmark{height:21px;display:block}
+
+  /* ===== 공통 레이아웃 ===== */
+  .container{padding:0 24px 24px}
+  section{padding-top:120px;display:flex;flex-direction:column;gap:20px;align-items:center}
+  section.hero{padding-top:60px}
+  .head-group{display:flex;flex-direction:column;gap:8px;align-items:center;text-align:center}
+  .eyebrow{color:var(--amber-600)}
+  .headline{color:var(--navy-900);text-align:center;white-space:pre-line}
+  .lead{color:var(--gray-600);text-align:center;white-space:pre-line}
+  .illust{width:100%;border-radius:12px;display:block;background:var(--gray-100)}
+
+  /* ===== 히어로 ===== */
+  .hero-badge{background:var(--amber-100);color:var(--amber-600);padding:7px 15px;border-radius:999px}
+  .hero-title{color:var(--gray-800);text-align:center}
+  .hl{background:linear-gradient(transparent 62%, var(--amber-200) 62%);padding:0 2px}
+
+  /* ===== 아이폰 셸 목업 ===== */
+  .mockup-wrapper{margin:28px 0 56px;display:flex;justify-content:center;width:100%}
+  .phone{
+    width:344px;max-width:100%;background:var(--shell);border:1.5px solid var(--shell-edge);
+    border-radius:56px;position:relative;padding:0 18px;
+    box-shadow:0 10px 14px -3px rgba(15,23,42,.18), 0 34px 32px -12px rgba(15,23,42,.38);
   }
-  .logo-type { font-weight:800; font-size: 19px; letter-spacing:-0.03em; color: var(--navy); }
-  .header-cta {
-    text-decoration:none; background:var(--ink-1); color:#fff;
-    font-size: 14px; font-weight:700; border-radius:999px; padding: 10px 18px;
+  .phone .screen{
+    position:absolute;inset:12px;background:var(--gray-300);border-radius:44px;z-index:0;
   }
-
-  /* hero */
-  .hero { padding: 60px 0 24px; text-align:center; }
-  .hero .badge {
-    display:inline-block; background:var(--brand-soft); color:var(--brand-deep);
-    font-size: 13px; font-weight:700; border-radius:999px; padding: 7px 15px; margin-bottom: 20px;
+  .phone .notch{
+    position:absolute;top:12px;left:50%;transform:translateX(-50%);
+    width:110px;height:24px;background:var(--shell-notch);border-radius:0 0 14px 14px;z-index:3;
   }
-  h1 { font-size: 36px; line-height:1.25; letter-spacing:-0.04em; font-weight:800; }
-  h1 .hl { background: linear-gradient(180deg, transparent 65%, var(--accent) 65%); padding: 0 4px; }
-  .hero .sub { margin: 20px auto 0; font-size: 17px; color:var(--ink-2); max-width: 520px; }
-  .hero .cta-row { margin-top: 32px; display:flex; flex-direction:column; align-items:center; gap: 12px; }
-  .cta-main {
-    display:inline-block; text-decoration:none; background:var(--brand); color:#fff;
-    font-size: 18px; font-weight:800; border-radius: 16px; padding: 18px 40px;
-    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.25);
-    transition: background 0.2s ease;
+  .phone .home-bar{
+    position:absolute;bottom:21px;left:50%;transform:translateX(-50%);
+    width:110px;height:5px;background:rgba(15,23,42,.3);border-radius:2.5px;z-index:3;
   }
-  .cta-main:hover { background: var(--brand-deep); }
-  .cta-under { font-size: 13px; color:var(--muted); }
+  .phone-content{position:relative;z-index:1;padding:55px 4px 40px}
+  .phone.tall .phone-content{padding-top:51px}
 
-  /* stats strip */
-  .stats { display:flex; justify-content:center; gap: 12px; flex-wrap:wrap; margin: 40px 0 16px; }
-  .stat {
-    background:var(--surface); border:1px solid var(--border); border-radius: 16px;
-    padding: 16px 24px; text-align:center; min-width: 120px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  .alim-profile{display:flex;align-items:center;gap:8px;margin-bottom:6px;padding-left:2px}
+  .alim-profile img{width:34px;height:34px;border-radius:50%;box-shadow:0 1px 3px rgba(15,23,42,.2)}
+  .alim-profile span{color:var(--gray-700)}
+  .alim-banner{
+    background:var(--kakao);color:var(--kakao-text);border-radius:12px 12px 0 0;
+    padding:12px 14px;display:flex;align-items:center;justify-content:space-between;
   }
-  .stat .v { font-size: 22px; font-weight:800; letter-spacing:-0.02em; }
-  .stat .k { font-size: 12px; color:var(--muted); font-weight:600; margin-top: 2px; }
-
-  /* phone mock */
-  .mock-zone { padding: 40px 0 12px; display:flex; justify-content:center; }
-  .mock-frame { background:#475569; border-radius: 36px; padding: 24px 18px; width:100%; max-width: 420px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
-  .m-msg { display:flex; gap: 10px; align-items:flex-start; }
-  .m-avatar { width: 42px; height: 42px; border-radius:50%; background:#fff; flex:none; display:flex; align-items:center; justify-content:center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-  .m-avatar svg { width: 30px; height: 30px; }
-  .m-body { flex:1; min-width:0; }
-  .m-sender { font-size: 13px; color:#f1f1f1; margin: 2px 0 8px 3px; font-weight: 600;}
-  .m-bubble { position:relative; background:#fff; border-radius: 12px; }
-  .m-khead { background:var(--kakao); border-radius: 12px 12px 0 0; padding: 12px 16px; font-size: 14px; font-weight:800; color:#111; }
-  .m-kbadge { position:absolute; top:-15px; right:12px; width: 42px; height: 42px; border-radius:50%; background:#334155; color:#eee; display:flex; align-items:center; justify-content:center; font-size: 11px; font-weight: 700;}
-  .m-content { padding: 18px 16px; }
-  .m-title { font-size: 19px; font-weight:800; color:#111; line-height:1.4; letter-spacing: -0.01em; }
-  .m-div { height:1px; background:#e8e8e8; margin: 14px 0; }
-  .m-content p { font-size: 13.5px; font-weight:400; color:#333; line-height:1.65; }
-  .m-sec { margin-top: 14px; }
-  .m-sec-h { font-size: 15px; font-weight:800; }
-  .m-btn { margin-top: 14px; background:#f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align:center; font-size: 13.5px; font-weight:700; color:#1e293b; padding: 11px 0; cursor: pointer;}
-  .m-btn + .m-btn { margin-top: 8px; }
-  .m-time { text-align:right; font-size: 11.5px; color:#cbd5e1; margin-top: 6px; }
-
-  /* sections */
-  section { padding: 60px 0 16px; }
-  .sec-kicker { text-align:center; font-size: 13.5px; font-weight:800; color:var(--brand-deep); margin-bottom: 10px; letter-spacing: 0.05em; text-transform: uppercase; }
-  h2 { text-align:center; font-size: 28px; font-weight:800; letter-spacing:-0.03em; line-height:1.35; color: var(--navy); }
-  .sec-sub { text-align:center; font-size: 16px; color:var(--ink-2); margin: 12px auto 0; max-width: 560px; }
-
-  /* problem cards */
-  .cards { display:grid; grid-template-columns:1fr; gap: 16px; margin-top: 32px; }
-  @media (min-width: 560px){ .cards { grid-template-columns: 1fr 1fr 1fr; } }
-  .card { background:var(--surface); border:1px solid var(--border); border-radius: 20px; padding: 28px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
-  .card .big { font-size: 32px; font-weight:800; letter-spacing:-0.03em; color:var(--brand-deep); }
-  .card .t { font-size: 16px; font-weight:800; margin-top: 4px; color: var(--navy); }
-  .card .d { font-size: 14.5px; color:var(--ink-2); margin-top: 10px; line-height: 1.6; }
-
-  /* steps */
-  .steps { margin-top: 32px; display:grid; gap: 12px; }
-  .step { display:flex; gap: 16px; background:var(--surface); border:1px solid var(--border); border-radius: 18px; padding: 20px; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);}
-  .step .n { width: 36px; height: 36px; border-radius:999px; background:var(--brand); color:#fff; font-weight:800; font-size: 15px; display:flex; align-items:center; justify-content:center; flex:none; }
-  .step .t { font-size: 16.5px; font-weight:800; color: var(--navy); }
-  .step .d { font-size: 14px; color:var(--ink-2); margin-top: 4px; }
-
-  /* sites */
-  .sites { display:flex; flex-wrap:wrap; gap: 10px; justify-content:center; margin-top: 28px; max-width: 640px; margin-left: auto; margin-right: auto;}
-  .site { background:var(--surface); border:1px solid var(--border); border-radius:999px; font-size: 13.5px; font-weight:700; color:var(--ink-2); padding: 9px 18px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);}
-  .sites-note { text-align:center; font-size: 12.5px; color:var(--muted); margin-top: 16px; }
-
-  /* form */
-  .panel { background:var(--surface); border:1px solid var(--border); border-radius: 24px; padding: 32px 28px; margin-top: 32px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
-  .f-label { font-size: 14px; font-weight:800; margin: 24px 0 10px; color: var(--navy); }
-  .f-label:first-child { margin-top:0; }
-  .chips { display:flex; flex-wrap:wrap; gap: 10px; }
-  .chip {
-    border: 1.5px solid #e2e8f0; background:var(--surface); border-radius:999px;
-    font-size: 14px; font-weight:700; color:var(--ink-2); padding: 10px 18px; cursor:pointer;
-    transition: all .15s ease; font-family:inherit;
+  .alim-banner .kakao-badge{
+    width:26px;height:26px;border-radius:50%;background:var(--shell-notch);color:#FEE500;
+    display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;
   }
-  .chip:hover:not(.on) { border-color: #cbd5e1; background: #f8fafc; }
-  .chip.on { border-color:var(--brand); color:#fff; background:var(--brand); box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2); }
-  input[type=text], input[type=tel] {
-    width:100%; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 14px 16px;
-    font-size: 16px; font-family:inherit; background:var(--surface); color:var(--ink-1);
-  }
-  input:focus { outline:none; border-color:var(--brand); box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1); }
-  .price-box { display:flex; align-items:baseline; justify-content:center; gap: 12px; margin: 8px 0 4px; }
-  .price-old { font-size: 18px; color:var(--muted); text-decoration:line-through; }
-  .price-now { font-size: 34px; font-weight:800; letter-spacing:-0.03em; color: var(--brand-deep); }
-  .price-now small { font-size: 16px; font-weight:700; color: var(--ink-2); }
-  .price-note { text-align:center; font-size: 13.5px; color:var(--good); font-weight:700; }
-  .price-alt { text-align:center; font-size: 13px; color:var(--muted); margin-top: 8px; }
-  .cta-submit {
-    width:100%; margin-top: 24px; background:var(--kakao); color:#191919; border:none; cursor:pointer;
-    font-size: 17px; font-weight:800; border-radius: 16px; padding: 18px 0; font-family:inherit;
-    display:flex; align-items:center; justify-content:center; gap: 10px;
-    transition: opacity 0.2s ease;
-  }
-  .cta-submit:hover { opacity: 0.9; }
-  .cta-submit svg { width: 22px; height: 22px; flex:none; }
-  .form-fine { text-align:center; font-size: 12px; color:var(--muted); margin-top: 14px; }
-
-  /* pay panel */
-  #payPanel { display:none; }
-  .pay-row { display:flex; justify-content:space-between; align-items:center; gap: 12px; background:var(--chip-bg); border-radius: 12px; padding: 16px 20px; margin-top: 12px; }
-  .pay-row .k { font-size: 13.5px; color:var(--ink-2); font-weight:600; white-space:nowrap; }
-  .pay-row .v { font-size: 15px; font-weight:800; display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap: 8px; text-align:right; color: var(--navy); }
-  .copy-btn { border:none; background:var(--navy); color:#fff; font-size: 12.5px; font-weight:700; border-radius: 8px; padding: 8px 14px; cursor:pointer; font-family:inherit; margin-left: 10px; transition: background 0.2s ease;}
-  .copy-btn:hover { background: var(--ink-1); }
-  .pay-steps { margin-top: 20px; font-size: 15px; color:var(--ink-2); }
-  .pay-steps li { margin: 10px 0 0 24px; line-height: 1.6;}
-  .openchat {
-    display:block; text-align:center; margin-top: 24px; background:var(--kakao); color:#111;
-    text-decoration:none; font-size: 16px; font-weight:800; border-radius: 14px; padding: 16px 0;
+  .alim-card{background:#fff;border-radius:0 0 12px 12px;padding:16px 14px;box-shadow:0 4px 12px rgba(15,23,42,.10)}
+  .alim-card h3{color:var(--gray-800);margin-bottom:12px}
+  .alim-sec{margin-bottom:12px}
+  .alim-sec:last-of-type{margin-bottom:16px}
+  .alim-sec .sec-title{color:var(--gray-800);margin-bottom:4px}
+  .alim-sec p{color:var(--gray-600);white-space:pre-line}
+  .alim-cta{
+    display:block;text-align:center;background:var(--gray-50);border:1px solid var(--gray-200);
+    border-radius:8px;padding:10px;color:var(--navy-500);text-decoration:none;
   }
 
-  /* faq */
-  details { background:var(--surface); border:1px solid var(--border); border-radius: 16px; padding: 20px 24px; margin-top: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);}
-  summary { font-size: 15.5px; font-weight:800; cursor:pointer; color: var(--navy); display: flex; justify-content: space-between; align-items: center;}
-  summary::after { content: '+'; font-size: 18px; color: var(--muted); font-weight: 500;}
-  details[open] summary::after { content: '−';}
-  details p { font-size: 14.5px; color:var(--ink-2); margin-top: 12px; line-height: 1.65; }
+  /* ===== 사이트 칩 ===== */
+  .chips{display:flex;flex-wrap:wrap;gap:13px;justify-content:center}
+  .chip{background:#fff;border:1px solid var(--gray-200);box-shadow:0 1px 3px rgba(15,23,42,.06);
+    border-radius:999px;padding:9px 18px;color:var(--gray-600)}
 
-  footer { margin-top: 80px; padding: 40px 0 60px; border-top:1px solid var(--grid); text-align:center; }
-  footer .fine { font-size: 12.5px; color:var(--muted); line-height: 1.8; }
+  /* ===== how it works ===== */
+  .steps{display:flex;flex-direction:column;gap:12px;width:100%;margin-top:12px}
+  .step{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid var(--gray-200);
+    box-shadow:0 2px 8px rgba(15,23,42,.06);border-radius:14px;padding:20px}
+  .step .num{flex:none;width:32px;height:32px;border-radius:50%;background:var(--amber-500);color:#fff;
+    display:flex;align-items:center;justify-content:center}
+  .step .t-h3{color:var(--navy-900);white-space:pre-line}
 
-  /* floating CTA */
-  body { padding-bottom: 110px; }
-  .float-cta {
-    position:fixed; left:50%; transform:translateX(-50%); bottom: 20px; z-index:50;
-    width:calc(100% - 40px); max-width: 480px;
-    background:var(--kakao); color:#191919; text-decoration:none;
-    font-weight:800; font-size: 16.5px; border-radius:999px; padding: 18px 0;
-    display:flex; align-items:center; justify-content:center; gap: 10px;
-    box-shadow:0 12px 32px rgba(30, 41, 59, 0.25);
-    transition: transform 0.2s ease, opacity 0.2s ease;
+  /* ===== 푸터 ===== */
+  footer{background:var(--gray-100);padding:80px 24px 120px;margin-top:120px}
+  footer .biz{display:flex;flex-direction:column;gap:8px;color:var(--gray-500)}
+  footer .links a{color:var(--gray-500);text-decoration:none}
+
+  /* ===== 플로팅 CTA ===== */
+  .floating-cta{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    width:calc(100% - 40px);max-width:360px;background:var(--kakao);color:var(--kakao-text);
+    border-radius:14px;padding:18px;text-align:center;text-decoration:none;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    box-shadow:0 8px 24px rgba(15,23,42,.22);z-index:10;
   }
-  .float-cta:active { transform: translateX(-50%) scale(0.98); opacity: 0.95;}
-  .float-cta svg { width: 22px; height: 22px; flex:none; }
+  .floating-cta:active{transform:translateX(-50%) scale(.98)}
+  .floating-cta svg{flex:none}
+
+  @media (prefers-reduced-motion: no-preference){
+    section{opacity:0;transform:translateY(12px);transition:opacity .5s ease,transform .5s ease}
+    section.in{opacity:1;transform:none}
+  }
+  :focus-visible{outline:2px solid var(--amber-500);outline-offset:2px}
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="page">
 
   <header>
-    <div class="logo">
-        <div class="logo-mark"><svg width="24" height="24" viewBox="0 0 48 48" fill="none"><path d="M9 41 V34 H15.5 V27.5 H22 V21 H28.9" stroke="white" stroke-width="4"/><rect x="28.9" y="14.5" width="5.8" height="25" fill="white"/><path d="M31.8 4 L41.4 15.5 L22.2 15.5 Z" fill="white"/><path d="M5.5 41 H42.5" stroke="white" stroke-width="4" stroke-linecap="round"/></svg></div>
-        <div class="logo-type">커리어코치</div>
-    </div>
+    <div class="app-icon"><img src="assets/mark-white.svg" alt=""></div>
+    <img class="wordmark" src="assets/wordmark.svg" alt="커리어코치">
   </header>
 
-  <!-- HERO : 소구 1(연봉) + 2(FOMO) -->
-  <div class="hero">
-    <div class="badge">매일 아침 8시 · 카카오톡 알림톡</div>
-    <h1>연봉 앞자리를 바꾸는<br><span class="hl">출근길 1분</span></h1>
-    <p class="sub">국내 15개 사이트의 모든 공고를 종합해, 내 직군·연차·지역에 맞는 <b>새로 나온 공고</b>만 골라 매일 아침 보내드려요.</p>
-    <div class="cta-row">
-      <a class="cta-main" href="#subscribe">월 990원으로 시작하기</a>
-      <div class="cta-under">언제든 해지 가능</div>
-    </div>
-  </div>
+  <div class="container">
 
-  <div class="stats">
-    <div class="stat" style="background:#EEF3FC;"><div class="v" style="color:#2A4A9C;">15개</div><div class="k">수집 사이트</div></div>
-    <div class="stat" style="background:#FFF8EA;"><div class="v" style="color:#C57F06;">16건</div><div class="k">하루 신규 공고(직군 평균)</div></div>
-    <div class="stat" style="background:#EAF6EF;"><div class="v" style="color:#1B7F4D;">8시</div><div class="k">매일 아침 도착</div></div>
-    <div class="stat" style="background:#FDEFEA;"><div class="v" style="color:#C05B3B;">990원</div><div class="k">월 구독료</div></div>
-  </div>
+    <!-- 히어로 -->
+    <section class="hero in">
+      <div class="hero-badge t-caption-strong">연봉 올리기 프로젝트</div>
+      <h1 class="t-display-l hero-title">나도 <span class="hl">더 좋은 곳</span>으로<br><span class="hl">이직할 수 있을까?</span></h1>
+      <p class="t-body-l lead">차가운 이직시장에서
+매일 1분 투자로 연봉 앞자리를 바꿔보세요</p>
+      <img class="illust" src="assets/img-hero.png" alt="이직을 준비하는 사람 일러스트" width="344" height="224">
+    </section>
 
-  <!-- 알림톡 목업 (인라인) -->
-  <div class="mock-zone">
-    <div class="mock-frame">
-      <div class="m-msg">
-        <div class="m-avatar"><svg width="26" height="26" viewBox="0 0 48 48"><path d="M9 41 V34 H15.5 V27.5 H22 V21 H28.9" fill="none" stroke="#1E3A8A" stroke-width="3.4"/><rect x="28.9" y="14.5" width="5.8" height="25" fill="#F59E0B"/><path d="M31.8 4 L41.4 15.5 L22.2 15.5 Z" fill="#F59E0B"/><path d="M5.5 41 H42.5" stroke="#1E3A8A" stroke-width="3" stroke-linecap="round"/></svg></div>
-        <div class="m-body">
-          <div class="m-sender">커리어코치</div>
-          <div class="m-bubble">
-            <div class="m-khead">알림톡 도착</div>
-            <div class="m-kbadge">kakao</div>
-            <div class="m-content">
-              <div class="m-title">6월 19일<br>오늘의 새로운 기회</div>
-              <div class="m-div"></div>
-              <p>*지원자가 많아지기 전에 지원하면 이력서가 더 꼼꼼히 읽혀요.<br>*국내 15개 사이트의 모든 공고를 종합했어요.</p>
-              <p class="m-sec"><span class="m-sec-h">[📋 어제 새로 나온 공고 16건]</span><br>1. 쿠팡 — 시니어 디자이너 (7년+)<br>2. 김캐디 — 프로덕트 디자이너 (5년+)<br>3. 가제트코리아 — Product Designer (5~7년)<br>…외 13건은 브리핑에서 확인</p>
-              <p class="m-sec"><span class="m-sec-h">[📈 어제 마감된 공고 수]</span><br>- 어제도 공고 3건이 조용히 마감됐어요. 기회는 기다려주지 않아요.</p>
-              <p class="m-sec"><span class="m-sec-h">[💡 면접을 위한 최신 인사이트]</span><br>- Config 2026 이후, 디자이너 직무기술서가 바뀌고 있다</p>
-              <div class="m-btn">오늘 브리핑 전체 보기</div>
-              <div class="m-btn">내 직군 · 연차 · 지역 설정</div>
+    <!-- 1. 일단 지원 -->
+    <section>
+      <div class="head-group">
+        <div class="t-label eyebrow">붙으면 희소식, 안붙어도 손해 X.</div>
+        <h2 class="t-display headline">관심 있는 회사 공고가 열리면
+일단 지원해 보세요</h2>
+      </div>
+      <img class="illust" src="assets/img-apply.png" alt="이력서 제출 일러스트" width="344" height="160">
+      <p class="t-body" style="color:var(--gray-700);width:100%">지금 가지고 있는 포트폴리오·이력서로 일단 넣으세요.<br><strong>불합격 해도 다음 지원에 패널티가 전혀 없어요.</strong><br>오히려 여러 번 도전하면, ‘우리 회사를 이렇게 좋아하면 잘 적응할 확률이 크다’고 판단해 더 좋게 봐요.<br><strong>붙으면 희소식, 안붙어도 손해 X. 안 할 이유가 없어요.</strong><br>결국 결과를 얻은 건 실행하는 사람들이었어요.</p>
+    </section>
+
+    <!-- 2. 마감 FOMO -->
+    <section>
+      <div class="head-group">
+        <div class="t-label eyebrow">내가 원하던 공고</div>
+        <h2 class="t-display headline">한정된 기회를 놓치지 마세요</h2>
+      </div>
+      <p class="t-body-l lead">관심 기업의 원하던 공고가
+내가 모르는 사이 닫히는 경우, 생각보다 많아요.</p>
+      <img class="illust" src="assets/img-fomo.png" alt="마감된 공고 일러스트" width="344" height="228">
+    </section>
+
+    <!-- 3. 초반 지원 우위 -->
+    <section>
+      <div class="head-group">
+        <div class="t-label eyebrow">합격 확률을 높이세요</div>
+        <h2 class="t-display headline">빨리 지원할수록
+이력서가 더 꼼꼼히 읽힙니다.</h2>
+      </div>
+      <p class="t-body-l lead">인사 담당자도 사람이다보니, 현실적으로 이력서가 수백 개 쌓였을 때 들어오는 이력서는 꼼꼼히 보기 힘들어요.</p>
+      <img class="illust" src="assets/img-speed.png" alt="첫날 지원 우위 일러스트" width="344" height="224">
+    </section>
+
+    <!-- 4. 데일리 알림 (목업 1) -->
+    <section>
+      <div class="head-group">
+        <div class="t-label eyebrow">경쟁자보다 앞서나가세요</div>
+        <h2 class="t-display headline">누구보다 빠르게
+새로운 채용공고를 알려드려요</h2>
+      </div>
+      <p class="t-body-l lead" style="color:var(--gray-800)">공고가 뜨자마자 아는 것도 실력입니다. 매일 아침 8시,
+내 직군에서 어제 나온 모든 공고를 받아보세요.</p>
+
+      <div class="mockup-wrapper">
+        <div class="phone">
+          <div class="screen"></div><div class="notch"></div><div class="home-bar"></div>
+          <div class="phone-content">
+            <div class="alim-profile"><img src="assets/logo-circle.svg" alt=""><span class="t-caption-strong">커리어코치</span></div>
+            <div class="alim-banner"><span class="t-body-strong">알림톡 도착</span><span class="kakao-badge">kakao</span></div>
+            <div class="alim-card">
+              <h3 class="t-h3">오늘의 새로운 공고</h3>
+              <div class="alim-sec">
+                <div class="t-caption-strong sec-title">[📢 어제 새로 나온 공고 16건]</div>
+                <p class="t-caption">1. 쿠팡 - 시니어 디자이너 (7년+)
+2. 김캐디 - 프로덕트 디자이너 (5년+)
+3. 가제트코리아 - UI Designer (5~7년)
+…외 13건은 ‘브리핑 보기’로 확인하세요</p>
+              </div>
+              <div class="alim-sec">
+                <div class="t-caption-strong sec-title">[✉️ 어제 마감된 공고 수]</div>
+                <p class="t-caption">- 어제도 공고 3건이 조용히 마감됐어요.
+기회는 기다려주지 않아요.</p>
+              </div>
+              <div class="alim-sec">
+                <div class="t-caption-strong sec-title">[🎤 면접을 위한 최신 인사이트]</div>
+                <p class="t-caption">- Config 2026 이후, 디자이너 직무기술서가 바뀌고 있다. 이 시대에 우리는…</p>
+              </div>
+              <a class="alim-cta t-caption-strong" href="letter.html">오늘 브리핑 전체 보기</a>
             </div>
           </div>
-          <div class="m-time">오전 8:00</div>
         </div>
       </div>
-    </div>
+    </section>
+
+    <!-- 5. 빠짐없이 -->
+    <section>
+      <div class="head-group">
+        <div class="t-label eyebrow">빠짐없이</div>
+        <h2 class="t-display headline">모든 국내 채용 사이트의
+공고를 종합해 드려요</h2>
+      </div>
+      <p class="t-body-l lead">같은 공고가 여러 사이트에 올라와도
+중복 없이 하나로 정리해 드려요.</p>
+      <div class="chips">
+        <span class="chip t-caption-strong">원티드</span><span class="chip t-caption-strong">사람인</span><span class="chip t-caption-strong">잡코리아</span><span class="chip t-caption-strong">그리팅</span><span class="chip t-caption-strong">랠릿</span>
+        <span class="chip t-caption-strong">점핏</span><span class="chip t-caption-strong">잡플래닛</span><span class="chip t-caption-strong">로켓펀치</span><span class="chip t-caption-strong">링크드인</span><span class="chip t-caption-strong">고용24</span>
+        <span class="chip t-caption-strong">그룹바이</span><span class="chip t-caption-strong">리멤버</span><span class="chip t-caption-strong">인크루트</span><span class="chip t-caption-strong">자소설닷컴</span><span class="chip t-caption-strong">캐치</span>
+      </div>
+    </section>
+
+    <!-- 6. 시간 절약 -->
+    <section>
+      <div class="head-group">
+        <div class="t-label eyebrow">귀중한 퇴근 후 시간</div>
+        <h2 class="t-display headline">하루에 1시간씩 아끼세요</h2>
+      </div>
+      <p class="t-body-l lead">17개 채용사이트 × 직군 키워드 평균 3개 = 매일 51회.
+저희가 대신 검색하고 카톡 1개로 압축해 드려요.</p>
+      <img class="illust" src="assets/img-save.png" alt="시간 절약 일러스트" width="344" height="228">
+    </section>
+
+    <!-- 7. 개인화 -->
+    <section>
+      <div class="head-group">
+        <div class="t-label eyebrow">나만을 위해</div>
+        <h2 class="t-display headline">나에게 개인화된
+알림을 받을수 있어요</h2>
+      </div>
+      <p class="t-body-l lead">원하는 직군·연차·근무지를 알려주시면,
+저희가 맞춤으로 알려드릴게요.</p>
+      <img class="illust" src="assets/img-personal.png" alt="개인화 설정 일러스트" width="344" height="230">
+    </section>
+
+    <!-- 8. 인사이트 (목업 2) -->
+    <section>
+      <div class="head-group">
+        <div class="t-label eyebrow">단순히 공고만 보내 드리지 않아요</div>
+        <h2 class="t-display headline">1분 투자로 면접에 도움되는
+업계 동향·인사이트까지</h2>
+      </div>
+      <p class="t-body-l lead">"요즘 업계를 어떻게 보세요?"라는 질문에
+바로 쓸 수 있는 이야기까지 매일 하나씩 쌓아드려요.
+안 읽은 사람 대비 앞서나가세요.</p>
+
+      <div class="mockup-wrapper">
+        <div class="phone tall">
+          <div class="screen"></div><div class="notch"></div><div class="home-bar"></div>
+          <div class="phone-content">
+            <div class="alim-profile"><img src="assets/logo-circle.svg" alt=""><span class="t-caption-strong">커리어코치</span></div>
+            <div class="alim-banner"><span class="t-body-strong">알림톡 도착</span><span class="kakao-badge">kakao</span></div>
+            <div class="alim-card">
+              <h3 class="t-h3">오늘의 업계 소식</h3>
+              <div class="alim-sec">
+                <div class="t-caption-strong sec-title">[🎤 면접을 위한 최신 인사이트]</div>
+                <p class="t-caption">1. Config 2026 이후, 디자이너 직무기술서가 바뀌고 있다.
+2. 핵심은 단순한 ‘UI Designer’에서 코드가 읽히는 환경을 설계하는 ‘Design Engineer’로의 진화이다.
+3. AI·Figma Motion 등을 활용한 빠른 프로토타이핑이 우선 역량으로 자리잡는 중.</p>
+              </div>
+              <div class="alim-sec">
+                <div class="t-caption-strong sec-title">[💬 면접에서 이렇게]</div>
+                <p class="t-caption">- "최근 주목한 업계 변화를 묻는다면, 디자인-개발 협업 경계가 바뀌는 흐름을 짚고 나의 프로토타입 경험을 연결해 보세요."</p>
+              </div>
+              <a class="alim-cta t-caption-strong" href="letter.html">오늘 브리핑 전체 보기</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. how it works -->
+    <section>
+      <div class="head-group">
+        <div class="t-label eyebrow">지금 바로 시작하세요</div>
+        <h2 class="t-display headline">매일 1분 투자로
+연봉 상승 확률 높이기</h2>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="num t-body-strong">1</div><div class="t-h3">원하는 직군 · 연차 · 지역 설정</div></div>
+        <div class="step"><div class="num t-body-strong">2</div><div class="t-h3">매일 아침 8시 카카오 알림톡</div></div>
+        <div class="step"><div class="num t-body-strong">3</div><div class="t-h3">지원자가 많아지기 전에 지원
+→ 서류 합격률 상승</div></div>
+        <div class="step"><div class="num t-body-strong">4</div><div class="t-h3">1분 업계 동향·인사이트 학습
+→ 면접 합격률 상승</div></div>
+      </div>
+    </section>
+
   </div>
 
-  <!-- 문제 제기 : 소구 5(마감 FOMO) + 3(초반 지원) + 4(빠짐없이) -->
-  <section>
-    <div class="sec-kicker">알고 계셨나요?</div>
-    <h2>공고의 절반은<br>당신이 알기 전에 닫힙니다</h2>
-    <p class="sec-sub">공고가 열리고 <b>빨리 지원할수록 이력서가 더 꼼꼼히 읽힐 확률이 높아요.</b> 이력서가 수백 개 쌓인 후 늦게 지원하면, 인사 담당자도 사람인지라 한 건 한 건 꼼꼼히 보기 어려워요.</p>
-    <div class="cards">
-      <div class="card">
-        <div class="big">57%</div>
-        <div class="t">30일 안에 마감</div>
-        <div class="d">관심 기업의 원하던 공고가 내가 모르는 사이 닫히는 경우, 생각보다 많아요.</div>
-      </div>
-      <div class="card">
-        <div class="big">첫날</div>
-        <div class="t">지원이 가장 유리</div>
-        <div class="d">이력서가 몇백 장 쌓이면 꼼꼼히 읽히기 어려워요. 공고가 뜨자마자 아는 게 실력입니다.</div>
-      </div>
-      <div class="card">
-        <div class="big">75번</div>
-        <div class="t">매일 검색 대신</div>
-        <div class="d">15개 사이트 × 직군 키워드 5개 = 매일 75번 검색. 저희가 대신 하고 카톡 1개로 드려요.</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- how it works -->
-  <section>
-    <div class="sec-kicker">이렇게 시작돼요</div>
-    <h2>1분이면 시작 가능</h2>
-    <div class="steps">
-      <div class="step"><div class="n">1</div><div><div class="t">직군 · 연차 · 지역 설정</div></div></div>
-      <div class="step"><div class="n">2</div><div><div class="t">매일 아침 8시 알림톡</div></div></div>
-      <div class="step"><div class="n">3</div><div><div class="t">지원자가 많아지기 전에 지원</div></div></div>
-    </div>
-  </section>
-
-  <!-- 면접 인사이트 소개 -->
-  <section>
-    <div class="sec-kicker">공고만 보내고 끝나지 않아요</div>
-    <h2>면접을 위한<br>최신 인사이트</h2>
-    <p class="sec-sub">직군별 뉴스레터와 업계 소식을 종합해, <b>"요즘 업계 변화를 어떻게 보세요?"</b>라는 면접 질문에 바로 쓸 수 있는 이야기를 매일 하나씩 쌓아드려요.</p>
-    <div class="panel" style="margin-top: 24px; border-left: 4px solid var(--brand);">
-      <div style="font-size: 13px; font-weight:800; color:var(--brand-deep); letter-spacing: 0.05em;">최신 인사이트 예시</div>
-      <div style="font-size: 18px; font-weight:800; line-height:1.4; margin-top: 10px; color: var(--navy);">Config 2026 이후, 프로덕트 디자이너의 직무기술서가 바뀌고 있다</div>
-      <div style="margin-top: 16px; padding: 16px; border-radius: 12px; background:var(--chip-bg); font-size: 14px; line-height: 1.6;">🎤 <b>면접에서 이렇게</b> — "최근 주목한 업계 변화"를 묻는다면, 디자인-개발 협업 경계가 바뀌는 흐름을 짚고 내 프로젝트 경험 하나를 연결해 보세요.</div>
-      <div style="margin-top: 16px; text-align:center; font-size: 13.5px; font-weight:700; color:var(--brand-deep);">📚 오늘도 '안 읽는 사람' 대비 학습 하나를 추가했어요</div>
-    </div>
-  </section>
-
-  <!-- 수집 사이트 리스트업 : 소구 4 -->
-  <section>
-    <div class="sec-kicker">빠짐없이</div>
-    <h2>국내 15개 사이트의<br>모든 공고를 종합해요</h2>
-    <div class="sites">
-      <span class="site">원티드</span><span class="site">사람인</span><span class="site">잡코리아</span>
-      <span class="site">리멤버</span><span class="site">랠릿</span><span class="site">그리팅</span>
-      <span class="site">잡플래닛</span><span class="site">로켓펀치</span><span class="site">링크드인</span>
-      <span class="site">점핏</span><span class="site">캐치</span><span class="site">인크루트</span>
-      <span class="site">고용24</span><span class="site">그룹바이</span><span class="site">자소설닷컴</span>
-    </div>
-    <p class="sites-note">같은 공고가 여러 사이트에 올라와도 중복 없이 하나로 정리해 드려요.</p>
-  </section>
-
-  <!-- 구독 신청 -->
-  <section id="subscribe">
-    <div class="sec-kicker">런칭 이벤트</div>
-    <h2>커피 한 모금 값으로<br>매일 기회를 먼저 받아보세요</h2>
-    <div class="panel" id="formPanel">
-      <div class="price-box"><span class="price-old">월 2,000원</span><span class="price-now">990<small>원/월</small></span></div>
-      <div class="price-note">런칭 이벤트 50% 할인 중</div>
-      <div class="price-alt">언제든 해지</div>
-
-      <div class="f-label">직군을 골라주세요 <span style="font-weight:600; color:var(--muted); font-size: 12px;">(직군 추가 예정)</span></div>
-      <div class="chips" id="jobChips">
-        <button class="chip on" type="button">UI/UX 디자이너</button>
-        <button class="chip" type="button">개발자</button>
-        <button class="chip" type="button">PM · PO</button>
-        <button class="chip" type="button">마케터</button>
-        <button class="chip" type="button">BD</button>
-        <button class="chip" type="button">MD</button>
-        <button class="chip" type="button">경영지원</button>
-      </div>
-
-      <div class="f-label">경력 연차</div>
-      <div class="chips" id="expChips">
-        <button class="chip" type="button">신입</button>
-        <button class="chip" type="button">1~3년</button>
-        <button class="chip on" type="button">4~6년</button>
-        <button class="chip" type="button">7년 이상</button>
-      </div>
-
-      <div class="f-label">근무지 범위</div>
-      <div class="chips" id="locChips">
-        <button class="chip on" type="button">서울</button>
-        <button class="chip" type="button">인천</button>
-        <button class="chip" type="button">수원</button>
-        <button class="chip" type="button">경기</button>
-        <button class="chip more-loc" type="button" hidden>전남</button>
-        <button class="chip more-loc" type="button" hidden>전북</button>
-        <button class="chip more-loc" type="button" hidden>경북</button>
-        <button class="chip more-loc" type="button" hidden>경남</button>
-        <button class="chip more-loc" type="button" hidden>강원</button>
-        <button class="chip more-loc" type="button" hidden>충남</button>
-        <button class="chip more-loc" type="button" hidden>충북</button>
-        <button class="chip more-loc" type="button" hidden>제주</button>
-        <button class="chip" type="button" id="locMore" style="background: #f8fafc; border-color: #cbd5e1; color: #64748b;">더보기 +</button>
-      </div>
-
-      <button class="cta-submit" id="goPay" type="button">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#191919" d="M12 3C6.48 3 2 6.58 2 11c0 2.84 1.86 5.33 4.66 6.74l-.94 3.46c-.08.3.26.55.53.38l4.14-2.73c.53.07 1.06.11 1.61.11 5.52 0 10-3.58 10-7.96S17.52 3 12 3z"/></svg>
-        카카오로 1분만에 시작하기
-      </button>
-      <p class="form-fine">간단 정보를 다 전송하면 입금 안내 화면으로 이동합니다.</p>
-    </div>
-
-    <!-- 입금 안내 -->
-    <div class="panel" id="payPanel">
-      <h2 style="font-size: 20px; text-align:left;">🎉 거의 다 됐어요!</h2>
-      <p style="font-size: 15px; color:var(--ink-2); margin-top: 10px;">아래 계좌로 <b>990원</b>을 보내주시면, 확인 후 <b>다음 영업일 아침 8시</b>부터 브리핑이 시작돼요.</p>
-      <div class="pay-row"><span class="k">입금 계좌</span><span class="v">카카오뱅크 3333-00-0000000<button class="copy-btn" data-copy="3333-00-0000000">복사</button></span></div>
-      <div class="pay-row"><span class="k">금액</span><span class="v" style="color: var(--brand-deep); font-size: 18px;">990원</span></div>
-      <div class="pay-row"><span class="k">입금자명</span><span class="v" id="payerName">이름+코드<button class="copy-btn" id="copyPayer">복사</button></span></div>
-      <ol class="pay-steps">
-        <li>위 <b>입금자명 그대로</b> 계좌이체 해주세요 (광고·신청 매칭용 코드예요).</li>
-        <li>입금 후 아래 버튼으로 <b>오픈채팅에 입금자명</b>만 남겨주시면 확인이 빨라져요.</li>
-      </ol>
-      <a class="openchat" href="https://open.kakao.com/o/YOUR_OPENCHAT" id="openchatBtn">카카오 오픈채팅으로 입금 알리기</a>
-      <p class="form-fine" style="color: var(--good); font-weight: 600;">첫 브리핑이 마음에 안 들면 전액 환불해 드려요.</p>
-    </div>
-  </section>
-
-  <!-- FAQ -->
-  <section>
-    <div class="sec-kicker">자주 묻는 질문</div>
-    <h2>궁금한 점이 있다면</h2>
-    <div style="margin-top: 24px;">
-      <details><summary>무료 공고 알림이랑 뭐가 달라요?</summary><p>무료 알림은 한두 개 사이트의 공고를 그대로 밀어줘요. 커리어코치는 15개 사이트를 종합하고, 회사마다 다른 직군 이름(UI/UX·UXUI·프로덕트 디자이너…)까지 전부 매칭한 뒤, 연차·지역에 맞는 것만 골라 매일 마감 추적·트렌드·면접 인사이트와 함께 보내드려요.</p></details>
-      <details><summary>왜 계좌이체로 받나요?</summary><p>지금은 소규모 베타 기간이라 간편결제 대신 계좌이체로 받고 있어요. 정식 오픈 시 카드 정기결제로 전환되며, 베타 구독자는 이벤트 가격이 유지돼요.</p></details>
-      <details><summary>해지는 어떻게 하나요?</summary><p>오픈채팅에 "해지"라고 남기시면 다음 달부터 발송·청구가 중단돼요. 채널 차단으로도 수신을 멈출 수 있어요.</p></details>
-      <details><summary>내 직군이 아직 없어요.</summary><p>지금은 프로덕트 디자이너부터 시작해요. 다른 직군을 선택해 신청하시면 대기 명단에 올라가고, 오픈 시 가장 먼저 알려드려요 (그때까지 청구되지 않아요).</p></details>
-    </div>
-  </section>
-
   <footer>
-    <p class="fine">
-      커리어코치 · 문의: 카카오 오픈채팅<br>
-      공고 정보 출처: 각 채용 플랫폼 (브리핑에서 원문으로 이동)<br>
-      * '하루 신규 공고 16건'은 2026년 7월 프로덕트 디자이너 직군 실측 기준입니다.
-    </p>
+    <div class="biz">
+      <div class="t-caption-strong">주식회사 오늘의논문</div>
+      <div class="t-caption">대표 : 이채빈<br>사업자등록번호 : 450-86-03846<br>주소 : 서울특별시 서대문구 이화여대7길 37, 3층 J15호</div>
+      <div class="t-caption links"><a href="#">이용약관</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="#">개인정보처리방침</a></div>
+    </div>
   </footer>
 
-</div>
+  <a class="floating-cta t-button" href="https://open.kakao.com/o/YOUR_OPENCHAT" id="ctaBtn">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3C6.5 3 2 6.6 2 11c0 2.8 1.9 5.3 4.7 6.7-.2.7-.7 2.6-.8 3-.1.5.2.5.4.4.2-.1 2.6-1.8 3.7-2.5.6.1 1.3.2 2 .2 5.5 0 10-3.6 10-8S17.5 3 12 3z"/></svg>
+    카카오로 1분만에 시작하기
+  </a>
 
-<a class="float-cta" href="#subscribe">
-  <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#191919" d="M12 3C6.48 3 2 6.58 2 11c0 2.84 1.86 5.33 4.66 6.74l-.94 3.46c-.08.3.26.55.53.38l4.14-2.73c.53.07 1.06.11 1.61.11 5.52 0 10-3.58 10-7.96S17.52 3 12 3z"/></svg>
-  카카오로 1분만에 시작하기
-</a>
-
-<script>
-  // ---- 칩 선택 ----
-  function chipify(id, single) {
-    const box = document.getElementById(id);
-    if (!box) return; // 에러 방지
-    box.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
-      if (single) box.querySelectorAll('.chip').forEach(x => x.classList.remove('on'));
-      c.classList.toggle('on');
-    }));
-  }
-  chipify('jobChips', true);
-  chipify('expChips', true);
-  chipify('locChips', false);
-
-  // ---- 근무지 더보기 ----
-  const locMoreBtn = document.getElementById('locMore');
-  if (locMoreBtn) {
-    locMoreBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      document.querySelectorAll('.more-loc').forEach(c => c.hidden = false);
-      e.currentTarget.remove();
-    }, { once: true });
-  }
-
-  // ---- 광고 코드 (utm_content=A~E → 입금자명 코드) ----
-  const utm = new URLSearchParams(location.search).get('utm_content') || 'Z';
-  const adCode = utm.charAt(0).toUpperCase();
-
-  // ---- 신청 → 입금 안내 ----
-  const goPayBtn = document.getElementById('goPay');
-  if (goPayBtn) {
-    goPayBtn.addEventListener('click', () => {
-      const payer = '코치' + adCode + Math.floor(10 + Math.random() * 90); // 예: 코치A37
-      const payerNameEl = document.getElementById('payerName');
-      const copyPayerBtn = document.getElementById('copyPayer');
-
-      if (payerNameEl) payerNameEl.childNodes[0].nodeValue = payer;
-      if (copyPayerBtn) copyPayerBtn.dataset.copy = payer;
-
-      // 신청 데이터 (백엔드/폼 연동 지점 — Tally·Google Form·Apps Script URL로 전송)
-      const data = {
-        payer, adCode,
-        job: document.querySelector('#jobChips .on')?.textContent,
-        exp: document.querySelector('#expChips .on')?.textContent,
-        loc: [...document.querySelectorAll('#locChips .on')].map(c => c.textContent).join(', '),
-        ts: new Date().toISOString()
-      };
-      console.log('signup', data);
-      // fetch('YOUR_FORM_ENDPOINT', {method:'POST', body: JSON.stringify(data)});
-
-      const formPanel = document.getElementById('formPanel');
-      const payPanel = document.getElementById('payPanel');
-      
-      if (formPanel) formPanel.style.display = 'none';
-      if (payPanel) {
-          payPanel.style.display = 'block';
-          payPanel.scrollIntoView({behavior:'smooth', block:'start'});
-      }
-
-      if (window.fbq) { fbq('track', 'InitiateCheckout', {value: 990, currency: 'KRW'}); }
+  <script>
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); }),{threshold:.08});
+    document.querySelectorAll('section').forEach(s => io.observe(s));
+    document.getElementById('ctaBtn').addEventListener('click', () => {
+      if (window.fbq) fbq('track', 'InitiateCheckout', {value: 990, currency: 'KRW'});
     });
-  }
-
-  // ---- 복사 버튼 ----
-  document.addEventListener('click', e => {
-    const btn = e.target.closest('.copy-btn');
-    if (!btn) return;
-    if (navigator.clipboard) { // 클립보드 API 지원 여부 확인
-        navigator.clipboard.writeText(btn.dataset.copy).then(() => {
-          const old = btn.textContent; btn.textContent = '복사됨!';
-          setTimeout(() => btn.textContent = old, 1200);
-        }).catch(err => {
-            console.error('복사 실패:', err);
-            // 실패 시 대안 작업 (예: alert)
-        });
-    } else {
-        // 클립보드 API 미지원 시 대안 작업
-        console.warn('이 브라우저는 클립보드 복사를 지원하지 않습니다.');
-    }
-  });
-</script>
+  </script>
+</div>
 </body>
 </html>
