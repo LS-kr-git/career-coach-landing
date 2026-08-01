@@ -223,8 +223,8 @@ fbq('track', 'PageView');
   footer{background:var(--gray-100);padding:80px 24px 120px}
   footer .biz{display:flex;flex-direction:column;gap:8px;color:var(--gray-500)}
   footer .links a{color:var(--gray-500);text-decoration:none}
-  /* 개인정보처리방침 링크만 한 단계 위 크기 — 피그마 6:365 (13→14, SemiBold) 대응 (2026-08-01) */
-  footer .links a[href$="privacy.html"]{font-size:14px;font-weight:600}
+  /* 개인정보처리방침 링크 — 피그마 6:365 는 이 구간만 SemiBold (크기는 13 유지, 2026-08-01 롤백) */
+  footer .links a[href$="privacy.html"]{font-weight:600}
 
   /* ===== 플로팅 CTA ===== */
   .floating-cta{
