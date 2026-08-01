@@ -31,9 +31,9 @@
       "file": "assets/img-fomo.png",
       "figmaName": "image 6",
       "rawSha256": "5e7993dc0791e4d505d88b9cf8e39cd6eb7a1438ae57ce4a1da7c4dae8b1b1e9",
-      "shaVerified": false,
+      "shaVerified": true,
       "verifiedAt": "2026-08-01",
-      "note": "웹에서 새로 제작한 게이지 그래픽으로 교체(2026-08-01). 피그마 노드 6:197 fill 교체 후 shaVerified를 true로 되돌릴 것."
+      "note": "웹에서 새로 제작한 반원 게이지 그래픽. 피그마 6:197 fill을 같은 파일로 교체해 대조 완료 (2026-08-01)."
     },
     {
       "node": "6:205",
