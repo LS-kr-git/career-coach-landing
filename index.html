@@ -24,6 +24,7 @@ fbq('track', 'PageView');
     /* careercoach tokens */
     --amber-100:#FEF3C7; --amber-200:#FDE68A; --amber-500:#F59E0B; --amber-600:#D97706; --amber-700:#B45309;
     --navy-500:#3B82F6; --navy-900:#1E3A8A;
+    --blue-100:#DBEAFE; --blue-50:#EFF6FF; --amber-50:#FFFBEB;
     --gray-50:#F8FAFC; --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-300:#CBD5E1; --gray-400:#94A3B8;
     --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155; --gray-800:#1E293B; --gray-900:#0F172A;
     --kakao:#FEE500; --kakao-text:#191919;
@@ -42,7 +43,7 @@ fbq('track', 'PageView');
      이렇게 해야 푸터 회색 띠도 화면 끝까지 이어진다. */
   /* overflow-x:clip — 칩 줄이 100vw로 삐져나올 때 가로 스크롤이 생기지 않도록 */
   .page{width:100%;margin:0 auto;background:#fff;min-height:100vh;position:relative;overflow-x:clip}
-  header, .container{max-width:400px;margin-left:auto;margin-right:auto;width:100%}
+  header{max-width:400px;margin-left:auto;margin-right:auto;width:100%}
   footer .biz{max-width:352px;margin:0 auto}
   @media (min-width:520px){
     body{background:var(--gray-100)}
@@ -69,10 +70,20 @@ fbq('track', 'PageView');
   .app-icon img{width:21px;height:21px;display:block}
   header .wordmark{height:21px;display:block}
 
-  /* ===== 공통 레이아웃 ===== */
-  .container{padding:0 24px 24px}
-  section{padding-top:120px;display:flex;flex-direction:column;gap:20px;align-items:center}
+  /* ===== 공통 레이아웃 =====
+     섹션마다 배경색이 다르고(피그마 6:148) 그 배경이 화면 끝까지 이어져야 하므로,
+     좌우 패딩을 .container 가 아니라 각 section 이 갖는다.
+     안쪽 콘텐츠는 여전히 352px(=400-48)로 묶여 줄바꿈이 피그마와 동일하게 유지된다. */
+  .container{width:100%;padding:0 0 24px}
+  section{padding:120px 24px 0;width:100%;display:flex;flex-direction:column;gap:20px;align-items:center}
   section.hero{padding-top:60px}
+  section > *{width:100%;max-width:352px}
+  section > .chips{max-width:none}
+
+  /* 섹션 배경 — 피그마 6:148 (그라데이션은 위 진함 → 아래 옅음) */
+  .bg-blue{background:linear-gradient(var(--blue-100), var(--blue-50))}
+  .bg-amber{background:linear-gradient(var(--amber-100), var(--amber-50))}
+  .bg-gray{background:var(--gray-50)}
   .head-group{display:flex;flex-direction:column;gap:8px;align-items:center;text-align:center}
   .eyebrow{color:var(--amber-600)}
   .headline{color:var(--navy-900);text-align:center;white-space:pre-line}
@@ -205,8 +216,8 @@ fbq('track', 'PageView');
       <img class="illust" src="assets/img-hero.png" alt="이직으로 연봉이 4,000만원에서 5,000만원으로 오르는 그래프" width="344" height="224">
     </section>
 
-    <!-- 1. 일단 지원 -->
-    <section>
+    <!-- 1. 일단 지원 (피그마 6:182 · Blue100→50) -->
+    <section class="bg-blue">
       <div class="head-group">
         <div class="t-label eyebrow">붙으면 희소식, 안붙어도 손해 X.</div>
         <h2 class="t-display headline">관심 있는 회사 공고가 열리면
@@ -216,8 +227,8 @@ fbq('track', 'PageView');
       <p class="t-body" style="color:var(--gray-700);width:100%">지금 가지고 있는 포트폴리오·이력서로 일단 넣으세요.<br><strong>불합격 해도 다음 지원에 패널티가 전혀 없어요.</strong><br>오히려 여러 번 도전하면, ‘우리 회사를 이렇게 좋아하면 잘 적응할 확률이 크다’고 판단해 더 좋게 봐요.<br><strong>붙으면 희소식, 안붙어도 손해 X. 안 할 이유가 없어요.</strong><br>결국 결과를 얻은 건 실행하는 사람들이었어요.</p>
     </section>
 
-    <!-- 2. 마감 FOMO -->
-    <section>
+    <!-- 2. 마감 FOMO (피그마 123:4387 · Amber100→50) -->
+    <section class="bg-amber">
       <div class="head-group">
         <div class="t-label eyebrow">내가 원하던 공고</div>
         <h2 class="t-display headline">한정된 기회를 놓치지 마세요</h2>
@@ -238,8 +249,8 @@ fbq('track', 'PageView');
       <img class="illust" src="assets/img-speed.png" alt="첫날 지원 우위 일러스트" width="344" height="257">
     </section>
 
-    <!-- 4. 데일리 알림 (목업 1) -->
-    <section>
+    <!-- 4. 데일리 알림 (목업 1) (피그마 123:4341 · Amber100→50) -->
+    <section class="bg-amber">
       <div class="head-group">
         <div class="t-label eyebrow">경쟁자보다 앞서나가세요</div>
         <h2 class="t-display headline">누구보다 빠르게
@@ -296,8 +307,8 @@ fbq('track', 'PageView');
       </div>
     </section>
 
-    <!-- 6. 시간 절약 -->
-    <section>
+    <!-- 6. 시간 절약 (피그마 6:283 · Gray50) -->
+    <section class="bg-gray">
       <div class="head-group">
         <div class="t-label eyebrow">귀중한 퇴근 후 시간</div>
         <h2 class="t-display headline">하루에 1시간씩 아끼세요</h2>
@@ -319,8 +330,8 @@ fbq('track', 'PageView');
       <img class="illust" src="assets/img-personal.png" alt="개인화 설정 일러스트" width="344" height="248">
     </section>
 
-    <!-- 8. 인사이트 (목업 2) -->
-    <section>
+    <!-- 8. 인사이트 (목업 2) (피그마 6:299 · Amber100→50) -->
+    <section class="bg-amber">
       <div class="head-group">
         <div class="t-label eyebrow">단순히 공고만 보내 드리지 않아요</div>
         <h2 class="t-display headline" style="font-size:27px;word-break:keep-all">1분 투자로 면접에 도움되는<br>업계 동향·인사이트까지</h2>

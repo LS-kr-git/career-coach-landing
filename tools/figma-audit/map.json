@@ -109,8 +109,8 @@
     },
     {
       "id": "content-cap-400",
-      "결정": "콘텐츠 폭은 400px로 고정 (넓은 폰에서도 줄바꿈이 피그마와 동일하게 유지되도록)",
-      "mustMatch": "header, \\.container\\{max-width:400px"
+      "결정": "콘텐츠 폭은 352px(=400-48)로 고정. 섹션 배경이 화면 끝까지 가야 해서 좌우 패딩이 section으로 옮겨졌으므로, 캡은 section > * 에 건다 (2026-08-01 갱신)",
+      "mustMatch": "section > \\*\\{width:100%;max-width:352px\\}"
     },
     {
       "id": "desk-bg-520",
@@ -145,6 +145,17 @@
       "결정": "how-it-works 스텝 4개는 모두 한 줄 (피그마 카드 높이 78px). \"→ 합격률 상승\" 둘째 줄은 삭제됨",
       "figmaNode": "6:340",
       "mustNotMatch": "→ (서류|면접) 합격률 상승"
+    },
+    {
+      "id": "section-bg",
+      "결정": "섹션 배경 = 피그마 6:148 그대로. 일단지원 Blue100→50 / 마감FOMO·목업1·인사이트 Amber100→50 / 시간절약 Gray50, 나머지 흰색. 그라데이션은 위 진함→아래 옅음",
+      "figmaNode": "6:161",
+      "mustMatch": "\\.bg-blue\\{background:linear-gradient\\(var\\(--blue-100\\), var\\(--blue-50\\)\\)\\}[\\s\\S]{0,200}\\.bg-amber\\{background:linear-gradient\\(var\\(--amber-100\\), var\\(--amber-50\\)\\)\\}"
+    },
+    {
+      "id": "section-bg-count",
+      "결정": "배경 클래스가 붙는 섹션은 blue 1개 + amber 3개 + gray 1개",
+      "mustMatch": "(class=\"bg-(blue|amber|gray)\"[\\s\\S]*?){5}"
     }
   ],
   "_부호예외설명": "따옴표·말줄임표만 다르고 그 차이를 의도적으로 허용한 노드. 이유를 반드시 적을 것.",
