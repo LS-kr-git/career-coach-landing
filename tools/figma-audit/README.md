@@ -138,3 +138,32 @@ return frame.findAllWithCriteria({ types: ['TEXT'] }).map(n => {
 - 피그마 노드 `6:325`만 곧은 따옴표 `'UI Designer'`, 웹과 피그마의 다른 노드는 둥근 따옴표 `‘UI Designer’`.
   피그마 텍스트 수정은 편집 환경에 `Pretendard Variable` 폰트가 없어 불가 → 웹(둥근 쪽)을 유지하고 `map.json`의 `acceptedPunctDiffs`에 예외로 기록했다.
   나중에 피그마에서 직접 고치면 예외 항목을 지우면 된다.
+
+---
+
+## page-audit.mjs — 결과물 공통 점검 (모든 페이지)
+
+`audit.mjs` 는 피그마 기준 프레임이 있는 `index.html` 만 본다.
+기준 프레임이 없는 나머지 결과물(`letter/signup/terms/privacy.html`, `CNAME`, `assets`)은 이쪽이 본다.
+
+```
+node tools/figma-audit/page-audit.mjs
+node tools/figma-audit/page-audit.mjs --json
+```
+
+| 항목 | 내용 | 등급 |
+|---|---|---|
+| 링크 | 로컬 `href`/`src` 가 실제 파일로 존재하는가 | ❌ 막힘 |
+| 대소문자 | 경로 대소문자가 정확한가 (GitHub Pages 는 구분한다) | ❌ 막힘 |
+| 머리 | `DOCTYPE` · `lang="ko"` · `charset` · `viewport` · 빈 `<title>` | ❌ 막힘 |
+| 자리표시자 | `YOUR_*` · Lorem ipsum · `@example.com` · "여기에 입력" | ❌ 막힘 |
+| 비보안 | `http://` 외부 리소스 | ❌ 막힘 |
+| 도메인 | `github.io` 를 하드코딩했는가 (CNAME 과 불일치) | ❌ 막힘 |
+| 태그 | `div/section/header/footer/main/ul/ol/table/...` 여닫음 수 | ❌ 막힘 |
+| CNAME | 호스트명 한 줄인가 | ❌ 막힘 |
+| 제목·폰트·빈 링크·안 쓰는 자산 | | ⚠️ 경고 |
+
+- 대상은 저장소 루트의 `*.html` 을 **읽어서** 정한다. 페이지를 추가해도 설정을 고칠 필요가 없다.
+- 준비물이 없다(피그마 덤프·브라우저·폰트 불필요). 그래서 pre-push 훅에서 **항상** 돈다.
+- `❌ 막힘` 이 있으면 종료코드 1, `⚠️ 경고` 만 있으면 0.
+- `TODO`/`FIXME` 는 경고다 — 개발 메모까지 배포를 막을 일은 아니라고 봤다.

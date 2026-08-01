@@ -6,8 +6,21 @@
 ```
 git config core.hooksPath tools/hooks
 ```
-랜딩 결과물(`index.html`/`assets`)이 바뀐 푸시는 **검수를 통과해야만** 나간다.
-문서·도구만 바꾼 푸시는 그냥 통과한다. 급할 때만 `git push --no-verify`.
+훅은 **두 겹**이다.
+
+| 겹 | 스크립트 | 언제 도나 | 대상 |
+|---|---|---|---|
+| 1 | `tools/figma-audit/page-audit.mjs` | **모든 푸시** | 저장소의 모든 `*.html` + `CNAME` + `assets` |
+| 2 | `tools/figma-audit/audit.mjs` | `index.html`/`assets` 가 바뀐 푸시 | 랜딩 (피그마 프레임 6:148 대조) |
+
+1겹은 준비물이 없어 어떤 세션에서든 무조건 돈다. 페이지를 새로 추가해도 설정을 고칠 필요 없이 자동으로 대상에 들어온다.
+보는 것: 깨진 링크·경로 대소문자·`DOCTYPE`/`lang`/`charset`/`viewport`/`title` 누락·자리표시자(`YOUR_*`, Lorem, example.com)·`http://` 리소스·`github.io` 하드코딩·블록 태그 불균형·CNAME 형식. `❌ 막힘` 이 있으면 푸시가 멈추고, `⚠️ 경고` 는 알려만 준다.
+
+2겹은 피그마 덤프 2개가 있어야 하고, 없으면 푸시를 막는다(확인 안 한 걸 통과로 착각하지 않기 위해).
+
+급할 때만 `git push --no-verify`.
+
+혼자 돌려볼 때: `node tools/figma-audit/page-audit.mjs`
 
 ## 기준
 - 피그마 파일 `LnT8TgFVBxky0bVyaF6Tob`, 프레임 **`6:148` "랜딩페이지_커리어코치"** (가로 360px)

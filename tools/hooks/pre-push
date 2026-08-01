@@ -1,10 +1,18 @@
 #!/usr/bin/env bash
-# 랜딩 결과물(index.html / assets)이 바뀐 푸시는 검수를 통과해야만 나간다.
+# 푸시 전 검수 훅 — 두 겹으로 막는다.
+#
+#   1겹 · 결과물 공통 점검 (page-audit.mjs) — 항상 돈다
+#       저장소의 모든 *.html + CNAME + assets 를 본다. 새 페이지를 추가해도
+#       설정을 고칠 필요 없이 자동으로 대상에 들어온다. 외부 준비물이 없어
+#       어느 세션에서든 무조건 실행된다.
+#
+#   2겹 · 피그마 대조 (audit.mjs) — index.html / assets 가 바뀐 푸시에만 돈다
+#       기준 프레임(6:148)이 있는 랜딩만 해당. 피그마 덤프 2개가 필요하다.
 #
 # 설치 (클론한 세션에서 한 줄):
 #   git config core.hooksPath tools/hooks
 #
-# 검수에 필요한 피그마 덤프 두 개를 찾는 순서:
+# 피그마 덤프를 찾는 순서:
 #   1) 환경변수 FIGMA_META / FIGMA_TYPE
 #   2) 저장소 루트의 figma_meta.xml / figma_type.json
 #   3) 상위 디렉터리(/home/claude 등)의 같은 이름 파일
@@ -15,14 +23,39 @@ set -u
 ROOT="$(git rev-parse --show-toplevel)"
 cd "$ROOT" || exit 0
 
-# 결과물이 안 바뀐 푸시(문서/도구만)는 통과
+fail() {
+  cat >&2
+  echo "(정말 급하면: git push --no-verify)" >&2
+  exit 1
+}
+
+# ─────────────────────────────────────────────────────────
+# 1겹 — 결과물 공통 점검 (항상)
+# ─────────────────────────────────────────────────────────
+echo "▶ 결과물 공통 점검…"
+if ! node tools/figma-audit/page-audit.mjs; then
+  fail <<'MSG'
+
+✋ 푸시 중단 — 결과물 공통 점검에서 조치 필요 항목이 나왔습니다.
+깨진 링크·빠진 head·자리표시자·태그 불균형은 배포되면 바로 드러납니다.
+위 "❌ 막힘" 항목을 고친 뒤 다시 푸시하세요.
+MSG
+fi
+
+# ─────────────────────────────────────────────────────────
+# 2겹 — 피그마 대조 (랜딩이 바뀐 푸시만)
+# ─────────────────────────────────────────────────────────
 RANGE_BASE="$(git rev-parse --verify -q origin/main 2>/dev/null || echo '')"
 if [ -n "$RANGE_BASE" ]; then
   CHANGED="$(git diff --name-only "$RANGE_BASE"..HEAD -- index.html assets 2>/dev/null)"
 else
   CHANGED="index.html"
 fi
-[ -z "$CHANGED" ] && exit 0
+if [ -z "$CHANGED" ]; then
+  echo "· 랜딩(index.html/assets)은 그대로 → 피그마 대조 건너뜀"
+  echo "✅ 검수 통과 — 푸시합니다."
+  exit 0
+fi
 
 find_file() {
   local name="$1" env_val="$2"
@@ -36,7 +69,7 @@ META="$(find_file figma_meta.xml "${FIGMA_META:-}")"
 TYPE="$(find_file figma_type.json "${FIGMA_TYPE:-}")"
 
 if [ -z "$META" ]; then
-  cat >&2 <<'MSG'
+  fail <<'MSG'
 
 ✋ 푸시 중단 — 피그마 메타데이터(figma_meta.xml)를 찾지 못했습니다.
 
@@ -45,13 +78,10 @@ CLAUDE.md "랜딩을 건드렸다면 — 푸시 전에" 절차대로
   1) get_metadata → figma_meta.xml
   2) use_figma 스니펫 → figma_type.json
 를 만든 뒤 다시 푸시하세요.
-
-(정말 급하면: git push --no-verify)
 MSG
-  exit 1
 fi
 
-echo "▶ 푸시 전 검수 실행…"
+echo "▶ 피그마 대조 검수 실행…"
 if [ -n "$TYPE" ]; then
   node tools/figma-audit/audit.mjs "$META" "$TYPE"
 else
@@ -61,13 +91,11 @@ fi
 STATUS=$?
 
 if [ $STATUS -ne 0 ]; then
-  cat >&2 <<'MSG'
+  fail <<'MSG'
 
-✋ 푸시 중단 — 검수에서 조치 필요 항목이 나왔습니다.
+✋ 푸시 중단 — 피그마 대조에서 조치 필요 항목이 나왔습니다.
 위 목록을 피그마 기준으로 해결한 뒤 다시 푸시하세요.
-(정말 급하면: git push --no-verify)
 MSG
-  exit 1
 fi
 
 echo "✅ 검수 통과 — 푸시합니다."
