@@ -96,9 +96,9 @@
       "mustMatch": "font-size:27px;word-break:keep-all"
     },
     {
-      "id": "label-17-bold",
-      "결정": "t-label = 17px Bold, 자간 1%",
-      "mustMatch": "\\.t-label\\{font-size:17px;line-height:20px;font-weight:700;letter-spacing:0\\.01em\\}"
+      "id": "label-14-bold",
+      "결정": "아이브로우(t-label) = 14px Bold, 자간 1% (피그마 text/label). 2026-07-31에는 피그마가 17px였으나 360px 전환 때 14px로 바뀜 — 웹도 14px로 정정 (2026-08-01)",
+      "mustMatch": "\\.t-label\\{font-size:14px;line-height:20px;font-weight:700;letter-spacing:0\\.01em\\}"
     },
     {
       "id": "full-bleed-page",
@@ -167,6 +167,21 @@
       "결정": "스텝 문구는 16px SemiBold/24 (피그마 6:360). t-h3(17px)를 그대로 쓰면 360px에서 스텝4가 2줄로 넘어간다 — 17px는 웹 쪽 드리프트였음 (2026-08-01)",
       "figmaNode": "6:360",
       "mustMatch": "\\.step \\.t-h3\\{[^}]*font-size:16px;line-height:24px\\}"
+    },
+    {
+      "id": "type-scale-figma",
+      "결정": "타이포는 피그마 값 그대로: 리드 16/23, 아이브로우 14/20, 목업 카드제목 20/28(-1%), 목업 섹션제목 15/23, 목업 본문 12/20, 플로팅 CTA 17/24 (2026-08-01 전수 대조)",
+      "mustMatch": "\\.t-h2\\{font-size:20px;line-height:28px;font-weight:700;letter-spacing:-0\\.01em\\}"
+    },
+    {
+      "id": "lead-16-23",
+      "결정": "리드 본문(t-body-l)은 16px/23 (피그마 text/body-l). 웹이 26으로 벌어져 있었음 (2026-08-01)",
+      "mustMatch": "\\.t-body-l\\{font-size:16px;line-height:23px;font-weight:400\\}"
+    },
+    {
+      "id": "mockup-body-12",
+      "결정": "알림톡 목업 본문은 12px/20 (피그마 123:4372). t-caption(13/18) 아님",
+      "mustMatch": "\\.alim-sec p\\{[^}]*font-size:12px;line-height:20px\\}"
     }
   ],
   "_부호예외설명": "따옴표·말줄임표만 다르고 그 차이를 의도적으로 허용한 노드. 이유를 반드시 적을 것.",
