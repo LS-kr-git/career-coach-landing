@@ -23,10 +23,10 @@
       "node": "123:4053",
       "file": "assets/img-apply.png",
       "figmaName": "image 359",
-      "rawSha256": "a271e5b51ec10bdc5b72094db3e8a256db1490270319e90211cdf5b22b65343f",
+      "rawSha256": "435ea76d1339d98a45599f6d9b1e9e4c3c6e895589f15c50ebf46f07cc2601cd",
       "shaVerified": true,
       "verifiedAt": "2026-08-01",
-      "note": "피그마 PROD 프레임(6:148)에서 Export한 투명 PNG 2x. 표시 비율은 피그마 이미지 노드 크기와 동일."
+      "note": "피그마 Export 투명 PNG 2x. 엣지 정리본(흰 프린지 제거 + 클립 내부 투명화, 커밋 5932ef4)으로 교체 — 육안 확인 완료."
     },
     {
       "node": "123:4394",
