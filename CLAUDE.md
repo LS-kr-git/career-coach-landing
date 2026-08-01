@@ -53,12 +53,53 @@ return frame.findAllWithCriteria({ types: ['TEXT'] }).map(n => {
 ```
 > `getStyledTextSegments` 를 쓰는 이유: 굵기가 섞인 문단(예: 6:189)은 `n.fontName` 이 `figma.mixed` 라 그냥 읽으면 빠진다.
 
+**(c) 스타일 원본 덤프** — `use_figma` 로 아래를 실행하고 결과를 `figma_style.json` 으로 저장:
+```js
+const IDS = require_ids; // ← tools/figma-audit/figma-style.json 의 items[].node 값들을 배열로 넣는다
+const hex = c => c ? '#'+[c.r,c.g,c.b].map(v=>Math.round(v*255).toString(16).padStart(2,'0')).join('') : null;
+const solid = n => (n && 'fills' in n && n.fills !== figma.mixed && n.fills[0] && n.fills[0].type === 'SOLID') ? hex(n.fills[0].color) : null;
+const out = [];
+for (const id of IDS) {
+  const n = await figma.getNodeByIdAsync(id);
+  if (!n) { out.push({ id, missing: true }); continue; }
+  const o = { id };
+  if (n.type === 'TEXT') o.textFill = solid(n);
+  else {
+    const f = solid(n); if (f) o.fill = f;
+    const t = ('findAllWithCriteria' in n) ? n.findAllWithCriteria({ types: ['TEXT'] })[0] : null;
+    if (t) o.textFill = solid(t);
+  }
+  if ('strokes' in n && n.strokes.length && n.strokes[0].type === 'SOLID') { o.stroke = hex(n.strokes[0].color); o.sw = n.strokeWeight; }
+  if ('cornerRadius' in n && n.cornerRadius !== figma.mixed) o.radius = n.cornerRadius;
+  if ('effects' in n) o.shadow = n.effects.some(e => e.type === 'DROP_SHADOW' && e.visible !== false);
+  if ('paddingTop' in n && n.layoutMode && n.layoutMode !== 'NONE')
+    o.pad = [n.paddingTop, n.paddingRight, n.paddingBottom, n.paddingLeft].map(v => Math.round(v * 10) / 10);
+  o.h = Math.round(n.height * 10) / 10;
+  out.push(o);
+}
+return out;
+```
+> **왜 필요한가**: `get_metadata` XML 에는 **색·보더·반경·패딩·그림자가 아예 없다.** 2026-08-01 검수에서 이 구멍 때문에 12건(말풍선 들여쓰기, 구분선 누락, 프로필명 색, 카드 그림자, 배지 보더 …)이 "차이 없음" 을 통과한 채 눈으로만 달라 보였다.
+
 ### 2. 검수를 돌린다 — **인자 두 개를 모두 준다**
 ```
-node tools/figma-audit/audit.mjs figma_meta.xml figma_type.json
+node tools/figma-audit/audit.mjs figma_meta.xml figma_type.json figma_style.json
 ```
-- 두 번째 인자를 빼면 "🅰️ 신선도 미확인" 이 조치 필요 항목으로 뜬다. **확인 안 한 걸 통과로 착각하지 않기 위한 장치**이니 `--skip-type-freshness` 로 덮지 말 것.
+- 두 번째/세 번째 인자를 빼면 "🅰️ / 🎨 신선도 미확인" 이 조치 필요 항목으로 뜬다. **확인 안 한 걸 통과로 착각하지 않기 위한 장치**이니 `--skip-type-freshness` 로 덮지 말 것.
 - "차이 없음" 이 나와야 푸시한다.
+
+### 2-2. 검수가 보는 것 (2026-08-01 확장)
+| 검사 | 무엇을 보나 | 근거 파일 |
+|---|---|---|
+| 문구 | 텍스트 노드 vs 웹 블록 | `figma_meta.xml` |
+| 확정값 | `lockedStyles` 정규식 | `map.json` |
+| 이미지 | `assets/*.png` sha256 | `map.json` |
+| 타이포 | 크기·굵기·행간·자간 실측 | `figma-type.json` |
+| **시각 스타일** | **색·보더·반경·패딩·그림자·태그명 실측** | **`figma-style.json`** |
+
+시각 요소(색/보더/간격/구조)를 바꿨다면 **`figma-style.json` 에 항목이 있는지 먼저 확인**하고, 없으면 추가한다.
+항목 하나는 `{ id, label, sel, node, figma:{피그마 원본값}, css:{기대 computed style} }` 형태다.
+`css` 의 특수 키: `"shadow": "있음"|"없음"`, `"tag": "SPAN"` (링크가 아니어야 하는 요소를 잠근다).
 
 ### 3. 피그마 타이포가 바뀌었다는 결과가 나오면
 ```

@@ -1,0 +1,262 @@
+{
+  "_설명": "피그마 기준 프레임의 시각 스타일 스냅샷. style-audit.mjs 가 이 값을 웹 실측(getComputedStyle)과 대조한다.",
+  "_왜필요한가": "audit.mjs 가 읽는 get_metadata XML 에는 색·보더·반경·패딩·그림자가 없다. 그래서 2026-08-01 검수에서 12건이 '차이 없음'을 통과한 채 눈으로만 달라 보였다. 그 구멍을 메우는 파일이다.",
+  "_갱신방법": "피그마 값이 바뀌면 items[].figma 와 items[].css 를 함께 고친다. 신선도 검사가 어떤 노드가 바뀌었는지 새 값과 함께 알려 준다.",
+  "_필드": "sel=웹 선택자 / css=기대 computed style(색은 #hex 또는 rgb() 아무거나) / figma=피그마 원본 값(신선도 대조용) / node=figma 의 근거 노드",
+  "figmaNode": "6:148",
+  "generatedAt": "2026-08-01",
+  "items": [
+    {
+      "id": "hero-badge",
+      "label": "히어로 배지",
+      "sel": ".hero-badge",
+      "node": "6:169",
+      "figma": {
+        "fill": "#fef3c7",
+        "stroke": "#fde68a",
+        "sw": 1,
+        "radius": 999,
+        "shadow": false,
+        "textFill": "#d97706"
+      },
+      "css": {
+        "background-color": "#FEF3C7",
+        "border-top-width": "1px",
+        "border-top-color": "#FDE68A",
+        "border-top-left-radius": "999px",
+        "color": "#D97706"
+      }
+    },
+    {
+      "id": "alim-bubble",
+      "label": "알림톡 말풍선 들여쓰기",
+      "sel": ".alim-bubble",
+      "node": "6:309",
+      "figma": {
+        "indent": 52
+      },
+      "css": {
+        "margin-left": "52px"
+      }
+    },
+    {
+      "id": "alim-divider",
+      "label": "카드 제목 아래 구분선",
+      "sel": ".alim-divider",
+      "node": "6:321",
+      "figma": {
+        "fill": "#e2e8f0",
+        "h": 1
+      },
+      "css": {
+        "background-color": "#E2E8F0",
+        "height": "1px"
+      }
+    },
+    {
+      "id": "alim-profile-name",
+      "label": "알림톡 프로필명",
+      "sel": ".alim-profile span",
+      "node": "6:314",
+      "figma": {
+        "textFill": "#f1f5f9"
+      },
+      "css": {
+        "color": "#F1F5F9"
+      }
+    },
+    {
+      "id": "alim-avatar",
+      "label": "알림톡 아바타",
+      "sel": ".alim-profile img",
+      "node": "6:310",
+      "figma": {
+        "shadow": true
+      },
+      "css": {
+        "shadow": "있음"
+      }
+    },
+    {
+      "id": "alim-banner",
+      "label": "알림톡 노란 배너",
+      "sel": ".alim-banner",
+      "node": "6:316",
+      "figma": {
+        "fill": "#fee500",
+        "pad": [
+          12,
+          16,
+          12,
+          16
+        ]
+      },
+      "css": {
+        "background-color": "#FEE500",
+        "padding-left": "16px",
+        "padding-right": "16px",
+        "padding-top": "12px",
+        "padding-bottom": "12px",
+        "color": "#191919"
+      }
+    },
+    {
+      "id": "alim-card",
+      "label": "알림톡 카드",
+      "sel": ".alim-card",
+      "node": "6:315",
+      "figma": {
+        "fill": "#ffffff",
+        "shadow": false
+      },
+      "css": {
+        "background-color": "#FFFFFF",
+        "shadow": "없음",
+        "padding-left": "16px",
+        "padding-right": "16px"
+      },
+      "_주": "패딩은 안쪽 컨테이너 6:318 값(16.8/16/18/16). 6:315 자체 패딩은 0이라 신선도 대조에서 제외."
+    },
+    {
+      "id": "alim-card-title",
+      "label": "카드 제목",
+      "sel": ".alim-card h3",
+      "node": "6:320",
+      "figma": {
+        "textFill": "#111111"
+      },
+      "css": {
+        "color": "#111111"
+      }
+    },
+    {
+      "id": "alim-sec-title",
+      "label": "카드 소제목",
+      "sel": ".alim-sec .sec-title",
+      "node": "6:323",
+      "figma": {
+        "textFill": "#333333"
+      },
+      "css": {
+        "color": "#333333"
+      }
+    },
+    {
+      "id": "alim-body",
+      "label": "카드 본문",
+      "sel": ".alim-sec p",
+      "node": "6:324",
+      "figma": {
+        "textFill": "#333333"
+      },
+      "css": {
+        "color": "#333333"
+      }
+    },
+    {
+      "id": "alim-cta",
+      "label": "카드 안 CTA (링크 아님)",
+      "sel": ".alim-cta",
+      "node": "6:331",
+      "figma": {
+        "fill": "#f8fafc",
+        "stroke": "#e2e8f0",
+        "sw": 1,
+        "radius": 8,
+        "textFill": "#1e293b"
+      },
+      "css": {
+        "background-color": "#F8FAFC",
+        "border-top-width": "1px",
+        "border-top-color": "#E2E8F0",
+        "border-top-left-radius": "8px",
+        "color": "#1E293B",
+        "padding-top": "11px",
+        "tag": "SPAN"
+      }
+    },
+    {
+      "id": "phone-screen",
+      "label": "폰 화면 배경",
+      "sel": ".phone .screen",
+      "node": "53:561",
+      "figma": {
+        "fill": "#94a3b8"
+      },
+      "css": {
+        "background-color": "#94A3B8"
+      }
+    },
+    {
+      "id": "step-card",
+      "label": "how it works 스텝 카드",
+      "sel": ".step",
+      "node": "6:341",
+      "figma": {
+        "fill": "#f8fafc",
+        "stroke": "#e2e8f0",
+        "sw": 1,
+        "radius": 18,
+        "shadow": true
+      },
+      "css": {
+        "background-color": "#F8FAFC",
+        "border-top-width": "1px",
+        "border-top-color": "#E2E8F0",
+        "border-top-left-radius": "18px"
+      }
+    },
+    {
+      "id": "step-num",
+      "label": "스텝 번호 원",
+      "sel": ".step .num",
+      "node": "6:342",
+      "figma": {
+        "fill": "#f59e0b"
+      },
+      "css": {
+        "background-color": "#F59E0B"
+      }
+    },
+    {
+      "id": "step-text",
+      "label": "스텝 문구",
+      "sel": ".step .t-h3",
+      "node": "6:345",
+      "figma": {
+        "textFill": "#1e3a8a"
+      },
+      "css": {
+        "color": "#1E3A8A"
+      }
+    },
+    {
+      "id": "floating-cta",
+      "label": "플로팅 CTA",
+      "sel": ".floating-cta",
+      "node": "6:366",
+      "figma": {
+        "fill": "#fee500",
+        "radius": 14,
+        "shadow": true
+      },
+      "css": {
+        "background-color": "#FEE500",
+        "border-top-left-radius": "14px",
+        "shadow": "있음"
+      }
+    },
+    {
+      "id": "footer",
+      "label": "푸터",
+      "sel": "footer",
+      "node": "6:361",
+      "figma": {
+        "fill": "#f1f5f9"
+      },
+      "css": {
+        "background-color": "#F1F5F9"
+      }
+    }
+  ]
+}

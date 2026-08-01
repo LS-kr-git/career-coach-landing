@@ -7,14 +7,14 @@
 #       어느 세션에서든 무조건 실행된다.
 #
 #   2겹 · 피그마 대조 (audit.mjs) — index.html / assets 가 바뀐 푸시에만 돈다
-#       기준 프레임(6:148)이 있는 랜딩만 해당. 피그마 덤프 2개가 필요하다.
+#       기준 프레임(6:148)이 있는 랜딩만 해당. 피그마 덤프 3개(메타/타이포/스타일)가 필요하다.
 #
 # 설치 (클론한 세션에서 한 줄):
 #   git config core.hooksPath tools/hooks
 #
-# 피그마 덤프를 찾는 순서:
-#   1) 환경변수 FIGMA_META / FIGMA_TYPE
-#   2) 저장소 루트의 figma_meta.xml / figma_type.json
+# 피그마 덤프 세 개를 찾는 순서:
+#   1) 환경변수 FIGMA_META / FIGMA_TYPE / FIGMA_STYLE
+#   2) 저장소 루트의 figma_meta.xml / figma_type.json / figma_style.json
 #   3) 상위 디렉터리(/home/claude 등)의 같은 이름 파일
 #
 # 급할 때만: git push --no-verify
@@ -67,6 +67,7 @@ find_file() {
 
 META="$(find_file figma_meta.xml "${FIGMA_META:-}")"
 TYPE="$(find_file figma_type.json "${FIGMA_TYPE:-}")"
+STYLE="$(find_file figma_style.json "${FIGMA_STYLE:-}")"
 
 if [ -z "$META" ]; then
   fail <<'MSG'
@@ -76,18 +77,22 @@ if [ -z "$META" ]; then
 랜딩 결과물이 바뀌었는데 피그마와 대조하지 않은 상태입니다.
 CLAUDE.md "랜딩을 건드렸다면 — 푸시 전에" 절차대로
   1) get_metadata → figma_meta.xml
-  2) use_figma 스니펫 → figma_type.json
+  2) use_figma 타이포 스니펫 → figma_type.json
+  3) use_figma 스타일 스니펫 → figma_style.json
 를 만든 뒤 다시 푸시하세요.
 MSG
 fi
 
 echo "▶ 피그마 대조 검수 실행…"
-if [ -n "$TYPE" ]; then
-  node tools/figma-audit/audit.mjs "$META" "$TYPE"
-else
-  echo "⚠️ figma_type.json 이 없어 타이포 신선도는 확인하지 못합니다." >&2
-  node tools/figma-audit/audit.mjs "$META"
+ARGS=("$META")
+[ -n "$TYPE" ] && ARGS+=("$TYPE")
+if [ -n "$STYLE" ]; then
+  [ -z "$TYPE" ] && { echo "✋ figma_style.json 만 있고 figma_type.json 이 없습니다 — 인자 순서상 둘 다 필요합니다." >&2; exit 1; }
+  ARGS+=("$STYLE")
 fi
+[ -z "$TYPE" ]  && echo "⚠️ figma_type.json 이 없어 타이포 신선도는 확인하지 못합니다." >&2
+[ -z "$STYLE" ] && echo "⚠️ figma_style.json 이 없어 스타일 신선도는 확인하지 못합니다." >&2
+node tools/figma-audit/audit.mjs "${ARGS[@]}"
 STATUS=$?
 
 if [ $STATUS -ne 0 ]; then

@@ -7,7 +7,7 @@
 ## ⚠️ 이 저장소를 건드리기 전에 — 3줄 요약
 
 1. **피그마가 기준이다.** 파일 `LnT8TgFVBxky0bVyaF6Tob` / 프레임 `6:148` "랜딩페이지_커리어코치"(360px). 웹은 파생물.
-2. **푸시 전 검수는 필수다.** 피그마에서 덤프 2개를 뽑아 `node tools/figma-audit/audit.mjs figma_meta.xml figma_type.json` → "차이 없음" 이어야 한다.
+2. **푸시 전 검수는 필수다.** 피그마에서 덤프 3개를 뽑아 `node tools/figma-audit/audit.mjs figma_meta.xml figma_type.json figma_style.json` → "차이 없음" 이어야 한다. (문구·확정값·이미지·타이포·**시각 스타일**)
 3. **클론 직후 훅을 켠다:** `git config core.hooksPath tools/hooks`
    → **모든 푸시**가 결과물 공통 점검(모든 페이지·CNAME·assets)을 통과해야 하고,
    → 랜딩이 바뀐 푸시는 추가로 피그마 대조까지 통과해야 나간다.
