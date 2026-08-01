@@ -33,11 +33,20 @@ fbq('track', 'PageView');
   html{scroll-behavior:smooth;background:linear-gradient(to bottom,#ffffff 50%,#F1F5F9 50%) fixed}
   body{
     font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;
-    background:var(--gray-100); color:var(--gray-800);
+    /* 기기 화면에서는 페이지 양옆에 다른 색이 보이면 안 됨 → 기본 흰색.
+       데스크톱 등 넓은 화면에서만 회색 바탕 + 카드 그림자 (아래 미디어쿼리) */
+    background:#fff; color:var(--gray-800);
     -webkit-font-smoothing:antialiased;
   }
-  .page{max-width:400px;margin:0 auto;background:#fff;min-height:100vh;position:relative;
-    box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
+  /* 페이지는 기기 폭을 꽉 채우고(좌우 여백 0), 안쪽 콘텐츠만 400px로 고정한다.
+     이렇게 해야 푸터 회색 띠도 화면 끝까지 이어진다. */
+  .page{width:100%;margin:0 auto;background:#fff;min-height:100vh;position:relative}
+  header, .container{max-width:400px;margin-left:auto;margin-right:auto;width:100%}
+  footer .biz{max-width:352px;margin:0 auto}
+  @media (min-width:520px){
+    body{background:var(--gray-100)}
+    .page{max-width:400px;box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
+  }
 
   /* ===== 텍스트 스타일 (피그마 text/* 대응) ===== */
   .t-display-l{font-size:36px;line-height:44px;font-weight:800;letter-spacing:-0.01em}

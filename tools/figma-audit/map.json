@@ -24,7 +24,10 @@
     { "id": "avatar-42",     "결정": "알림톡 프로필 아바타 42px", "mustMatch": "\\.alim-profile img\\{width:42px;height:42px" },
     { "id": "step-radius-18","결정": "how-it-works 스텝 카드 radius 18px", "mustMatch": "border-radius:18px;padding:20px" },
     { "id": "insight-head",  "결정": "인사이트 섹션 헤딩 27px·keep-all로 2줄 고정", "mustMatch": "font-size:27px;word-break:keep-all" },
-    { "id": "label-17-bold", "결정": "t-label = 17px Bold, 자간 1%", "mustMatch": "\\.t-label\\{font-size:17px;line-height:20px;font-weight:700;letter-spacing:0\\.01em\\}" }
+    { "id": "label-17-bold", "결정": "t-label = 17px Bold, 자간 1%", "mustMatch": "\\.t-label\\{font-size:17px;line-height:20px;font-weight:700;letter-spacing:0\\.01em\\}" },
+    { "id": "full-bleed-page", "결정": "페이지는 기기 폭을 꽉 채운다 — 폰에서 좌우에 배경색이 보이면 안 됨 (2026-07-31, iPhone Air 제보)", "figmaNode": "6:148", "mustMatch": "\\.page\\{width:100%", "mustNotMatch": "\\.page\\{max-width:400px;margin" },
+    { "id": "content-cap-400", "결정": "콘텐츠 폭은 400px로 고정 (넓은 폰에서도 줄바꿈이 피그마와 동일하게 유지되도록)", "mustMatch": "header, \\.container\\{max-width:400px" },
+    { "id": "desk-bg-520", "결정": "회색 바탕 + 카드 그림자는 520px 이상에서만", "mustMatch": "@media \\(min-width:520px\\)\\{[\\s\\S]{0,200}background:var\\(--gray-100\\)" }
   ],
   "_부호예외설명": "따옴표·말줄임표만 다르고 그 차이를 의도적으로 허용한 노드. 이유를 반드시 적을 것.",
   "acceptedPunctDiffs": [

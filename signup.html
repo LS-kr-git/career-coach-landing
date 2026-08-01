@@ -16,10 +16,16 @@
   *{margin:0;padding:0;box-sizing:border-box}
   body{
     font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;
-    background:var(--gray-100); color:var(--gray-800); -webkit-font-smoothing:antialiased;
+    /* 기기 화면에서는 페이지 양옆에 다른 색이 보이면 안 됨 → 기본 흰색.
+       데스크톱 등 넓은 화면에서만 회색 바탕 + 카드 그림자 (아래 미디어쿼리) */
+    background:#fff; color:var(--gray-800); -webkit-font-smoothing:antialiased;
   }
-  .page{max-width:400px;margin:0 auto;background:#fff;min-height:100vh;
-    box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
+  .page{width:100%;margin:0 auto;background:#fff;min-height:100vh}
+  header, .container{max-width:400px;margin-left:auto;margin-right:auto;width:100%}
+  @media (min-width:520px){
+    body{background:var(--gray-100)}
+    .page{max-width:400px;box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
+  }
   header{display:flex;align-items:center;gap:10px;padding:24px}
   .app-icon{width:29px;height:29px;border-radius:25%;background:linear-gradient(135deg,#F59E0B,#D97706);display:flex;align-items:center;justify-content:center}
   header a{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--gray-800);font-weight:800;font-size:16px}
