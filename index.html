@@ -183,13 +183,6 @@ fbq('track', 'PageView');
   .floating-cta:active{transform:translateX(-50%) scale(.98)}
   .floating-cta svg{flex:none}
 
-  /* 360px급 좁은 화면(갤럭시 등)에서도 피그마와 같은 줄 수를 유지한다.
-     390px에서는 2줄인 헤딩 2곳과 스텝4가 360px에서 한 줄씩 더 늘어나는 것을 막는 최소 보정. */
-  @media (max-width:389px){
-    .headline{font-size:27px;line-height:35px}
-    .step .t-h3{font-size:16px}
-  }
-
   @media (prefers-reduced-motion: no-preference){
     section{opacity:0;transform:translateY(12px);transition:opacity .5s ease,transform .5s ease}
     section.in{opacity:1;transform:none}

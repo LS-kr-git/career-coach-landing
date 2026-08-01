@@ -14,10 +14,10 @@
       "node": "123:4041",
       "file": "assets/img-hero.png",
       "figmaName": "image 355",
-      "rawSha256": "b1836632943e127bf769c255731ddcf090f35cb3fefbca6c2e7cae5197f65d19",
+      "rawSha256": "f1e397208aa88a1e8729f2a8b749e539d711f40a7bba002ef21110c5a5aa759e",
       "shaVerified": true,
       "verifiedAt": "2026-08-01",
-      "note": "피그마 PROD 프레임(6:148)에서 Export한 투명 PNG 2x. 표시 비율은 피그마 이미지 노드 크기와 동일."
+      "note": "피그마 Export 원본의 흰 배경을 투명 처리한 버전 (2026-08-01). 흰 배경 합성 시 원본과 평균 0.1/255 차이."
     },
     {
       "node": "123:4053",
