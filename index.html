@@ -189,7 +189,9 @@ fbq('track', 'PageView');
   /* 번호 원은 피그마 6:357 기준 36px (카드 높이 78px = 20+36+20+보더2) */
   .step .num{flex:none;width:36px;height:36px;border-radius:50%;background:var(--amber-500);color:#fff;
     display:flex;align-items:center;justify-content:center}
-  .step .t-h3{color:var(--navy-900);white-space:pre-line}
+  /* 스텝 문구는 피그마 6:345/6:350/6:355/6:360 기준 16px SemiBold (t-h3 의 17px 아님).
+     이 값이라야 카드 높이도 피그마와 같은 78px 이 되고, 360px 화면에서 4개 모두 한 줄로 들어간다. */
+  .step .t-h3{color:var(--navy-900);white-space:pre-line;font-size:16px;line-height:24px}
 
   /* ===== 푸터 ===== */
   footer{background:var(--gray-100);padding:80px 24px 120px}
