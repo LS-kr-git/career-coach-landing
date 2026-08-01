@@ -65,43 +65,51 @@ await page.goto(pathToFileURL(htmlPath).href, { waitUntil: 'domcontentloaded' })
 
 const rows = await page.evaluate((groups) =>
   groups.map((g) => {
-    const el = document.querySelector(g.sel);
-    if (!el) return { id: g.id, label: g.label, missing: true };
-    const cs = getComputedStyle(el);
-    const size = parseFloat(cs.fontSize);
-    const lhRaw = cs.lineHeight;
-    const lh = lhRaw === 'normal' ? null : parseFloat(lhRaw);
-    const ls = cs.letterSpacing === 'normal' ? 0 : Math.round((parseFloat(cs.letterSpacing) / size) * 1000) / 10;
-    return { id: g.id, label: g.label, size, lh, weight: Number(cs.fontWeight), ls };
+    const sels = g.sels || (g.sel ? [{ sel: g.sel, label: g.label }] : []);
+    return {
+      id: g.id,
+      measured: sels.map((x) => {
+        const el = document.querySelector(x.sel);
+        if (!el) return { sel: x.sel, label: x.label, missing: true };
+        const cs = getComputedStyle(el);
+        const size = parseFloat(cs.fontSize);
+        const lh = cs.lineHeight === 'normal' ? null : parseFloat(cs.lineHeight);
+        const ls = cs.letterSpacing === 'normal' ? 0 : Math.round((parseFloat(cs.letterSpacing) / size) * 1000) / 10;
+        return { sel: x.sel, label: x.label, size, lh, weight: Number(cs.fontWeight), ls };
+      }),
+    };
   }), spec.groups);
 
 await browser.close();
 
 const findings = [];
+let checkedSelectors = 0;
 for (let i = 0; i < spec.groups.length; i++) {
   const g = spec.groups[i];
-  const w = rows[i];
-  if (w.missing) {
-    findings.push({ level: 'TYPE', id: g.id, label: g.label,
-      detail: `웹에서 요소를 못 찾음 (선택자: ${g.sel})`, figmaNodes: g.figmaNodes });
-    continue;
-  }
-  const diff = [];
-  if (w.size !== g.size) diff.push(`크기 ${g.size}→${w.size}`);
-  if (g.lh != null && w.lh !== g.lh) diff.push(`행간 ${g.lh}→${w.lh}`);
-  if (w.weight !== g.weight) diff.push(`굵기 ${g.weight}→${w.weight}`);
-  if (Math.abs(w.ls - g.ls) > 0.15) diff.push(`자간 ${g.ls}%→${w.ls}%`);
-  if (diff.length) {
-    findings.push({ level: 'TYPE', id: g.id, label: g.label, detail: diff.join(', '),
-      figma: `${g.size}/${g.lh}/${g.weight}/${g.ls}%`, web: `${w.size}/${w.lh}/${w.weight}/${w.ls}%`,
-      figmaNodes: g.figmaNodes, sel: g.sel });
+  for (const w of rows[i].measured) {
+    checkedSelectors++;
+    if (w.missing) {
+      findings.push({ level: 'TYPE', id: g.id, label: w.label || g.label,
+        detail: `웹에서 요소를 못 찾음 (선택자: ${w.sel})`, figmaNodes: g.figmaNodes });
+      continue;
+    }
+    const diff = [];
+    if (w.size !== g.size) diff.push(`크기 ${g.size}→${w.size}`);
+    if (g.lh != null && w.lh !== g.lh) diff.push(`행간 ${g.lh}→${w.lh}`);
+    if (w.weight !== g.weight) diff.push(`굵기 ${g.weight}→${w.weight}`);
+    if (Math.abs(w.ls - g.ls) > 0.15) diff.push(`자간 ${g.ls}%→${w.ls}%`);
+    if (diff.length) {
+      findings.push({ level: 'TYPE', id: g.id, label: w.label || g.label, detail: diff.join(', '),
+        figma: `${g.size}/${g.lh}/${g.weight}/${g.ls}%`, web: `${w.size}/${w.lh}/${w.weight}/${w.ls}%`,
+        figmaNodes: g.figmaNodes, sel: w.sel });
+    }
   }
 }
 
 if (asJson) {
-  console.log(JSON.stringify({ skipped: false, checked: spec.groups.length, findings }));
+  console.log(JSON.stringify({ skipped: false, checked: checkedSelectors, groups: spec.groups.length, findings }));
 } else {
-  console.log(`\n타이포 검수 — 피그마 스냅샷 ${spec.generatedAt} (노드 ${spec.figmaNode}) / ${spec.groups.length}개 그룹`);
+  console.log(`\n타이포 검수 — 피그마 스냅샷 ${spec.generatedAt} (노드 ${spec.figmaNode}) / 그룹 ${spec.groups.length}개, 선택자 ${checkedSelectors}개`);
   if (!findings.length) {
     console.log('✅ 타이포 차이 없음\n');
   } else {

@@ -29,6 +29,13 @@
    ```
 3. 나온 차이를 **피그마 쪽으로 맞춰** 고친다. 웹이 맞다고 판단되면 **피그마도 같은 세션에서 고친다.**
 
+**인자 두 개를 모두 주는 것이 정상 사용법이다:**
+```
+node tools/figma-audit/audit.mjs figma_meta.xml figma_type.json
+```
+두 번째 인자(`figma_type.json`)는 이번 세션에 피그마에서 새로 뽑은 **타이포 원본 덤프**다.
+빼면 "🅰️ 신선도 미확인" 이 조치 필요 항목으로 뜬다 — 스냅샷이 낡았는지 확인도 안 하고 통과로 착각하는 걸 막기 위한 장치다. (정말 건너뛰려면 `--skip-type-freshness`)
+
 `audit.mjs` 가 타이포 검수(`type-audit.mjs`)를 자동으로 함께 돌린다. 따로 실행하려면:
 ```
 node tools/figma-audit/type-audit.mjs
@@ -45,20 +52,43 @@ node tools/figma-audit/type-audit.mjs
 폰트 파일은 필요 없다 — 크기·굵기·행간·자간은 폰트 로딩과 무관하게 계산된다.
 (줄바꿈 폭까지 보려면 Pretendard 설치가 필요하지만 그건 이 스크립트 범위 밖이다.)
 
-### 타이포 스냅샷 갱신 (피그마에서 글자 값이 바뀌었을 때)
+### 타이포 스냅샷은 어떻게 최신으로 유지되나
 
-Figma MCP `use_figma` 로 아래를 실행하고, 결과를 `figma-type.json` 의 `groups` 에 반영한다:
+`figma-type.json` 은 커밋된 값이라 피그마가 바뀌면 저절로 낡는다. 그래서 두 겹으로 막는다.
+
+1. **낡았는지 자동 감지** — `audit.mjs` 에 이번 세션의 타이포 덤프(`figma_type.json`)를 주면, 스냅샷의 각 그룹을 피그마 실제 값과 대조해 *"피그마가 바뀌었는데 스냅샷이 안 따라옴"* 을 잡는다. 스냅샷에 없는 새 노드, 사라진 노드도 함께 보고한다.
+2. **갱신은 자동 생성** — 손으로 JSON 을 고치지 않는다:
+   ```
+   node tools/figma-audit/build-type-snapshot.mjs figma_type.json          # 미리보기
+   node tools/figma-audit/build-type-snapshot.mjs figma_type.json --write  # 반영
+   ```
+   같은 (크기/굵기/행간/자간) 조합끼리 자동으로 묶고, **기존 웹 선택자(`sels`)를 조합 키로 이어받는다.**
+   사람이 채울 것은 **새로 생긴 조합의 선택자뿐**이며, 어떤 조합이 비었는지 스크립트가 알려 준다.
+   덤프에 안 나온 그룹(서식이 섞인 문단 등)은 버리지 않고 이전 값을 유지한다.
+
+한 타이포 조합에 웹 선택자가 여러 개 붙을 수 있다(예: 13/600/18 = 히어로 배지·칩·프로필명·목업 CTA·푸터 상호). `sels` 배열에 전부 넣으면 모두 검사한다.
+`ignoreNodes` 에 적은 노드는 대조에서 빠진다(상태바 시계처럼 웹에 대응 요소가 없는 것).
+
+### 타이포 원본 덤프 뽑는 코드
+
+Figma MCP `use_figma` 로 아래를 실행하고 결과를 `figma_type.json` 으로 저장한다:
 
 ```js
 const frame = await figma.getNodeByIdAsync('6:148');
-return frame.findAllWithCriteria({ types: ['TEXT'] })
-  .filter(n => typeof n.fontSize === 'number')
-  .map(n => ({ id: n.id, t: n.characters.replace(/\s+/g,' ').slice(0,24),
-    size: n.fontSize, weight: n.fontName && n.fontName.style,
-    lh: n.lineHeight && n.lineHeight.value, ls: n.letterSpacing && n.letterSpacing.value }));
+return frame.findAllWithCriteria({ types: ['TEXT'] }).map(n => {
+  const s = (n.getStyledTextSegments(['fontSize','fontName','lineHeight','letterSpacing']) || [])[0] || {};
+  const size = typeof n.fontSize === 'number' ? n.fontSize : s.fontSize;
+  const fn = n.fontName !== figma.mixed ? n.fontName : s.fontName;
+  const lh = n.lineHeight !== figma.mixed ? n.lineHeight : s.lineHeight;
+  const ls = n.letterSpacing !== figma.mixed ? n.letterSpacing : s.letterSpacing;
+  return { id: n.id, t: n.characters.replace(/\s+/g,' ').trim().slice(0,20),
+    size, weight: fn && fn.style,
+    lh: lh && lh.unit === 'PIXELS' ? lh.value : null,
+    ls: ls && typeof ls.value === 'number' ? ls.value : 0 };
+});
 ```
 
-같은 (size, weight, lh, ls) 조합끼리 묶어 그룹 하나로 만들고, 웹에서 그 스타일이 적용된 대표 요소의 CSS 선택자를 `sel` 에 적는다. `generatedAt` 도 갱신할 것.
+`getStyledTextSegments` 를 쓰는 이유: 굵기가 섞인 문단(예: `6:189`)은 `n.fontName` 이 `figma.mixed` 라 그냥 읽으면 빠진다.
 
 ### 왜 확정값(lockedStyles)과 중복되나
 
