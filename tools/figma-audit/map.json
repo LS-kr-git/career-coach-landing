@@ -10,27 +10,125 @@
     "html": "index.html"
   },
   "images": [
-    { "node": "6:181", "file": "assets/img-hero.png", "figmaName": "image 8",  "rawSha256": "dd9236d22e249fdb34269b53bb55973bc76c32506c05028db73471916ebbf68e", "shaVerified": true, "verifiedAt": "2026-07-31" },
-    { "node": "6:187", "file": "assets/img-apply.png", "figmaName": "image 10", "rawSha256": "f7029f6569957bdfda0cb1b6dc04850f2927e4b6b341398dc529450234a537ec", "shaVerified": true, "verifiedAt": "2026-07-31" },
-    { "node": "6:197", "file": "assets/img-fomo.png", "figmaName": "image 6", "rawSha256": "2052c34218acedb82febac4d220bd5ea6d0eab27a0be43e3dfd9794f9d809bd0", "shaVerified": true, "verifiedAt": "2026-07-31" },
-    { "node": "6:205", "file": "assets/img-speed.png", "figmaName": "image 5", "rawSha256": "8e10c025aeeefe3c84c1c7417fec3d3f5b4e43a51af915a05f4e1c1ffb98f5fb", "shaVerified": true, "verifiedAt": "2026-07-31" },
-    { "node": "6:290", "file": "assets/img-save.png", "figmaName": "image 4", "rawSha256": "1e10574dfade669ba7990b5ee7b18e1d2a93b5f00dcb671bed7a1e3162390fdc", "shaVerified": true, "verifiedAt": "2026-07-31" },
-    { "node": "6:298", "file": "assets/img-personal.png", "figmaName": "image 7", "rawSha256": "4313bdbecc83b9e00e28cacc35742b5c4c8bec30f26d2d6c8bc591ea79d79017", "shaVerified": true, "verifiedAt": "2026-07-31" }
+    {
+      "node": "6:181",
+      "file": "assets/img-hero.png",
+      "figmaName": "image 8",
+      "rawSha256": "dd9236d22e249fdb34269b53bb55973bc76c32506c05028db73471916ebbf68e",
+      "shaVerified": true,
+      "verifiedAt": "2026-07-31"
+    },
+    {
+      "node": "6:187",
+      "file": "assets/img-apply.png",
+      "figmaName": "image 10",
+      "rawSha256": "f7029f6569957bdfda0cb1b6dc04850f2927e4b6b341398dc529450234a537ec",
+      "shaVerified": true,
+      "verifiedAt": "2026-07-31"
+    },
+    {
+      "node": "6:197",
+      "file": "assets/img-fomo.png",
+      "figmaName": "image 6",
+      "rawSha256": "5e7993dc0791e4d505d88b9cf8e39cd6eb7a1438ae57ce4a1da7c4dae8b1b1e9",
+      "shaVerified": false,
+      "verifiedAt": "2026-08-01",
+      "note": "웹에서 새로 제작한 게이지 그래픽으로 교체(2026-08-01). 피그마 노드 6:197 fill 교체 후 shaVerified를 true로 되돌릴 것."
+    },
+    {
+      "node": "6:205",
+      "file": "assets/img-speed.png",
+      "figmaName": "image 5",
+      "rawSha256": "8e10c025aeeefe3c84c1c7417fec3d3f5b4e43a51af915a05f4e1c1ffb98f5fb",
+      "shaVerified": true,
+      "verifiedAt": "2026-07-31"
+    },
+    {
+      "node": "6:290",
+      "file": "assets/img-save.png",
+      "figmaName": "image 4",
+      "rawSha256": "1e10574dfade669ba7990b5ee7b18e1d2a93b5f00dcb671bed7a1e3162390fdc",
+      "shaVerified": true,
+      "verifiedAt": "2026-07-31"
+    },
+    {
+      "node": "6:298",
+      "file": "assets/img-personal.png",
+      "figmaName": "image 7",
+      "rawSha256": "4313bdbecc83b9e00e28cacc35742b5c4c8bec30f26d2d6c8bc591ea79d79017",
+      "shaVerified": true,
+      "verifiedAt": "2026-07-31"
+    }
   ],
   "_lock설명": "세션 간에 확정된 값. 되돌아가면 즉시 FAIL. 결정이 바뀌면 여기와 피그마를 함께 고칠 것.",
   "lockedStyles": [
-    { "id": "hl-strip",      "결정": "하이라이트 = Amber200 65% 스트립 (v8.9)", "figmaNode": "6:174", "mustMatch": "linear-gradient\\(transparent 65%, var\\(--amber-200\\) 65%\\)" },
-    { "id": "hl-line1-only", "결정": "하이라이트는 첫 줄만, 둘째 줄 없음 (v8.9)", "figmaNode": "6:177", "mustMatch": "<br>이직할 수 있을까\\?</h1>", "mustNotMatch": "<span class=\"hl\">이직할 수 있을까" },
-    { "id": "avatar-42",     "결정": "알림톡 프로필 아바타 42px", "mustMatch": "\\.alim-profile img\\{width:42px;height:42px" },
-    { "id": "step-radius-18","결정": "how-it-works 스텝 카드 radius 18px", "mustMatch": "border-radius:18px;padding:20px" },
-    { "id": "insight-head",  "결정": "인사이트 섹션 헤딩 27px·keep-all로 2줄 고정", "mustMatch": "font-size:27px;word-break:keep-all" },
-    { "id": "label-17-bold", "결정": "t-label = 17px Bold, 자간 1%", "mustMatch": "\\.t-label\\{font-size:17px;line-height:20px;font-weight:700;letter-spacing:0\\.01em\\}" },
-    { "id": "full-bleed-page", "결정": "페이지는 기기 폭을 꽉 채운다 — 폰에서 좌우에 배경색이 보이면 안 됨 (2026-07-31, iPhone Air 제보)", "figmaNode": "6:148", "mustMatch": "\\.page\\{width:100%", "mustNotMatch": "\\.page\\{max-width:400px;margin" },
-    { "id": "content-cap-400", "결정": "콘텐츠 폭은 400px로 고정 (넓은 폰에서도 줄바꿈이 피그마와 동일하게 유지되도록)", "mustMatch": "header, \\.container\\{max-width:400px" },
-    { "id": "desk-bg-520", "결정": "회색 바탕 + 카드 그림자는 520px 이상에서만", "mustMatch": "@media \\(min-width:520px\\)\\{[\\s\\S]{0,200}background:var\\(--gray-100\\)" },
-    { "id": "chips-3rows-bleed", "결정": "채용사이트 칩 = 5개씩 3줄 고정, 줄바꿈 없이 페이지 밖으로 흘러넘치고 가장자리에서 잘림 (피그마 6:249, 2026-07-31)", "figmaNode": "6:249", "mustMatch": "\\.chip-row\\{display:flex;gap:13px;flex:none;white-space:nowrap\\}", "mustNotMatch": "\\.chips\\{display:flex;flex-wrap:wrap" },
-    { "id": "chips-3rows-markup", "결정": "칩 줄은 정확히 3개 (줄 구성이 바뀌면 피그마와 어긋남)", "mustMatch": "(class=\"chip-row\"[\\s\\S]*?){3}</div>\\s*</div>" },
-    { "id": "chips-stagger", "결정": "줄별 좌우 어긋남 = 피그마 프레임 중심 대비 +10 / -39 / -7px", "mustMatch": "translateX\\(10px\\)[\\s\\S]{0,160}translateX\\(-39px\\)[\\s\\S]{0,160}translateX\\(-7px\\)" }
+    {
+      "id": "hl-strip",
+      "결정": "하이라이트 = Amber200 65% 스트립 (v8.9)",
+      "figmaNode": "6:174",
+      "mustMatch": "linear-gradient\\(transparent 65%, var\\(--amber-200\\) 65%\\)"
+    },
+    {
+      "id": "hl-line1-only",
+      "결정": "하이라이트는 첫 줄만, 둘째 줄 없음 (v8.9)",
+      "figmaNode": "6:177",
+      "mustMatch": "<br>이직할 수 있을까\\?</h1>",
+      "mustNotMatch": "<span class=\"hl\">이직할 수 있을까"
+    },
+    {
+      "id": "avatar-42",
+      "결정": "알림톡 프로필 아바타 42px",
+      "mustMatch": "\\.alim-profile img\\{width:42px;height:42px"
+    },
+    {
+      "id": "step-radius-18",
+      "결정": "how-it-works 스텝 카드 radius 18px",
+      "mustMatch": "border-radius:18px;padding:20px"
+    },
+    {
+      "id": "insight-head",
+      "결정": "인사이트 섹션 헤딩 27px·keep-all로 2줄 고정",
+      "mustMatch": "font-size:27px;word-break:keep-all"
+    },
+    {
+      "id": "label-17-bold",
+      "결정": "t-label = 17px Bold, 자간 1%",
+      "mustMatch": "\\.t-label\\{font-size:17px;line-height:20px;font-weight:700;letter-spacing:0\\.01em\\}"
+    },
+    {
+      "id": "full-bleed-page",
+      "결정": "페이지는 기기 폭을 꽉 채운다 — 폰에서 좌우에 배경색이 보이면 안 됨 (2026-07-31, iPhone Air 제보)",
+      "figmaNode": "6:148",
+      "mustMatch": "\\.page\\{width:100%",
+      "mustNotMatch": "\\.page\\{max-width:400px;margin"
+    },
+    {
+      "id": "content-cap-400",
+      "결정": "콘텐츠 폭은 400px로 고정 (넓은 폰에서도 줄바꿈이 피그마와 동일하게 유지되도록)",
+      "mustMatch": "header, \\.container\\{max-width:400px"
+    },
+    {
+      "id": "desk-bg-520",
+      "결정": "회색 바탕 + 카드 그림자는 520px 이상에서만",
+      "mustMatch": "@media \\(min-width:520px\\)\\{[\\s\\S]{0,200}background:var\\(--gray-100\\)"
+    },
+    {
+      "id": "chips-3rows-bleed",
+      "결정": "채용사이트 칩 = 5개씩 3줄 고정, 줄바꿈 없이 페이지 밖으로 흘러넘치고 가장자리에서 잘림 (피그마 6:249, 2026-07-31)",
+      "figmaNode": "6:249",
+      "mustMatch": "\\.chip-row\\{display:flex;gap:13px;flex:none;white-space:nowrap\\}",
+      "mustNotMatch": "\\.chips\\{display:flex;flex-wrap:wrap"
+    },
+    {
+      "id": "chips-3rows-markup",
+      "결정": "칩 줄은 정확히 3개 (줄 구성이 바뀌면 피그마와 어긋남)",
+      "mustMatch": "(class=\"chip-row\"[\\s\\S]*?){3}</div>\\s*</div>"
+    },
+    {
+      "id": "chips-stagger",
+      "결정": "줄별 좌우 어긋남 = 피그마 프레임 중심 대비 +10 / -39 / -7px",
+      "mustMatch": "translateX\\(10px\\)[\\s\\S]{0,160}translateX\\(-39px\\)[\\s\\S]{0,160}translateX\\(-7px\\)"
+    }
   ],
   "_부호예외설명": "따옴표·말줄임표만 다르고 그 차이를 의도적으로 허용한 노드. 이유를 반드시 적을 것.",
   "acceptedPunctDiffs": [
@@ -40,7 +138,11 @@
     }
   ],
   "_무시설명": "피그마에만 있고 웹에는 없는 게 정상인 문자열 (상태바 시계, 레이어용 더미 등).",
-  "ignoreFigmaText": ["9:41", "커리어코치 워드마크 (투톤, 아웃라인)", "커리어코치 로고 (원형)"],
+  "ignoreFigmaText": [
+    "9:41",
+    "커리어코치 워드마크 (투톤, 아웃라인)",
+    "커리어코치 로고 (원형)"
+  ],
   "_웹전용설명": "웹에만 있고 피그마에는 없는 게 정상인 문자열 (SEO/접근성/약관 링크 등).",
   "ignoreWebText": [
     "커리어코치 — 매일 아침 8시, 내 직군의 새 공고를 카톡으로",
