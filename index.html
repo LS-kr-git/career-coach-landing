@@ -170,10 +170,10 @@ fbq('track', 'PageView');
   .alim-card h3{color:#111;margin-bottom:14px}
   /* 피그마 6:321 / 123:4369 — 제목 아래 1px Gray 200 구분선 */
   .alim-divider{height:1px;background:var(--gray-200);margin-bottom:13px}
-  .alim-sec{margin-bottom:13px}
-  /* 피그마 6:327 — 인사이트 목업에만 15px 스페이서가 있어 블록 간격이 넓다 */
-  .phone.tall .alim-sec{margin-bottom:36px}
-  .alim-sec:last-of-type,.phone.tall .alim-sec:last-of-type{margin-bottom:8px}
+  /* 섹션 간 간격 24px 로 두 목업 통일 (2026-08-01 — 피그마 gap 8 + 섹션 pad-top 16 = 24 동기화.
+     이전: 위 13 / 아래 36 으로 달랐음) */
+  .alim-sec{margin-bottom:24px}
+  .alim-sec:last-of-type{margin-bottom:8px}
   /* 피그마 6:323·6:329·123:4371·123:4374·123:4377 — 소제목 #333 으로 통일 (2026-08-01 사용자 확정) */
   .alim-sec .sec-title{color:#333;margin-bottom:3px}
   /* 목업 본문은 피그마 123:4372 기준 12px/20 (t-caption 13/18 아님) */
