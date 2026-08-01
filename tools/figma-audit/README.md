@@ -154,6 +154,7 @@ node tools/figma-audit/page-audit.mjs --json
 | 항목 | 내용 | 등급 |
 |---|---|---|
 | 링크 | 로컬 `href`/`src` 가 실제 파일로 존재하는가 | ❌ 막힘 |
+| 절대 URL | `og:image`·`canonical` 등 우리 도메인 URL 이 실제 파일인가 | ❌ 막힘 |
 | 대소문자 | 경로 대소문자가 정확한가 (GitHub Pages 는 구분한다) | ❌ 막힘 |
 | 머리 | `DOCTYPE` · `lang="ko"` · `charset` · `viewport` · 빈 `<title>` | ❌ 막힘 |
 | 자리표시자 | `YOUR_*` · Lorem ipsum · `@example.com` · "여기에 입력" | ❌ 막힘 |

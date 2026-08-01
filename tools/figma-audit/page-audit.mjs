@@ -112,6 +112,21 @@ for (const page of pages) {
     }
   }
 
+  /* 2-b) 우리 도메인 절대 URL (og:image, canonical 등) 도 실제 파일이어야 한다 */
+  if (domain) {
+    const own = new RegExp(`https://${domain.replace(/\./g, '\\.')}(/[^"'\\s]*)`, 'gi');
+    for (const m of live.matchAll(own)) {
+      const path = m[1].split(/[?#]/)[0];
+      if (path === '/' || path === '') continue;
+      const rel = path.replace(/^\//, '');
+      if (!existsSync(join(ROOT, rel))) {
+        add('BLOCK', '깨진 절대 URL', page, m[0], '우리 도메인을 가리키는데 저장소에 그 파일이 없습니다');
+      } else if (rel.startsWith('assets/')) {
+        referenced.add(rel.slice('assets/'.length));
+      }
+    }
+  }
+
   /* 3) 자리표시자 */
   for (const [level, re, label] of PLACEHOLDERS) {
     const hits = [...live.matchAll(re)].map((h) => h[0]);
