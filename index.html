@@ -74,9 +74,12 @@ fbq('track', 'PageView');
      섹션마다 배경색이 다르고(피그마 6:148) 그 배경이 화면 끝까지 이어져야 하므로,
      좌우 패딩을 .container 가 아니라 각 section 이 갖는다.
      안쪽 콘텐츠는 여전히 352px(=400-48)로 묶여 줄바꿈이 피그마와 동일하게 유지된다. */
+  /* 피그마 6:148 의 모든 섹션은 위·아래 패딩이 각각 60px.
+     이렇게 해야 ① 섹션 사이 간격이 60+60=120 으로 일정하고
+     ② 배경색 띠가 콘텐츠 위아래로 똑같이 60px씩 감싼다.
+     (이전에는 120/0 이라 색 띠가 위로만 쏠려 섹션마다 여백이 달라 보였다) */
   .container{width:100%;padding:0 0 24px}
-  section{padding:120px 24px 0;width:100%;display:flex;flex-direction:column;gap:20px;align-items:center}
-  section.hero{padding-top:60px}
+  section{padding:60px 24px;width:100%;display:flex;flex-direction:column;gap:20px;align-items:center}
   section > *{width:100%;max-width:352px}
   section > .chips{max-width:none}
 
@@ -174,12 +177,13 @@ fbq('track', 'PageView');
   .steps{display:flex;flex-direction:column;gap:12px;width:100%;margin-top:12px}
   .step{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid var(--gray-200);
     box-shadow:0 2px 8px rgba(15,23,42,.06);border-radius:18px;padding:20px}
-  .step .num{flex:none;width:32px;height:32px;border-radius:50%;background:var(--amber-500);color:#fff;
+  /* 번호 원은 피그마 6:357 기준 36px (카드 높이 78px = 20+36+20+보더2) */
+  .step .num{flex:none;width:36px;height:36px;border-radius:50%;background:var(--amber-500);color:#fff;
     display:flex;align-items:center;justify-content:center}
   .step .t-h3{color:var(--navy-900);white-space:pre-line}
 
   /* ===== 푸터 ===== */
-  footer{background:var(--gray-100);padding:80px 24px 120px;margin-top:120px}
+  footer{background:var(--gray-100);padding:80px 24px 120px}
   footer .biz{display:flex;flex-direction:column;gap:8px;color:var(--gray-500)}
   footer .links a{color:var(--gray-500);text-decoration:none}
 
@@ -247,7 +251,7 @@ fbq('track', 'PageView');
       <div class="head-group">
         <div class="t-label eyebrow">합격 확률을 높이세요</div>
         <h2 class="t-display headline">빨리 지원할수록
-이력서가 더 꼼꼼히 읽힙니다.</h2>
+이력서가 더 꼼꼼히 읽힙니다</h2>
       </div>
       <p class="t-body-l lead">인사 담당자도 사람이다보니, 현실적으로 이력서가 수백 개 쌓였을 때 들어오는 이력서는 꼼꼼히 보기 힘들어요.</p>
       <img class="illust" src="assets/img-speed.png" alt="첫날 지원 우위 일러스트" width="344" height="257">
@@ -258,7 +262,7 @@ fbq('track', 'PageView');
       <div class="head-group">
         <div class="t-label eyebrow">경쟁자보다 앞서나가세요</div>
         <h2 class="t-display headline">누구보다 빠르게
-새로운 채용공고를 알려드려요</h2>
+최신 채용공고를 알려드려요</h2>
       </div>
       <p class="t-body-l lead" style="color:var(--gray-800)">공고가 뜨자마자 아는 것도 실력입니다. 매일 아침 8시,
 내 직군에서 어제 나온 모든 공고를 받아보세요.</p>
@@ -380,7 +384,7 @@ fbq('track', 'PageView');
         <div class="step"><div class="num t-body-strong">1</div><div class="t-h3">원하는 직군 · 연차 · 지역 설정</div></div>
         <div class="step"><div class="num t-body-strong">2</div><div class="t-h3">매일 아침 8시 카카오 알림톡</div></div>
         <div class="step"><div class="num t-body-strong">3</div><div class="t-h3">지원자가 많아지기 전에 지원</div></div>
-        <div class="step"><div class="num t-body-strong">4</div><div class="t-h3">1분 업계 동향·인사이트 학습해 면접</div></div>
+        <div class="step"><div class="num t-body-strong">4</div><div class="t-h3">더 많은 업계 동향·인사이트로 면접</div></div>
       </div>
     </section>
 
