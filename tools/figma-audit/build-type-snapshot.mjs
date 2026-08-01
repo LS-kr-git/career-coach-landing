@@ -5,8 +5,12 @@
  *   node tools/figma-audit/build-type-snapshot.mjs <figma_type.json> [--write]
  *
  * <figma_type.json> 은 Figma MCP `use_figma` 로 뽑은 원본 배열.
- * 만드는 코드는 README "타이포 스냅샷 갱신" 절에 그대로 있다. 형태:
+ * 만드는 코드는 CLAUDE.md / README "타이포 원본 덤프" 절에 그대로 있다. 형태:
  *   [{ id, t, size, weight, lh, ls }, ...]
+ * 2026-08-01부터 덤프는 "세그먼트 단위" — 서식이 섞인 텍스트 노드는 스타일 조합별로
+ * "6:365#0", "6:365#1" 처럼 여러 항목으로 나뉘어 들어온다. 이 스크립트는 항목을 조합별로
+ * 묶기만 하므로 별도 처리 없이 그대로 동작하고, 혼합 노드의 어느 구간이 바뀌어도
+ * "새 조합" 으로 감지된다. (이전 첫-세그먼트 방식의 사각지대 보완)
  *
  * 하는 일
  *   1) 같은 (size, weight, lh, ls) 조합끼리 자동으로 묶는다

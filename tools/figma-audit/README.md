@@ -73,22 +73,36 @@ node tools/figma-audit/type-audit.mjs
 
 Figma MCP `use_figma` 로 아래를 실행하고 결과를 `figma_type.json` 으로 저장한다:
 
+**항상 CLAUDE.md 의 최신 스크립트를 쓴다** (2026-08-01부터 세그먼트 단위 버전). 요지:
+
 ```js
+// 노드당 1줄이 아니라 "스타일 조합당 1줄" — 혼합 서식 노드는 6:365#0, 6:365#1 처럼 쪼개진다.
 const frame = await figma.getNodeByIdAsync('6:148');
-return frame.findAllWithCriteria({ types: ['TEXT'] }).map(n => {
-  const s = (n.getStyledTextSegments(['fontSize','fontName','lineHeight','letterSpacing']) || [])[0] || {};
-  const size = typeof n.fontSize === 'number' ? n.fontSize : s.fontSize;
-  const fn = n.fontName !== figma.mixed ? n.fontName : s.fontName;
-  const lh = n.lineHeight !== figma.mixed ? n.lineHeight : s.lineHeight;
-  const ls = n.letterSpacing !== figma.mixed ? n.letterSpacing : s.letterSpacing;
-  return { id: n.id, t: n.characters.replace(/\s+/g,' ').trim().slice(0,20),
-    size, weight: fn && fn.style,
-    lh: lh && lh.unit === 'PIXELS' ? lh.value : null,
-    ls: ls && typeof ls.value === 'number' ? ls.value : 0 };
-});
+const out = [];
+for (const n of frame.findAllWithCriteria({ types: ['TEXT'] })) {
+  const segs = n.getStyledTextSegments(['fontSize','fontName','lineHeight','letterSpacing']) || [];
+  const keyOf = s => `${s.fontSize}/${s.fontName && s.fontName.style}/${s.lineHeight && s.lineHeight.unit === 'PIXELS' ? s.lineHeight.value : null}/${s.letterSpacing && typeof s.letterSpacing.value === 'number' ? s.letterSpacing.value : 0}`;
+  const uniq = [];
+  for (const s of segs) {
+    const k = keyOf(s);
+    const hit = uniq.find(u => u.k === k);
+    if (hit) hit.chars += ' ' + s.characters; else uniq.push({ k, s, chars: s.characters });
+  }
+  uniq.forEach((u, i) => out.push({
+    id: uniq.length > 1 ? `${n.id}#${i}` : n.id,
+    t: u.chars.replace(/\s+/g, ' ').trim().slice(0, 20),
+    size: u.s.fontSize,
+    weight: u.s.fontName && u.s.fontName.style,
+    lh: u.s.lineHeight && u.s.lineHeight.unit === 'PIXELS' ? u.s.lineHeight.value : null,
+    ls: u.s.letterSpacing && typeof u.s.letterSpacing.value === 'number' ? u.s.letterSpacing.value : 0,
+  }));
+}
+return out;
 ```
 
-`getStyledTextSegments` 를 쓰는 이유: 굵기가 섞인 문단(예: `6:189`)은 `n.fontName` 이 `figma.mixed` 라 그냥 읽으면 빠진다.
+세그먼트 단위인 이유: 이전 버전(첫 세그먼트만 기록)은 혼합 서식 노드의 나머지 구간이 검수 사각지대였고,
+실제로 6:365 의 SemiBold 구간 굵기 드리프트가 이 구멍으로 통과했다 (2026-08-01). 지금은 어느 구간이
+바뀌어도 새 스타일 조합으로 감지된다.
 
 ### 왜 확정값(lockedStyles)과 중복되나
 

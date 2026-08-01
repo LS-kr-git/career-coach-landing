@@ -49,20 +49,34 @@ get_metadata(fileKey="LnT8TgFVBxky0bVyaF6Tob", nodeId="0:1")
 
 **(b) 타이포 원본 덤프** — `use_figma` 로 아래를 그대로 실행하고 결과를 `figma_type.json` 으로 저장:
 ```js
+// 세그먼트 단위 덤프 — 한 텍스트 노드 안에 서식이 섞여 있어도(예: 6:365 의
+// "이용약관|개인정보처리방침") 스타일 조합별로 모두 기록된다. 읽기 전용이라 폰트 로드 불필요.
 const frame = await figma.getNodeByIdAsync('6:148');
-return frame.findAllWithCriteria({ types: ['TEXT'] }).map(n => {
-  const s = (n.getStyledTextSegments(['fontSize','fontName','lineHeight','letterSpacing']) || [])[0] || {};
-  const size = typeof n.fontSize === 'number' ? n.fontSize : s.fontSize;
-  const fn = n.fontName !== figma.mixed ? n.fontName : s.fontName;
-  const lh = n.lineHeight !== figma.mixed ? n.lineHeight : s.lineHeight;
-  const ls = n.letterSpacing !== figma.mixed ? n.letterSpacing : s.letterSpacing;
-  return { id: n.id, t: n.characters.replace(/\s+/g,' ').trim().slice(0,20),
-    size, weight: fn && fn.style,
-    lh: lh && lh.unit === 'PIXELS' ? lh.value : null,
-    ls: ls && typeof ls.value === 'number' ? ls.value : 0 };
-});
+const out = [];
+for (const n of frame.findAllWithCriteria({ types: ['TEXT'] })) {
+  const segs = n.getStyledTextSegments(['fontSize','fontName','lineHeight','letterSpacing']) || [];
+  const keyOf = s => `${s.fontSize}/${s.fontName && s.fontName.style}/${s.lineHeight && s.lineHeight.unit === 'PIXELS' ? s.lineHeight.value : null}/${s.letterSpacing && typeof s.letterSpacing.value === 'number' ? s.letterSpacing.value : 0}`;
+  const uniq = [];
+  for (const s of segs) {
+    const k = keyOf(s);
+    const hit = uniq.find(u => u.k === k);
+    if (hit) hit.chars += ' ' + s.characters; else uniq.push({ k, s, chars: s.characters });
+  }
+  uniq.forEach((u, i) => out.push({
+    id: uniq.length > 1 ? `${n.id}#${i}` : n.id,
+    t: u.chars.replace(/\s+/g, ' ').trim().slice(0, 20),
+    size: u.s.fontSize,
+    weight: u.s.fontName && u.s.fontName.style,
+    lh: u.s.lineHeight && u.s.lineHeight.unit === 'PIXELS' ? u.s.lineHeight.value : null,
+    ls: u.s.letterSpacing && typeof u.s.letterSpacing.value === 'number' ? u.s.letterSpacing.value : 0,
+  }));
+}
+return out;
 ```
-> `getStyledTextSegments` 를 쓰는 이유: 굵기가 섞인 문단(예: 6:189)은 `n.fontName` 이 `figma.mixed` 라 그냥 읽으면 빠진다.
+> **세그먼트 단위인 이유** (2026-08-01): 이전 스크립트는 노드당 첫 세그먼트만 기록해서, 혼합 서식 노드의
+> 나머지 구간(예: 6:365 의 SemiBold "개인정보처리방침")이 검수 사각지대였다 — 실제로 굵기 드리프트가
+> 이 구멍으로 통과했다. 지금은 서식이 섞인 노드가 `6:365#0`, `6:365#1` 처럼 스타일 조합별로 쪼개져
+> 나오고, 어느 구간이 바뀌어도 build-type-snapshot 이 "새 조합" 으로 잡아낸다.
 
 **(c) 스타일 원본 덤프** — `use_figma` 로 아래를 실행하고 결과를 `figma_style.json` 으로 저장:
 ```js
