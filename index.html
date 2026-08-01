@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="format-detection" content="telephone=no">
 <title>커리어코치</title>
 <meta name="description" content="일하는 사람들의 커리어 성장을 위해">
 <link rel="canonical" href="https://careercoach.my/">
@@ -222,6 +223,8 @@ fbq('track', 'PageView');
   footer{background:var(--gray-100);padding:80px 24px 120px}
   footer .biz{display:flex;flex-direction:column;gap:8px;color:var(--gray-500)}
   footer .links a{color:var(--gray-500);text-decoration:none}
+  /* 개인정보처리방침 링크만 한 단계 위 크기 — 피그마 6:365 (13→14, SemiBold) 대응 (2026-08-01) */
+  footer .links a[href$="privacy.html"]{font-size:14px;font-weight:600}
 
   /* ===== 플로팅 CTA ===== */
   .floating-cta{
