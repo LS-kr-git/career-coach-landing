@@ -41,10 +41,10 @@
       "node": "123:4050",
       "file": "assets/img-speed.png",
       "figmaName": "image 358",
-      "rawSha256": "4820c7234fcedd3d1f200a9a38434391b68ee4296e25ef19ceed59595f5b3819",
+      "rawSha256": "94d8bfdcad9788c0f98f19fece46ca0da5cb3dec38d5fe733a38e7ea92b83d42",
       "shaVerified": true,
       "verifiedAt": "2026-08-01",
-      "note": "3D 소프트 뎁스 리디자인 확정본 (2026-08-01 사용자 확정, 피그마·웹 동일 파일 업로드)"
+      "note": "3D A안 보정본 (2026-08-01: personal 중앙선 6px·3연결, speed 뒤 서류 농도 상향)"
     },
     {
       "node": "123:4047",
@@ -59,10 +59,10 @@
       "node": "123:4044",
       "file": "assets/img-personal.png",
       "figmaName": "image 356",
-      "rawSha256": "c219660143592694ad55b697bb65fabdb4ac1111be1e635eafafeeddcaecc464",
+      "rawSha256": "67251319d2f865bb43326fd6d297a801a71215ac7aef68ccfcabb4eee551e751",
       "shaVerified": true,
       "verifiedAt": "2026-08-01",
-      "note": "3D 소프트 뎁스 리디자인 확정본 (2026-08-01 사용자 확정, 피그마·웹 동일 파일 업로드)"
+      "note": "3D A안 보정본 (2026-08-01: personal 중앙선 6px·3연결, speed 뒤 서류 농도 상향)"
     }
   ],
   "_lock설명": "세션 간에 확정된 값. 되돌아가면 즉시 FAIL. 결정이 바뀌면 여기와 피그마를 함께 고칠 것.",
