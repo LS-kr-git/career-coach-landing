@@ -1,0 +1,137 @@
+{
+  "_설명": "피그마 기준 프레임의 타이포 스냅샷. type-audit.mjs 가 이 값을 웹 실측값과 대조한다.",
+  "_갱신방법": "피그마에서 글자 크기/굵기/행간/자간을 바꾸면 README '타이포 스냅샷 갱신' 절차대로 다시 뽑아 이 파일을 교체할 것.",
+  "figmaNode": "6:148",
+  "generatedAt": "2026-08-01",
+  "_필드": "size=px, weight=CSS font-weight, lh=line-height px, ls=letter-spacing %(피그마 표기). sel=웹에서 이 스타일이 적용된 대표 요소",
+  "groups": [
+    {
+      "id": "hero-title",
+      "label": "히어로 타이틀",
+      "sel": ".hero-title",
+      "size": 36, "weight": 800, "lh": 44, "ls": -1,
+      "figmaNodes": ["6:173", "6:175", "6:176", "6:178"]
+    },
+    {
+      "id": "headline",
+      "label": "섹션 헤딩",
+      "sel": ".headline:not([style])",
+      "size": 28, "weight": 800, "lh": 36, "ls": -1,
+      "figmaNodes": ["6:186", "123:4391", "6:202", "123:4345", "6:246", "6:287", "6:295", "6:339"],
+      "note": "인사이트 헤딩(6:303)은 인라인 27px 이 걸려 있어 제외 — insight-head 확정값 참고"
+    },
+    {
+      "id": "eyebrow",
+      "label": "아이브로우",
+      "sel": ".eyebrow",
+      "size": 14, "weight": 700, "lh": 20, "ls": 1,
+      "figmaNodes": ["6:184", "123:4389", "6:200", "123:4343", "6:244", "6:285", "6:293", "6:301", "6:337"]
+    },
+    {
+      "id": "lead",
+      "label": "섹션 리드",
+      "sel": ".lead",
+      "size": 16, "weight": 400, "lh": 23, "ls": 0,
+      "figmaNodes": ["6:180", "123:4393", "6:204", "123:4347", "6:247", "6:289", "6:297", "6:305"]
+    },
+    {
+      "id": "body",
+      "label": "일단지원 본문",
+      "sel": "section.bg-blue p.t-body",
+      "size": 15, "weight": 400, "lh": 23, "ls": 0,
+      "figmaNodes": ["6:189"]
+    },
+    {
+      "id": "hero-badge",
+      "label": "히어로 배지",
+      "sel": ".hero-badge",
+      "size": 13, "weight": 600, "lh": 18, "ls": 0,
+      "figmaNodes": ["6:170"]
+    },
+    {
+      "id": "chip",
+      "label": "사이트 칩",
+      "sel": ".chip",
+      "size": 13, "weight": 600, "lh": 18, "ls": 0,
+      "figmaNodes": ["6:252", "6:254", "6:256", "6:258", "6:260", "6:263", "6:265", "6:267", "6:269", "6:271", "6:274", "6:276", "6:278", "6:280", "6:282"]
+    },
+    {
+      "id": "mockup-profile",
+      "label": "목업 프로필명",
+      "sel": ".alim-profile span",
+      "size": 13, "weight": 600, "lh": 18, "ls": 0,
+      "figmaNodes": ["123:4362", "6:314"]
+    },
+    {
+      "id": "mockup-banner",
+      "label": "목업 알림톡 도착",
+      "sel": ".alim-banner .t-body-strong",
+      "size": 15, "weight": 600, "lh": 23, "ls": 0,
+      "figmaNodes": ["123:4365", "6:317"]
+    },
+    {
+      "id": "mockup-card-title",
+      "label": "목업 카드 제목",
+      "sel": ".alim-card h3",
+      "size": 20, "weight": 700, "lh": 28, "ls": -1,
+      "figmaNodes": ["123:4368", "6:320"]
+    },
+    {
+      "id": "mockup-sec-title",
+      "label": "목업 섹션 제목",
+      "sel": ".alim-sec .sec-title",
+      "size": 15, "weight": 600, "lh": 23, "ls": 0,
+      "figmaNodes": ["123:4371", "123:4374", "123:4377", "6:323", "6:329"]
+    },
+    {
+      "id": "mockup-body",
+      "label": "목업 본문",
+      "sel": ".alim-sec p",
+      "size": 12, "weight": 400, "lh": 20, "ls": 0,
+      "figmaNodes": ["123:4372", "123:4375", "123:4378", "6:324", "6:325", "6:326", "6:330"]
+    },
+    {
+      "id": "mockup-cta",
+      "label": "목업 CTA",
+      "sel": ".alim-cta",
+      "size": 13, "weight": 600, "lh": 18, "ls": 0,
+      "figmaNodes": ["123:4380", "6:332"]
+    },
+    {
+      "id": "step-num",
+      "label": "스텝 번호",
+      "sel": ".step .num",
+      "size": 15, "weight": 600, "lh": 23, "ls": 0,
+      "figmaNodes": ["6:343", "6:348", "6:353", "6:358"]
+    },
+    {
+      "id": "step-text",
+      "label": "스텝 문구",
+      "sel": ".step .t-h3",
+      "size": 16, "weight": 600, "lh": 24, "ls": 0,
+      "figmaNodes": ["6:345", "6:350", "6:355", "6:360"],
+      "note": "t-h3(17px)가 아니라 16px. 17px면 360px에서 스텝4가 2줄로 넘어간다."
+    },
+    {
+      "id": "footer-name",
+      "label": "푸터 상호",
+      "sel": "footer .t-caption-strong",
+      "size": 13, "weight": 600, "lh": 18, "ls": 0,
+      "figmaNodes": ["6:363"]
+    },
+    {
+      "id": "footer-biz",
+      "label": "푸터 사업자정보",
+      "sel": "footer .biz .t-caption",
+      "size": 13, "weight": 400, "lh": 18, "ls": 0,
+      "figmaNodes": ["6:364"]
+    },
+    {
+      "id": "floating-cta",
+      "label": "플로팅 CTA",
+      "sel": ".floating-cta",
+      "size": 17, "weight": 600, "lh": 24, "ls": 0,
+      "figmaNodes": ["6:368"]
+    }
+  ]
+}

@@ -10,10 +10,12 @@
 | 문구 | 기준 섹션의 모든 text 노드가 웹에 있는가 (공백 무시 비교) | ❌ 차이 |
 | 문장부호 | 글자는 같고 따옴표·말줄임표만 다른가 | ⚠️ 부호 |
 | 역방향 | 웹에만 있는 문구가 있는가 | ℹ️ 웹전용 |
+| 부분 일치 | 포함은 되는데 정확히 같은 줄이 없는가 (웹에 마침표 등이 더 붙은 경우) | 🔎 부분일치 |
 | 확정값 | `map.json`의 `lockedStyles` 결정이 유지되는가 | 🔒 확정값 |
 | 이미지 | `assets/*.png` sha256이 기준값과 같은가 | ❌ 차이 |
+| **타이포** | **글자 크기·굵기·행간·자간이 피그마와 같은가** | 🅰️ 타이포 |
 
-`❌`/`🔒`가 하나라도 있으면 종료코드 1.
+`❌`/`🔒`/`🅰️`가 하나라도 있으면 종료코드 1.
 
 ## 쓰는 법 (Cowork 세션 안에서)
 
@@ -26,6 +28,43 @@
    node tools/figma-audit/audit.mjs figma_meta.xml --json   # 기계 판독용
    ```
 3. 나온 차이를 **피그마 쪽으로 맞춰** 고친다. 웹이 맞다고 판단되면 **피그마도 같은 세션에서 고친다.**
+
+`audit.mjs` 가 타이포 검수(`type-audit.mjs`)를 자동으로 함께 돌린다. 따로 실행하려면:
+```
+node tools/figma-audit/type-audit.mjs
+```
+
+## 타이포 검수 (2026-08-01 추가)
+
+`get_metadata` XML 에는 **글자 크기 정보가 없다.** 그래서 타이포는 다른 방식으로 검사한다:
+
+- 피그마 값은 `figma-type.json` 에 **스냅샷으로 커밋**해 둔다 (그룹별 size/weight/line-height/letter-spacing + 그 값이 나온 피그마 노드 id).
+- 웹 값은 **headless Chromium 으로 `index.html` 을 열어 `getComputedStyle` 로 실측**한다. CSS 를 정적 파싱하지 않으므로 상속·미디어쿼리·인라인 스타일까지 반영된 "실제 적용값" 을 본다.
+- `playwright` 가 없거나 `figma-type.json` 이 없으면 **조용히 건너뛴다**(종료코드 0). 검수 헤더에 건너뛴 사유가 찍힌다.
+
+폰트 파일은 필요 없다 — 크기·굵기·행간·자간은 폰트 로딩과 무관하게 계산된다.
+(줄바꿈 폭까지 보려면 Pretendard 설치가 필요하지만 그건 이 스크립트 범위 밖이다.)
+
+### 타이포 스냅샷 갱신 (피그마에서 글자 값이 바뀌었을 때)
+
+Figma MCP `use_figma` 로 아래를 실행하고, 결과를 `figma-type.json` 의 `groups` 에 반영한다:
+
+```js
+const frame = await figma.getNodeByIdAsync('6:148');
+return frame.findAllWithCriteria({ types: ['TEXT'] })
+  .filter(n => typeof n.fontSize === 'number')
+  .map(n => ({ id: n.id, t: n.characters.replace(/\s+/g,' ').slice(0,24),
+    size: n.fontSize, weight: n.fontName && n.fontName.style,
+    lh: n.lineHeight && n.lineHeight.value, ls: n.letterSpacing && n.letterSpacing.value }));
+```
+
+같은 (size, weight, lh, ls) 조합끼리 묶어 그룹 하나로 만들고, 웹에서 그 스타일이 적용된 대표 요소의 CSS 선택자를 `sel` 에 적는다. `generatedAt` 도 갱신할 것.
+
+### 왜 확정값(lockedStyles)과 중복되나
+
+타이포 일부는 `lockedStyles` 로도 잠겨 있어 어긋나면 **두 번 보고된다**. 의도한 것이다 —
+`lockedStyles` 는 CSS 텍스트를 정규식으로 보므로 playwright 가 없는 환경에서도 동작하는 **1차 방어선**이고,
+타이포 검수는 실제 렌더값을 보므로 **선택자가 바뀌거나 다른 규칙이 덮어써도 잡아내는** 2차 방어선이다.
 
 ## 공백 무시 비교를 쓰는 이유
 
