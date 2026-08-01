@@ -86,12 +86,11 @@ fbq('track', 'PageView');
      섹션마다 배경색이 다르고(피그마 6:148) 그 배경이 화면 끝까지 이어져야 하므로,
      좌우 패딩을 .container 가 아니라 각 section 이 갖는다.
      안쪽 콘텐츠는 여전히 352px(=400-48)로 묶여 줄바꿈이 피그마와 동일하게 유지된다. */
-  /* 피그마 6:148 의 모든 섹션은 위·아래 패딩이 각각 60px.
-     이렇게 해야 ① 섹션 사이 간격이 60+60=120 으로 일정하고
-     ② 배경색 띠가 콘텐츠 위아래로 똑같이 60px씩 감싼다.
-     (이전에는 120/0 이라 색 띠가 위로만 쏠려 섹션마다 여백이 달라 보였다) */
+  /* 피그마 6:148 의 모든 섹션은 위 60px · 아래 100px 패딩 (2026-08-01 하단 60→100 확장).
+     섹션 사이 간격은 100+60=160 으로 일정하고,
+     배경색 띠는 콘텐츠 위로 60px, 아래로 100px 감싼다. */
   .container{width:100%;padding:0 0 24px}
-  section{padding:60px 24px;width:100%;display:flex;flex-direction:column;gap:20px;align-items:center}
+  section{padding:60px 24px 100px;width:100%;display:flex;flex-direction:column;gap:20px;align-items:center}
   section > *{width:100%;max-width:352px}
   section > .chips{max-width:none}
 
