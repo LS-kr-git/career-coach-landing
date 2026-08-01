@@ -147,6 +147,9 @@ fbq('track', 'PageView');
     width:110px;height:5px;background:rgba(15,23,42,.3);border-radius:2.5px;z-index:3;
   }
   .phone-content{position:relative;z-index:1;padding:55px 4px 40px}
+  /* 첫 번째 목업만 폰을 32px 연장 (피그마 123:4349 = 631px). 콘텐츠 위치는 그대로,
+     바닥 여백만 늘어나고 홈 인디케이터가 바닥을 따라 내려간다 (2026-08-01) */
+  .phone:not(.tall) .phone-content{padding-bottom:72px}
   .phone.tall .phone-content{padding-top:51px}
 
   /* 피그마 6:309 — 아바타(42) + 간격(10). 말풍선은 그 오른쪽으로 들여쓴다 */
