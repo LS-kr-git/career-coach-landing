@@ -1,0 +1,5 @@
+# 검수용 스크래치 — 커밋하지 말 것
+node_modules/
+package.json
+package-lock.json
+figma_meta.xml
