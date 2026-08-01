@@ -77,7 +77,8 @@ fbq('track', 'PageView');
   .eyebrow{color:var(--amber-600)}
   .headline{color:var(--navy-900);text-align:center;white-space:pre-line}
   .lead{color:var(--gray-600);text-align:center;white-space:pre-line}
-  .illust{width:100%;border-radius:12px;display:block;background:var(--gray-100)}
+  /* 일러스트는 배경이 투명한 PNG — 회색 박스를 씌우지 않는다 (2026-08-01, 신규 6종) */
+  .illust{width:100%;border-radius:12px;display:block}
 
   /* ===== 히어로 ===== */
   .hero-badge{background:var(--amber-100);color:var(--amber-600);padding:7px 15px;border-radius:999px}
@@ -171,6 +172,13 @@ fbq('track', 'PageView');
   .floating-cta:active{transform:translateX(-50%) scale(.98)}
   .floating-cta svg{flex:none}
 
+  /* 360px급 좁은 화면(갤럭시 등)에서도 피그마와 같은 줄 수를 유지한다.
+     390px에서는 2줄인 헤딩 2곳과 스텝4가 360px에서 한 줄씩 더 늘어나는 것을 막는 최소 보정. */
+  @media (max-width:389px){
+    .headline{font-size:27px;line-height:35px}
+    .step .t-h3{font-size:16px}
+  }
+
   @media (prefers-reduced-motion: no-preference){
     section{opacity:0;transform:translateY(12px);transition:opacity .5s ease,transform .5s ease}
     section.in{opacity:1;transform:none}
@@ -204,7 +212,7 @@ fbq('track', 'PageView');
         <h2 class="t-display headline">관심 있는 회사 공고가 열리면
 일단 지원해 보세요</h2>
       </div>
-      <img class="illust" src="assets/img-apply.png" alt="이력서 제출 일러스트" width="344" height="160">
+      <img class="illust" src="assets/img-apply.png" alt="이력서 제출 일러스트" width="344" height="169">
       <p class="t-body" style="color:var(--gray-700);width:100%">지금 가지고 있는 포트폴리오·이력서로 일단 넣으세요.<br><strong>불합격 해도 다음 지원에 패널티가 전혀 없어요.</strong><br>오히려 여러 번 도전하면, ‘우리 회사를 이렇게 좋아하면 잘 적응할 확률이 크다’고 판단해 더 좋게 봐요.<br><strong>붙으면 희소식, 안붙어도 손해 X. 안 할 이유가 없어요.</strong><br>결국 결과를 얻은 건 실행하는 사람들이었어요.</p>
     </section>
 
@@ -216,7 +224,7 @@ fbq('track', 'PageView');
       </div>
       <p class="t-body-l lead">관심 기업의 원하던 공고가
 내가 모르는 사이 닫히는 경우, 생각보다 많아요.</p>
-      <img class="illust" src="assets/img-fomo.png" alt="추적한 채용공고의 57%가 30일 안에 마감됐음을 보여주는 게이지 그래프" width="344" height="228">
+      <img class="illust" src="assets/img-fomo.png" alt="추적한 채용공고의 57%가 30일 안에 마감됐음을 보여주는 게이지 그래프" width="344" height="172">
     </section>
 
     <!-- 3. 초반 지원 우위 -->
@@ -227,7 +235,7 @@ fbq('track', 'PageView');
 이력서가 더 꼼꼼히 읽힙니다.</h2>
       </div>
       <p class="t-body-l lead">인사 담당자도 사람이다보니, 현실적으로 이력서가 수백 개 쌓였을 때 들어오는 이력서는 꼼꼼히 보기 힘들어요.</p>
-      <img class="illust" src="assets/img-speed.png" alt="첫날 지원 우위 일러스트" width="344" height="224">
+      <img class="illust" src="assets/img-speed.png" alt="첫날 지원 우위 일러스트" width="344" height="257">
     </section>
 
     <!-- 4. 데일리 알림 (목업 1) -->
@@ -296,7 +304,7 @@ fbq('track', 'PageView');
       </div>
       <p class="t-body-l lead">17개 채용사이트 × 직군 키워드 평균 3개 = 매일 51회.
 저희가 대신 검색하고 카톡 1개로 압축해 드려요.</p>
-      <img class="illust" src="assets/img-save.png" alt="시간 절약 일러스트" width="344" height="228">
+      <img class="illust" src="assets/img-save.png" alt="시간 절약 일러스트" width="344" height="236">
     </section>
 
     <!-- 7. 개인화 -->
@@ -308,7 +316,7 @@ fbq('track', 'PageView');
       </div>
       <p class="t-body-l lead">원하는 직군·연차·근무지를 알려주시면,
 저희가 맞춤으로 알려드릴게요.</p>
-      <img class="illust" src="assets/img-personal.png" alt="개인화 설정 일러스트" width="344" height="230">
+      <img class="illust" src="assets/img-personal.png" alt="개인화 설정 일러스트" width="344" height="248">
     </section>
 
     <!-- 8. 인사이트 (목업 2) -->
@@ -356,10 +364,8 @@ fbq('track', 'PageView');
       <div class="steps">
         <div class="step"><div class="num t-body-strong">1</div><div class="t-h3">원하는 직군 · 연차 · 지역 설정</div></div>
         <div class="step"><div class="num t-body-strong">2</div><div class="t-h3">매일 아침 8시 카카오 알림톡</div></div>
-        <div class="step"><div class="num t-body-strong">3</div><div class="t-h3">지원자가 많아지기 전에 지원
-→ 서류 합격률 상승</div></div>
-        <div class="step"><div class="num t-body-strong">4</div><div class="t-h3">1분 업계 동향·인사이트 학습
-→ 면접 합격률 상승</div></div>
+        <div class="step"><div class="num t-body-strong">3</div><div class="t-h3">지원자가 많아지기 전에 지원</div></div>
+        <div class="step"><div class="num t-body-strong">4</div><div class="t-h3">1분 업계 동향·인사이트 학습해 면접</div></div>
       </div>
     </section>
 
