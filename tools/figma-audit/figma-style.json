@@ -160,20 +160,19 @@
       "node": "6:331",
       "figma": {
         "fill": "#f8fafc",
-        "stroke": "#e2e8f0",
-        "sw": 1,
+        "stroke": null,
         "radius": 8,
         "textFill": "#1e293b"
       },
       "css": {
         "background-color": "#F8FAFC",
-        "border-top-width": "1px",
-        "border-top-color": "#E2E8F0",
         "border-top-left-radius": "8px",
         "color": "#1E293B",
         "padding-top": "11px",
-        "tag": "SPAN"
-      }
+        "tag": "SPAN",
+        "border-top-width": "0px"
+      },
+      "_주": "2026-08-01 보더 제거 결정(피그마 123:4379/6:331 스트로크 삭제). border-top-width 0px 로 \"보더 없음\"을 잠근다."
     },
     {
       "id": "phone-screen",
