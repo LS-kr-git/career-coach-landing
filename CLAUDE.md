@@ -22,6 +22,17 @@ git config core.hooksPath tools/hooks
 
 혼자 돌려볼 때: `node tools/figma-audit/page-audit.mjs`
 
+## 프로젝트 문서는 어디에 있나
+사업기획·브랜드 가이드·검증 데이터·작업 원칙 등 **모든 프로젝트 문서의 정본은 비공개 저장소
+`LS-kr-git/career-coach` 의 `docs/` 에 있다.** (2026-08-01 이관)
+
+```
+git clone https://github.com/LS-kr-git/career-coach.git   # 비공개 — PAT 필요
+```
+- 색인·작업 규칙: `docs/README.md`
+- 이 저장소와 직접 관련된 것: `docs/검증/랜딩페이지-메모.md`, `docs/기획/피그마-웹-동기화.md`, `docs/기획/저장소-상태.md`, `docs/마케팅/브랜드-가이드.md`
+- **claude.ai 프로젝트 쪽 문서는 포인터일 뿐이다. 거기서 고치지 말 것** — 충돌 감지가 없어 마지막 저장이 앞 내용을 조용히 덮는다. 저장소에서 고치면 git 이 막아 준다.
+
 ## 기준
 - 피그마 파일 `LnT8TgFVBxky0bVyaF6Tob`, 프레임 **`6:148` "랜딩페이지_커리어코치"** (가로 360px)
 - PROD 섹션(`6:147`)에는 다른 프로젝트 레퍼런스 프레임이 섞여 있다. **섹션이 아니라 프레임 6:148 만** 기준이다.
