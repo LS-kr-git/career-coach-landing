@@ -257,6 +257,22 @@
       "css": {
         "background-color": "#F1F5F9"
       }
+    },
+    {
+      "id": "footer-privacy-link",
+      "label": "푸터 개인정보처리방침 링크 (혼합 굵기 구간)",
+      "sel": "footer .links a[href$=\"privacy.html\"]",
+      "node": "6:365",
+      "figma": {
+        "segment": "개인정보처리방침",
+        "size": 13,
+        "weight": "SemiBold"
+      },
+      "css": {
+        "font-size": "13px",
+        "font-weight": "600"
+      },
+      "_주": "6:365 는 한 텍스트 노드 안에 Regular(이용약관)와 SemiBold(개인정보처리방침)가 섞여 있다. 타이포 덤프 스크립트는 첫 세그먼트만 기록하므로 이 SemiBold 구간이 검수 사각지대였음(2026-08-01 굵기 드리프트의 원인). 이 항목이 그 구간을 별도로 잠근다."
     }
   ]
 }
