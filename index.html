@@ -151,8 +151,9 @@ fbq('track', 'PageView');
   /* 첫 번째 목업만 폰을 32px 연장 (피그마 123:4349 = 631px). 콘텐츠 위치는 그대로,
      바닥 여백만 늘어나고 홈 인디케이터가 바닥을 따라 내려간다 (2026-08-01) */
   .phone:not(.tall) .phone-content{padding-bottom:72px}
-  /* 두 번째 목업: 하단 +16px 연장, 상단은 첫 목업과 같은 55(기본값) 로 통일 (피그마 6:308, 2026-08-01) */
-  .phone.tall .phone-content{padding-bottom:56px}
+  /* 두 번째 목업도 말풍선 아래 여백을 첫 목업과 동일하게 72px 로 통일
+     (2026-08-01 사용자 확정 — 피그마 6:308 높이 700.2, 홈 인디케이터 바닥 21 정렬) */
+  .phone.tall .phone-content{padding-bottom:72px}
 
   /* 피그마 6:309 — 아바타(42) + 간격(10). 말풍선은 그 오른쪽으로 들여쓴다 */
   .alim-profile{display:flex;align-items:center;gap:10px;margin-bottom:6px;padding-left:2px}
@@ -178,10 +179,11 @@ fbq('track', 'PageView');
   .alim-sec .sec-title{color:#333;margin-bottom:3px}
   /* 목업 본문은 피그마 123:4372 기준 12px/20 (t-caption 13/18 아님) */
   .alim-sec p{color:#333;white-space:pre-line;font-size:12px;line-height:20px}
-  /* 피그마 6:331 / 123:4379 — Gray 50 채움, 보더 없음(2026-08-01 제거), 패딩 11, 텍스트 Gray 800 */
+  /* 피그마 6:331 / 123:4379 — 실제 알림톡 버튼 컬러 #F5F5F5/#191919 (2026-08-01 사용자 확정,
+     이전 Gray 50/Gray 800 은 말풍선 흰 배경과 구분이 안 됐음). 보더 없음, 패딩 11 */
   .alim-cta{
-    display:block;text-align:center;background:var(--gray-50);
-    border-radius:8px;padding:11px 0;color:var(--gray-800);text-decoration:none;
+    display:block;text-align:center;background:#F5F5F5;
+    border-radius:8px;padding:11px 0;color:#191919;text-decoration:none;
   }
 
   /* ===== 사이트 칩 =====

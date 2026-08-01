@@ -159,20 +159,20 @@
       "sel": ".alim-cta",
       "node": "6:331",
       "figma": {
-        "fill": "#f8fafc",
+        "fill": "#f5f5f5",
         "stroke": null,
         "radius": 8,
-        "textFill": "#1e293b"
+        "textFill": "#191919"
       },
       "css": {
-        "background-color": "#F8FAFC",
+        "background-color": "#F5F5F5",
         "border-top-left-radius": "8px",
-        "color": "#1E293B",
+        "color": "#191919",
         "padding-top": "11px",
         "tag": "SPAN",
         "border-top-width": "0px"
       },
-      "_주": "2026-08-01 보더 제거 결정(피그마 123:4379/6:331 스트로크 삭제). border-top-width 0px 로 \"보더 없음\"을 잠근다."
+      "_주": "2026-08-01 실제 알림톡 버튼 컬러(#F5F5F5/#191919)로 확정 — 흰 말풍선과 구분되도록. 보더 없음 유지(border-top-width 0px 잠금)."
     },
     {
       "id": "phone-screen",

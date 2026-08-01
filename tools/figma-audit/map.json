@@ -14,55 +14,55 @@
       "node": "123:4041",
       "file": "assets/img-hero.png",
       "figmaName": "image 355",
-      "rawSha256": "f1e397208aa88a1e8729f2a8b749e539d711f40a7bba002ef21110c5a5aa759e",
+      "rawSha256": "6ce5d369e5fd40ad7f2685af759090424bb165cc4c7bc7a0d645d2c3eb5e21bd",
       "shaVerified": true,
       "verifiedAt": "2026-08-01",
-      "note": "피그마 Export 원본의 흰 배경을 투명 처리한 버전 (2026-08-01). 흰 배경 합성 시 원본과 평균 0.1/255 차이."
+      "note": "3D 소프트 뎁스 리디자인 확정본 (2026-08-01 사용자 확정, 피그마·웹 동일 파일 업로드)"
     },
     {
       "node": "123:4053",
       "file": "assets/img-apply.png",
       "figmaName": "image 359",
-      "rawSha256": "435ea76d1339d98a45599f6d9b1e9e4c3c6e895589f15c50ebf46f07cc2601cd",
+      "rawSha256": "0bfcbb9b07a07024112bf8931d6bfcb774ad22283a1684ebaed15025c6374778",
       "shaVerified": true,
       "verifiedAt": "2026-08-01",
-      "note": "피그마 Export 투명 PNG 2x. 엣지 정리본(흰 프린지 제거 + 클립 내부 투명화, 커밋 5932ef4)으로 교체 — 육안 확인 완료."
+      "note": "3D 소프트 뎁스 리디자인 확정본 (2026-08-01 사용자 확정, 피그마·웹 동일 파일 업로드)"
     },
     {
       "node": "123:4394",
       "file": "assets/img-fomo.png",
       "figmaName": "image 360",
-      "rawSha256": "8ec084cbe6f3126adb2aa244069168a297e5f7614cfa43bd7786455b079d983a",
+      "rawSha256": "4d7dfc24e728f4c778776b245c9f78e69ee1d05a34bbdfc4eda3eceab94232b1",
       "shaVerified": true,
       "verifiedAt": "2026-08-01",
-      "note": "피그마 PROD 프레임(6:148)에서 Export한 투명 PNG 2x. 표시 비율은 피그마 이미지 노드 크기와 동일."
+      "note": "3D 소프트 뎁스 리디자인 확정본 (2026-08-01 사용자 확정, 피그마·웹 동일 파일 업로드)"
     },
     {
       "node": "123:4050",
       "file": "assets/img-speed.png",
       "figmaName": "image 358",
-      "rawSha256": "64419fd53a47bbdd3ef06c9141ca54d1cfa75abf53061ef27984b5ab78981bf2",
+      "rawSha256": "4820c7234fcedd3d1f200a9a38434391b68ee4296e25ef19ceed59595f5b3819",
       "shaVerified": true,
       "verifiedAt": "2026-08-01",
-      "note": "피그마 PROD 프레임(6:148)에서 Export한 투명 PNG 2x. 표시 비율은 피그마 이미지 노드 크기와 동일."
+      "note": "3D 소프트 뎁스 리디자인 확정본 (2026-08-01 사용자 확정, 피그마·웹 동일 파일 업로드)"
     },
     {
       "node": "123:4047",
       "file": "assets/img-save.png",
       "figmaName": "image 357",
-      "rawSha256": "7d2b332879a9355c8b61da48331f48d57a41346f315be34f290d44682cb84f7c",
+      "rawSha256": "3fe40f74ca34aba3659fc58af5ea12c7b936a02e89e102703ae18ed681e28e26",
       "shaVerified": true,
       "verifiedAt": "2026-08-01",
-      "note": "피그마 PROD 프레임(6:148)에서 Export한 투명 PNG 2x. 표시 비율은 피그마 이미지 노드 크기와 동일."
+      "note": "3D 소프트 뎁스 리디자인 확정본 (2026-08-01 사용자 확정, 피그마·웹 동일 파일 업로드)"
     },
     {
       "node": "123:4044",
       "file": "assets/img-personal.png",
       "figmaName": "image 356",
-      "rawSha256": "1c087ed469e7958baeb7403af1ec3dc1eb003a7e290725efe9cac818ee5b6249",
+      "rawSha256": "c219660143592694ad55b697bb65fabdb4ac1111be1e635eafafeeddcaecc464",
       "shaVerified": true,
       "verifiedAt": "2026-08-01",
-      "note": "피그마 PROD 프레임(6:148)에서 Export한 투명 PNG 2x. 표시 비율은 피그마 이미지 노드 크기와 동일."
+      "note": "3D 소프트 뎁스 리디자인 확정본 (2026-08-01 사용자 확정, 피그마·웹 동일 파일 업로드)"
     }
   ],
   "_lock설명": "세션 간에 확정된 값. 되돌아가면 즉시 FAIL. 결정이 바뀌면 여기와 피그마를 함께 고칠 것.",
