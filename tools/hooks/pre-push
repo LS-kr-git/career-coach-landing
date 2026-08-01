@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# 랜딩 결과물(index.html / assets)이 바뀐 푸시는 검수를 통과해야만 나간다.
+#
+# 설치 (클론한 세션에서 한 줄):
+#   git config core.hooksPath tools/hooks
+#
+# 검수에 필요한 피그마 덤프 두 개를 찾는 순서:
+#   1) 환경변수 FIGMA_META / FIGMA_TYPE
+#   2) 저장소 루트의 figma_meta.xml / figma_type.json
+#   3) 상위 디렉터리(/home/claude 등)의 같은 이름 파일
+#
+# 급할 때만: git push --no-verify
+
+set -u
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT" || exit 0
+
+# 결과물이 안 바뀐 푸시(문서/도구만)는 통과
+RANGE_BASE="$(git rev-parse --verify -q origin/main 2>/dev/null || echo '')"
+if [ -n "$RANGE_BASE" ]; then
+  CHANGED="$(git diff --name-only "$RANGE_BASE"..HEAD -- index.html assets 2>/dev/null)"
+else
+  CHANGED="index.html"
+fi
+[ -z "$CHANGED" ] && exit 0
+
+find_file() {
+  local name="$1" env_val="$2"
+  [ -n "$env_val" ] && [ -f "$env_val" ] && { echo "$env_val"; return; }
+  for p in "$ROOT/$name" "$ROOT/../$name" "$HOME/$name"; do
+    [ -f "$p" ] && { echo "$p"; return; }
+  done
+}
+
+META="$(find_file figma_meta.xml "${FIGMA_META:-}")"
+TYPE="$(find_file figma_type.json "${FIGMA_TYPE:-}")"
+
+if [ -z "$META" ]; then
+  cat >&2 <<'MSG'
+
+✋ 푸시 중단 — 피그마 메타데이터(figma_meta.xml)를 찾지 못했습니다.
+
+랜딩 결과물이 바뀌었는데 피그마와 대조하지 않은 상태입니다.
+CLAUDE.md "랜딩을 건드렸다면 — 푸시 전에" 절차대로
+  1) get_metadata → figma_meta.xml
+  2) use_figma 스니펫 → figma_type.json
+를 만든 뒤 다시 푸시하세요.
+
+(정말 급하면: git push --no-verify)
+MSG
+  exit 1
+fi
+
+echo "▶ 푸시 전 검수 실행…"
+if [ -n "$TYPE" ]; then
+  node tools/figma-audit/audit.mjs "$META" "$TYPE"
+else
+  echo "⚠️ figma_type.json 이 없어 타이포 신선도는 확인하지 못합니다." >&2
+  node tools/figma-audit/audit.mjs "$META"
+fi
+STATUS=$?
+
+if [ $STATUS -ne 0 ]; then
+  cat >&2 <<'MSG'
+
+✋ 푸시 중단 — 검수에서 조치 필요 항목이 나왔습니다.
+위 목록을 피그마 기준으로 해결한 뒤 다시 푸시하세요.
+(정말 급하면: git push --no-verify)
+MSG
+  exit 1
+fi
+
+echo "✅ 검수 통과 — 푸시합니다."
+exit 0
