@@ -27,7 +27,10 @@
     { "id": "label-17-bold", "결정": "t-label = 17px Bold, 자간 1%", "mustMatch": "\\.t-label\\{font-size:17px;line-height:20px;font-weight:700;letter-spacing:0\\.01em\\}" },
     { "id": "full-bleed-page", "결정": "페이지는 기기 폭을 꽉 채운다 — 폰에서 좌우에 배경색이 보이면 안 됨 (2026-07-31, iPhone Air 제보)", "figmaNode": "6:148", "mustMatch": "\\.page\\{width:100%", "mustNotMatch": "\\.page\\{max-width:400px;margin" },
     { "id": "content-cap-400", "결정": "콘텐츠 폭은 400px로 고정 (넓은 폰에서도 줄바꿈이 피그마와 동일하게 유지되도록)", "mustMatch": "header, \\.container\\{max-width:400px" },
-    { "id": "desk-bg-520", "결정": "회색 바탕 + 카드 그림자는 520px 이상에서만", "mustMatch": "@media \\(min-width:520px\\)\\{[\\s\\S]{0,200}background:var\\(--gray-100\\)" }
+    { "id": "desk-bg-520", "결정": "회색 바탕 + 카드 그림자는 520px 이상에서만", "mustMatch": "@media \\(min-width:520px\\)\\{[\\s\\S]{0,200}background:var\\(--gray-100\\)" },
+    { "id": "chips-3rows-bleed", "결정": "채용사이트 칩 = 5개씩 3줄 고정, 줄바꿈 없이 페이지 밖으로 흘러넘치고 가장자리에서 잘림 (피그마 6:249, 2026-07-31)", "figmaNode": "6:249", "mustMatch": "\\.chip-row\\{display:flex;gap:13px;flex:none;white-space:nowrap\\}", "mustNotMatch": "\\.chips\\{display:flex;flex-wrap:wrap" },
+    { "id": "chips-3rows-markup", "결정": "칩 줄은 정확히 3개 (줄 구성이 바뀌면 피그마와 어긋남)", "mustMatch": "(class=\"chip-row\"[\\s\\S]*?){3}</div>\\s*</div>" },
+    { "id": "chips-stagger", "결정": "줄별 좌우 어긋남 = 피그마 프레임 중심 대비 +10 / -39 / -7px", "mustMatch": "translateX\\(10px\\)[\\s\\S]{0,160}translateX\\(-39px\\)[\\s\\S]{0,160}translateX\\(-7px\\)" }
   ],
   "_부호예외설명": "따옴표·말줄임표만 다르고 그 차이를 의도적으로 허용한 노드. 이유를 반드시 적을 것.",
   "acceptedPunctDiffs": [
