@@ -43,14 +43,16 @@ fbq('track', 'PageView');
     --shell:#17181C; --shell-edge:#4A4E58; --shell-notch:#17181C;
   }
   *{margin:0;padding:0;box-sizing:border-box}
-  html{scroll-behavior:smooth;background:linear-gradient(to bottom,#ffffff 50%,#F1F5F9 50%) fixed}
-  /* iOS 러버밴드(오버스크롤) 색 보정 — 페이지 끝을 지나 당길 때 드러나는 영역을
-     위는 흰색, 아래는 푸터색(gray-100)으로 덮는다. 러버밴드 시 fixed 요소도 페이지와
-     함께 밀리므로, 화면 밖에 주차한 이 레이어들이 빈 영역으로 미끄러져 들어온다.
-     (html 고정 그라디언트를 iOS 웹킷이 오버스크롤 영역에 제대로 못 칠하는 문제의 보정) */
-  body::before,body::after{content:'';position:fixed;left:0;right:0;height:100vh;z-index:-1;pointer-events:none}
-  body::before{top:-100vh;background:#fff}
-  body::after{bottom:-100vh;background:var(--gray-100)}
+  /* 오버스크롤(러버밴드) 색 — 아래는 캔버스색, 위는 물리 bleed 로 처리 (2026-08-02).
+     ① html 배경색 = gray-100: 문서 아래로 당길 때 모든 엔진이 캔버스색을 칠하므로
+        푸터색이 그대로 이어진다. (이전의 fixed 그라디언트는 iOS 가 attachment:fixed 를
+        지원하지 않아 문서 높이로 늘어난 뒤 바닥에서 타일 반복 → 흰색이 비쳤음.
+        fixed 레이어 방식도 iOS 러버밴드가 fixed 를 화면에 고정해 무효였음)
+     ② 위쪽 흰색: 문서 위로 100vh 흰 판을 덧댄다. CSS 오버플로는 위쪽으로는
+        스크롤 영역을 늘리지 않으므로 부작용이 없다. */
+  html{scroll-behavior:smooth;background:var(--gray-100)}
+  body{position:relative}
+  body::before{content:'';position:absolute;left:0;right:0;bottom:100%;height:100vh;background:#fff}
   body{
     font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;
     /* 기기 화면에서는 페이지 양옆에 다른 색이 보이면 안 됨 → 기본 흰색.
