@@ -45,14 +45,14 @@ fbq('track', 'PageView');
     /* ===== 반응형 폭 — 브레이크포인트 없이 연속으로 자란다 (2026-08-02) =====
        이전에는 520px 에서 카드가 한 번에 400→540 으로 튀었다(콘텐츠 +96px). 지금은 튀는 지점이 없다.
 
-       --pad-x  좌우 여백. 430px(실기기 폰 최대치)까지는 피그마 6:168 값인 24 를 그대로 쓰고,
-                430 → 540 구간에서만 36 으로 서서히 벌어진다. 폰에서는 피그마와 같은 24 가 유지된다.
-       --card-max     카드 최대 폭 540 (피클플러스 기준)
-       --content-max  글이 퍼지는 최대 폭 468 (= 540 − 36·2)
-       실제 콘텐츠 폭 = min(화면폭 − --pad-x·2, 468) 이라 처음부터 끝까지 연속이다. */
-    --pad-x: clamp(24px, calc(24px + (100vw - 430px) * 12 / 110), 36px);
-    --card-max: 540px;
-    --content-max: 468px;
+       --pad-x  좌우 여백 24 고정 — 피그마 6:168 값 그대로다. 화면 폭과 무관하게 같은 값이라
+                모바일·데스크톱이 같은 여백을 쓴다. (2026-08-02 사용자 확정: 36 → 24 로 되돌림)
+       --card-max     카드 최대 폭 450 (2026-08-02 사용자 확정. 540 → 450)
+       --content-max  글이 퍼지는 최대 폭 402 (= 450 − 24·2)
+       실제 콘텐츠 폭 = min(화면폭 − 48, 402) 이라 처음부터 끝까지 연속이다. */
+    --pad-x: 24px;
+    --card-max: 450px;
+    --content-max: 402px;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   /* 오버스크롤(러버밴드) 색 — 아래는 캔버스색, 위는 물리 bleed 로 처리 (2026-08-02).
@@ -72,14 +72,14 @@ fbq('track', 'PageView');
     background:var(--gray-100); color:var(--gray-800);
     -webkit-font-smoothing:antialiased;
   }
-  /* 페이지는 기기 폭을 꽉 채우고(좌우 여백 0), 넓어지면 --card-max(540px)에서 멈춘다.
+  /* 페이지는 기기 폭을 꽉 채우고(좌우 여백 0), 넓어지면 --card-max(450px)에서 멈춘다.
      이렇게 해야 푸터 회색 띠도 화면 끝까지 이어진다. */
   /* overflow-x:clip — 칩 줄이 100vw로 삐져나올 때 가로 스크롤이 생기지 않도록 */
   /* padding-top:100vh + margin-top:-100vh — 흰 카드 배경을 문서 위로 100vh 덧댄다(위쪽 오버스크롤 흰색).
      absolute/fixed 덧댐은 iOS 크롬이 문서 위 영역에서 안 그려줘서, 요소 자신의 배경을 늘리는 이 방식만 확실하다. */
   .page{width:100%;margin:0 auto;background:#fff;min-height:100vh;position:relative;overflow-x:clip;
     padding-top:100vh;margin-top:-100vh;
-    /* 카드 폭은 화면과 함께 자라다 540 에서 멈춘다. 브레이크포인트 없음 = 튀는 지점 없음 */
+    /* 카드 폭은 화면과 함께 자라다 --card-max 에서 멈춘다. 브레이크포인트 없음 = 튀는 지점 없음 */
     max-width:var(--card-max)}
   header{max-width:var(--card-max);margin-left:auto;margin-right:auto;width:100%}
   footer .biz{max-width:var(--content-max);margin:0 auto}
@@ -108,7 +108,7 @@ fbq('track', 'PageView');
   /* ===== 공통 레이아웃 =====
      섹션마다 배경색이 다르고(피그마 6:148) 그 배경이 화면 끝까지 이어져야 하므로,
      좌우 패딩을 .container 가 아니라 각 section 이 갖는다.
-     안쪽 콘텐츠는 --content-max(468px)로 묶인다. 좁은 화면에서는 화면폭 − --pad-x·2 가 먼저 걸린다. */
+     안쪽 콘텐츠는 --content-max(402px)로 묶인다. 좁은 화면에서는 화면폭 − --pad-x·2 가 먼저 걸린다. */
   /* 피그마 6:148 의 모든 섹션은 위·아래 패딩이 각각 100px (2026-08-01 60→100 확장).
      섹션 사이 간격은 100+100=200 으로 일정하고,
      배경색 띠가 콘텐츠 위아래를 똑같이 100px씩 감싼다. */
@@ -124,7 +124,13 @@ fbq('track', 'PageView');
   .head-group{display:flex;flex-direction:column;gap:8px;align-items:center;text-align:center}
   .eyebrow{color:var(--amber-600)}
   .headline{color:var(--navy-900);text-align:center;white-space:pre-line}
-  .lead{color:var(--gray-600);text-align:center;white-space:pre-line}
+  /* 피그마 리드 텍스트는 hug 라 섹션 패딩(24)을 넘어 최대 344 까지 벌어진다(6:247 = 344).
+     웹이 312 로 가두면 명시 줄바꿈이 안 지켜지고 "쌓아드려 / 요." 처럼 한 글자가 밀려 내려간다.
+     그래서 리드만 좌우로 16px 씩 흘러넘치게 둔다 — 360px 에서 344 로 피그마와 같아진다. (2026-08-02) */
+  /* 피그마 6:189(폭 330)처럼 섹션 패딩을 넘어가는 본문 문단 — 리드와 같은 규칙을 쓴다 */
+  .para-wide{width:calc(100% + 32px);max-width:calc(var(--content-max) + 32px);margin-left:-16px;margin-right:-16px}
+  .lead{color:var(--gray-600);text-align:center;white-space:pre-line;
+    width:calc(100% + 32px);max-width:calc(var(--content-max) + 32px);margin-left:-16px;margin-right:-16px}
   /* 일러스트는 배경이 투명한 PNG — 회색 박스를 씌우지 않는다 (2026-08-01, 신규 6종) */
   /* height:auto 필수 — img 의 height="224" 속성이 살아 있으면 폭만 늘어나 가로로 눌린다.
      352px 시절엔 원본 344 와 비슷해 티가 안 났지만, 데스크톱에서 넓히자 바로 드러났다. (2026-08-02) */
@@ -171,7 +177,9 @@ fbq('track', 'PageView');
     position:absolute;bottom:21px;left:50%;transform:translateX(-50%);
     width:110px;height:5px;background:rgba(15,23,42,.3);border-radius:2.5px;z-index:3;
   }
-  .phone-content{position:relative;z-index:1;padding:55px 4px 40px}
+  /* 피그마 6:309 = 폭 276 / 패딩 0. 좌우 4px 패딩이 있으면 말풍선이 224 가 아니라 216 이 되어
+     목업 본문이 한 줄씩 더 밀린다("인사이 / 트]", "보세 / 요."). 좌우 패딩은 0 이어야 한다. (2026-08-02) */
+  .phone-content{position:relative;z-index:1;padding:55px 0 40px}
   /* 첫 번째 목업만 폰을 32px 연장 (피그마 123:4349 = 631px). 콘텐츠 위치는 그대로,
      바닥 여백만 늘어나고 홈 인디케이터가 바닥을 따라 내려간다 (2026-08-01) */
   .phone:not(.tall) .phone-content{padding-bottom:72px}
@@ -217,7 +225,7 @@ fbq('track', 'PageView');
      오프셋(+34 / -2 / +3)은 피그마 프레임 중심 대비 각 줄 중심의 어긋난 양. */
   .chips{
     display:flex;flex-direction:column;gap:16px;align-items:center;
-    /* min() 으로 화면폭과 카드폭(540)을 연속으로 잇는다 — 미디어쿼리 없이 넘침·잘림이 같이 따라온다 */
+    /* min() 으로 화면폭과 --card-max 를 연속으로 잇는다 — 미디어쿼리 없이 넘침·잘림이 같이 따라온다 */
     width:min(100vw, var(--card-max));
     margin-left:calc(50% - min(50vw, var(--card-max) / 2));
     margin-right:calc(50% - min(50vw, var(--card-max) / 2));
@@ -257,8 +265,8 @@ fbq('track', 'PageView');
   /* ===== 플로팅 CTA ===== */
   .floating-cta{
     position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
-    /* 폭 = 화면 − 40, 카드 폭 − 40 인 500 에서 멈춘다 (연속) */
-    width:calc(100% - 40px);max-width:500px;background:var(--kakao);color:var(--kakao-text);
+    /* 폭 = 화면 − 40, 카드 폭 − 40 인 410 에서 멈춘다 (연속) */
+    width:calc(100% - 40px);max-width:410px;background:var(--kakao);color:var(--kakao-text);
     border-radius:14px;padding:18px;text-align:center;text-decoration:none;
     display:flex;align-items:center;justify-content:center;gap:8px;
     box-shadow:0 12px 32px rgba(15,23,42,.25);z-index:10;
@@ -268,7 +276,7 @@ fbq('track', 'PageView');
 
   /* ===== 넓은 화면 카드 어포던스 (520px~) =====
      폭은 위에서 이미 연속으로 처리했다. 여기 남은 것은 "회색 바탕 위의 카드"라는
-     시각적 표현뿐이라 값이 튀지 않는다(520~540 구간에서는 카드가 화면을 꽉 채워 회색이 안 보인다). */
+     시각적 표현뿐이라 값이 튀지 않는다(카드가 --card-max 에 닿기 전까지는 회색이 안 보인다). */
   @media (min-width:520px){
     body{background:var(--gray-100)}
     .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
@@ -308,7 +316,7 @@ fbq('track', 'PageView');
 일단 지원해 보세요</h2>
       </div>
       <img class="illust" src="assets/img-apply.png" alt="이력서 제출 일러스트" width="344" height="169">
-      <p class="t-body" style="color:var(--gray-700);width:100%">지금 가지고 있는 포트폴리오·이력서로 일단 넣으세요.<br><strong>불합격 해도 다음 지원에 패널티가 전혀 없어요.</strong><br>오히려 여러 번 도전하면, ‘우리 회사를 이렇게 좋아하면 잘 적응할 확률이 크다’고 판단해 더 좋게 봐요.<br><strong>붙으면 희소식, 안붙어도 손해 X. 안 할 이유가 없어요.</strong><br>결국 결과를 얻은 건 실행하는 사람들이었어요.</p>
+      <p class="t-body para-wide" style="color:var(--gray-700)">지금 가지고 있는 포트폴리오·이력서로 일단 넣으세요.<br><strong>불합격 해도 다음 지원에 패널티가 전혀 없어요.</strong><br>오히려 여러 번 도전하면, ‘우리 회사를 이렇게<br>좋아하면 잘 적응할 확률이 크다’고 판단해 더 좋게 봐요.<br><strong>붙으면 희소식, 안붙어도 손해 X. 안 할 이유가 없어요.</strong><br>결국 결과를 얻은 건 실행하는 사람들이었어요.</p>
     </section>
 
     <!-- 2. 마감 FOMO (피그마 123:4387 · Amber100→50) -->

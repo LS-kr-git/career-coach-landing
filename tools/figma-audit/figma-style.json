@@ -326,40 +326,39 @@
       "_근거": "피그마 6:148 의 모든 섹션이 100/24 · gap 20. 섹션 사이 간격은 200 으로 일정하다."
     },
     {
-      "id": "width-desk-card-540",
+      "id": "width-desk-card-450",
       "label": "데스크톱 카드 폭",
       "sel": ".page",
       "node": null,
       "viewport": 1280,
       "figma": null,
       "css": {
-        "width": "540px"
+        "width": "450px"
       },
-      "_근거": "2026-08-02 사용자 확정(512→540). 피클플러스 카드 폭과 동일. 주선왕은 512."
+      "_근거": "2026-08-02 사용자 확정 (540 → 450). --card-max 한 곳에서 관리한다."
     },
     {
-      "id": "width-desk-content-468",
+      "id": "width-desk-content-402",
       "label": "데스크톱 콘텐츠 폭",
       "sel": "section > .head-group",
       "node": null,
       "viewport": 1280,
       "figma": null,
       "css": {
-        "width": "468px"
+        "width": "402px"
       },
-      "_근거": "카드 540 − 좌우 36·2. 눈에 보이는 \"글이 퍼지는 폭\" 이 이 값이다."
+      "_근거": "카드 450 − 좌우 24·2. 좌우 여백은 2026-08-02 에 36 에서 피그마 6:168 값인 24 로 되돌렸다."
     },
     {
-      "id": "width-desk-chips-540",
+      "id": "width-desk-chips-450",
       "label": "데스크톱 칩 클립 폭",
       "sel": ".chips",
-      "node": "6:248",
+      "node": "215:2788",
       "viewport": 1280,
       "figma": null,
       "css": {
-        "width": "540px"
-      },
-      "_근거": "칩이 카드 밖 회색 바탕으로 새지 않도록 카드 폭에서 자른다. (2026-08-02 칩 개편으로 6:249 삭제 → 참조 노드를 6:248 로 교체)"
+        "width": "450px"
+      }
     },
     {
       "id": "width-mobile-content-382",
@@ -386,19 +385,26 @@
       "_근거": "520px 미만에서는 카드 제한이 없어야 한다 — 폰 좌우에 회색 바탕이 보이면 안 된다(2026-07-31 iPhone Air 제보)."
     },
     {
-      "id": "spacing-desk-section-36",
-      "label": "데스크톱 섹션 좌우 패딩",
+      "id": "spacing-desk-section-24",
+      "label": "데스크톱 섹션 패딩",
       "sel": "section",
-      "node": null,
+      "node": "6:168",
       "viewport": 1280,
-      "figma": null,
+      "figma": {
+        "pad": [
+          100,
+          24,
+          100,
+          24
+        ]
+      },
       "css": {
-        "padding-left": "36px",
-        "padding-right": "36px",
+        "padding-left": "24px",
+        "padding-right": "24px",
         "padding-top": "100px",
         "padding-bottom": "100px"
       },
-      "_근거": "2026-08-02 사용자 확정(24→36, 데스크톱만). 모바일 24 는 피그마 6:168 값이라 그대로."
+      "_근거": "좌우 24 는 화면 폭과 무관하게 피그마 6:168 값 그대로다 (2026-08-02, 36 에서 되돌림)."
     },
     {
       "id": "illust-aspect-desk",
@@ -431,9 +437,33 @@
       "viewport": 485,
       "figma": null,
       "css": {
-        "width": "425px"
+        "width": "402px"
       },
-      "_근거": "485px = 430~540 보간 구간의 한가운데. 패딩 30 → 콘텐츠 425. 여기가 352 나 468 로 튀면 브레이크포인트가 되살아난 것이다."
+      "_근거": "485px 는 카드 상한(450)을 넘은 폭 → 콘텐츠는 402 에서 멈춰 있어야 한다."
+    },
+    {
+      "id": "width-alim-card-224",
+      "label": "알림톡 말풍선 폭",
+      "sel": ".phone .alim-card",
+      "node": "6:315",
+      "viewport": 360,
+      "figma": null,
+      "css": {
+        "width": "224px"
+      },
+      "_근거": "피그마 6:312 = 224 (컨테이너 276 − 아바타 42 − 간격 10). 216 이면 목업 본문이 한 줄씩 밀린다. phone-content 좌우 패딩이 0 이어야 나온다. (2026-08-02) 폰 셸이 312 인 360px 뷰포트에서 잰다(폰은 최대 344 까지 자란다)."
+    },
+    {
+      "id": "width-lead-bleed-344",
+      "label": "리드 문단 폭(패딩 넘김)",
+      "sel": "section .lead",
+      "node": null,
+      "viewport": 360,
+      "figma": null,
+      "css": {
+        "width": "344px"
+      },
+      "_근거": "피그마 리드는 hug 라 섹션 패딩을 넘어 최대 344 까지 벌어진다(6:247). 312 로 가두면 명시 줄바꿈이 깨진다. (2026-08-02)"
     }
   ],
   "_여백설명": "여백·간격 항목(id 가 spacing- 으로 시작)은 2026-08-02 추가. lockedStyles 정규식이 소스 문자열만 보기 때문에 뒤에 붙은 규칙이 값을 덮어도 통과하던 구멍(.chips 의 50px 이 4px 보정에 덮인 사건)을 메운다. 이쪽은 브라우저 계산값을 보므로 무엇이 덮든 실제 결과가 잡힌다.",

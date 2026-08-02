@@ -158,9 +158,9 @@
       "mustMatch": "(class=\"bg-(blue|amber|gray)\"[\\s\\S]*?){5}"
     },
     {
-      "id": "desk-card-540",
-      "결정": "카드 최대 폭 540 / 콘텐츠 최대 폭 468 / 좌우 여백 24→36 (2026-08-02 사용자 확정). 피클플러스 카드 폭(540)을 택했다 — 주선왕은 512. 값은 :root 의 --card-max / --content-max / --pad-x 한 곳에서만 관리한다. 피그마 프레임 360px 은 고정이고 이 셋은 웹 전용 반응형 값이다.",
-      "mustMatch": "--card-max: 540px;[\\s\\S]{0,60}--content-max: 468px;"
+      "id": "desk-card-450",
+      "결정": "카드 최대 폭 450 / 콘텐츠 최대 폭 402 / 좌우 여백 24 고정 (2026-08-02 사용자 확정. 같은 날 400→512→540→450, 여백 24→36→24 로 정착). :root 의 --card-max / --content-max / --pad-x 한 곳에서만 관리한다. 피그마 프레임 360px 은 고정이고 카드 상한만 웹 전용 값이다.",
+      "mustMatch": "--pad-x: 24px;[\\s\\S]{0,40}--card-max: 450px;[\\s\\S]{0,40}--content-max: 402px;"
     },
     {
       "id": "step-text-16",
@@ -185,13 +185,18 @@
     },
     {
       "id": "responsive-continuous",
-      "결정": "폭·여백은 브레이크포인트가 아니라 clamp()/min() 으로 연속 보간한다. 520px 한 지점에서 콘텐츠가 352→448 로 96px 튀는 것을 사용자가 창을 늘리다 발견했다 (2026-08-02). 실제 연속성은 flow-audit.mjs 가 1px 씩 훑어 확인한다.",
-      "mustMatch": "--pad-x: clamp\\(24px, calc\\(24px \\+ \\(100vw - 430px\\) \\* 12 / 110\\), 36px\\);"
+      "결정": "폭·여백은 브레이크포인트가 아니라 :root 변수 + min() 으로 연속 보간한다. 520px 한 지점에서 콘텐츠가 352→448 로 96px 튀는 것을 사용자가 창을 늘리다 발견했다 (2026-08-02). 실제 연속성은 flow-audit.mjs 가 1px 씩 훑어 확인한다.",
+      "mustMatch": "width:min\\(100vw, var\\(--card-max\\)\\)"
     },
     {
       "id": "illust-height-auto",
       "결정": "img.illust 는 height=\"224\" 같은 속성을 갖고 있으므로 CSS 에 height:auto 가 반드시 있어야 한다. 없으면 width:100% 로 폭만 늘어나 가로로 눌린다 (2026-08-02 데스크톱 확장 때 실제로 발생). 비율 자체는 figma-style.json 의 illust-aspect-* 가 렌더로 잡는다.",
       "mustMatch": "\\.illust\\{width:100%;height:auto"
+    },
+    {
+      "id": "mockup-content-nopad",
+      "결정": ".phone-content 는 좌우 패딩 0 이어야 한다. 4px 이 있으면 말풍선이 피그마 224 가 아니라 216 이 되어 목업 본문이 한 줄씩 밀린다(2026-08-02 실제 발생). 폭 자체는 figma-style.json 의 width-alim-card-224 가 렌더로 잡는다.",
+      "mustMatch": "\\.phone-content\\{position:relative;z-index:1;padding:55px 0 40px\\}"
     }
   ],
   "_부호예외설명": "따옴표·말줄임표만 다르고 그 차이를 의도적으로 허용한 노드. 이유를 반드시 적을 것.",
