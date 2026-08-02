@@ -54,6 +54,24 @@ git clone https://github.com/LS-kr-git/career-coach.git   # 비공개 — PAT �
 - 피그마 파일 `LnT8TgFVBxky0bVyaF6Tob`, 프레임 **`6:148` "랜딩페이지_커리어코치"** (가로 360px)
 - PROD 섹션(`6:147`)에는 다른 프로젝트 레퍼런스 프레임이 섞여 있다. **섹션이 아니라 프레임 6:148 만** 기준이다.
 
+## 새 페이지는 폴더 주소로 만든다 (2026-08-02 확정)
+
+파일 하나를 루트에 두지 말고 **`<경로>/index.html`** 로 만든다. GitHub Pages 는 디렉터리를 요청받으면
+그 안의 `index.html` 을 주므로 `/onboarding/1/` 로 열리고, 슬래시 없이 들어와도 슬래시 붙은 주소로 301 된다.
+
+```
+onboarding/1/index.html   → https://careercoach.my/onboarding/1/
+onboarding/2/index.html   → /onboarding/2/
+onboarding/3/index.html   → /onboarding/3/
+```
+
+- **한글 파일명을 쓰지 않는다.** `step1-직군.html` 은 주소에서 `step1-%EC%A7%81%EA%B5%B0.html` 가 된다
+  (한글 1자 = 3바이트 = 9글자). 공유 링크·광고 랜딩 URL·심사 제출 URL·GA 리포트가 전부 지저분해진다.
+- **`.html` 을 주소에 노출하지 않는다.** 나중에 서버 렌더링으로 옮겨도 주소가 그대로라 광고 링크·북마크가 안 깨진다.
+- 하위 폴더 페이지에서 **자산은 루트 절대경로(`/assets/…`)로 참조한다.** `./assets/…` 는 한 단계 깊어져 깨진다.
+- 화면 간 이동은 절대경로(`/onboarding/2/`)로 쓴다. `page-audit` 이 폴더 주소와 상대경로를 모두 검사한다.
+- 앞으로 만들 페이지도 같은 규칙: `/onboarding/done/`, `/checkout/`, `/welcome/`, `/me/`, `/letter/<날짜>/`.
+
 ## 피그마에 글자를 쓸 때 — Pretendard 규칙 (2026-08-02 확정)
 
 **플러그인 실행 환경(`use_figma`)에는 Pretendard 가 없다.** `listAvailableFontsAsync()` 가 1,938개 패밀리를
