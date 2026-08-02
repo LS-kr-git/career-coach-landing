@@ -6,12 +6,29 @@
 ```
 git config core.hooksPath tools/hooks
 ```
-훅은 **두 겹**이다.
+훅은 **세 겹**이다.
 
-| 겹 | 스크립트 | 언제 도나 | 대상 |
+| 겹 | 무엇 | 언제 도나 | 본다 |
 |---|---|---|---|
+| 0 | 배포 쿨다운 | **모든 푸시** | 직전 푸시로부터 15분이 지났는가 |
 | 1 | `tools/figma-audit/page-audit.mjs` | **모든 푸시** | 저장소의 모든 `*.html` + `CNAME` + `assets` |
 | 2 | `tools/figma-audit/audit.mjs` | `index.html`/`assets` 가 바뀐 푸시 | 랜딩 (피그마 프레임 6:148 대조) |
+
+**0겹 — 배포 쿨다운 (2026-08-02 신설)**
+GitHub Pages 는 [푸시 → 빌드 → 배포] 3단계이고, 같은 브랜치에 새 푸시가 들어오면 진행 중이던 실행을
+`Canceling since a higher priority waiting request ... exists` 로 **취소**한다. 2026-08-02 에 30분 동안
+다섯 번 푸시했더니 앞의 네 개가 전부 취소돼, 이미 고친 버그가 라이브에 한 시간 넘게 안 올라갔다.
+
+훅은 `origin/main` 최신 커밋 시각을 "직전 푸시 시각"으로 삼아, 15분이 안 지났으면 **막고 남은 시간을 알려 준다.**
+세션이 달라도 원격을 기준으로 하므로 새 대화창에서도 그대로 동작한다.
+
+```
+CC_PUSH_COOLDOWN=<초> git push origin main   # 조절 (기본 900 = 15분)
+CC_PUSH_COOLDOWN=0    git push origin main   # 쿨다운만 끄기 — 검수 1·2겹은 그대로 돈다
+```
+
+**막혔을 때 하는 일: 기다리면서 커밋을 더 쌓는다.** 커밋은 얼마든지 해도 되고, 푸시만 모아서 한 번
+하면 된다. 그게 실제로 가장 빨리 라이브에 닿는 길이다. 그 사이 확인이 급하면 `node tools/make-preview.mjs`.
 
 1겹은 준비물이 없어 어떤 세션에서든 무조건 돈다. 페이지를 새로 추가해도 설정을 고칠 필요 없이 자동으로 대상에 들어온다.
 보는 것: 깨진 링크·경로 대소문자·`DOCTYPE`/`lang`/`charset`/`viewport`/`title` 누락·자리표시자(`YOUR_*`, Lorem, example.com)·`http://` 리소스·`github.io` 하드코딩·블록 태그 불균형·CNAME 형식. `❌ 막힘` 이 있으면 푸시가 멈추고, `⚠️ 경고` 는 알려만 준다.
