@@ -131,8 +131,8 @@
     },
     {
       "id": "chips-stagger",
-      "결정": "줄별 좌우 어긋남 = 피그마 프레임 중심 대비 +10 / -39 / -7px",
-      "mustMatch": "translateX\\(10px\\)[\\s\\S]{0,160}translateX\\(-39px\\)[\\s\\S]{0,160}translateX\\(-7px\\)"
+      "결정": "줄별 좌우 어긋남 = 피그마 프레임 중심 대비 +34 / -2 / +3px (2026-08-02 칩 개편 215:2788)",
+      "mustMatch": "translateX\\(34px\\)[\\s\\S]{0,160}translateX\\(-2px\\)[\\s\\S]{0,160}translateX\\(3px\\)"
     },
     {
       "id": "illust-no-box",
