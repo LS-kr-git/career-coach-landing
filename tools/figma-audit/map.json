@@ -108,9 +108,9 @@
       "mustNotMatch": "\\.page\\{max-width:400px;margin"
     },
     {
-      "id": "content-cap-400",
-      "결정": "모바일 콘텐츠 폭은 352px(=400-48)로 고정. 섹션 배경이 화면 끝까지 가야 해서 좌우 패딩이 section 으로 옮겨졌으므로 캡은 section > * 에 건다. 데스크톱(520px~)에서는 464px 로 덮어쓴다 — 그 오버라이드는 파일 맨 아래 \"데스크톱 오버라이드\" 블록에 있어야 하고(같은 특이도는 나중 규칙이 이김), 실제 적용 여부는 figma-style.json 의 width-desk-content-464 가 확인한다. (2026-08-02 갱신)",
-      "mustMatch": "section > \\*\\{width:100%;max-width:352px\\}"
+      "id": "content-cap-var",
+      "결정": "콘텐츠 폭 상한은 --content-max(468px) 하나로 관리한다. 화면이 좁으면 화면폭 − --pad-x·2 가 먼저 걸리므로, 별도 모바일 상한(예전 352px)을 두지 않는다 — 그 상한이 520px 브레이크포인트에서 96px 점프를 만들었다 (2026-08-02).",
+      "mustMatch": "section > \\*\\{width:100%;max-width:var\\(--content-max\\)\\}"
     },
     {
       "id": "desk-bg-520",
@@ -159,8 +159,8 @@
     },
     {
       "id": "desk-card-540",
-      "결정": "넓은 화면 카드 폭 540px / 좌우 36 / 콘텐츠 468px (2026-08-02 사용자 확정, 같은 날 512/24/464 에서 변경, 그 전 400/24/352). 피클플러스 카드 폭(540)을 택했다 — 주선왕은 512. 피그마 기준 프레임은 360px 고정이고 모바일 좌우 24 도 피그마 6:168 값 그대로다. 데스크톱 폭·패딩만 웹 전용 반응형 값이므로 360/400/24 로 \"되돌리지\" 말 것. 실제 렌더 폭은 figma-style.json 의 width-desk-* / spacing-desk-section-36 이 계산값으로 잡는다.",
-      "mustMatch": "@media \\(min-width:520px\\)\\{[\\s\\S]{0,200}\\.page\\{max-width:540px"
+      "결정": "카드 최대 폭 540 / 콘텐츠 최대 폭 468 / 좌우 여백 24→36 (2026-08-02 사용자 확정). 피클플러스 카드 폭(540)을 택했다 — 주선왕은 512. 값은 :root 의 --card-max / --content-max / --pad-x 한 곳에서만 관리한다. 피그마 프레임 360px 은 고정이고 이 셋은 웹 전용 반응형 값이다.",
+      "mustMatch": "--card-max: 540px;[\\s\\S]{0,60}--content-max: 468px;"
     },
     {
       "id": "step-text-16",
@@ -184,9 +184,9 @@
       "mustMatch": "\\.alim-sec p\\{[^}]*font-size:12px;line-height:20px\\}"
     },
     {
-      "id": "desk-override-order",
-      "결정": "데스크톱 오버라이드 @media 블록은 기본 규칙보다 뒤에 있어야 한다. 위에 두면 section > * 같은 오버라이드가 같은 특이도에 밀려 조용히 무시된다 (2026-08-02 실제로 겪음).",
-      "mustMatch": "section > \\*\\{width:100%;max-width:352px\\}[\\s\\S]*@media \\(min-width:520px\\)\\{[\\s\\S]{0,400}section > \\*\\{max-width:468px\\}"
+      "id": "responsive-continuous",
+      "결정": "폭·여백은 브레이크포인트가 아니라 clamp()/min() 으로 연속 보간한다. 520px 한 지점에서 콘텐츠가 352→448 로 96px 튀는 것을 사용자가 창을 늘리다 발견했다 (2026-08-02). 실제 연속성은 flow-audit.mjs 가 1px 씩 훑어 확인한다.",
+      "mustMatch": "--pad-x: clamp\\(24px, calc\\(24px \\+ \\(100vw - 430px\\) \\* 12 / 110\\), 36px\\);"
     },
     {
       "id": "illust-height-auto",

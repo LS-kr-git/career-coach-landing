@@ -41,6 +41,18 @@ fbq('track', 'PageView');
     --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155; --gray-800:#1E293B; --gray-900:#0F172A;
     --kakao:#FEE500; --kakao-text:#191919;
     --shell:#17181C; --shell-edge:#4A4E58; --shell-notch:#17181C;
+
+    /* ===== 반응형 폭 — 브레이크포인트 없이 연속으로 자란다 (2026-08-02) =====
+       이전에는 520px 에서 카드가 한 번에 400→540 으로 튀었다(콘텐츠 +96px). 지금은 튀는 지점이 없다.
+
+       --pad-x  좌우 여백. 430px(실기기 폰 최대치)까지는 피그마 6:168 값인 24 를 그대로 쓰고,
+                430 → 540 구간에서만 36 으로 서서히 벌어진다. 폰에서는 피그마와 같은 24 가 유지된다.
+       --card-max     카드 최대 폭 540 (피클플러스 기준)
+       --content-max  글이 퍼지는 최대 폭 468 (= 540 − 36·2)
+       실제 콘텐츠 폭 = min(화면폭 − --pad-x·2, 468) 이라 처음부터 끝까지 연속이다. */
+    --pad-x: clamp(24px, calc(24px + (100vw - 430px) * 12 / 110), 36px);
+    --card-max: 540px;
+    --content-max: 468px;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   /* 오버스크롤(러버밴드) 색 — 아래는 캔버스색, 위는 물리 bleed 로 처리 (2026-08-02).
@@ -60,17 +72,17 @@ fbq('track', 'PageView');
     background:var(--gray-100); color:var(--gray-800);
     -webkit-font-smoothing:antialiased;
   }
-  /* 페이지는 기기 폭을 꽉 채우고(좌우 여백 0), 안쪽 콘텐츠만 400px로 고정한다.
+  /* 페이지는 기기 폭을 꽉 채우고(좌우 여백 0), 넓어지면 --card-max(540px)에서 멈춘다.
      이렇게 해야 푸터 회색 띠도 화면 끝까지 이어진다. */
   /* overflow-x:clip — 칩 줄이 100vw로 삐져나올 때 가로 스크롤이 생기지 않도록 */
   /* padding-top:100vh + margin-top:-100vh — 흰 카드 배경을 문서 위로 100vh 덧댄다(위쪽 오버스크롤 흰색).
      absolute/fixed 덧댐은 iOS 크롬이 문서 위 영역에서 안 그려줘서, 요소 자신의 배경을 늘리는 이 방식만 확실하다. */
   .page{width:100%;margin:0 auto;background:#fff;min-height:100vh;position:relative;overflow-x:clip;
-    padding-top:100vh;margin-top:-100vh}
-  header{max-width:400px;margin-left:auto;margin-right:auto;width:100%}
-  footer .biz{max-width:352px;margin:0 auto}
-  /* 데스크톱(520px~) 규칙은 파일 맨 아래 "데스크톱 오버라이드" 한 곳에 모여 있다.
-     CSS 는 같은 특이도면 나중 규칙이 이기므로, 기본 규칙보다 뒤에 있어야 한다. */
+    padding-top:100vh;margin-top:-100vh;
+    /* 카드 폭은 화면과 함께 자라다 540 에서 멈춘다. 브레이크포인트 없음 = 튀는 지점 없음 */
+    max-width:var(--card-max)}
+  header{max-width:var(--card-max);margin-left:auto;margin-right:auto;width:100%}
+  footer .biz{max-width:var(--content-max);margin:0 auto}
 
   /* ===== 텍스트 스타일 (피그마 text/* 대응) ===== */
   .t-display-l{font-size:36px;line-height:44px;font-weight:800;letter-spacing:-0.01em}
@@ -88,7 +100,7 @@ fbq('track', 'PageView');
   .t-button{font-size:15px;line-height:20px;font-weight:600}
 
   /* ===== 헤더 ===== */
-  header{display:flex;align-items:center;gap:10px;padding:24px}
+  header{display:flex;align-items:center;gap:10px;padding:24px var(--pad-x)}
   .app-icon{width:29px;height:29px;border-radius:25%;background:linear-gradient(135deg,#F59E0B,#D97706);display:flex;align-items:center;justify-content:center}
   .app-icon img{width:21px;height:21px;display:block}
   header .wordmark{height:21px;display:block}
@@ -96,13 +108,13 @@ fbq('track', 'PageView');
   /* ===== 공통 레이아웃 =====
      섹션마다 배경색이 다르고(피그마 6:148) 그 배경이 화면 끝까지 이어져야 하므로,
      좌우 패딩을 .container 가 아니라 각 section 이 갖는다.
-     안쪽 콘텐츠는 여전히 352px(=400-48)로 묶여 줄바꿈이 피그마와 동일하게 유지된다. */
+     안쪽 콘텐츠는 --content-max(468px)로 묶인다. 좁은 화면에서는 화면폭 − --pad-x·2 가 먼저 걸린다. */
   /* 피그마 6:148 의 모든 섹션은 위·아래 패딩이 각각 100px (2026-08-01 60→100 확장).
      섹션 사이 간격은 100+100=200 으로 일정하고,
      배경색 띠가 콘텐츠 위아래를 똑같이 100px씩 감싼다. */
   .container{width:100%;padding:0 0 24px}
-  section{padding:100px 24px;width:100%;display:flex;flex-direction:column;gap:20px;align-items:center}
-  section > *{width:100%;max-width:352px}
+  section{padding:100px var(--pad-x);width:100%;display:flex;flex-direction:column;gap:20px;align-items:center}
+  section > *{width:100%;max-width:var(--content-max)}
   section > .chips{max-width:none}
 
   /* 섹션 배경 — 피그마 6:148 (그라데이션은 위 진함 → 아래 옅음) */
@@ -205,7 +217,10 @@ fbq('track', 'PageView');
      오프셋(+34 / -2 / +3)은 피그마 프레임 중심 대비 각 줄 중심의 어긋난 양. */
   .chips{
     display:flex;flex-direction:column;gap:16px;align-items:center;
-    width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);
+    /* min() 으로 화면폭과 카드폭(540)을 연속으로 잇는다 — 미디어쿼리 없이 넘침·잘림이 같이 따라온다 */
+    width:min(100vw, var(--card-max));
+    margin-left:calc(50% - min(50vw, var(--card-max) / 2));
+    margin-right:calc(50% - min(50vw, var(--card-max) / 2));
     /* 피그마 6:248 — 칩 블록 위아래 50px 여백 (이미지 영역 안쪽 패딩).
        이 패딩은 overflow:hidden 의 클립 경계(=패딩 박스 끝) 안쪽이라,
        마지막 줄 칩의 그림자(0 1px 3px)와 보더 아래 1px 도 함께 살아난다.
@@ -219,7 +234,6 @@ fbq('track', 'PageView');
   .chip-row:nth-child(3){transform:translateX(3px)}
   .chip{flex:none;background:#fff;border:1px solid var(--gray-200);box-shadow:0 1px 3px rgba(15,23,42,.06);
     border-radius:999px;padding:9px 18px;color:var(--gray-600)}
-  /* 넓은 화면에서 칩을 카드 폭에 맞춰 자르는 규칙도 아래 "데스크톱 오버라이드" 에 있다 */
 
   /* ===== how it works ===== */
   .steps{display:flex;flex-direction:column;gap:12px;width:100%;margin-top:12px}
@@ -234,7 +248,7 @@ fbq('track', 'PageView');
   .step .t-h3{color:var(--navy-900);white-space:pre-line;font-size:16px;line-height:24px}
 
   /* ===== 푸터 ===== */
-  footer{background:var(--gray-100);padding:80px 24px 120px}
+  footer{background:var(--gray-100);padding:80px var(--pad-x) 120px}
   footer .biz{display:flex;flex-direction:column;gap:8px;color:var(--gray-500)}
   footer .links a{color:var(--gray-500);text-decoration:none}
   /* 개인정보처리방침 링크 — 피그마 6:365 는 이 구간만 SemiBold (크기는 13 유지, 2026-08-01 롤백) */
@@ -243,7 +257,8 @@ fbq('track', 'PageView');
   /* ===== 플로팅 CTA ===== */
   .floating-cta{
     position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
-    width:calc(100% - 40px);max-width:360px;background:var(--kakao);color:var(--kakao-text);
+    /* 폭 = 화면 − 40, 카드 폭 − 40 인 500 에서 멈춘다 (연속) */
+    width:calc(100% - 40px);max-width:500px;background:var(--kakao);color:var(--kakao-text);
     border-radius:14px;padding:18px;text-align:center;text-decoration:none;
     display:flex;align-items:center;justify-content:center;gap:8px;
     box-shadow:0 12px 32px rgba(15,23,42,.25);z-index:10;
@@ -251,30 +266,12 @@ fbq('track', 'PageView');
   .floating-cta:active{transform:translateX(-50%) scale(.98)}
   .floating-cta svg{flex:none}
 
-  /* ===== 데스크톱 오버라이드 (520px~) — PC 에서만 넓어진다 =====
-     520px 미만(= 실기기 폰 전부)은 이 블록이 적용되지 않으므로 모바일 렌더는 그대로다.
-     카드 540 / 좌우 36 → 글이 퍼지는 폭 468. (2026-08-02 사용자 확정, 512/24/464 에서 변경)
-     레퍼런스 실측: 피클플러스 카드 540·글 508 (주선왕은 512·글 512). 피클플러스 폭을 택했다.
-     좌우 36 은 피클(16)·주선왕(0~24)보다 넓다 — 의도적으로 더 여유를 준 값이다.
-     피그마 프레임은 360px 고정 — 데스크톱 폭은 피그마와 무관한 웹 전용 반응형 값이다.
-     모바일(520px 미만)의 좌우 24 는 피그마 6:168 값이라 그대로 둔다.
-     ⚠️ 이 블록은 반드시 파일의 기본 규칙보다 **뒤에** 있어야 한다.
-        같은 특이도면 나중 규칙이 이기므로, 위쪽에 두면 section > * 같은 오버라이드가 조용히 무시된다. */
+  /* ===== 넓은 화면 카드 어포던스 (520px~) =====
+     폭은 위에서 이미 연속으로 처리했다. 여기 남은 것은 "회색 바탕 위의 카드"라는
+     시각적 표현뿐이라 값이 튀지 않는다(520~540 구간에서는 카드가 화면을 꽉 채워 회색이 안 보인다). */
   @media (min-width:520px){
     body{background:var(--gray-100)}
-    .page{max-width:540px;box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
-    header{max-width:540px;padding:24px 36px}
-    section{padding:100px 36px}
-    section > *{max-width:468px}
-    section > .chips{max-width:none}
-    footer{padding:80px 36px 120px}
-    footer .biz{max-width:468px}
-    /* 칩은 카드 밖(회색 바탕)으로 새지 않게 카드 폭에서 자른다 */
-    .chips{width:540px;margin-left:calc(50% - 270px);margin-right:calc(50% - 270px)}
-    /* CTA 폭 = 카드 − 40 (모바일과 같은 공식) */
-    .floating-cta{max-width:500px}
-    /* 폰 목업은 넓히지 않는다 — 기기를 그린 것이라 커지면 폰으로 안 보인다.
-       늘어나는 것은 "콘텐츠"(글·일러스트·칩·푸터)뿐이다. */
+    .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
   }
 
   @media (prefers-reduced-motion: no-preference){
