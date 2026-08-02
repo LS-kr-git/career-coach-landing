@@ -165,6 +165,26 @@ node tools/figma-audit/build-type-snapshot.mjs figma_type.json --write  # 반영
 - 모바일(520px 미만) 렌더는 데스크톱을 넓힐 때 **같이 넓어지면 안 된다.**
   `width-mobile-content-352` · `width-mobile-card-full` 이 430px 뷰포트에서 회귀를 잡는다.
 
+## 배포를 기다리지 않고 확인하기
+
+GitHub Pages 는 푸시 → 빌드 큐 → 배포라 라이브 반영까지 **10~15분**이 걸린다(2026-08-02 실측 14분 49초).
+그 사이 "고쳤는데 안 바뀐다" 로 시간을 버리지 말 것. 순서는 이렇다.
+
+1. **미리보기 파일을 만들어 사용자에게 보낸다** — 배포와 무관하게 즉시 확인 가능:
+   ```
+   node tools/make-preview.mjs          # assets 를 data: URL 로 인라인한 단일 HTML
+   ```
+   → `SendUserFile` 로 전달. 데스크톱이 연결돼 있으면 `create_artifact` 로
+   `careercoach-landing-preview` 아티팩트를 **갱신**해 준다(같은 id 를 계속 update — 새로 만들지 말 것).
+2. 라이브 반영 여부는 서버 응답으로 본다 (브라우저 캐시 말고):
+   ```js
+   const r = await fetch('/index.html', { cache: 'reload' }); r.headers.get('last-modified')
+   ```
+3. 아직이면 저장소 → Actions → `pages-build-deployment` 가 `Queued` 인지 본다. 맞으면 그냥 기다린다.
+
+**연달아 푸시하면 앞 빌드가 취소되고 큐가 더 밀린다.** 커밋을 모아서 한 번에 푸시하는 게 결국 빠르다.
+저장소 루트의 `.nojekyll` 은 Jekyll 빌드 단계를 건너뛰게 한다(큐 대기는 못 줄인다).
+
 ## 로컬 검수 환경
 - 줄바꿈·폭을 재려면 Pretendard 가 필요하다: `npm i pretendard` → `PretendardVariable.ttf` 를 `~/.fonts` 에 복사 → `fc-cache -f`.
   **폰트 없이 재면 줄바꿈 판정이 틀린다.** (타이포 검수 자체는 폰트 없이도 정확하다)
