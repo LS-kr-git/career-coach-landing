@@ -470,6 +470,32 @@ fbq('track', 'PageView');
     document.getElementById('ctaBtn').addEventListener('click', () => {
       if (window.fbq) fbq('track', 'InitiateCheckout', {value: 990, currency: 'KRW'});
     });
+
+    // 오버스크롤(러버밴드) 캔버스색 스위칭 — iOS 웹킷은 오버스크롤 영역을 위아래 구분 없이
+    // 단일 색(캔버스/body 배경색)으로만 칠하고 그라디언트·문서 밖 요소는 그리지 않는다.
+    // 그래서 스크롤 위치로 그 한 색을 바꿔친다: 상단부=흰색(헤더와 이어짐), 하단부=회색(푸터와 이어짐).
+    // 색 전환은 흰 카드(.page) 뒤에서 일어나 눈에 보이지 않는다. 데스크톱(≥520px)은 body 회색이
+    // 카드 양옆에 실제로 보이므로 건드리지 않는다.
+    (() => {
+      const mq = matchMedia('(max-width: 519px)');
+      let cur = null;
+      const apply = () => {
+        if (!mq.matches) {
+          if (cur !== null) { cur = null;
+            document.documentElement.style.backgroundColor = '';
+            document.body.style.backgroundColor = ''; }
+          return;
+        }
+        const mid = (document.documentElement.scrollHeight - innerHeight) / 2;
+        const c = scrollY < mid ? '#ffffff' : '#F1F5F9';
+        if (cur !== c) { cur = c;
+          document.documentElement.style.backgroundColor = c;
+          document.body.style.backgroundColor = c; }
+      };
+      addEventListener('scroll', apply, { passive: true });
+      addEventListener('resize', apply, { passive: true });
+      apply();
+    })();
   </script>
 </div>
 </body>
