@@ -2,102 +2,138 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="format-detection" content="telephone=no">
 <title>개인정보처리방침 — 커리어코치</title>
+<link rel="icon" type="image/svg+xml" href="assets/logo-circle.svg">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
-  :root { --bg:#FAFBFC; --ink-1:#1E293B; --ink-2:#475569; --muted:#94A3B8; --grid:#E2E8F0; --brand:#F59E0B; --brand-deep:#D97706; --navy:#1E3A8A; }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif; background:var(--bg); color:var(--ink-1); -webkit-font-smoothing:antialiased; }
-  .wrap { max-width: 720px; margin: 0 auto; padding: 0 24px 80px; }
-  header { display:flex; align-items:center; gap:10px; padding: 20px 0; border-bottom: 1px solid var(--grid); margin-bottom: 32px; }
-  .logo-mark { width:32px; height:32px; border-radius:8px; background:linear-gradient(135deg, var(--brand), var(--brand-deep)); display:flex; align-items:center; justify-content:center; flex:none; }
-  header a { text-decoration:none; color:var(--ink-1); font-weight:800; font-size:16px; display:flex; align-items:center; gap:10px; }
-  h1 { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
-  .date { font-size: 13px; color: var(--muted); margin-bottom: 32px; }
-  h2 { font-size: 16.5px; font-weight: 800; margin: 32px 0 10px; color: var(--navy); }
-  p, li { font-size: 14.5px; color: var(--ink-2); line-height: 1.75; }
-  ul { padding-left: 20px; margin: 8px 0; }
-  table { width:100%; border-collapse: collapse; margin: 12px 0; font-size: 13.5px; }
-  th, td { border: 1px solid var(--grid); padding: 9px 12px; text-align: left; color: var(--ink-2); line-height:1.6; }
-  th { background:#F1F5F9; color: var(--ink-1); font-weight:700; }
-  .back { display:inline-block; margin-top: 40px; font-size: 14px; color: var(--brand-deep); text-decoration:none; font-weight:700; }
+  /* 커리어코치 디자인 시스템 — index.html 과 동일한 토큰·폭·타이포·헤더를 그대로 쓴다.
+     피그마 단일 기준: 파일 LnT8TgFVBxky0bVyaF6Tob / 섹션 327:2474 "이용약관 / 개인정보처리방침". */
+  :root{
+    --amber-500:#F59E0B; --amber-600:#D97706;
+    --navy-500:#3B82F6; --navy-900:#1E3A8A;
+    --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-400:#94A3B8;
+    --gray-600:#475569; --gray-700:#334155; --gray-800:#1E293B;
+    /* 랜딩과 동일한 폭 시스템 — 카드 450 / 콘텐츠 402 / 좌우 여백 24 (index.html :root 와 같은 값) */
+    --pad-x: 24px;
+    --card-max: 450px;
+    --content-max: 402px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth;background:var(--gray-100)}
+  body{
+    font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;
+    background:#fff; color:var(--gray-800); -webkit-font-smoothing:antialiased;
+  }
+  /* 페이지 카드 — 랜딩과 동일하게 --card-max(450)에서 멈추고 가운데 정렬. 좌우 여백은 --pad-x(24). */
+  .page{width:100%;max-width:var(--card-max);margin:0 auto;background:#fff;min-height:100vh}
+
+  /* ===== 헤더 (index.html 과 동일: app-icon + mark-white.svg + wordmark.svg) ===== */
+  header{display:flex;align-items:center;gap:10px;padding:24px var(--pad-x)}
+  .app-icon{width:29px;height:29px;border-radius:25%;background:linear-gradient(135deg,#F59E0B,#D97706);display:flex;align-items:center;justify-content:center}
+  .app-icon img{width:21px;height:21px;display:block}
+  header .wordmark{height:21px;display:block}
+
+  /* ===== 문서 본문 — 시맨틱 태그에 피그마 text/* 스타일을 그대로 매핑 ===== */
+  .doc{padding:8px var(--pad-x) 96px}
+  .doc h1{font-size:28px;line-height:36px;font-weight:800;letter-spacing:-0.01em;color:var(--navy-900);margin-bottom:6px}      /* = text/display */
+  .doc .date{font-size:13px;line-height:18px;color:var(--gray-400);margin-bottom:28px}                                        /* = text/caption */
+  .doc h2{font-size:20px;line-height:28px;font-weight:700;letter-spacing:-0.01em;color:var(--navy-900);margin:30px 0 10px}     /* = text/h2 */
+  .doc p{font-size:15px;line-height:23px;font-weight:400;color:var(--gray-600);margin:6px 0}                                   /* = text/body */
+  .doc ul,.doc ol{padding-left:20px;margin:8px 0}
+  .doc li{font-size:15px;line-height:23px;font-weight:400;color:var(--gray-600);margin:5px 0}                                  /* = text/body */
+  .doc strong{font-weight:600;color:var(--gray-700)}
+  .doc a{color:var(--navy-500);text-decoration:underline}
+  /* 표 — 디자인 시스템 토큰(보더 gray-200, 헤더 gray-100)으로 스타일 */
+  .doc table{width:100%;border-collapse:collapse;margin:12px 0}
+  .doc th,.doc td{border:1px solid var(--gray-200);padding:9px 12px;text-align:left;font-size:14px;line-height:20px}           /* = text/body-s */
+  .doc th{background:var(--gray-100);color:var(--gray-800);font-weight:700}
+  .doc td{color:var(--gray-600)}
+  /* 돌아가기 링크 = text/button (15/20/600), 브랜드 앰버 */
+  .doc-back{display:inline-block;margin-top:40px;font-size:15px;line-height:20px;font-weight:600;color:var(--amber-600);text-decoration:none}
+
+  /* 넓은 화면에서만 회색 바탕 + 카드 그림자 (index.html 과 동일한 451px 임계값) */
+  @media (min-width:451px){
+    body{background:var(--gray-100)}
+    .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
+  }
+  :focus-visible{outline:2px solid var(--amber-500);outline-offset:2px}
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="page">
   <header>
-    <a href="./index.html">
-      <span class="logo-mark"><svg width="20" height="20" viewBox="0 0 48 48" fill="none"><path d="M9 41 V34 H15.5 V27.5 H22 V21 H28.9" stroke="white" stroke-width="4"/><rect x="28.9" y="14.5" width="5.8" height="25" fill="white"/><path d="M31.8 4 L41.4 15.5 L22.2 15.5 Z" fill="white"/><path d="M5.5 41 H42.5" stroke="white" stroke-width="4" stroke-linecap="round"/></svg></span>
-      커리어코치
-    </a>
+    <div class="app-icon"><img src="assets/mark-white.svg" alt=""></div>
+    <img class="wordmark" src="assets/wordmark.svg" alt="커리어코치">
   </header>
 
-  <h1>개인정보처리방침</h1>
-  <p class="date">시행일: 2026년 8월 1일</p>
+  <main class="doc">
+    <h1>개인정보처리방침</h1>
+    <p class="date">시행일: 2026년 8월 1일</p>
 
-  <p>주식회사 오늘의논문(이하 "회사")은 커리어코치 서비스(이하 "서비스") 이용자의 개인정보를 소중히 여기며, 「개인정보 보호법」 등 관련 법령을 준수합니다. 본 방침은 회사가 어떤 정보를 왜 수집하고, 어떻게 이용·보관·파기하는지를 설명합니다.</p>
+    <p>주식회사 오늘의논문(이하 "회사")은 커리어코치 서비스(이하 "서비스") 이용자의 개인정보를 소중히 여기며, 「개인정보 보호법」 등 관련 법령을 준수합니다. 본 방침은 회사가 어떤 정보를 왜 수집하고, 어떻게 이용·보관·파기하는지를 설명합니다.</p>
 
-  <h2>1. 수집하는 개인정보 항목 및 수집 방법</h2>
-  <table>
-    <tr><th>수집 시점</th><th>항목</th><th>수집 방법</th></tr>
-    <tr><td>회원가입(구독 신청)</td><td>이름, 성별, 연령대, 생일, 출생 연도, 휴대전화번호, 희망 직군·경력 연차·근무지 범위</td><td>회원가입 양식</td></tr>
-    <tr><td>카카오 로그인 이용 시</td><td>이름, 성별, 연령대, 생일, 출생 연도, 카카오계정(전화번호), CI(연계정보), 카카오톡 채널 추가 여부</td><td>카카오 로그인 동의 절차</td></tr>
-    <tr><td>결제 확인</td><td>입금자명, 입금 일시</td><td>계좌이체 내역</td></tr>
-    <tr><td>자동 수집</td><td>접속 기록, 유입 경로(UTM)</td><td>웹사이트 이용 과정</td></tr>
-  </table>
+    <h2>1. 수집하는 개인정보 항목 및 수집 방법</h2>
+    <table>
+      <tr><th>수집 시점</th><th>항목</th><th>수집 방법</th></tr>
+      <tr><td>회원가입(구독 신청)</td><td>이름, 성별, 연령대, 생일, 출생 연도, 휴대전화번호, 희망 직군·경력 연차·근무지 범위</td><td>회원가입 양식</td></tr>
+      <tr><td>카카오 로그인 이용 시</td><td>이름, 성별, 연령대, 생일, 출생 연도, 카카오계정(전화번호), CI(연계정보), 카카오톡 채널 추가 여부</td><td>카카오 로그인 동의 절차</td></tr>
+      <tr><td>결제 확인</td><td>입금자명, 입금 일시</td><td>계좌이체 내역</td></tr>
+      <tr><td>자동 수집</td><td>접속 기록, 유입 경로(UTM)</td><td>웹사이트 이용 과정</td></tr>
+    </table>
 
-  <h2>2. 개인정보의 수집·이용 목적</h2>
-  <ul>
-    <li>카카오 알림톡을 통한 채용공고 브리핑 발송 (서비스의 핵심 기능)</li>
-    <li>직군·연차·근무지 기반 맞춤 브리핑 제공</li>
-    <li>구독 신청 확인, 결제(입금) 확인 및 구독 관리</li>
-    <li>연령대·성별 등 인구통계 정보를 활용한 콘텐츠 품질 개선 및 통계 분석</li>
-    <li>CI(연계정보)를 통한 이용자 식별 및 중복 가입 확인</li>
-    <li>공지사항 전달, 문의 응대, 서비스 개선을 위한 통계 분석</li>
-  </ul>
+    <h2>2. 개인정보의 수집·이용 목적</h2>
+    <ul>
+      <li>카카오 알림톡을 통한 채용공고 브리핑 발송 (서비스의 핵심 기능)</li>
+      <li>직군·연차·근무지 기반 맞춤 브리핑 제공</li>
+      <li>구독 신청 확인, 결제(입금) 확인 및 구독 관리</li>
+      <li>연령대·성별 등 인구통계 정보를 활용한 콘텐츠 품질 개선 및 통계 분석</li>
+      <li>CI(연계정보)를 통한 이용자 식별 및 중복 가입 확인</li>
+      <li>공지사항 전달, 문의 응대, 서비스 개선을 위한 통계 분석</li>
+    </ul>
 
-  <h2>3. 개인정보의 보유 및 이용 기간</h2>
-  <p>구독 해지 또는 회원 탈퇴 시 지체 없이 파기합니다. 다만 관련 법령에 따라 아래 정보는 명시된 기간 동안 보관합니다.</p>
-  <ul>
-    <li>계약 또는 청약철회 등에 관한 기록: 5년 (전자상거래법)</li>
-    <li>대금 결제 및 재화 등의 공급에 관한 기록: 5년 (전자상거래법)</li>
-    <li>소비자 불만 또는 분쟁 처리에 관한 기록: 3년 (전자상거래법)</li>
-  </ul>
+    <h2>3. 개인정보의 보유 및 이용 기간</h2>
+    <p>구독 해지 또는 회원 탈퇴 시 지체 없이 파기합니다. 다만 관련 법령에 따라 아래 정보는 명시된 기간 동안 보관합니다.</p>
+    <ul>
+      <li>계약 또는 청약철회 등에 관한 기록: 5년 (전자상거래법)</li>
+      <li>대금 결제 및 재화 등의 공급에 관한 기록: 5년 (전자상거래법)</li>
+      <li>소비자 불만 또는 분쟁 처리에 관한 기록: 3년 (전자상거래법)</li>
+    </ul>
 
-  <h2>4. 개인정보 처리의 위탁</h2>
-  <table>
-    <tr><th>수탁자</th><th>위탁 업무</th></tr>
-    <tr><td>주식회사 카카오</td><td>카카오 로그인, 카카오톡 알림톡 메시지 전달</td></tr>
-    <tr><td>알림톡 발송 대행사(SOLAPI 등)</td><td>알림톡 발송 처리</td></tr>
-    <tr><td>클라우드 인프라 제공사</td><td>데이터 보관 및 서비스 운영 인프라</td></tr>
-  </table>
-  <p>회사는 위탁 계약 시 개인정보가 안전하게 관리되도록 필요한 사항을 규정하고 감독합니다.</p>
+    <h2>4. 개인정보 처리의 위탁</h2>
+    <table>
+      <tr><th>수탁자</th><th>위탁 업무</th></tr>
+      <tr><td>주식회사 카카오</td><td>카카오 로그인, 카카오톡 알림톡 메시지 전달</td></tr>
+      <tr><td>알림톡 발송 대행사(SOLAPI 등)</td><td>알림톡 발송 처리</td></tr>
+      <tr><td>클라우드 인프라 제공사</td><td>데이터 보관 및 서비스 운영 인프라</td></tr>
+    </table>
+    <p>회사는 위탁 계약 시 개인정보가 안전하게 관리되도록 필요한 사항을 규정하고 감독합니다.</p>
 
-  <h2>5. 개인정보의 제3자 제공</h2>
-  <p>회사는 이용자의 개인정보를 제3자에게 제공하지 않습니다. 다만 이용자가 사전에 동의하거나 법령에 의해 요구되는 경우는 예외로 합니다.</p>
+    <h2>5. 개인정보의 제3자 제공</h2>
+    <p>회사는 이용자의 개인정보를 제3자에게 제공하지 않습니다. 다만 이용자가 사전에 동의하거나 법령에 의해 요구되는 경우는 예외로 합니다.</p>
 
-  <h2>6. 이용자의 권리와 행사 방법</h2>
-  <p>이용자는 언제든지 자신의 개인정보에 대한 열람·정정·삭제·처리정지를 요구할 수 있습니다. 아래 연락처로 요청하시면 지체 없이 처리합니다. 카카오톡 채널 차단 또는 오픈채팅을 통한 해지 요청으로 알림톡 수신을 중단할 수 있습니다.</p>
+    <h2>6. 이용자의 권리와 행사 방법</h2>
+    <p>이용자는 언제든지 자신의 개인정보에 대한 열람·정정·삭제·처리정지를 요구할 수 있습니다. 아래 연락처로 요청하시면 지체 없이 처리합니다. 카카오톡 채널 차단 또는 오픈채팅을 통한 해지 요청으로 알림톡 수신을 중단할 수 있습니다.</p>
 
-  <h2>7. 개인정보의 파기 절차 및 방법</h2>
-  <p>보유 기간이 경과하거나 처리 목적이 달성된 개인정보는 재생 불가능한 방법으로 지체 없이 파기합니다. 전자적 파일은 복구할 수 없는 기술적 방법으로 삭제합니다.</p>
+    <h2>7. 개인정보의 파기 절차 및 방법</h2>
+    <p>보유 기간이 경과하거나 처리 목적이 달성된 개인정보는 재생 불가능한 방법으로 지체 없이 파기합니다. 전자적 파일은 복구할 수 없는 기술적 방법으로 삭제합니다.</p>
 
-  <h2>8. 개인정보의 안전성 확보 조치</h2>
-  <p>회사는 개인정보의 안전한 처리를 위해 접근 권한 최소화, 전송 구간 암호화(HTTPS), 접근 기록 관리 등의 조치를 시행합니다.</p>
+    <h2>8. 개인정보의 안전성 확보 조치</h2>
+    <p>회사는 개인정보의 안전한 처리를 위해 접근 권한 최소화, 전송 구간 암호화(HTTPS), 접근 기록 관리 등의 조치를 시행합니다.</p>
 
-  <h2>9. 개인정보 보호책임자</h2>
-  <ul>
-    <li>개인정보 보호책임자: 이채빈 (대표)</li>
-    <li>연락처: careercoach.my@gmail.com / 070-8018-9238</li>
-  </ul>
-  <p>개인정보 침해에 대한 신고·상담은 개인정보침해신고센터(privacy.kisa.or.kr, 국번 없이 118)에 문의하실 수 있습니다.</p>
+    <h2>9. 개인정보 보호책임자</h2>
+    <ul>
+      <li>개인정보 보호책임자: 이채빈 (대표)</li>
+      <li>연락처: careercoach.my@gmail.com</li>
+    </ul>
+    <p>개인정보 침해에 대한 신고·상담은 개인정보침해신고센터(privacy.kisa.or.kr, 국번 없이 118)에 문의하실 수 있습니다.</p>
 
-  <h2>10. 방침의 변경</h2>
-  <p>본 방침이 변경되는 경우 시행 7일 전부터 서비스 내 공지사항 또는 본 페이지를 통해 고지합니다.</p>
+    <h2>10. 방침의 변경</h2>
+    <p>본 방침이 변경되는 경우 시행 7일 전부터 서비스 내 공지사항 또는 본 페이지를 통해 고지합니다.</p>
 
-  <a class="back" href="./index.html">← 커리어코치로 돌아가기</a>
+    <a class="doc-back" href="./index.html">← 커리어코치로 돌아가기</a>
+  </main>
 </div>
 </body>
 </html>
