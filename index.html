@@ -63,7 +63,10 @@ fbq('track', 'PageView');
   /* 페이지는 기기 폭을 꽉 채우고(좌우 여백 0), 안쪽 콘텐츠만 400px로 고정한다.
      이렇게 해야 푸터 회색 띠도 화면 끝까지 이어진다. */
   /* overflow-x:clip — 칩 줄이 100vw로 삐져나올 때 가로 스크롤이 생기지 않도록 */
-  .page{width:100%;margin:0 auto;background:#fff;min-height:100vh;position:relative;overflow-x:clip}
+  /* padding-top:100vh + margin-top:-100vh — 흰 카드 배경을 문서 위로 100vh 덧댄다(위쪽 오버스크롤 흰색).
+     absolute/fixed 덧댐은 iOS 크롬이 문서 위 영역에서 안 그려줘서, 요소 자신의 배경을 늘리는 이 방식만 확실하다. */
+  .page{width:100%;margin:0 auto;background:#fff;min-height:100vh;position:relative;overflow-x:clip;
+    padding-top:100vh;margin-top:-100vh}
   header{max-width:400px;margin-left:auto;margin-right:auto;width:100%}
   footer .biz{max-width:352px;margin:0 auto}
   @media (min-width:520px){
