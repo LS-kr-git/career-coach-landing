@@ -136,8 +136,8 @@
     },
     {
       "id": "illust-no-box",
-      "결정": "일러스트는 투명 PNG — 회색 박스 배경을 씌우지 않는다 (2026-08-01 신규 6종)",
-      "mustMatch": "\\.illust\\{width:100%;border-radius:12px;display:block\\}",
+      "결정": "일러스트는 투명 PNG — 회색 박스 배경을 씌우지 않는다 (2026-08-01 신규 6종) / height:auto 는 2026-08-02 추가 — 없으면 폭만 늘어나 가로로 눌린다.",
+      "mustMatch": "\\.illust\\{width:100%;height:auto;border-radius:12px;display:block\\}",
       "mustNotMatch": "\\.illust\\{[^}]*background:var\\(--gray-100\\)"
     },
     {
@@ -158,9 +158,9 @@
       "mustMatch": "(class=\"bg-(blue|amber|gray)\"[\\s\\S]*?){5}"
     },
     {
-      "id": "desk-card-512",
-      "결정": "넓은 화면 카드 폭 512px / 콘텐츠 464px (2026-08-02 사용자 확정, 이전 400/352). 레퍼런스 실측 주선왕 카드 512·글 512, 피클플러스 카드 540·글 508. 피그마 기준 프레임은 360px 고정 — 데스크톱 폭은 피그마와 무관한 웹 전용 반응형 값이므로 360/400 으로 \"되돌리지\" 말 것. 실제 렌더 폭은 figma-style.json 의 width-desk-* 가 계산값으로 잡는다.",
-      "mustMatch": "@media \\(min-width:520px\\)\\{[\\s\\S]{0,200}\\.page\\{max-width:512px"
+      "id": "desk-card-540",
+      "결정": "넓은 화면 카드 폭 540px / 좌우 36 / 콘텐츠 468px (2026-08-02 사용자 확정, 같은 날 512/24/464 에서 변경, 그 전 400/24/352). 피클플러스 카드 폭(540)을 택했다 — 주선왕은 512. 피그마 기준 프레임은 360px 고정이고 모바일 좌우 24 도 피그마 6:168 값 그대로다. 데스크톱 폭·패딩만 웹 전용 반응형 값이므로 360/400/24 로 \"되돌리지\" 말 것. 실제 렌더 폭은 figma-style.json 의 width-desk-* / spacing-desk-section-36 이 계산값으로 잡는다.",
+      "mustMatch": "@media \\(min-width:520px\\)\\{[\\s\\S]{0,200}\\.page\\{max-width:540px"
     },
     {
       "id": "step-text-16",
@@ -186,7 +186,12 @@
     {
       "id": "desk-override-order",
       "결정": "데스크톱 오버라이드 @media 블록은 기본 규칙보다 뒤에 있어야 한다. 위에 두면 section > * 같은 오버라이드가 같은 특이도에 밀려 조용히 무시된다 (2026-08-02 실제로 겪음).",
-      "mustMatch": "section > \\*\\{width:100%;max-width:352px\\}[\\s\\S]*@media \\(min-width:520px\\)\\{[\\s\\S]{0,400}section > \\*\\{max-width:464px\\}"
+      "mustMatch": "section > \\*\\{width:100%;max-width:352px\\}[\\s\\S]*@media \\(min-width:520px\\)\\{[\\s\\S]{0,400}section > \\*\\{max-width:468px\\}"
+    },
+    {
+      "id": "illust-height-auto",
+      "결정": "img.illust 는 height=\"224\" 같은 속성을 갖고 있으므로 CSS 에 height:auto 가 반드시 있어야 한다. 없으면 width:100% 로 폭만 늘어나 가로로 눌린다 (2026-08-02 데스크톱 확장 때 실제로 발생). 비율 자체는 figma-style.json 의 illust-aspect-* 가 렌더로 잡는다.",
+      "mustMatch": "\\.illust\\{width:100%;height:auto"
     }
   ],
   "_부호예외설명": "따옴표·말줄임표만 다르고 그 차이를 의도적으로 허용한 노드. 이유를 반드시 적을 것.",

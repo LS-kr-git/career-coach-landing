@@ -104,6 +104,9 @@ const measured = new Array(spec.items.length);
 for (const [vw, idxs] of [...byViewport.entries()].sort((a, b) => a[0] - b[0])) {
   const page = await browser.newPage({ viewport: { width: vw, height: 900 } });
   await page.goto(pathToFileURL(htmlPath).href, { waitUntil: 'domcontentloaded' });
+  // "aspect" 검사는 naturalWidth 가 필요하다 → 이미지 로드를 기다린다
+  await page.evaluate(() => Promise.all([...document.images].map((i) =>
+    i.complete ? null : new Promise((r) => { i.onload = i.onerror = r; }))));
   const got = await page.evaluate((items) =>
     items.map((it) => {
       const el = document.querySelector(it.sel);
@@ -114,6 +117,17 @@ for (const [vw, idxs] of [...byViewport.entries()].sort((a, b) => a[0] - b[0])) 
         if (prop === 'shadow') got.shadow = cs.boxShadow && cs.boxShadow !== 'none' ? '있음' : '없음';
         else if (prop === 'tag') got.tag = el.tagName;
         else if (prop === 'width') got.width = `${Math.round(el.getBoundingClientRect().width)}px`;
+        else if (prop === 'aspect') {
+          // 선택자에 걸리는 이미지 전부의 렌더 비율이 원본 비율과 같은가
+          const els = [...document.querySelectorAll(it.sel)].filter((e) => e.naturalWidth);
+          const bad = els.filter((e) => {
+            const r = e.getBoundingClientRect();
+            return Math.abs(r.width / r.height - e.naturalWidth / e.naturalHeight) > 0.02;
+          });
+          got.aspect = els.length === 0 ? '이미지 없음'
+            : bad.length ? `깨짐 ${bad.length}/${els.length} (${bad.map((e) => e.getAttribute('src').split('/').pop()).join(', ')})`
+            : '정상';
+        }
         else got[prop] = cs.getPropertyValue(prop);
       }
       return { id: it.id, got };
