@@ -131,6 +131,18 @@ node tools/figma-audit/audit.mjs figma_meta.xml figma_type.json figma_style.json
 ```
 - 두 번째/세 번째 인자를 빼면 "🅰️ / 🎨 신선도 미확인" 이 조치 필요 항목으로 뜬다. **확인 안 한 걸 통과로 착각하지 않기 위한 장치**이니 `--skip-type-freshness` 로 덮지 말 것.
 - "차이 없음" 이 나와야 푸시한다.
+- **덤프를 재사용하지 않는다. 세션마다 다시 뽑는다.** 2026-08-02 에 08:24 덤프로 검수해 "차이 없음" 이
+  나왔는데, 그 사이 피그마 푸터(6:364)에 문의·전화번호가 들어가 있었다. **옛 피그마 vs 새 웹**을
+  비교한 것이라 통과한 것이지 실제로 같아서가 아니었다. 지금은 `🕰️ 덤프 낡음` 이 이걸 막는다 —
+  덤프 파일이 `index.html` 보다 오래됐으면 차단, 24시간 넘었으면 경고.
+  덤프가 진짜 최신인지 싸게 확인하려면 노드별 해시를 비교한다(전문을 다시 받을 필요가 없다):
+  ```js
+  // use_figma (읽기 전용) — 결과를 기존 덤프에서 뽑은 해시와 대조
+  const frame = await figma.getNodeByIdAsync('6:148');
+  const h = s => { let x = 5381; for (const c of s) x = ((x*33) ^ c.codePointAt(0)) >>> 0; return x.toString(36); };
+  const out = {}; for (const n of frame.findAllWithCriteria({ types: ['TEXT'] })) out[n.id] = h(n.characters.replace(/\s+/g,''));
+  return out;
+  ```
 
 ### 2-2. 검수가 보는 것 (2026-08-01 확장)
 | 검사 | 무엇을 보나 | 근거 파일 |
@@ -236,6 +248,10 @@ GitHub Pages 는 푸시 → 빌드 큐 → 배포라 라이브 반영까지 **10
 - 줄바꿈·폭을 재려면 Pretendard 가 필요하다: `npm i pretendard` → `PretendardVariable.ttf` 를 `~/.fonts` 에 복사 → `fc-cache -f`.
   **폰트 없이 재면 줄바꿈 판정이 틀린다.** (타이포 검수 자체는 폰트 없이도 정확하다)
 - 샌드박스에서 `figma.com` 과 jsdelivr 는 차단돼 있다. 이미지는 사용자가 피그마에서 Export → 채팅 첨부가 표준 경로.
+- **Figma MCP 실행 환경에 `Pretendard Variable` 이 설치돼 있지 않다** (`listAvailableFontsAsync` 8,927개 중 0개).
+  텍스트 노드의 **문자열 수정은 불가능**하다 — 플러그인 API 는 편집 전 `loadFontAsync` 를 강제하는데
+  그 폰트가 없어서 실패한다. 읽기(`characters`·`getStyledTextSegments`)와 폰트가 필요 없는 편집
+  (크기·위치·색·프레임 폭)은 된다. **문구 변경은 사용자가 피그마에서 직접 해야 한다.** (2026-08-02 확인)
 
 ## 푸시
 공개 저장소라 토큰 없이 clone 된다. 푸시는:
