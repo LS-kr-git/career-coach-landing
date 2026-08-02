@@ -113,9 +113,9 @@
       "mustMatch": "section > \\*\\{width:100%;max-width:var\\(--content-max\\)\\}"
     },
     {
-      "id": "desk-bg-520",
-      "결정": "회색 바탕 + 카드 그림자는 520px 이상에서만",
-      "mustMatch": "@media \\(min-width:520px\\)\\{[\\s\\S]{0,200}background:var\\(--gray-100\\)"
+      "id": "desk-bg-over-card",
+      "결정": "회색 바탕 + 카드 그림자는 카드가 화면을 다 못 채우는 폭부터 나온다. 임계값(451)은 --card-max(450) 바로 위여야 한다. 2026-08-02: 카드 상한을 400 → 450 으로 올렸는데 이 블록과 오버스크롤 스크립트가 520/519 에 묶여 있어 451~519 구간에서 색 있는 섹션 양옆이 흰색으로 보였다. 실제 색은 flow-audit.mjs 의 \"카드 양옆 바탕색\" 이 1px 씩 훑어 확인한다.",
+      "mustMatch": "@media \\(min-width:451px\\)\\{[\\s\\S]{0,200}background:var\\(--gray-100\\)"
     },
     {
       "id": "chips-3rows-bleed",
@@ -197,6 +197,11 @@
       "id": "mockup-content-nopad",
       "결정": ".phone-content 는 좌우 패딩 0 이어야 한다. 4px 이 있으면 말풍선이 피그마 224 가 아니라 216 이 되어 목업 본문이 한 줄씩 밀린다(2026-08-02 실제 발생). 폭 자체는 figma-style.json 의 width-alim-card-224 가 렌더로 잡는다.",
       "mustMatch": "\\.phone-content\\{position:relative;z-index:1;padding:55px 0 40px\\}"
+    },
+    {
+      "id": "overscroll-threshold-from-var",
+      "결정": "오버스크롤 캔버스색 스크립트의 임계값은 숫자를 박지 말고 --card-max 에서 읽는다. 박아 두면 카드 상한을 바꿀 때마다 어긋나 양옆이 흰색으로 남는다 (2026-08-02 실제 발생).",
+      "mustMatch": "getPropertyValue\\('--card-max'\\)"
     }
   ],
   "_부호예외설명": "따옴표·말줄임표만 다르고 그 차이를 의도적으로 허용한 노드. 이유를 반드시 적을 것.",

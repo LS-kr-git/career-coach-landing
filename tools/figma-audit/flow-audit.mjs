@@ -13,6 +13,9 @@
  *   1) 연속성 — 폭 1px 변화에 추적 요소가 JUMP_PX 이상 튀는가
  *   2) 가로 스크롤 — 어느 폭에서든 문서가 화면보다 넓어지는가
  *   3) 이미지 비율 — 모든 폭에서 .illust 렌더 비율이 원본 비율과 같은가
+ *   4) 카드 양옆 바탕색 — 카드가 화면보다 좁아진 폭에서 양옆이 흰색으로 남아 있지 않은가
+ *      (2026-08-02: 오버스크롤 스크립트가 519px 로 임계값을 박아 둬서, 카드 상한을 450 으로 낮춘 뒤
+ *       451~519 구간에서 색 있는 섹션 양옆이 흰색으로 보였다. 값이 아니라 "두 임계값이 어긋난" 버그다)
  *
  * playwright 가 없으면 조용히 건너뛴다(종료코드 0, skipped=true).
  */
@@ -78,6 +81,9 @@ let steps = 0;
 for (let w = FROM; w <= TO; w += STEP) {
   await page.setViewportSize({ width: w, height: 700 });
   const v = await page.evaluate((track) => {
+    // 뷰포트 변경 직후 resize 리스너가 아직 안 돌았을 수 있다(오버스크롤 캔버스색 스크립트 등).
+    // 동기적으로 한 번 돌려 상태를 확정한 뒤 잰다 — 안 그러면 직전 폭의 값이 남아 오탐이 난다.
+    window.dispatchEvent(new Event('resize'));
     const de = document.documentElement;
     const out = { _scroll: de.scrollWidth > de.clientWidth + 1 };
     for (const t of track) {
@@ -92,6 +98,16 @@ for (let w = FROM; w <= TO; w += STEP) {
       const r = i.getBoundingClientRect();
       return Math.abs(r.width / r.height - i.naturalWidth / i.naturalHeight) > 0.02;
     }).length;
+    // 카드가 화면보다 좁으면 양옆 바탕이 보인다 — 흰색이면 색 있는 섹션 옆에서 튀어 보인다
+    const card = document.querySelector('.page');
+    const cw = card ? card.getBoundingClientRect().width : de.clientWidth;
+    out._gutter = null;
+    if (cw < de.clientWidth - 1) {
+      const canvas = getComputedStyle(document.documentElement).backgroundColor;
+      const body = getComputedStyle(document.body).backgroundColor;
+      const white = (c) => /^rgba?\(\s*255,\s*255,\s*255/.test(c);
+      if (white(canvas) || white(body)) out._gutter = `canvas=${canvas} body=${body}`;
+    }
     return out;
   }, TRACK);
   steps++;
@@ -100,6 +116,9 @@ for (let w = FROM; w <= TO; w += STEP) {
     detail: `${w}px 에서 문서가 화면보다 넓어집니다` });
   if (v._ratioBad) findings.push({ level: 'FLOW', kind: '이미지 비율', width: w,
     detail: `${w}px 에서 일러스트 ${v._ratioBad}개의 비율이 원본과 다릅니다` });
+  if (v._gutter) findings.push({ level: 'FLOW', kind: '카드 양옆 바탕색', width: w,
+    detail: `${w}px 에서 카드가 화면보다 좁은데 양옆이 흰색입니다 (${v._gutter})`,
+    note: '카드 상한(--card-max)과 배경 전환 임계값이 어긋났는지 확인하세요 — @media 와 오버스크롤 스크립트 양쪽' });
 
   if (prev) {
     for (const t of TRACK) {
