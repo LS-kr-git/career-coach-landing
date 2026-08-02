@@ -193,6 +193,8 @@ fbq('track', 'PageView');
   .chips{
     display:flex;flex-direction:column;gap:16px;align-items:center;
     width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);
+    /* 피그마 6:248 — 칩 블록 위아래 50px 여백 (이미지 영역 안쪽 패딩) */
+    padding:50px 0;
     overflow:hidden;
     /* overflow:hidden 이 마지막 줄 칩의 그림자(0 1px 3px)와 보더 아래 1px을 잘라내
        하단이 미세하게 짤려 보였다. 클립 경계는 패딩 박스 끝이므로 위아래 4px 패딩으로
