@@ -32,7 +32,21 @@ const add = (level, kind, file, detail, note) => findings.push({ level, kind, fi
 
 /* ---------- 대상 수집 ---------- */
 
-const pages = readdirSync(ROOT).filter((f) => f.endsWith('.html')).sort();
+// 루트뿐 아니라 하위 폴더까지 훑는다 — 온보딩처럼 /onboarding/1/index.html 로
+// 폴더 주소를 쓰는 페이지가 검수 사각지대에 남지 않도록. (2026-08-02)
+const SKIP_DIRS = new Set(['node_modules', '.git', 'tools', '.github']);
+const collectPages = (dir, prefix = '') => {
+  const out = [];
+  for (const entry of readdirSync(dir)) {
+    if (SKIP_DIRS.has(entry) || entry.startsWith('.')) continue;
+    const full = join(dir, entry);
+    const rel = prefix ? posix.join(prefix, entry) : entry;
+    if (statSync(full).isDirectory()) out.push(...collectPages(full, rel));
+    else if (entry.endsWith('.html')) out.push(rel);
+  }
+  return out;
+};
+const pages = collectPages(ROOT).sort();
 const cnamePath = join(ROOT, 'CNAME');
 const domain = existsSync(cnamePath) ? readFileSync(cnamePath, 'utf8').trim() : null;
 
@@ -94,22 +108,39 @@ for (const page of pages) {
       continue;
     }
     // 로컬 경로
-    const clean = url.split(/[?#]/)[0].replace(/^\.\//, '');
-    const target = join(ROOT, clean);
+    // "/onboarding/1/" 처럼 슬래시로 시작하면 저장소 루트 기준, 아니면 그 페이지가 있는 폴더 기준이다.
+    // 폴더로 끝나는 주소는 GitHub Pages 가 그 안의 index.html 을 준다 — 그걸로 판정한다. (2026-08-02)
+    const bare = url.split(/[?#]/)[0];
+    if (!bare) continue;
+    const fromRoot = bare.startsWith('/');
+    const pageDir = page.includes('/') ? posix.dirname(page) : '';
+    const parts = (fromRoot ? bare : posix.join(pageDir, bare)).split('/').filter((p) => p && p !== '.');
+    // ".." 정리
+    const norm = [];
+    for (const p of parts) { if (p === '..') norm.pop(); else norm.push(p); }
+    const clean = norm.join('/');
+    const target = clean ? join(ROOT, clean) : ROOT;
+
     if (!existsSync(target)) {
       add('BLOCK', '깨진 링크', page, url, '해당 파일이 저장소에 없습니다');
-    } else {
-      // 대소문자까지 일치하는지 (GitHub Pages 는 대소문자를 구분한다)
-      const parts = clean.split('/');
-      let dir = ROOT;
-      let ok = true;
-      for (const part of parts) {
-        if (!readdirSync(dir).includes(part)) { ok = false; break; }
-        dir = join(dir, part);
-      }
-      if (!ok) add('BLOCK', '대소문자 불일치', page, url, 'GitHub Pages 는 경로 대소문자를 구분합니다');
-      if (clean.startsWith('assets/')) referenced.add(clean.slice('assets/'.length));
+      continue;
     }
+    // 대소문자까지 일치하는지 (GitHub Pages 는 대소문자를 구분한다)
+    let dir = ROOT;
+    let ok = true;
+    for (const part of norm) {
+      if (!readdirSync(dir).includes(part)) { ok = false; break; }
+      dir = join(dir, part);
+    }
+    if (!ok) {
+      add('BLOCK', '대소문자 불일치', page, url, 'GitHub Pages 는 경로 대소문자를 구분합니다');
+      continue;
+    }
+    if (statSync(target).isDirectory() && !existsSync(join(target, 'index.html'))) {
+      add('BLOCK', '폴더 주소에 index 없음', page, url, '폴더 주소는 그 안의 index.html 로 열립니다 — 파일을 만드세요');
+      continue;
+    }
+    if (clean.startsWith('assets/')) referenced.add(clean.slice('assets/'.length));
   }
 
   /* 2-b) 우리 도메인 절대 URL (og:image, canonical 등) 도 실제 파일이어야 한다 */

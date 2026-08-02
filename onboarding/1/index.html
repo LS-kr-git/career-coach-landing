@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no"><title>직군 선택 — 커리어코치</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root{
+    --amber-50:#FFFBEB;--amber-100:#FEF3C7;--amber-200:#FDE68A;--amber-500:#F59E0B;--amber-600:#D97706;--amber-700:#B45309;
+    --gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;--gray-300:#CBD5E1;--gray-400:#94A3B8;
+    --gray-500:#64748B;--gray-600:#475569;--gray-700:#334155;--gray-800:#1E293B;--gray-900:#0F172A;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{background:#fff}
+  body{font-family:'Pretendard Variable',Pretendard,'Pretendard','Noto Sans CJK KR',-apple-system,sans-serif;
+    background:#fff;color:var(--gray-800);-webkit-font-smoothing:antialiased}
+  .board{width:100%;max-width:450px;margin:0 auto;min-height:100vh;background:#fff;
+    padding-bottom:calc(100px + env(safe-area-inset-bottom))}
+  @media (min-width:451px){ body{background:var(--gray-100)}
+    .board{box-shadow:0 0 24px rgba(15,23,42,.06),0 0 64px rgba(15,23,42,.10)} }
+
+  /* 상단바 — 화살표는 좌측 24 그대로, 탭 영역만 44×44 (음수 마진으로 레이아웃 높이는 14 유지) */
+  .nav{display:flex;align-items:center;padding:calc(18px + env(safe-area-inset-top)) 24px 0}
+  .back{text-decoration:none;width:44px;height:44px;margin:-15px 0 -15px -18.5px;display:flex;align-items:center;justify-content:center;
+    background:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .back:active{opacity:.5}
+  /* 진행 바 — 3칸 전체가 하나의 그라디언트로 이어지도록 background-size/position 으로 잘라 쓴다 */
+  .prog{display:flex;gap:5px;padding:22px 24px 0}
+  .prog i{height:3px;border-radius:99px;background-color:var(--gray-100);flex:1}
+  .prog i.on{background-image:linear-gradient(90deg,#FBBF24 0%,#D97706 100%);background-size:300% 100%;background-repeat:no-repeat}
+  .prog i:nth-child(1).on{background-position:0% 0}
+  .prog i:nth-child(2).on{background-position:50% 0}
+  .prog i:nth-child(3).on{background-position:100% 0}
+
+  .kick{padding:20px 24px 0;font-size:13px;line-height:18px;font-weight:600;color:var(--amber-600);
+    display:flex;align-items:center;gap:6px}
+  .kick .off{color:var(--gray-300);font-weight:600}
+  .kick i{font-style:normal;font-weight:600}
+  .title{padding:9px 24px 0;font-size:24px;line-height:32px;font-weight:700;color:var(--gray-900);letter-spacing:-0.01em}
+  .desc{padding:10px 24px 0;font-size:14px;line-height:20px;color:var(--gray-500)}
+  .scroll{padding:24px 24px 0}
+
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .c,.call{border:1px solid var(--gray-200);background:#fff;color:var(--gray-600);border-radius:10px;
+    padding:8px 11px;font-size:13px;line-height:18px;font-weight:400;
+    cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;
+    transition:background .12s,border-color .12s,color .12s}
+  .c:active,.call:active{transform:scale(.97)}
+  .c.on{background:var(--amber-50);border-color:var(--amber-500);color:var(--amber-600)}
+  .call{display:inline-flex;align-items:center;gap:5px}
+  .call.on{background:var(--amber-500);border-color:var(--amber-500);color:#fff}
+  .call svg{display:none}
+
+  /* 구분선은 inset 그림자 — 피그마의 INSIDE 스트로크처럼 높이를 안 늘린다 (행 52px 유지) */
+  .acc{box-shadow:inset 0 1px 0 var(--gray-100)}
+  .acc:last-of-type{box-shadow:inset 0 1px 0 var(--gray-100),inset 0 -1px 0 var(--gray-100)}
+  .arow{display:flex;align-items:center;padding:15px 0;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
+  .arow .nm{font-size:15px;line-height:22px;font-weight:600;color:var(--gray-800)}
+  .arow .cnt{margin-left:7px;font-size:12px;color:var(--gray-400);font-weight:500}
+  .arow .sel{margin-left:auto;font-size:12px;font-weight:700;color:var(--amber-600)}
+  .arow .cv{margin-left:auto;color:var(--gray-300);font-size:11px;line-height:14px;font-weight:500}
+  .abody{padding:2px 0 16px}
+
+  .grp{margin-bottom:24px}
+  .ghead{display:flex;align-items:center;margin-bottom:10px}
+  .ghead h3{font-size:13px;line-height:18px;font-weight:600;color:var(--gray-500)}
+
+  /* 슬라이더 — 그림자 없음 */
+  .sumB{text-align:center}
+  .sumB .k{font-size:12px;color:var(--gray-400);font-weight:600}
+  .sumB .v{font-size:31px;line-height:40px;font-weight:700;color:var(--gray-900);letter-spacing:-0.03em;margin-top:2px}
+  .track{position:relative;height:6px;border-radius:99px;background:var(--gray-100);margin:30px 0 0}
+  .fill{position:absolute;height:6px;border-radius:99px}
+  .fill.grad{background:linear-gradient(90deg,#FBBF24,#D97706)}
+  .fill.solid{background:var(--amber-500)}
+  .knob{position:absolute;top:50%;transform:translate(-50%,-50%);width:24px;height:24px;border-radius:50%;
+    background:#fff;border:2px solid var(--amber-500)}
+  .axis{display:flex;justify-content:space-between;margin-top:11px;font-size:11px;line-height:14px;font-weight:500;color:var(--gray-400)}
+  /* B5 밴드 — 위아래 선 + 선택 구간 밑줄 */
+  .b5{display:flex;margin-top:22px;border-top:1px solid var(--gray-100);border-bottom:1px solid var(--gray-100)}
+  .b5 div{padding:11px 4px;text-align:center;font-size:11px;line-height:14px;font-weight:500;color:var(--gray-400)}
+  .b5 div b{display:block;font-size:13px;line-height:18px;font-weight:600;color:var(--gray-600);margin-bottom:2px}
+  .b5 div.hit{color:var(--amber-600);box-shadow:inset 0 -2px 0 var(--amber-500)}
+  .b5 div.hit b{color:var(--amber-600)}
+  .note{margin-top:14px;font-size:11.5px;line-height:18px;color:var(--gray-400)}
+
+  /* 플로팅 CTA — 크기·위치는 랜딩(index.html .floating-cta)과 동일:
+     width calc(100% - 40px) / max 410 / height 60 / bottom 20 / radius 14 / 가운데 정렬.
+     색·그림자색·글자 스타일만 온보딩 값이다. */
+  .fade{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:450px;height:100px;
+    background:linear-gradient(180deg,rgba(255,255,255,0),#fff 55%);pointer-events:none;z-index:9}
+  .cta{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    width:calc(100% - 40px);max-width:410px;height:60px;
+    display:block;text-align:center;line-height:60px;
+    background:var(--amber-500);color:#fff;border-radius:14px;
+    font-size:15px;font-weight:600;
+    box-shadow:0 12px 32px rgba(217,119,6,.28);cursor:pointer;z-index:10;
+    -webkit-tap-highlight-color:transparent}
+  .cta:active{transform:translateX(-50%) scale(.98)}
+  .cta .s2{opacity:.85}
+  .cta.off{background:var(--gray-100);color:var(--gray-400);box-shadow:none}
+</style></head><body>
+<div class="board"><div class="nav"><a class="back" href="/" aria-label="뒤로"><svg width="7" height="14" viewBox="0 0 7 14" fill="none" overflow="visible"><path d="M7 0L0 7l7 7" stroke="#0F172A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
+  <div class="prog"><i class="on"></i><i></i><i></i></div>
+  <div class="kick"><span>직군</span><i class="off">·</i><span class="off">연차</span><i class="off">·</i><span class="off">근무지</span></div>
+  <div class="title">어떤 직무의 공고를<br>받아볼까요?</div>
+  <div class="desc">여러 직무를 함께 고를 수 있어요</div>
+  <div class="scroll"><div class="acc"><div class="arow"><div class="nm">개발</div><div class="cv">▼</div></div><div class="abody" hidden><div class="chips"><span class="call"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>전체</span><div class="c">백엔드</div><div class="c">프론트엔드</div><div class="c">풀스택</div><div class="c">데이터 엔지니어</div><div class="c">AI·ML</div><div class="c">DevOps·인프라</div><div class="c">QA</div><div class="c">안드로이드</div><div class="c">iOS</div><div class="c">보안</div><div class="c">크로스플랫폼</div><div class="c">임베디드</div></div></div></div><div class="acc"><div class="arow"><div class="nm">마케팅</div><div class="cv">▲</div></div><div class="abody"><div class="chips"><span class="call on"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>전체</span><div class="c on">퍼포먼스</div><div class="c on">콘텐츠</div><div class="c on">브랜드</div><div class="c on">그로스</div><div class="c on">CRM</div><div class="c on">SNS·커뮤니티</div><div class="c on">광고기획(AE)</div><div class="c on">제휴·파트너십</div><div class="c on">PR·홍보</div><div class="c on">오프라인·이벤트</div><div class="c on">마케팅 기획</div></div></div></div><div class="acc"><div class="arow"><div class="nm">기획·전략</div><div class="cv">▼</div></div><div class="abody" hidden><div class="chips"><span class="call"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>전체</span><div class="c">서비스기획(PM·PO)</div><div class="c">사업개발</div><div class="c">데이터분석</div><div class="c">전략기획</div><div class="c">프로젝트 매니저</div><div class="c">UX 리서치</div><div class="c">컨설팅</div></div></div></div><div class="acc"><div class="arow"><div class="nm">영업</div><div class="cv">▼</div></div><div class="abody" hidden><div class="chips"><span class="call"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>전체</span><div class="c">B2B 세일즈</div><div class="c">영업관리</div><div class="c">CS·고객성공</div><div class="c">B2C 세일즈</div><div class="c">세일즈 매니저</div><div class="c">해외영업</div><div class="c">리테일·매장</div></div></div></div><div class="acc"><div class="arow"><div class="nm">디자인</div><div class="cv">▲</div></div><div class="abody"><div class="chips"><span class="call"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>전체</span><div class="c on">UX·UI / 프로덕트</div><div class="c">그래픽</div><div class="c on">BX·브랜드</div><div class="c">영상·모션</div><div class="c">웹·퍼블리싱</div><div class="c">3D</div><div class="c">게임 아트</div><div class="c">공간·산업</div></div></div></div><div class="acc"><div class="arow"><div class="nm">경영지원</div><div class="cv">▼</div></div><div class="abody" hidden><div class="chips"><span class="call"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>전체</span><div class="c">인사·HR</div><div class="c">재무·회계</div><div class="c">총무·오피스</div><div class="c">경영기획</div><div class="c">HRD·조직문화</div><div class="c">법무</div><div class="c">구매</div><div class="c">세무</div><div class="c">IR</div></div></div></div><div class="acc"><div class="arow"><div class="nm">물류·생산</div><div class="cv">▼</div></div><div class="abody" hidden><div class="chips"><span class="call"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>전체</span><div class="c">생산관리</div><div class="c">품질관리(QC)</div><div class="c">SCM·구매</div><div class="c">물류·유통</div><div class="c">설비·공정</div><div class="c">안전관리</div><div class="c">시설관리</div></div></div></div><div class="acc"><div class="arow"><div class="nm">미디어·콘텐츠</div><div class="cv">▼</div></div><div class="abody" hidden><div class="chips"><span class="call"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>전체</span><div class="c">에디터·기자</div><div class="c">영상 PD</div><div class="c">편집·촬영</div><div class="c">작가</div><div class="c">사진</div><div class="c">번역·통역</div></div></div></div><div class="acc"><div class="arow"><div class="nm">의료·바이오</div><div class="cv">▼</div></div><div class="abody" hidden><div class="chips"><span class="call"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>전체</span><div class="c">임상</div><div class="c">연구·R&D</div><div class="c">인허가(RA)</div><div class="c">의료기기</div><div class="c">약무</div></div></div></div><div class="acc"><div class="arow"><div class="nm">교육</div><div class="cv">▼</div></div><div class="abody" hidden><div class="chips"><span class="call"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>전체</span><div class="c">강사·교사</div><div class="c">교육기획</div><div class="c">교재·콘텐츠</div><div class="c">학원운영</div></div></div></div></div>
+</div>
+<div class="fade"></div>
+<div class="cta">다음</div>
+<script>
+const accs=[...document.querySelectorAll('.acc')];
+const sync=()=>{let total=0;
+ accs.forEach(a=>{const chips=[...a.querySelectorAll('.c')],on=chips.filter(c=>c.classList.contains('on'));
+  total+=on.length;a.querySelector('.call').classList.toggle('on',on.length===chips.length);
+  // 선택이 하나라도 있으면 접을 수 없다 — 잠금 표시로 화살표를 흐리게
+  const locked=on.length>0; a.dataset.locked=locked?'1':'';
+  const cv=a.querySelector('.cv'); cv.style.opacity=locked?'.25':'';
+  if(locked){const body=a.querySelector('.abody'); if(body.hidden){body.hidden=false; cv.textContent='▲';}}});
+ const cta=document.querySelector('.cta');
+ if(total===0){cta.classList.add('off');cta.textContent='직무를 1개 이상 골라주세요';}
+ else{cta.classList.remove('off');cta.innerHTML='다음 <span class="s2">· '+total+'개 선택됨</span>';}};
+accs.forEach(a=>{const row=a.querySelector('.arow'),body=a.querySelector('.abody'),cv=a.querySelector('.cv');
+ row.addEventListener('click',()=>{if(a.dataset.locked==='1')return;const o=!body.hidden;body.hidden=o;cv.textContent=o?'▼':'▲';});
+ a.querySelectorAll('.c').forEach(c=>c.addEventListener('click',e=>{e.stopPropagation();c.classList.toggle('on');sync();}));
+ a.querySelector('.call').addEventListener('click',e=>{e.stopPropagation();
+  const chips=[...a.querySelectorAll('.c')],allOn=chips.every(c=>c.classList.contains('on'));
+  chips.forEach(c=>c.classList.toggle('on',!allOn));sync();});});
+sync();
+
+document.querySelector('.cta').addEventListener('click',()=>{
+  const c=document.querySelector('.cta');
+  if(!c.classList.contains('off')) location.href='/onboarding/2/';
+});
+</script></body></html>

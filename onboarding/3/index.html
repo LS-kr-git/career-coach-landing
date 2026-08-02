@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no"><title>근무지 선택 — 커리어코치</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root{
+    --amber-50:#FFFBEB;--amber-100:#FEF3C7;--amber-200:#FDE68A;--amber-500:#F59E0B;--amber-600:#D97706;--amber-700:#B45309;
+    --gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;--gray-300:#CBD5E1;--gray-400:#94A3B8;
+    --gray-500:#64748B;--gray-600:#475569;--gray-700:#334155;--gray-800:#1E293B;--gray-900:#0F172A;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{background:#fff}
+  body{font-family:'Pretendard Variable',Pretendard,'Pretendard','Noto Sans CJK KR',-apple-system,sans-serif;
+    background:#fff;color:var(--gray-800);-webkit-font-smoothing:antialiased}
+  .board{width:100%;max-width:450px;margin:0 auto;min-height:100vh;background:#fff;
+    padding-bottom:calc(100px + env(safe-area-inset-bottom))}
+  @media (min-width:451px){ body{background:var(--gray-100)}
+    .board{box-shadow:0 0 24px rgba(15,23,42,.06),0 0 64px rgba(15,23,42,.10)} }
+
+  /* 상단바 — 화살표는 좌측 24 그대로, 탭 영역만 44×44 (음수 마진으로 레이아웃 높이는 14 유지) */
+  .nav{display:flex;align-items:center;padding:calc(18px + env(safe-area-inset-top)) 24px 0}
+  .back{text-decoration:none;width:44px;height:44px;margin:-15px 0 -15px -18.5px;display:flex;align-items:center;justify-content:center;
+    background:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .back:active{opacity:.5}
+  /* 진행 바 — 3칸 전체가 하나의 그라디언트로 이어지도록 background-size/position 으로 잘라 쓴다 */
+  .prog{display:flex;gap:5px;padding:22px 24px 0}
+  .prog i{height:3px;border-radius:99px;background-color:var(--gray-100);flex:1}
+  .prog i.on{background-image:linear-gradient(90deg,#FBBF24 0%,#D97706 100%);background-size:300% 100%;background-repeat:no-repeat}
+  .prog i:nth-child(1).on{background-position:0% 0}
+  .prog i:nth-child(2).on{background-position:50% 0}
+  .prog i:nth-child(3).on{background-position:100% 0}
+
+  .kick{padding:20px 24px 0;font-size:13px;line-height:18px;font-weight:600;color:var(--amber-600);
+    display:flex;align-items:center;gap:6px}
+  .kick .off{color:var(--gray-300);font-weight:600}
+  .kick i{font-style:normal;font-weight:600}
+  .title{padding:9px 24px 0;font-size:24px;line-height:32px;font-weight:700;color:var(--gray-900);letter-spacing:-0.01em}
+  .desc{padding:10px 24px 0;font-size:14px;line-height:20px;color:var(--gray-500)}
+  .scroll{padding:24px 24px 0}
+
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .c,.call{border:1px solid var(--gray-200);background:#fff;color:var(--gray-600);border-radius:10px;
+    padding:8px 11px;font-size:13px;line-height:18px;font-weight:400;
+    cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;
+    transition:background .12s,border-color .12s,color .12s}
+  .c:active,.call:active{transform:scale(.97)}
+  .c.on{background:var(--amber-50);border-color:var(--amber-500);color:var(--amber-600)}
+  .call{display:inline-flex;align-items:center;gap:5px}
+  .call.on{background:var(--amber-500);border-color:var(--amber-500);color:#fff}
+  .call svg{display:none}
+
+  /* 구분선은 inset 그림자 — 피그마의 INSIDE 스트로크처럼 높이를 안 늘린다 (행 52px 유지) */
+  .acc{box-shadow:inset 0 1px 0 var(--gray-100)}
+  .acc:last-of-type{box-shadow:inset 0 1px 0 var(--gray-100),inset 0 -1px 0 var(--gray-100)}
+  .arow{display:flex;align-items:center;padding:15px 0;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
+  .arow .nm{font-size:15px;line-height:22px;font-weight:600;color:var(--gray-800)}
+  .arow .cnt{margin-left:7px;font-size:12px;color:var(--gray-400);font-weight:500}
+  .arow .sel{margin-left:auto;font-size:12px;font-weight:700;color:var(--amber-600)}
+  .arow .cv{margin-left:9px;color:var(--gray-300);font-size:11px;line-height:14px;font-weight:500}
+  .abody{padding:2px 0 16px}
+
+  .grp{margin-bottom:24px}
+  .ghead{display:flex;align-items:center;margin-bottom:10px}
+  .ghead h3{font-size:13px;line-height:18px;font-weight:600;color:var(--gray-500)}
+
+  /* 슬라이더 — 그림자 없음 */
+  .sumB{text-align:center}
+  .sumB .k{font-size:12px;color:var(--gray-400);font-weight:600}
+  .sumB .v{font-size:31px;line-height:40px;font-weight:700;color:var(--gray-900);letter-spacing:-0.03em;margin-top:2px}
+  .track{position:relative;height:6px;border-radius:99px;background:var(--gray-100);margin:30px 0 0}
+  .fill{position:absolute;height:6px;border-radius:99px}
+  .fill.grad{background:linear-gradient(90deg,#FBBF24,#D97706)}
+  .fill.solid{background:var(--amber-500)}
+  .knob{position:absolute;top:50%;transform:translate(-50%,-50%);width:24px;height:24px;border-radius:50%;
+    background:#fff;border:2px solid var(--amber-500)}
+  .axis{display:flex;justify-content:space-between;margin-top:11px;font-size:11px;line-height:14px;font-weight:500;color:var(--gray-400)}
+  /* B5 밴드 — 위아래 선 + 선택 구간 밑줄 */
+  .b5{display:flex;margin-top:22px;border-top:1px solid var(--gray-100);border-bottom:1px solid var(--gray-100)}
+  .b5 div{padding:11px 4px;text-align:center;font-size:11px;line-height:14px;font-weight:500;color:var(--gray-400)}
+  .b5 div b{display:block;font-size:13px;line-height:18px;font-weight:600;color:var(--gray-600);margin-bottom:2px}
+  .b5 div.hit{color:var(--amber-600);box-shadow:inset 0 -2px 0 var(--amber-500)}
+  .b5 div.hit b{color:var(--amber-600)}
+  .note{margin-top:14px;font-size:11.5px;line-height:18px;color:var(--gray-400)}
+
+  /* 플로팅 CTA — 크기·위치는 랜딩(index.html .floating-cta)과 동일:
+     width calc(100% - 40px) / max 410 / height 60 / bottom 20 / radius 14 / 가운데 정렬.
+     색·그림자색·글자 스타일만 온보딩 값이다. */
+  .fade{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:450px;height:100px;
+    background:linear-gradient(180deg,rgba(255,255,255,0),#fff 55%);pointer-events:none;z-index:9}
+  .cta{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    width:calc(100% - 40px);max-width:410px;height:60px;
+    display:block;text-align:center;line-height:60px;
+    background:var(--amber-500);color:#fff;border-radius:14px;
+    font-size:15px;font-weight:600;
+    box-shadow:0 12px 32px rgba(217,119,6,.28);cursor:pointer;z-index:10;
+    -webkit-tap-highlight-color:transparent}
+  .cta:active{transform:translateX(-50%) scale(.98)}
+  .cta .s2{opacity:.85}
+  .cta.off{background:var(--gray-100);color:var(--gray-400);box-shadow:none}
+</style></head><body>
+<div class="board"><div class="nav"><a class="back" href="/onboarding/2/" aria-label="뒤로"><svg width="7" height="14" viewBox="0 0 7 14" fill="none" overflow="visible"><path d="M7 0L0 7l7 7" stroke="#0F172A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
+  <div class="prog"><i class="on"></i><i class="on"></i><i class="on"></i></div>
+  <div class="kick"><span>직군</span><i>·</i><span>연차</span><i>·</i><span>근무지</span></div>
+  <div class="title">어디에서<br>일하고 싶으세요?</div>
+  <div class="desc">여러 지역을 함께 고를 수 있어요</div>
+  <div class="scroll"><div class="grp"><div class="ghead"><h3>수도권</h3></div><div class="chips"><span class="call on"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>전체</span><div class="c on">서울</div><div class="c on">경기</div><div class="c on">인천</div></div></div><div class="grp"><div class="ghead"><h3>충청·강원</h3></div><div class="chips"><span class="call"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>전체</span><div class="c">대전</div><div class="c">세종</div><div class="c">충북</div><div class="c">충남</div><div class="c">강원</div></div></div><div class="grp"><div class="ghead"><h3>영남</h3></div><div class="chips"><span class="call"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>전체</span><div class="c">부산</div><div class="c">대구</div><div class="c">울산</div><div class="c">경북</div><div class="c">경남</div></div></div><div class="grp"><div class="ghead"><h3>호남·제주</h3></div><div class="chips"><span class="call"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>전체</span><div class="c">광주</div><div class="c">전북</div><div class="c">전남</div><div class="c">제주</div></div></div><div class="grp"><div class="ghead"><h3>기타</h3></div><div class="chips"><div class="c on">재택·원격</div></div></div></div>
+</div>
+<div class="fade"></div>
+<div class="cta">다음</div>
+<script>
+const grps=[...document.querySelectorAll('.grp')];
+const sync=()=>{let total=0;
+ grps.forEach(g=>{const chips=[...g.querySelectorAll('.c')],on=chips.filter(c=>c.classList.contains('on'));
+  total+=on.length;const all=g.querySelector('.call');
+  if(all) all.classList.toggle('on',chips.length>0&&on.length===chips.length);});
+ const cta=document.querySelector('.cta');
+ if(total===0){cta.classList.add('off');cta.textContent='지역을 1개 이상 골라주세요';}
+ else{cta.classList.remove('off');cta.innerHTML='다음 <span class="s2">· '+total+'개 지역</span>';}};
+grps.forEach(g=>{g.querySelectorAll('.c').forEach(c=>c.addEventListener('click',()=>{c.classList.toggle('on');sync();}));
+ const all=g.querySelector('.call');
+ if(all) all.addEventListener('click',()=>{const chips=[...g.querySelectorAll('.c')],
+  allOn=chips.every(c=>c.classList.contains('on'));chips.forEach(c=>c.classList.toggle('on',!allOn));sync();});});
+sync();
+
+// 다음 화면(/onboarding/done/)은 아직 없다 — 만들어지면 여기서 연결한다
+</script></body></html>
