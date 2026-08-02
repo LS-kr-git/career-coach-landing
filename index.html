@@ -128,10 +128,10 @@ fbq('track', 'PageView');
      360px 에서 섹션 패딩(24)을 16px 씩 넘어 344 가 되고, 그보다 넓은 화면에서도 344 에서 멈춘다.
      ⚠ 344 보다 넓히면 명시 줄바꿈 없는 리드(6:204 등)의 자동 줄바꿈 위치가 피그마와 달라진다
        — 2026-08-02 "수백/개" 줄바꿈 드리프트로 실제 발생. figma-style.json 에 잠금. */
-  /* 피그마 6:188(폭 330 고정) — 본문 문단은 화면이 넓어져도 늘어나지 않고 330 을 유지한 채
-     중앙 정렬된다 (피그마 sizeH FIXED + 부모 CENTER, 2026-08-02 사용자 확정).
-     360px 화면에서는 섹션 패딩(24)을 9px 씩 넘어 330 이 된다. 좁은 화면에서는 같이 줄어든다. */
-  .para-wide{width:calc(100% + 18px);max-width:330px;margin-left:-9px;margin-right:-9px}
+  /* 피그마 6:189(폭 312 고정) — 본문 문단은 섹션 콘텐츠 폭(360px 기준 312)에 딱 맞고,
+     화면이 넓어져도 312 를 유지한 채 중앙 정렬된다 (2026-08-02 사용자 재확정: 330 → 312).
+     ⚠ 이 문단에는 명시 줄바꿈이 없다 — 폭이 곧 줄바꿈이므로 312 를 바꾸면 줄이 달라진다. */
+  .para-wide{width:100%;max-width:312px}
   .lead{color:var(--gray-600);text-align:center;white-space:pre-line;
     width:calc(100% + 32px);max-width:344px;margin-left:-16px;margin-right:-16px}
   /* 일러스트는 배경이 투명한 PNG — 회색 박스를 씌우지 않는다 (2026-08-01, 신규 6종) */
@@ -143,11 +143,13 @@ fbq('track', 'PageView');
   /* 히어로 칩 — 2026-08-02 최종: 보더 없는 amber-100 틴트 필 (피그마 247:4843, radius 999, 패딩 6.5/15, h 31).
      플렉스 상하 중앙정렬로 글자가 위로 떠 보이던 문제 해결 (line-height 박스 대신 플렉스 센터링).
      칩↔헤딩 간격은 섹션 기본 gap 20 그대로 (피그마 241:2404 gap 20). */
-  .hero-badge{display:inline-flex;align-items:center;justify-content:center;
-    height:31px;padding:1px 15px 0;border-radius:999px;width:auto;
+  .hero-badge,.badge-blue{display:inline-flex;align-items:center;justify-content:center;
+    height:31px;padding:1px 15px 0;border-radius:999px;width:auto}
     /* padding-top 1px = 광학 보정: 글꼴 잉크 박스가 행간 박스보다 0.5px 위에 앉아
        플렉스 센터링만으로는 글자가 1px 떠 보인다 (피그마도 pad 7/6 으로 동일 보정) */
-    background:var(--amber-100);color:var(--amber-600)}
+  .hero-badge{background:var(--amber-100);color:var(--amber-600)}
+  /* 파랑 섹션용 칩 — 피그마 254:2404 (Blue 50 채움 / Blue 600 글자) */
+  .badge-blue{background:var(--blue-50);color:#2563EB}
   .hero-title{color:var(--gray-800);text-align:center}
   .hl{background:linear-gradient(transparent 65%, var(--amber-200) 65%);padding:0 2px}
 
@@ -321,13 +323,12 @@ fbq('track', 'PageView');
 
     <!-- 1. 일단 지원 (피그마 6:182 · Blue100→50) -->
     <section class="bg-blue">
-      <div class="head-group">
-        <div class="t-label eyebrow">붙으면 희소식, 안붙어도 손해 X</div>
-        <h2 class="t-display headline">관심 있는 회사 공고가 열리면
+      <div class="badge-blue t-caption-strong">붙으면 희소식, 안붙어도 손해 X</div>
+      <h2 class="t-display headline">관심 있는 회사 공고가 열리면
 일단 지원해 보세요</h2>
-      </div>
       <img class="illust" src="assets/img-apply.png" alt="이력서 제출 일러스트" width="344" height="169">
-      <p class="t-body para-wide" style="color:var(--gray-700)">지금 가지고 있는 포트폴리오·이력서로 일단 넣으세요.<br><strong>불합격 해도 다음 지원에 패널티가 전혀 없어요.</strong><br>오히려 여러 번 도전하면, ‘우리 회사를 이렇게<br>좋아하면 잘 적응할 확률이 크다’고 판단해 더 좋게 봐요.<br><strong>붙으면 희소식, 안붙어도 손해 X. 안 할 이유가 없어요.</strong><br>결국 결과를 얻은 건 실행하는 사람들이었어요.</p>
+      <!-- 줄바꿈 4개 = 피그마 6:189 의 U+2028 위치. 셋째 줄만 폭 312 에서 자동으로 두 줄이 된다 -->
+      <p class="t-body para-wide" style="color:var(--gray-700)">지금 가지고 있는 포트폴리오·이력서로 일단 넣으세요.<br><strong>불합격 해도 다음 지원에 패널티가 전혀 없어요.</strong><br>오히려 여러 번 도전하면, ‘우리 회사를 이렇게 좋아하면 잘 적응하겠다’고 판단해 더 좋게 봐요.<br><strong>붙으면 희소식, 안붙어도 손해 X. 안 할 이유가 없어요.</strong><br>결국 결과를 얻은 건 실행하는 사람들이었어요.</p>
     </section>
 
     <!-- 2. 마감 FOMO (피그마 123:4387 · Amber100→50) -->
