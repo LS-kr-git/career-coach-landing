@@ -5,283 +5,263 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="format-detection" content="telephone=no">
 <title>커리어코치 — 프로덕트 디자이너 데일리 · 7월 29일</title>
+<link rel="icon" type="image/svg+xml" href="assets/logo-circle.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
-  :root {
+  /* 커리어코치 디자인 시스템 — index.html 과 동일한 토큰·폭·타이포·헤더.
+     피그마 단일 기준: 파일 LnT8TgFVBxky0bVyaF6Tob / 섹션 356:3106 "브리핑 상세페이지". */
+  :root{
     color-scheme: light;
-    --surface-1: #FFFFFF;
-    --page: #FAFBFC;
-    --ink-1: #1E293B;
-    --ink-2: #475569;
-    --muted: #94A3B8;
-    --grid: #E2E8F0;
-    --baseline: #CBD5E1;
-    --border: rgba(30,41,59,0.08);
-    --series-1: #1E3A8A;
-    --series-2: #BF6B4A;
-    --series-1-soft: #FDE68A;
-    --delta-up: #059669;
-    --brand: #D97706;
-    --brand-deep: #B45309;
-    --navy: #1E3A8A;
-    --chip-bg: #F1F5F9;
+    --amber-100:#FEF3C7; --amber-200:#FDE68A; --amber-500:#F59E0B; --amber-600:#D97706; --amber-700:#B45309;
+    --navy-500:#3B82F6; --navy-900:#1E3A8A;
+    --gray-50:#F8FAFC; --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-300:#CBD5E1; --gray-400:#94A3B8;
+    --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155; --gray-800:#1E293B; --gray-900:#0F172A;
+    --delta-up:#059669;
+    /* 랜딩과 동일한 폭 시스템 — 카드 450 / 콘텐츠 402 / 좌우 여백 24 */
+    --pad-x: 24px;
+    --card-max: 450px;
+    --content-max: 402px;
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
-    background: var(--page);
-    color: var(--ink-1);
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth;background:var(--gray-100)}
+  body{
+    font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;
+    background:#fff; color:var(--gray-800); line-height:1.6; -webkit-font-smoothing:antialiased;
   }
-  .wrap { max-width: 640px; margin: 0 auto; padding: 0 20px 64px; }
+  .page{width:100%;max-width:var(--card-max);margin:0 auto;background:#fff;min-height:100vh}
 
-  .masthead { padding: 28px 0 20px; display: flex; align-items: center; gap: 10px; }
-  .logo-mark {
-    width: 34px; height: 34px; border-radius: 10px;
-    background: linear-gradient(135deg, #F59E0B, #D97706);
-    display: flex; align-items: center; justify-content: center; flex: none;
-  }
-  .logo-type { font-weight: 800; font-size: 18px; letter-spacing: -0.02em; }
-  .logo-type small { display:block; font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 0; }
+  /* ===== 헤더 (index.html 과 동일) ===== */
+  header{display:flex;align-items:center;gap:10px;padding:24px var(--pad-x)}
+  .app-icon{width:29px;height:29px;border-radius:25%;background:linear-gradient(135deg,#F59E0B,#D97706);display:flex;align-items:center;justify-content:center}
+  .app-icon img{width:21px;height:21px;display:block}
+  header .wordmark{height:21px;display:block}
 
-  .hero { padding: 8px 0 28px; }
-  .kicker { font-size: 13px; font-weight: 700; color: var(--brand); margin-bottom: 6px; }
-  h1 { font-size: 25px; line-height: 1.35; letter-spacing: -0.02em; font-weight: 800; }
-  .hero p { margin-top: 10px; font-size: 15px; color: var(--ink-2); }
-  .prefs { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 14px; align-items: center; }
-  .prefs .p-label { font-size: 12px; font-weight: 600; color: var(--muted); }
-  .pref-chip {
-    font-size: 12px; font-weight: 700; color: var(--brand);
-    background: var(--chip-bg); border-radius: 999px; padding: 4px 11px;
-  }
-  .pref-edit {
-    font-size: 12px; font-weight: 600; color: var(--muted); text-decoration: none;
-    border: 1px dashed var(--grid); border-radius: 999px; padding: 4px 11px;
-  }
+  /* ===== 텍스트 스타일 (피그마 text/*) ===== */
+  .t-display{font-size:28px;line-height:36px;font-weight:800;letter-spacing:-0.01em}
+  .t-h2{font-size:20px;line-height:28px;font-weight:700;letter-spacing:-0.01em}
+  .t-h3{font-size:17px;line-height:24px;font-weight:600}
+  .t-body{font-size:15px;line-height:23px;font-weight:400}
+  .t-body-strong{font-size:15px;line-height:23px;font-weight:600}
+  .t-body-s{font-size:14px;line-height:20px;font-weight:400}
+  .t-caption{font-size:13px;line-height:18px;font-weight:400}
+  .t-caption-strong{font-size:13px;line-height:18px;font-weight:600}
+  .t-label{font-size:14px;line-height:20px;font-weight:700;letter-spacing:0.01em}
+  .t-button{font-size:15px;line-height:20px;font-weight:600}
 
-  section { margin-top: 8px; padding-top: 28px; }
-  .sec-label { display:flex; align-items:baseline; gap:8px; margin-bottom: 14px; }
-  .sec-num { font-size: 12px; font-weight: 800; color: var(--brand); }
-  h2 { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; }
-  .sec-sub { font-size: 13.5px; color: var(--muted); margin: -8px 0 16px; }
+  .brief{padding:8px var(--pad-x) 0}
+  section{margin-top:8px;padding-top:32px}
 
-  .job {
-    display: block; text-decoration: none; color: inherit;
-    background: var(--surface-1); border: 1px solid var(--border);
-    border-radius: 14px; padding: 15px 16px; margin-bottom: 10px;
-    transition: transform .12s ease;
-  }
-  .job:active { transform: scale(0.99); }
-  .job-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-  .job-co { font-weight: 800; font-size: 15.5px; }
-  .src {
-    font-size: 11px; font-weight: 700; color: var(--ink-2);
-    background: var(--chip-bg); border-radius: 999px; padding: 3px 9px; white-space: nowrap;
-  }
-  .job-title { font-size: 14.5px; color: var(--ink-2); margin-top: 3px; }
-  .job-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 9px; }
-  .tag { font-size: 12px; color: var(--ink-2); border: 1px solid var(--grid); border-radius: 7px; padding: 2px 8px; }
-  .tag.hot { color: var(--brand); border-color: var(--series-1-soft); font-weight: 700; }
-  .more-note { text-align:center; font-size: 12.5px; color: var(--muted); margin-top: 14px; }
+  /* ===== 히어로 ===== */
+  .hero{padding:4px 0 4px}
+  .kicker{color:var(--amber-600);margin-bottom:6px}
+  .hero-title{color:var(--navy-900)}
+  .lead{color:var(--gray-600);margin-top:10px}
+  .prefs{display:flex;gap:6px;flex-wrap:wrap;margin-top:16px;align-items:center}
+  .p-label{color:var(--gray-400)}
+  /* 칩 = 디자인 시스템 amber-100 필 (히어로 배지와 동일 계열) */
+  .pref-chip{color:var(--amber-600);background:var(--amber-100);border-radius:999px;padding:4px 11px}
+  .pref-edit{color:var(--gray-500);text-decoration:none;border:1px dashed var(--gray-200);border-radius:999px;padding:4px 11px}
 
-  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-  .tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; }
-  .tile .t-label { font-size: 12.5px; font-weight: 600; color: var(--muted); }
-  .tile .t-value { font-size: 27px; font-weight: 800; letter-spacing: -0.02em; margin-top: 2px; }
-  .tile .t-delta { font-size: 12.5px; font-weight: 700; margin-top: 1px; }
-  .up { color: var(--delta-up); }
-  .warn-ink { color: var(--ink-2); }
+  /* ===== 섹션 헤더 ===== */
+  .sec-label{display:flex;align-items:baseline;gap:8px;margin-bottom:12px}
+  .sec-num{color:var(--amber-600);font-weight:800}
+  .sec-label h2{color:var(--navy-900)}
+  .sec-sub{color:var(--gray-500);margin:-4px 0 16px}
+  .sec-sub b{color:var(--gray-700);font-weight:600}
 
-  .viz-root {
-    background: var(--surface-1); border: 1px solid var(--border);
-    border-radius: 14px; padding: 16px 16px 10px; margin-bottom: 12px; position: relative;
-  }
-  .viz-title { font-size: 13.5px; font-weight: 700; }
-  .viz-sub { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
-  .legend { display:flex; gap:14px; margin:6px 0 4px; }
-  .lg { display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color: var(--ink-2); }
-  .lg .swatch { width:10px; height:10px; border-radius:50%; }
-  .sw1 { background: var(--series-1); }
-  .sw2 { background: var(--series-2); }
-  .viz-root svg { width: 100%; height: auto; display: block; }
-  .viz-note { font-size: 11px; color: var(--muted); margin-top: 4px; }
-  text { font-family: inherit; }
-  .tick { font-size: 11px; fill: var(--muted); }
-  .val { font-size: 11.5px; font-weight: 700; fill: var(--ink-2); }
-  .gridline { stroke: var(--grid); stroke-width: 1; }
-  .baseline { stroke: var(--baseline); stroke-width: 1; }
-  .line1 { stroke: var(--series-1); stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-  .line2 { stroke: var(--series-2); stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-  .dot1 { fill: var(--series-1); stroke: var(--surface-1); stroke-width: 2; }
-  .dot2 { fill: var(--series-2); stroke: var(--surface-1); stroke-width: 2; }
-  .hover-col { fill: transparent; }
-  .hover-col:hover { fill: rgba(42,74,156,0.07); }
-  .trend-copy { font-size: 14px; color: var(--ink-2); padding: 2px 4px 0; }
-  .trend-copy b { color: var(--ink-1); }
-  #tooltip {
-    position: fixed; z-index: 30; pointer-events: none; display: none;
-    background: var(--ink-1); color: var(--page);
-    font-size: 12px; font-weight: 600; border-radius: 8px; padding: 6px 10px;
-    transform: translate(-50%, calc(-100% - 10px)); white-space: nowrap;
-  }
+  /* ===== 공고 카드 (디자인 시스템 카드: 흰 배경·gray-200 보더·그림자) ===== */
+  .job{display:block;text-decoration:none;color:inherit;background:#fff;border:1px solid var(--gray-200);
+    box-shadow:0 1px 3px rgba(15,23,42,.05);border-radius:14px;padding:15px 16px;margin-bottom:10px;transition:transform .12s ease}
+  .job:active{transform:scale(0.99)}
+  .job-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .job-co{color:var(--navy-900);font-weight:800;font-size:15.5px}
+  .src{color:var(--gray-600);background:var(--gray-100);border-radius:999px;padding:3px 9px;white-space:nowrap;font-size:11px;font-weight:700}
+  .job-title{color:var(--gray-600);margin-top:3px;font-size:14.5px}
+  .job-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+  .tag{color:var(--gray-600);border:1px solid var(--gray-200);border-radius:7px;padding:2px 8px;font-size:12px}
+  .tag.hot{color:var(--amber-600);border-color:var(--amber-200);font-weight:700}
+  .more-note{text-align:center;color:var(--gray-400);margin-top:14px}
 
-  .insight {
-    background: var(--surface-1); border: 1px solid var(--border);
-    border-radius: 14px; padding: 20px;
-  }
-  .insight h3 { font-size: 16.5px; font-weight: 800; line-height: 1.45; letter-spacing: -0.01em; }
-  .insight p { font-size: 14.5px; color: var(--ink-2); margin-top: 12px; }
-  .insight p b { color: var(--ink-1); }
-  .insight .action {
-    margin-top: 16px; padding: 12px 14px; border-radius: 10px;
-    background: var(--chip-bg); font-size: 13.5px; color: var(--ink-1);
-  }
-  .insight .srcline { margin-top: 14px; font-size: 11.5px; color: var(--muted); }
-  .nudge {
-    margin-top: 12px; text-align: center; font-size: 13px; font-weight: 700;
-    color: var(--brand); padding: 10px 14px; border-radius: 10px;
-    border: 1px dashed var(--series-1-soft);
-  }
+  /* ===== 트렌드 타일 ===== */
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+  .tile{background:#fff;border:1px solid var(--gray-200);box-shadow:0 1px 3px rgba(15,23,42,.05);border-radius:14px;padding:14px 16px}
+  .tile .t-label{color:var(--gray-500);font-weight:600}
+  .tile .t-value{color:var(--navy-900);font-size:28px;line-height:34px;font-weight:800;letter-spacing:-0.01em;margin-top:2px}
 
-  footer { margin-top: 40px; text-align: center; }
-  .cta {
-    display: inline-block; text-decoration: none;
-    background: #F59E0B; color: #fff; font-weight: 800; font-size: 15px;
-    border-radius: 12px; padding: 14px 28px;
-    box-shadow: 0 6px 18px rgba(245,158,11,0.25);
+  /* ===== 차트 카드 ===== */
+  .viz-root{background:#fff;border:1px solid var(--gray-200);box-shadow:0 1px 3px rgba(15,23,42,.05);
+    border-radius:14px;padding:16px 16px 10px;margin-bottom:12px;position:relative}
+  .viz-title{color:var(--gray-800);font-weight:700}
+  .viz-sub{color:var(--gray-400);margin-bottom:4px}
+  .viz-root svg{width:100%;height:auto;display:block}
+  .viz-note{color:var(--gray-400);margin-top:4px;font-size:11px}
+  text{font-family:inherit}
+  .tick{font-size:11px;fill:var(--gray-400)}
+  .val{font-size:11.5px;font-weight:700;fill:var(--gray-600)}
+  .gridline{stroke:var(--gray-200);stroke-width:1}
+  .baseline{stroke:var(--gray-300);stroke-width:1}
+  .line1{stroke:var(--navy-900);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .dot1{fill:var(--navy-900);stroke:#fff;stroke-width:2}
+  .hover-col{fill:transparent}
+  .hover-col:hover{fill:rgba(30,58,138,0.07)}
+  .trend-copy{color:var(--gray-600);padding:2px 4px 0;font-size:14px}
+  .trend-copy b{color:var(--gray-800)}
+  #tooltip{position:fixed;z-index:30;pointer-events:none;display:none;background:var(--gray-800);color:#fff;
+    font-size:12px;font-weight:600;border-radius:8px;padding:6px 10px;transform:translate(-50%,calc(-100% - 10px));white-space:nowrap}
+
+  /* ===== 인사이트 카드 ===== */
+  .insight{background:#fff;border:1px solid var(--gray-200);box-shadow:0 1px 3px rgba(15,23,42,.05);border-radius:14px;padding:20px}
+  .insight h3{color:var(--navy-900);line-height:1.45}
+  .insight p{color:var(--gray-600);margin-top:12px;font-size:14.5px}
+  .insight p b{color:var(--gray-800)}
+  .insight .action{margin-top:16px;padding:12px 14px;border-radius:10px;background:var(--gray-100);color:var(--gray-800);font-size:13.5px}
+  .insight .srcline{margin-top:14px;color:var(--gray-400);font-size:11.5px}
+  .nudge{margin-top:12px;text-align:center;color:var(--amber-600);font-weight:700;padding:10px 14px;border-radius:10px;border:1px dashed var(--amber-200);font-size:13px}
+
+  /* ===== 푸터 ===== */
+  footer{margin-top:40px;text-align:center;padding:0 var(--pad-x) 56px}
+  .cta{display:inline-block;text-decoration:none;background:var(--amber-500);color:#fff;font-weight:800;font-size:15px;
+    border-radius:12px;padding:14px 28px;box-shadow:0 6px 18px rgba(245,158,11,.25)}
+  .cta:active{transform:scale(.98)}
+  .next{margin-top:16px;color:var(--gray-400);font-size:13px}
+  .fine{margin-top:22px;color:var(--gray-400);font-size:11px;line-height:1.7}
+
+  @media (min-width:451px){
+    body{background:var(--gray-100)}
+    .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
   }
-  footer .next { margin-top: 16px; font-size: 13px; color: var(--muted); }
-  footer .fine { margin-top: 22px; font-size: 11px; color: var(--muted); line-height: 1.7; }
+  :focus-visible{outline:2px solid var(--amber-500);outline-offset:2px}
 </style>
 </head>
 <body>
 <div id="tooltip" role="status"></div>
-<div class="wrap">
+<div class="page">
+  <header>
+    <div class="app-icon"><img src="assets/mark-white.svg" alt=""></div>
+    <img class="wordmark" src="assets/wordmark.svg" alt="커리어코치">
+  </header>
 
-  <div class="masthead">
-    <div class="logo-mark"><svg width="24" height="24" viewBox="0 0 48 48" fill="none"><path d="M9 41 V34 H15.5 V27.5 H22 V21 H28.9" stroke="white" stroke-width="4"/><rect x="28.9" y="14.5" width="5.8" height="25" fill="white"/><path d="M31.8 4 L41.4 15.5 L22.2 15.5 Z" fill="white"/><path d="M5.5 41 H42.5" stroke="white" stroke-width="4" stroke-linecap="round"/></svg></div>
-    <div class="logo-type">커리어코치<small>프로덕트 디자이너 데일리</small></div>
-  </div>
-
-  <div class="hero">
-    <div class="kicker">7월 29일 수요일 · 데일리 브리핑</div>
-    <h1>석준님, 오늘도<br>한 걸음 앞서 시작해요</h1>
-    <p>어제 하루 새로 나온 공고 16건, 그 사이 조용히 마감된 공고 3건.<br>출근길 1분으로 정리했어요.</p>
-    <div class="prefs">
-      <span class="p-label">내 설정</span>
-      <span class="pref-chip">프로덕트 디자이너</span>
-      <span class="pref-chip">경력 5~9년</span>
-      <span class="pref-chip">서울 · 재택 가능</span>
-      <a class="pref-edit" href="#">바꾸기</a>
-    </div>
-  </div>
-
-  <section>
-    <div class="sec-label"><span class="sec-num">01</span><h2>어제 새로 나온 채용공고</h2></div>
-    <p class="sec-sub">국내 15개 사이트의 모든 공고를 종합한 뒤 — 회사마다 부르는 이름이 달라도 빠짐없이 — 설정하신 <b>연차와 근무지</b>에 맞는 공고부터 보여드려요.</p>
-
-    <a class="job" target="_blank" rel="noopener" href="https://www.wanted.co.kr/wd/377044">
-      <div class="job-top"><span class="job-co">쿠팡</span><span class="src">원티드</span></div>
-      <div class="job-title">시니어 디자이너 · 이커머스</div>
-      <div class="job-meta"><span class="tag hot">경력 7~10년</span><span class="tag">정규직</span><span class="tag">서울</span></div>
-    </a>
-    <a class="job" target="_blank" rel="noopener" href="https://www.wanted.co.kr/wd/377370">
-      <div class="job-top"><span class="job-co">김캐디</span><span class="src">원티드</span></div>
-      <div class="job-title">프로덕트 디자이너 · SaaS</div>
-      <div class="job-meta"><span class="tag hot">경력 5년 이상</span><span class="tag">정규직</span><span class="tag">서울</span></div>
-    </a>
-    <a class="job" target="_blank" rel="noopener" href="https://www.wanted.co.kr/wd/377393">
-      <div class="job-top"><span class="job-co">가제트코리아</span><span class="src">원티드</span></div>
-      <div class="job-title">[커머스본부 제품팀] Product Designer</div>
-      <div class="job-meta"><span class="tag hot">경력 5~7년</span><span class="tag">정규직</span><span class="tag">서울</span></div>
-    </a>
-    <a class="job" target="_blank" rel="noopener" href="https://www.wanted.co.kr/wd/377187">
-      <div class="job-top"><span class="job-co">닷어스</span><span class="src">원티드</span></div>
-      <div class="job-title">[리드볼트] 커머스 제품 디자인팀 리드</div>
-      <div class="job-meta"><span class="tag hot">경력 6~10년</span><span class="tag">정규직</span><span class="tag">서울</span></div>
-    </a>
-    <a class="job" target="_blank" rel="noopener" href="https://www.wanted.co.kr/wd/377414">
-      <div class="job-top"><span class="job-co">리브애니웨어</span><span class="src">원티드</span></div>
-      <div class="job-title">Product Designer · 플랫폼</div>
-      <div class="job-meta"><span class="tag hot">경력 5~11년</span><span class="tag">정규직</span><span class="tag">마감 D-33</span></div>
-    </a>
-    <a class="job" target="_blank" rel="noopener" href="https://www.wanted.co.kr/wd/377306">
-      <div class="job-top"><span class="job-co">오토스테이</span><span class="src">원티드</span></div>
-      <div class="job-title">Product Designer (UX/UI) · 모빌리티</div>
-      <div class="job-meta"><span class="tag hot">경력 5년 이상</span><span class="tag">정규직</span><span class="tag">서울</span></div>
-    </a>
-    <a class="job" target="_blank" rel="noopener" href="https://www.wanted.co.kr/wd/377129">
-      <div class="job-top"><span class="job-co">111퍼센트</span><span class="src">원티드</span></div>
-      <div class="job-title">[운빨존많겜] UI·UX 디자이너 · 게임</div>
-      <div class="job-meta"><span class="tag hot">경력 3년 이상</span><span class="tag">정규직</span><span class="tag">마감 D-11</span></div>
-    </a>
-    <a class="job" target="_blank" rel="noopener" href="https://cesco.career.greetinghr.com/ko/o/230842">
-      <div class="job-top"><span class="job-co">세스코</span><span class="src">그리팅</span></div>
-      <div class="job-title">UI/UX 디자인 · 커머스</div>
-      <div class="job-meta"><span class="tag hot">경력 5년 이상</span><span class="tag">정규직</span><span class="tag">마감 D-13</span></div>
-    </a>
-    <p class="more-note">…외 8건은 브리핑 아카이브에서 · 원문은 카드를 누르면 열려요</p>
-  </section>
-
-  <section>
-    <div class="sec-label"><span class="sec-num">02</span><h2>프로덕트 디자이너 채용 트렌드</h2></div>
-
-    <div class="tiles">
-      <div class="tile">
-        <div class="t-label">어제 새로 나온 공고</div>
-        <div class="t-value">16건</div>
-      </div>
-      <div class="tile">
-        <div class="t-label">어제 마감된 공고</div>
-        <div class="t-value">3건</div>
+  <main class="brief">
+    <div class="hero">
+      <div class="kicker t-caption-strong">프로덕트 디자이너 데일리 · 7월 29일 수요일</div>
+      <h1 class="t-display hero-title">석준님, 오늘도<br>한 걸음 앞서 시작해요</h1>
+      <p class="t-body lead">어제 하루 새로 나온 공고 16건, 그 사이 조용히 마감된 공고 3건.<br>출근길 1분으로 정리했어요.</p>
+      <div class="prefs">
+        <span class="p-label t-caption">내 설정</span>
+        <span class="pref-chip t-caption-strong">프로덕트 디자이너</span>
+        <span class="pref-chip t-caption-strong">경력 5~9년</span>
+        <span class="pref-chip t-caption-strong">서울 · 재택 가능</span>
+        <a class="pref-edit t-caption" href="#">바꾸기</a>
       </div>
     </div>
 
-    <div class="viz-root">
-      <div class="viz-title">매일 닫힌 기회 수 (마감된 공고)</div>
-      <div class="viz-sub">최근 30일 · 커리어코치 추적 기준</div>
-      <svg viewBox="0 0 560 220" role="img" aria-label="최근 30일 일별 마감 공고 수 선 차트. 하루 0건에서 6건 사이로 매일 공고가 마감되며, 30일 합계 85건. 어제는 3건 마감.">
-        <line class="gridline" x1="24" y1="60"  x2="536" y2="60"/>
-        <line class="gridline" x1="24" y1="120" x2="536" y2="120"/>
-        <text class="tick" x="30" y="55" text-anchor="start">6건</text>
-        <text class="tick" x="30" y="115" text-anchor="start">3건</text>
-        <path class="line1" d="M60,100 L75.9,120 L91.7,80 L107.6,140 L123.4,120 L139.3,160 L155.2,180 L171,100 L186.9,80 L202.8,120 L218.6,100 L234.5,140 L250.3,180 L266.2,160 L282.1,120 L297.9,100 L313.8,60 L329.7,120 L345.5,100 L361.4,160 L377.2,180 L393.1,80 L409,120 L424.8,100 L440.7,140 L456.6,80 L472.4,180 L488.3,160 L504.1,100 L520,120"/>
-        <circle class="dot1" cx="313.8" cy="60" r="4"/>
-        <circle class="dot1" cx="520" cy="120" r="5"/>
-        <text class="val" x="313.8" y="45" text-anchor="middle">6</text>
-        <text class="val" x="527" y="124" text-anchor="start">3</text>
-        <line class="baseline" x1="24" y1="190" x2="536" y2="190"/>
-        <text class="tick" x="60"    y="210" text-anchor="middle">30일 전</text>
-        <text class="tick" x="218.6" y="210" text-anchor="middle">20일 전</text>
-        <text class="tick" x="377.2" y="210" text-anchor="middle">10일 전</text>
-        <text class="tick" x="520"   y="210" text-anchor="middle">어제</text>
-        <rect class="hover-col" data-tip="4주 전 · 마감 18건"  x="52"  y="30" width="111" height="160"/>
-        <rect class="hover-col" data-tip="3주 전 · 마감 19건"  x="163" y="30" width="111" height="160"/>
-        <rect class="hover-col" data-tip="2주 전 · 마감 21건"  x="274" y="30" width="111" height="160"/>
-        <rect class="hover-col" data-tip="1주 전 · 마감 20건"  x="385" y="30" width="111" height="160"/>
-        <rect class="hover-col" data-tip="이번 주 · 마감 7건"  x="496" y="30" width="40" height="160"/>
-      </svg>
-      <div class="viz-note">* 그래프 추이는 표본 추적 예시입니다. 어제 신규 16건은 7/29 실측 기준.</div>
-    </div>
+    <section>
+      <div class="sec-label"><span class="sec-num t-caption-strong">01</span><h2 class="t-h2">어제 새로 나온 채용공고</h2></div>
+      <p class="sec-sub t-body-s">국내 15개 사이트의 모든 공고를 종합한 뒤 — 회사마다 부르는 이름이 달라도 빠짐없이 — 설정하신 <b>연차와 근무지</b>에 맞는 공고부터 보여드려요.</p>
 
-    <p class="trend-copy">기회는 쉬는 날 없이 <b>매일 몇 건씩 조용히 닫혀요.</b> 어제 공고 중 관심 가는 게 있다면, 이력서가 쌓이기 전 <b>첫날 지원</b>이 가장 주목받아요.</p>
-  </section>
+      <a class="job" target="_blank" rel="noopener" href="https://www.wanted.co.kr/wd/377044">
+        <div class="job-top"><span class="job-co">쿠팡</span><span class="src">원티드</span></div>
+        <div class="job-title">시니어 디자이너 · 이커머스</div>
+        <div class="job-meta"><span class="tag hot">경력 7~10년</span><span class="tag">정규직</span><span class="tag">서울</span></div>
+      </a>
+      <a class="job" target="_blank" rel="noopener" href="https://www.wanted.co.kr/wd/377370">
+        <div class="job-top"><span class="job-co">김캐디</span><span class="src">원티드</span></div>
+        <div class="job-title">프로덕트 디자이너 · SaaS</div>
+        <div class="job-meta"><span class="tag hot">경력 5년 이상</span><span class="tag">정규직</span><span class="tag">서울</span></div>
+      </a>
+      <a class="job" target="_blank" rel="noopener" href="https://www.wanted.co.kr/wd/377393">
+        <div class="job-top"><span class="job-co">가제트코리아</span><span class="src">원티드</span></div>
+        <div class="job-title">[커머스본부 제품팀] Product Designer</div>
+        <div class="job-meta"><span class="tag hot">경력 5~7년</span><span class="tag">정규직</span><span class="tag">서울</span></div>
+      </a>
+      <a class="job" target="_blank" rel="noopener" href="https://www.wanted.co.kr/wd/377187">
+        <div class="job-top"><span class="job-co">닷어스</span><span class="src">원티드</span></div>
+        <div class="job-title">[리드볼트] 커머스 제품 디자인팀 리드</div>
+        <div class="job-meta"><span class="tag hot">경력 6~10년</span><span class="tag">정규직</span><span class="tag">서울</span></div>
+      </a>
+      <a class="job" target="_blank" rel="noopener" href="https://www.wanted.co.kr/wd/377414">
+        <div class="job-top"><span class="job-co">리브애니웨어</span><span class="src">원티드</span></div>
+        <div class="job-title">Product Designer · 플랫폼</div>
+        <div class="job-meta"><span class="tag hot">경력 5~11년</span><span class="tag">정규직</span><span class="tag">마감 D-33</span></div>
+      </a>
+      <a class="job" target="_blank" rel="noopener" href="https://www.wanted.co.kr/wd/377306">
+        <div class="job-top"><span class="job-co">오토스테이</span><span class="src">원티드</span></div>
+        <div class="job-title">Product Designer (UX/UI) · 모빌리티</div>
+        <div class="job-meta"><span class="tag hot">경력 5년 이상</span><span class="tag">정규직</span><span class="tag">서울</span></div>
+      </a>
+      <a class="job" target="_blank" rel="noopener" href="https://www.wanted.co.kr/wd/377129">
+        <div class="job-top"><span class="job-co">111퍼센트</span><span class="src">원티드</span></div>
+        <div class="job-title">[운빨존많겜] UI·UX 디자이너 · 게임</div>
+        <div class="job-meta"><span class="tag hot">경력 3년 이상</span><span class="tag">정규직</span><span class="tag">마감 D-11</span></div>
+      </a>
+      <a class="job" target="_blank" rel="noopener" href="https://cesco.career.greetinghr.com/ko/o/230842">
+        <div class="job-top"><span class="job-co">세스코</span><span class="src">그리팅</span></div>
+        <div class="job-title">UI/UX 디자인 · 커머스</div>
+        <div class="job-meta"><span class="tag hot">경력 5년 이상</span><span class="tag">정규직</span><span class="tag">마감 D-13</span></div>
+      </a>
+      <p class="more-note t-caption">…외 8건은 브리핑 아카이브에서 · 원문은 카드를 누르면 열려요</p>
+    </section>
 
-  <section>
-    <div class="sec-label"><span class="sec-num">03</span><h2>면접을 위한 업계 인사이트</h2></div>
-    <p class="sec-sub">"요즘 업계 변화를 어떻게 보세요?" — 면접에서 꺼낼 수 있는 이야기를 매일 하나씩 쌓아드려요.</p>
-    <div class="insight">
-      <h3>Config 2026 이후, 프로덕트 디자이너의 직무기술서가 바뀌고 있다</h3>
-      <p>지난달 Figma Config 2026에서 <b>Motion(타임라인 애니메이션), Weave(AI 이미지 워크플로우), Code Layers(디자인↔코드 양방향 변환)</b>가 공개됐어요. After Effects 없이 프로덕션 수준 모션을 만들고, 캔버스에서 바로 GitHub 연동 프로토타입을 돌리는 게 표준 워크플로우가 되는 중이에요.</p>
-      <p>오늘 새로 나온 공고들에도 이미 반영되고 있어요. <b>'프로토타이핑', '디자인 시스템', '데이터 기반 검증'</b>이 자격요건 상단으로 올라왔죠. 디자이너에게 기대하는 역할이 '화면 그리는 사람'에서 <b>인터랙션과 시스템을 설계하는 프로덕트 아키텍트</b>로 이동하는 신호예요.</p>
-      <div class="action">🎤 <b>면접에서 이렇게</b> — "최근 주목한 업계 변화"를 묻는다면: Config 2026의 Code Layers로 디자인-개발 협업 경계가 바뀌는 점을 짚고, 내 프로젝트에서 프로토타입으로 검증한 경험 하나를 연결해 보세요.</div>
-      <div class="srcline">직군별 뉴스레터와 Config 2026 발표를 종합해 커리어코치가 정리했어요.</div>
-    </div>
-    <div class="nudge">📚 오늘도 '안 읽는 사람' 대비 학습 하나를 추가했어요 — 이번 달 21개째</div>
-  </section>
+    <section>
+      <div class="sec-label"><span class="sec-num t-caption-strong">02</span><h2 class="t-h2">프로덕트 디자이너 채용 트렌드</h2></div>
+
+      <div class="tiles">
+        <div class="tile">
+          <div class="t-label">어제 새로 나온 공고</div>
+          <div class="t-value">16건</div>
+        </div>
+        <div class="tile">
+          <div class="t-label">어제 마감된 공고</div>
+          <div class="t-value">3건</div>
+        </div>
+      </div>
+
+      <div class="viz-root">
+        <div class="viz-title t-caption-strong">매일 닫힌 기회 수 (마감된 공고)</div>
+        <div class="viz-sub t-caption">최근 30일 · 커리어코치 추적 기준</div>
+        <svg viewBox="0 0 560 220" role="img" aria-label="최근 30일 일별 마감 공고 수 선 차트. 하루 0건에서 6건 사이로 매일 공고가 마감되며, 30일 합계 85건. 어제는 3건 마감.">
+          <line class="gridline" x1="24" y1="60"  x2="536" y2="60"/>
+          <line class="gridline" x1="24" y1="120" x2="536" y2="120"/>
+          <text class="tick" x="30" y="55" text-anchor="start">6건</text>
+          <text class="tick" x="30" y="115" text-anchor="start">3건</text>
+          <path class="line1" d="M60,100 L75.9,120 L91.7,80 L107.6,140 L123.4,120 L139.3,160 L155.2,180 L171,100 L186.9,80 L202.8,120 L218.6,100 L234.5,140 L250.3,180 L266.2,160 L282.1,120 L297.9,100 L313.8,60 L329.7,120 L345.5,100 L361.4,160 L377.2,180 L393.1,80 L409,120 L424.8,100 L440.7,140 L456.6,80 L472.4,180 L488.3,160 L504.1,100 L520,120"/>
+          <circle class="dot1" cx="313.8" cy="60" r="4"/>
+          <circle class="dot1" cx="520" cy="120" r="5"/>
+          <text class="val" x="313.8" y="45" text-anchor="middle">6</text>
+          <text class="val" x="527" y="124" text-anchor="start">3</text>
+          <line class="baseline" x1="24" y1="190" x2="536" y2="190"/>
+          <text class="tick" x="60"    y="210" text-anchor="middle">30일 전</text>
+          <text class="tick" x="218.6" y="210" text-anchor="middle">20일 전</text>
+          <text class="tick" x="377.2" y="210" text-anchor="middle">10일 전</text>
+          <text class="tick" x="520"   y="210" text-anchor="middle">어제</text>
+          <rect class="hover-col" data-tip="4주 전 · 마감 18건"  x="52"  y="30" width="111" height="160"/>
+          <rect class="hover-col" data-tip="3주 전 · 마감 19건"  x="163" y="30" width="111" height="160"/>
+          <rect class="hover-col" data-tip="2주 전 · 마감 21건"  x="274" y="30" width="111" height="160"/>
+          <rect class="hover-col" data-tip="1주 전 · 마감 20건"  x="385" y="30" width="111" height="160"/>
+          <rect class="hover-col" data-tip="이번 주 · 마감 7건"  x="496" y="30" width="40" height="160"/>
+        </svg>
+        <div class="viz-note">* 그래프 추이는 표본 추적 예시입니다. 어제 신규 16건은 7/29 실측 기준.</div>
+      </div>
+
+      <p class="trend-copy">기회는 쉬는 날 없이 <b>매일 몇 건씩 조용히 닫혀요.</b> 어제 공고 중 관심 가는 게 있다면, 이력서가 쌓이기 전 <b>첫날 지원</b>이 가장 주목받아요.</p>
+    </section>
+
+    <section>
+      <div class="sec-label"><span class="sec-num t-caption-strong">03</span><h2 class="t-h2">면접을 위한 업계 인사이트</h2></div>
+      <p class="sec-sub t-body-s">"요즘 업계 변화를 어떻게 보세요?" — 면접에서 꺼낼 수 있는 이야기를 매일 하나씩 쌓아드려요.</p>
+      <div class="insight">
+        <h3 class="t-h3">Config 2026 이후, 프로덕트 디자이너의 직무기술서가 바뀌고 있다</h3>
+        <p>지난달 Figma Config 2026에서 <b>Motion(타임라인 애니메이션), Weave(AI 이미지 워크플로우), Code Layers(디자인↔코드 양방향 변환)</b>가 공개됐어요. After Effects 없이 프로덕션 수준 모션을 만들고, 캔버스에서 바로 GitHub 연동 프로토타입을 돌리는 게 표준 워크플로우가 되는 중이에요.</p>
+        <p>오늘 새로 나온 공고들에도 이미 반영되고 있어요. <b>'프로토타이핑', '디자인 시스템', '데이터 기반 검증'</b>이 자격요건 상단으로 올라왔죠. 디자이너에게 기대하는 역할이 '화면 그리는 사람'에서 <b>인터랙션과 시스템을 설계하는 프로덕트 아키텍트</b>로 이동하는 신호예요.</p>
+        <div class="action">🎤 <b>면접에서 이렇게</b> — "최근 주목한 업계 변화"를 묻는다면: Config 2026의 Code Layers로 디자인-개발 협업 경계가 바뀌는 점을 짚고, 내 프로젝트에서 프로토타입으로 검증한 경험 하나를 연결해 보세요.</div>
+        <div class="srcline">직군별 뉴스레터와 Config 2026 발표를 종합해 커리어코치가 정리했어요.</div>
+      </div>
+      <div class="nudge">📚 오늘도 '안 읽는 사람' 대비 학습 하나를 추가했어요 — 이번 달 21개째</div>
+    </section>
+  </main>
 
   <footer>
-    <a class="cta" href="#">내일 아침에도 받아보기</a>
+    <a class="cta" href="./signup.html">내일 아침에도 받아보기</a>
     <div class="next">매 영업일 오전 8시, 카카오톡으로 만나요</div>
     <div class="fine">
       커리어코치 · 프로덕트 디자이너 데일리 7월 29일<br>
@@ -289,7 +269,6 @@
       수신을 원치 않으시면 채널 차단으로 언제든 해지할 수 있어요.
     </div>
   </footer>
-
 </div>
 <script>
   const tip = document.getElementById('tooltip');

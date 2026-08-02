@@ -261,17 +261,18 @@ node tools/figma-audit/build-type-snapshot.mjs figma_type.json --write  # 반영
 스냅샷은 **자동 생성**된다. 사람이 손댈 것은 새로 생긴 타이포 조합의 `sels`(웹 선택자)뿐이고, 스크립트가 어떤 조합에 선택자가 비었는지 알려 준다.
 그다음 **웹 CSS도 새 피그마 값으로 고친다** — 스냅샷만 갱신하고 끝내면 안 된다.
 
-## 약관·개인정보 화면 — 피그마↔웹 동기화 (2026-08-02 신설)
+## 약관·개인정보·브리핑 화면 — 피그마↔웹 동기화 (2026-08-02 신설)
 
-이용약관·개인정보처리방침도 랜딩처럼 **피그마가 기준**이다. 웹은 파생물.
-- 피그마: 파일 `LnT8TgFVBxky0bVyaF6Tob` / 섹션 **`327:2474` "이용약관 / 개인정보처리방침"**
-  - 프레임 `339:2474` = 이용약관 ↔ 웹 `terms.html`
-  - 프레임 `340:2478` = 개인정보처리방침 ↔ 웹 `privacy.html`
-- 두 화면은 랜딩과 **같은 디자인 시스템**으로 만들었다: 헤더는 랜딩 헤더(`6:162`) 클론,
-  타이포는 텍스트 스타일(`text/display`·`text/h2`·`text/body`·`text/body-s`·`text/label`·`text/caption`·`text/button`),
-  색은 원시 fill(navy-900/gray-600/gray-400/amber-600), 표는 auto-layout + 셀 보더(gray-200)·헤더 gray-100.
+이용약관·개인정보처리방침·브리핑 상세페이지도 랜딩처럼 **피그마가 기준**이다. 웹은 파생물.
+- 피그마 파일 `LnT8TgFVBxky0bVyaF6Tob`, 문서/브리핑 섹션 2개:
+  - 섹션 **`327:2474` "이용약관 / 개인정보처리방침"** — 프레임 `339:2474`=이용약관↔`terms.html`, `340:2478`=개인정보처리방침↔`privacy.html`
+  - 섹션 **`356:3106` "브리핑 상세페이지"** — 프레임 `362:2482` ↔ `letter.html`
+- 세 화면 모두 랜딩과 **같은 디자인 시스템**으로 만들었다: 헤더는 랜딩 헤더(`6:162`) 클론,
+  타이포는 텍스트 스타일(`text/display`·`h2`·`h3`·`body`·`body-s`·`label`·`caption`·`button`·`micro`),
+  색은 원시 fill(navy-900/gray-*/amber-600), 표·카드는 auto-layout + 보더(gray-200)·헤더 gray-100.
+  브리핑의 선 차트는 `createNodeFromSvg` 로 넣고 프레임 이름을 **`chart-viz`** 로 둔다(아래 표기 규칙 참고).
 - 웹도 같은 값을 쓴다: `:root` 는 `--pad-x:24`·`--card-max:450`·`--content-max:402` (index.html 과 동일),
-  `.doc` 의 시맨틱 태그에 위 텍스트 스타일 값을 그대로 매핑했다.
+  시맨틱 태그·컴포넌트 클래스에 위 텍스트 스타일 값을 그대로 매핑했다.
 
 ### 문구 동기화는 어떻게 강제되나
 커밋된 스냅샷 `tools/figma-audit/figma-docs-text.json`(피그마 텍스트, 마커 제외)을
@@ -279,32 +280,35 @@ node tools/figma-audit/build-type-snapshot.mjs figma_type.json --write  # 반영
 ```
 node tools/figma-audit/docs-audit.mjs
 ```
-pre-push 2겹(a)에서 `terms/privacy.html` 또는 스냅샷이 바뀐 푸시마다 자동으로 돈다.
+pre-push 2겹(a)에서 `terms/privacy/letter.html` 또는 스냅샷이 바뀐 푸시마다 자동으로 돈다.
 랜딩과 달리 **라이브 피그마 덤프가 필요 없다** — 커밋된 스냅샷과 대조하기 때문(문구는 자주 안 바뀌므로).
 
 ### 피그마 화면을 고쳤으면 — 스냅샷을 다시 뽑아 커밋한다
 1. 문구를 바꾼다. 새 텍스트를 만들거나 길게 고칠 땐 위 "피그마에 글자를 쓸 때" 규칙을 따른다 —
    **지오메트리·폭·행간을 측정용 Gothic A1 로 다 잡은 뒤, 맨 마지막에 텍스트 스타일을 입힌다.**
    (스타일을 먼저 입히면 Pretendard 미로드 상태가 되어 이후 `textAutoResize` 등 쓰기가 막힌다. 실측으로 겪음.)
-2. `use_figma`(읽기)로 두 프레임의 텍스트를 다시 뽑는다 — **마커(`name==='marker'`)는 제외:**
+2. `use_figma`(읽기)로 세 프레임의 텍스트를 다시 뽑는다 — **마커·차트 텍스트는 제외:**
    ```js
-   const frames = { '339:2474':'terms.html', '340:2478':'privacy.html' };
+   const frames = { '339:2474':'terms.html', '340:2478':'privacy.html', '362:2482':'letter.html' };
+   const underChart = n => { let p=n.parent; while(p){ if(p.name==='chart-viz') return true; p=p.parent; } return false; };
    const pages = [];
    for (const [fid, html] of Object.entries(frames)) {
      const f = await figma.getNodeByIdAsync(fid);
-     const texts = f.findAllWithCriteria({ types:['TEXT'] }).filter(t=>t.name!=='marker').map(t=>t.characters);
+     const texts = f.findAllWithCriteria({ types:['TEXT'] })
+       .filter(t=>t.name!=='marker' && !underChart(t)).map(t=>t.characters);   // 마커·차트 눈금 제외
      pages.push({ html, figmaNode: fid, name: f.name, ignoreWebText: [], texts });
    }
-   return { fileKey: figma.fileKey, section:'327:2474', pages };
+   return { fileKey: figma.fileKey, pages };
    ```
-3. 결과로 `figma-docs-text.json` 의 `pages` 를 갈아끼우고 `dumpedAt` 를 오늘로 바꾼다.
-4. 웹(terms/privacy.html)도 같은 문구로 고치고 `docs-audit` 가 "차이 없음" 이면 커밋.
+3. 결과로 `figma-docs-text.json` 의 해당 `pages[]` 항목을 갈아끼우고 `dumpedAt` 를 오늘로 바꾼다.
+4. 웹(terms/privacy/letter.html)도 같은 문구로 고치고 `docs-audit` 가 "차이 없음" 이면 커밋.
 
 ### 표기 규칙 (동기화가 안 깨지게)
 - 리스트 마커(번호 `1.`·불릿 `•`)는 피그마에서 **노드 이름을 `marker` 로** 둔다 — 스냅샷·검수가 걸러낸다.
   웹은 `<ol>`/`<ul>` 로 자동 생성하므로 마커가 DOM 텍스트에 없다(양쪽 다 "문구"가 아니다).
 - `date`·`back` 같은 내용 노드는 이름을 내용과 같게 둔다(autoRename). 검수는 텍스트 문자열만 본다.
 - 웹 문단 안 `<strong>`·`<a>` 는 대조에 영향 없다(공백 제거 후 이어붙여 비교).
+- 브리핑 선 차트는 `createNodeFromSvg` 프레임 이름을 **`chart-viz`** 로 둔다. 스냅샷 덤프가 그 하위 텍스트(눈금 `6건`·`30일 전` 등)를 제외하고, 웹도 `<svg>` 를 통째로 무시하므로 양쪽 다 "문구"에서 빠진다.
 
 ## 하지 말 것
 - **글자 크기를 줄여서 줄바꿈을 맞추지 않는다.** 문구가 안 들어가면 UXW(문구)를 줄인다. (2026-08-01 사용자 결정)

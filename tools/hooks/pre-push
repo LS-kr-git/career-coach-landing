@@ -101,7 +101,7 @@ diff_names() {
 }
 
 # (a) 약관·개인정보 화면 ↔ 피그마 문구 동기화
-CHANGED_DOCS="$(diff_names terms.html privacy.html tools/figma-audit/figma-docs-text.json)"
+CHANGED_DOCS="$(diff_names terms.html privacy.html letter.html tools/figma-audit/figma-docs-text.json)"
 if [ -n "$CHANGED_DOCS" ]; then
   echo "▶ 약관·개인정보 화면 ↔ 피그마 문구 대조…"
   if ! node tools/figma-audit/docs-audit.mjs; then
