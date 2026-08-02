@@ -203,6 +203,14 @@ node tools/figma-audit/build-type-snapshot.mjs figma_type.json --write  # 반영
   `figma-style.json` 의 `illust-aspect-desk`/`illust-aspect-mobile` 이 렌더 비율 vs 원본 비율로 잡는다.
 - 모바일(520px 미만) 렌더는 데스크톱을 넓힐 때 **같이 넓어지면 안 된다.**
   `width-mobile-content-352` · `width-mobile-card-full` 이 430px 뷰포트에서 회귀를 잡는다.
+- **OG 이미지를 같은 파일명으로 내용만 바꾸지 않는다.** 카카오·메타는 스크랩 정보(제목·설명)와
+  썸네일 이미지를 **따로**, 그것도 이미지는 URL 기준으로 캐싱한다. 파일명이 그대로면 스크랩 캐시를
+  지워도 옛 썸네일이 계속 나간다. 2026-08-01 에 `og-logo.png` 를 확정 로고로 교체했는데 파일명이
+  같아 8/2 까지 옛 워드마크가 카톡에 떴다. **바꿀 때마다 `og-logo-YYYYMMDD.png` 로 파일명을 함께 바꾼다.**
+  바꾼 뒤 순서도 중요하다 — ①배포 완료 확인 → ②[카카오 캐시 초기화](https://developers.kakao.com/tool/clear/og).
+  거꾸로 하면 옛 이미지를 다시 캐싱한다. 초기화는 `https://careercoach.my/` · `https://careercoach.my` ·
+  `http://…` · `www…` 가 **각각 별도 캐시**라 쓰는 형태를 전부 넣어야 한다(2026-08-02 에 5종 모두 1건씩 삭제됨).
+  이미 보낸 카톡 메시지의 미리보기는 전송 시점 스냅샷이라 **무슨 짓을 해도 안 바뀐다** — 링크를 새로 보내야 한다.
 
 ## 배포를 기다리지 않고 확인하기
 
