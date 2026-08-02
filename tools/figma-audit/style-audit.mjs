@@ -13,6 +13,10 @@
  * 특수 키:
  *   "shadow": "있음" | "없음"  → box-shadow 유무만 본다 (피그마 blur 와 CSS blur 는 값 체계가 달라 수치 비교는 무의미)
  *   "tag":    "SPAN" 등        → 요소의 태그명. 목업 CTA 처럼 "링크가 아니어야 한다" 를 잠근다
+ *   "width":  "464px"          → getComputedStyle 이 아니라 실제 렌더 폭(getBoundingClientRect). max-width 가 아니라 "결과적으로 몇 px 로 그려졌나" 를 본다
+ *
+ * 항목별 "viewport": 1280  → 그 항목만 해당 폭으로 재측정한다 (없으면 390 = 모바일).
+ *   데스크톱 전용 @media 규칙은 390 에서는 적용조차 안 되므로, 폭 항목은 반드시 viewport 를 준다.
  *   그 밖의 키는 CSS 속성명 그대로 getComputedStyle 값과 비교한다. 색은 #hex / rgb() 아무 표기나 된다.
  *
  * playwright 가 없으면 조용히 건너뛴다(종료코드 0, skipped=true).
@@ -85,22 +89,38 @@ try {
   bail(`크로미움 실행 실패 (${e.message.split('\n')[0]})`);
 }
 
-const page = await browser.newPage({ viewport: { width: 390, height: 900 } });
-await page.goto(pathToFileURL(htmlPath).href, { waitUntil: 'domcontentloaded' });
+/* 항목마다 viewport 를 지정할 수 있다 (없으면 390 = 모바일).
+   데스크톱 전용 규칙(@media min-width:520px)은 390 에서 재면 아예 적용되지 않으므로,
+   폭 관련 항목은 viewport:1280 으로 따로 잰다. 뷰포트별로 페이지를 한 번씩만 연다. */
+const DEFAULT_VW = 390;
+const byViewport = new Map();
+spec.items.forEach((it, i) => {
+  const vw = it.viewport || DEFAULT_VW;
+  if (!byViewport.has(vw)) byViewport.set(vw, []);
+  byViewport.get(vw).push(i);
+});
 
-const measured = await page.evaluate((items) =>
-  items.map((it) => {
-    const el = document.querySelector(it.sel);
-    if (!el) return { id: it.id, missing: true };
-    const cs = getComputedStyle(el);
-    const got = {};
-    for (const prop of Object.keys(it.css)) {
-      if (prop === 'shadow') got.shadow = cs.boxShadow && cs.boxShadow !== 'none' ? '있음' : '없음';
-      else if (prop === 'tag') got.tag = el.tagName;
-      else got[prop] = cs.getPropertyValue(prop);
-    }
-    return { id: it.id, got };
-  }), spec.items);
+const measured = new Array(spec.items.length);
+for (const [vw, idxs] of [...byViewport.entries()].sort((a, b) => a[0] - b[0])) {
+  const page = await browser.newPage({ viewport: { width: vw, height: 900 } });
+  await page.goto(pathToFileURL(htmlPath).href, { waitUntil: 'domcontentloaded' });
+  const got = await page.evaluate((items) =>
+    items.map((it) => {
+      const el = document.querySelector(it.sel);
+      if (!el) return { id: it.id, missing: true };
+      const cs = getComputedStyle(el);
+      const got = {};
+      for (const prop of Object.keys(it.css)) {
+        if (prop === 'shadow') got.shadow = cs.boxShadow && cs.boxShadow !== 'none' ? '있음' : '없음';
+        else if (prop === 'tag') got.tag = el.tagName;
+        else if (prop === 'width') got.width = `${Math.round(el.getBoundingClientRect().width)}px`;
+        else got[prop] = cs.getPropertyValue(prop);
+      }
+      return { id: it.id, got };
+    }), idxs.map((i) => spec.items[i]));
+  idxs.forEach((srcIdx, k) => { measured[srcIdx] = got[k]; });
+  await page.close();
+}
 
 await browser.close();
 
@@ -132,7 +152,8 @@ for (let i = 0; i < spec.items.length; i++) {
 if (asJson) {
   console.log(JSON.stringify({ skipped: false, checked, items: spec.items.length, findings }));
 } else {
-  console.log(`\n스타일 검수 — 피그마 스냅샷 ${spec.generatedAt} (노드 ${spec.figmaNode}) / 항목 ${spec.items.length}개, 속성 ${checked}개`);
+  const vws = [...new Set(spec.items.map((i) => i.viewport || 390))].sort((a, b) => a - b);
+  console.log(`\n스타일 검수 — 피그마 스냅샷 ${spec.generatedAt} (노드 ${spec.figmaNode}) / 항목 ${spec.items.length}개, 속성 ${checked}개 · 뷰포트 ${vws.join('/')}px`);
   if (!findings.length) console.log('✅ 스타일 차이 없음\n');
   else {
     for (const f of findings) {
