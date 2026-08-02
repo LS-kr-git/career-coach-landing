@@ -7,21 +7,24 @@
   "generatedAt": "2026-08-02",
   "items": [
     {
-      "id": "hero-eyebrow",
-      "label": "히어로 아이브로우(칩 제거 후 텍스트)",
-      "sel": ".hero .eyebrow",
-      "node": "6:170",
+      "id": "hero-badge",
+      "label": "히어로 칩(보더 없는 틴트)",
+      "sel": ".hero-badge",
+      "node": "247:4843",
       "figma": {
+        "fill": "#fef3c7",
+        "radius": 999,
+        "shadow": false,
         "textFill": "#d97706",
-        "h": 20
+        "h": 31
       },
       "css": {
-        "color": "#D97706",
-        "font-size": "14px",
-        "font-weight": "700",
-        "line-height": "20px"
+        "background-color": "#FEF3C7",
+        "border-top-width": "0px",
+        "border-top-left-radius": "999px",
+        "color": "#D97706"
       },
-      "_근거": "2026-08-02 칩(필+보더) 제거 — text/label 로 통일. 배경·보더가 되살아나면 잡는다."
+      "_근거": "2026-08-02 최종 확정 — 보더 없는 amber-100 틴트 칩. 보더가 되살아나면(1px) 잡는다."
     },
     {
       "id": "alim-bubble",

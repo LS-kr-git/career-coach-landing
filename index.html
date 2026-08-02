@@ -140,8 +140,14 @@ fbq('track', 'PageView');
   .illust{width:100%;height:auto;border-radius:12px;display:block}
 
   /* ===== 히어로 ===== */
-  /* 히어로 아이브로우 — 2026-08-02 칩(필+보더) 제거, 다른 섹션과 동일한 .t-label.eyebrow 로 통일
-     (피그마 6:170 = text/label 14/20 Bold ls1% amber-600, 헤딩과 gap 8 = 241:2404 컨테이너) */
+  /* 히어로 칩 — 2026-08-02 최종: 보더 없는 amber-100 틴트 필 (피그마 247:4843, radius 999, 패딩 6.5/15, h 31).
+     플렉스 상하 중앙정렬로 글자가 위로 떠 보이던 문제 해결 (line-height 박스 대신 플렉스 센터링).
+     칩↔헤딩 간격은 섹션 기본 gap 20 그대로 (피그마 241:2404 gap 20). */
+  .hero-badge{display:inline-flex;align-items:center;justify-content:center;
+    height:31px;padding:1px 15px 0;border-radius:999px;width:auto;
+    /* padding-top 1px = 광학 보정: 글꼴 잉크 박스가 행간 박스보다 0.5px 위에 앉아
+       플렉스 센터링만으로는 글자가 1px 떠 보인다 (피그마도 pad 7/6 으로 동일 보정) */
+    background:var(--amber-100);color:var(--amber-600)}
   .hero-title{color:var(--gray-800);text-align:center}
   .hl{background:linear-gradient(transparent 65%, var(--amber-200) 65%);padding:0 2px}
 
@@ -306,10 +312,8 @@ fbq('track', 'PageView');
 
     <!-- 히어로 -->
     <section class="hero in">
-      <div class="head-group">
-        <div class="t-label eyebrow">연봉 올리기 프로젝트</div>
-        <h1 class="t-display-l hero-title">나도 <span class="hl">더 좋은 곳</span>으로<br>이직할 수 있을까?</h1>
-      </div>
+      <div class="hero-badge t-caption-strong">연봉 올리기 프로젝트</div>
+      <h1 class="t-display-l hero-title">나도 <span class="hl">더 좋은 곳</span>으로<br>이직할 수 있을까?</h1>
       <p class="t-body-l lead">차가운 이직시장에서
 매일 1분 투자로 연봉 앞자리를 바꿔보세요</p>
       <img class="illust" src="assets/img-hero.png" alt="이직으로 연봉이 4,000만원에서 5,000만원으로 오르는 그래프" width="344" height="224">
