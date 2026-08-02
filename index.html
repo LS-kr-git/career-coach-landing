@@ -124,15 +124,16 @@ fbq('track', 'PageView');
   .head-group{display:flex;flex-direction:column;gap:8px;align-items:center;text-align:center}
   .eyebrow{color:var(--amber-600)}
   .headline{color:var(--navy-900);text-align:center;white-space:pre-line}
-  /* 피그마 리드 텍스트는 hug 라 섹션 패딩(24)을 넘어 최대 344 까지 벌어진다(6:247 = 344).
-     웹이 312 로 가두면 명시 줄바꿈이 안 지켜지고 "쌓아드려 / 요." 처럼 한 글자가 밀려 내려간다.
-     그래서 리드만 좌우로 16px 씩 흘러넘치게 둔다 — 360px 에서 344 로 피그마와 같아진다. (2026-08-02) */
+  /* 피그마 리드 문단은 최대 폭 344 (고정폭 노드들 = 344, hug 노드들은 그 이하 + 명시 줄바꿈).
+     360px 에서 섹션 패딩(24)을 16px 씩 넘어 344 가 되고, 그보다 넓은 화면에서도 344 에서 멈춘다.
+     ⚠ 344 보다 넓히면 명시 줄바꿈 없는 리드(6:204 등)의 자동 줄바꿈 위치가 피그마와 달라진다
+       — 2026-08-02 "수백/개" 줄바꿈 드리프트로 실제 발생. figma-style.json 에 잠금. */
   /* 피그마 6:188(폭 330 고정) — 본문 문단은 화면이 넓어져도 늘어나지 않고 330 을 유지한 채
      중앙 정렬된다 (피그마 sizeH FIXED + 부모 CENTER, 2026-08-02 사용자 확정).
      360px 화면에서는 섹션 패딩(24)을 9px 씩 넘어 330 이 된다. 좁은 화면에서는 같이 줄어든다. */
   .para-wide{width:calc(100% + 18px);max-width:330px;margin-left:-9px;margin-right:-9px}
   .lead{color:var(--gray-600);text-align:center;white-space:pre-line;
-    width:calc(100% + 32px);max-width:calc(var(--content-max) + 32px);margin-left:-16px;margin-right:-16px}
+    width:calc(100% + 32px);max-width:344px;margin-left:-16px;margin-right:-16px}
   /* 일러스트는 배경이 투명한 PNG — 회색 박스를 씌우지 않는다 (2026-08-01, 신규 6종) */
   /* height:auto 필수 — img 의 height="224" 속성이 살아 있으면 폭만 늘어나 가로로 눌린다.
      352px 시절엔 원본 344 와 비슷해 티가 안 났지만, 데스크톱에서 넓히자 바로 드러났다. (2026-08-02) */
