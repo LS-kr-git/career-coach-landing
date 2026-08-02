@@ -54,6 +54,58 @@ git clone https://github.com/LS-kr-git/career-coach.git   # 비공개 — PAT �
 - 피그마 파일 `LnT8TgFVBxky0bVyaF6Tob`, 프레임 **`6:148` "랜딩페이지_커리어코치"** (가로 360px)
 - PROD 섹션(`6:147`)에는 다른 프로젝트 레퍼런스 프레임이 섞여 있다. **섹션이 아니라 프레임 6:148 만** 기준이다.
 
+## 피그마에 글자를 쓸 때 — Pretendard 규칙 (2026-08-02 확정)
+
+**플러그인 실행 환경(`use_figma`)에는 Pretendard 가 없다.** `listAvailableFontsAsync()` 가 1,938개 패밀리를
+돌려주는데 Pretendard 는 0개다. OS 로컬 폰트가 아예 안 보이는 환경이라 **사용자 컴퓨터에 Pretendard 를
+설치해도 이 문제는 안 풀린다** — 설치는 사용자가 피그마를 직접 편집할 때만 효과가 있다.
+`loadFontAsync({family:'Pretendard Variable'})` 는 항상 실패한다.
+
+### 1. 이미 있는 텍스트에 Pretendard 를 입힐 때
+`setTextStyleIdAsync()` 는 **폰트 로드 없이** 파일의 텍스트 스타일(=Pretendard Variable)을 적용한다.
+이게 이 환경에서 Pretendard 를 붙이는 유일한 정식 경로다.
+```js
+const styles = await figma.getLocalTextStylesAsync();
+await node.setTextStyleIdAsync(styles.find(s => s.name === 'text/caption').id);
+```
+스타일 이름이 아니라 id 로 참조할 거면 실제 id 를 먼저 확인한다 — `text/caption` 이
+`S:de6f27cf…`, `text/caption-strong` 이 `S:8cbb5cff…` 다. 이름과 굵기를 짐작하지 말 것.
+
+### 2. 새 텍스트를 만들 때 — 폭·행간은 만들 때 고정된다
+폰트가 없으면 피그마가 **다시 측정하지 않는다.** 스타일을 나중에 입혀도 노드의 폭·높이는
+만들 때 값 그대로 남는다. 그래서 **측정 가능한 한글 폰트로 크기·행간을 먼저 잡고 글자를 넣은 뒤**
+스타일을 입힌다. 측정이 Pretendard 와 가장 가까운 건 **Gothic A1 Regular** 다(순한글 라벨은 오차 0px,
+`·`·괄호·영문이 섞이면 최대 4px).
+```js
+const G = { family: 'Gothic A1', style: 'Regular' };
+await figma.loadFontAsync(G);
+const t = figma.createText();
+t.fontName = G;
+t.fontSize = 13;
+t.lineHeight = { unit: 'PIXELS', value: 20 };   // ← 화면에 이미 있는 같은 역할 노드의 높이를 그대로
+t.characters = '퍼포먼스';
+await t.setTextStyleIdAsync(CAPTION_STYLE_ID);   // 여기서 Pretendard 로 바뀌고, 폭은 위 측정값이 남는다
+```
+행간은 스타일 값(18)이 아니라 **화면에 이미 있는 같은 역할 노드의 높이**(칩 20, 아코디언 21, CTA 22,
+단계표기 18)를 쓴다. 파일 전체가 그렇게 만들어져 있어서, 스타일 값을 쓰면 그 노드만 2px 작아진다.
+
+### 3. 기존 텍스트의 글자를 바꿀 때
+현재 폰트가 없으면 `characters` 쓰기가 막힌다(`Cannot write to node with unloaded font`).
+**Gothic A1 로 갈아탄 뒤 쓰고, 다시 스타일을 입힌다.**
+```js
+t.fontName = G;            // 현재 폰트가 없어도 이 대입은 된다
+t.characters = '새 문구';
+await t.setTextStyleIdAsync(styleId);
+```
+
+### 4. 하지 말 것 — 인스턴스 텍스트 오버라이드
+컴포넌트 인스턴스의 텍스트를 바꾸는 것(`setProperties` 든 직접 대입이든)은 **이 환경에서 못 쓴다.**
+2026-08-02 실측: 오버라이드한 인스턴스가 렌더에서 **글자가 아예 빈칸**으로 나오거나 **컴포넌트 기본값**으로
+돌아갔고, 스타일을 다시 입히는 순간 폭이 메인 컴포넌트 값으로 리셋됐다(칩 104px → 62px).
+그래서 **라벨이 화면마다 다른 요소(칩·아코디언 행·CTA 버튼)는 인스턴스로 만들지 않는다.**
+글자가 고정이거나 아예 없는 요소(진행바·단계 표기·상단바)만 인스턴스로 쓴다.
+Pretendard 가 실제로 보이는 환경에서 작업한다면 이 제약은 사라진다.
+
 ## 랜딩을 건드렸다면 — 푸시 전에 반드시
 
 ### 1. 피그마에서 두 가지를 뽑는다 (Figma MCP)
