@@ -193,13 +193,12 @@ fbq('track', 'PageView');
   .chips{
     display:flex;flex-direction:column;gap:16px;align-items:center;
     width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);
-    /* 피그마 6:248 — 칩 블록 위아래 50px 여백 (이미지 영역 안쪽 패딩) */
+    /* 피그마 6:248 — 칩 블록 위아래 50px 여백 (이미지 영역 안쪽 패딩).
+       이 패딩은 overflow:hidden 의 클립 경계(=패딩 박스 끝) 안쪽이라,
+       마지막 줄 칩의 그림자(0 1px 3px)와 보더 아래 1px 도 함께 살아난다.
+       — 이전의 4px 패딩 + -4px 마진 보정은 이 50px 에 흡수돼 필요 없어졌다. */
     padding:50px 0;
     overflow:hidden;
-    /* overflow:hidden 이 마지막 줄 칩의 그림자(0 1px 3px)와 보더 아래 1px을 잘라내
-       하단이 미세하게 짤려 보였다. 클립 경계는 패딩 박스 끝이므로 위아래 4px 패딩으로
-       그림자 공간을 확보하고, 같은 값의 음수 마진으로 바깥 레이아웃은 그대로 유지한다. */
-    padding-top:4px;padding-bottom:4px;margin-top:-4px;margin-bottom:-4px;
   }
   .chip-row{display:flex;gap:13px;flex:none;white-space:nowrap}
   .chip-row:nth-child(1){transform:translateX(10px)}
