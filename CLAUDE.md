@@ -97,8 +97,10 @@ for (const id of IDS) {
   if ('strokes' in n && n.strokes.length && n.strokes[0].type === 'SOLID') { o.stroke = hex(n.strokes[0].color); o.sw = n.strokeWeight; }
   if ('cornerRadius' in n && n.cornerRadius !== figma.mixed) o.radius = n.cornerRadius;
   if ('effects' in n) o.shadow = n.effects.some(e => e.type === 'DROP_SHADOW' && e.visible !== false);
-  if ('paddingTop' in n && n.layoutMode && n.layoutMode !== 'NONE')
+  if ('paddingTop' in n && n.layoutMode && n.layoutMode !== 'NONE') {
     o.pad = [n.paddingTop, n.paddingRight, n.paddingBottom, n.paddingLeft].map(v => Math.round(v * 10) / 10);
+    o.gap = Math.round(n.itemSpacing * 10) / 10;   // 섹션 내부 간격 — 여백 잠금이 이 값을 쓴다
+  }
   o.h = Math.round(n.height * 10) / 10;
   out.push(o);
 }
@@ -121,6 +123,13 @@ node tools/figma-audit/audit.mjs figma_meta.xml figma_type.json figma_style.json
 | 이미지 | `assets/*.png` sha256 | `map.json` |
 | 타이포 | 크기·굵기·행간·자간 실측 | `figma-type.json` |
 | **시각 스타일** | **색·보더·반경·패딩·그림자·태그명 실측** | **`figma-style.json`** |
+
+**여백·크기를 바꿨으면 `lockedStyles`(정규식)가 아니라 `figma-style.json` 에 넣는다.**
+`lockedStyles` 는 소스 문자열만 보므로 뒤에 붙은 규칙이 값을 덮어도 통과한다 — 2026-08-02 에 `.chips` 의
+`padding:50px 0` 이 나중 줄의 4px 보정에 덮여 계산값이 4px 이었는데 검수는 "차이 없음" 이었다.
+`figma-style.json` 쪽은 브라우저 `getComputedStyle` 을 보므로 무엇이 덮든 실제 결과가 잡힌다.
+현재 잠긴 여백: `spacing-chips-50` · `spacing-chips-rows-16` · `spacing-section-100`.
+상쇄용 음수 마진을 막으려면 `margin-top`/`margin-bottom` 도 함께 `0px` 로 잠근다.
 
 시각 요소(색/보더/간격/구조)를 바꿨다면 **`figma-style.json` 에 항목이 있는지 먼저 확인**하고, 없으면 추가한다.
 항목 하나는 `{ id, label, sel, node, figma:{피그마 원본값}, css:{기대 computed style} }` 형태다.

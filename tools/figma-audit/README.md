@@ -14,8 +14,30 @@
 | 확정값 | `map.json`의 `lockedStyles` 결정이 유지되는가 | 🔒 확정값 |
 | 이미지 | `assets/*.png` sha256이 기준값과 같은가 | ❌ 차이 |
 | **타이포** | **글자 크기·굵기·행간·자간이 피그마와 같은가** | 🅰️ 타이포 |
+| **시각 스타일** | **색·보더·반경·그림자가 피그마와 같은가** (`getComputedStyle` 실측) | 🎨 스타일 |
+| **여백·간격** | **패딩·마진·gap 이 피그마와 같은가** (`getComputedStyle` 실측) | 🎨 스타일 |
 
-`❌`/`🔒`/`🅰️`가 하나라도 있으면 종료코드 1.
+`❌`/`🔒`/`🅰️`/`🎨`가 하나라도 있으면 종료코드 1.
+
+### 여백은 왜 `lockedStyles` 가 아니라 `figma-style.json` 인가
+
+`lockedStyles` 는 **소스 문자열을 정규식으로** 본다. 그래서 뒤에 붙은 규칙이 값을 덮어도 통과한다.
+2026-08-02 에 `.chips` 의 `padding:50px 0` 뒤에 다른 세션의 `padding-top:4px;…margin-top:-4px` 가
+남아 있었는데, 소스에는 `padding:50px 0` 이 그대로 있으니 검수는 "차이 없음" 이었다. 실제 계산값은 4px.
+
+`figma-style.json` 항목은 헤드리스 크로미움의 **`getComputedStyle`** 을 본다. 무엇이 덮든 최종 결과가 잡힌다.
+**여백·크기를 잠글 때는 반드시 이쪽에 넣는다.** 상쇄용 음수 마진까지 막으려면 `margin-top`/`margin-bottom` 도
+같이 `0px` 로 잠근다 (`spacing-chips-50` 이 그렇게 돼 있다).
+
+현재 잠긴 여백 항목:
+
+| id | 선택자 | 잠근 값 | 피그마 근거 |
+|---|---|---|---|
+| `spacing-chips-50` | `.chips` | padding 위아래 50px, margin 위아래 0 | `6:248` 높이 257.8 (= 칩 157.8 + 50·2) |
+| `spacing-chips-rows-16` | `.chips` | row-gap 16px | `6:249` itemSpacing 16 |
+| `spacing-section-100` | `section` | padding 100/24, row-gap 20px | `6:168` pad [100,24,100,24] · gap 20 |
+
+네 방향 모두 확인됨: ① 웹 값이 덮이면 잡힘 ② 웹 값이 틀리면 잡힘 ③ 피그마가 바뀌면 "스냅샷 낡음" 으로 잡힘 ④ 일치하면 통과.
 
 ## 쓰는 법 (Cowork 세션 안에서)
 

@@ -4,7 +4,7 @@
   "_갱신방법": "피그마 값이 바뀌면 items[].figma 와 items[].css 를 함께 고친다. 신선도 검사가 어떤 노드가 바뀌었는지 새 값과 함께 알려 준다.",
   "_필드": "sel=웹 선택자 / css=기대 computed style(색은 #hex 또는 rgb() 아무거나) / figma=피그마 원본 값(신선도 대조용) / node=figma 의 근거 노드",
   "figmaNode": "6:148",
-  "generatedAt": "2026-08-01",
+  "generatedAt": "2026-08-02",
   "items": [
     {
       "id": "hero-badge",
@@ -272,6 +272,58 @@
         "font-weight": "600"
       },
       "_주": "6:365 는 한 텍스트 노드 안에 Regular(이용약관)와 SemiBold(개인정보처리방침)가 섞여 있다. 타이포 덤프 스크립트는 첫 세그먼트만 기록하므로 이 SemiBold 구간이 검수 사각지대였음(2026-08-01 굵기 드리프트의 원인). 이 항목이 그 구간을 별도로 잠근다."
+    },
+    {
+      "id": "spacing-chips-50",
+      "label": "칩 이미지 영역 위아래 여백",
+      "sel": ".chips",
+      "node": "6:248",
+      "figma": {
+        "h": 257.8
+      },
+      "css": {
+        "padding-top": "50px",
+        "padding-bottom": "50px",
+        "margin-top": "0px",
+        "margin-bottom": "0px"
+      },
+      "_근거": "피그마 6:248 높이 257.8 = 칩 블록 157.8 + 위아래 50. margin 0 도 함께 잠근다 — 음수 마진으로 여백을 상쇄하는 보정이 실제로 있었다."
+    },
+    {
+      "id": "spacing-chips-rows-16",
+      "label": "칩 줄 간격",
+      "sel": ".chips",
+      "node": "6:249",
+      "figma": {
+        "gap": 16
+      },
+      "css": {
+        "row-gap": "16px"
+      }
+    },
+    {
+      "id": "spacing-section-100",
+      "label": "섹션 수직 패딩 · 내부 간격",
+      "sel": "section",
+      "node": "6:168",
+      "figma": {
+        "pad": [
+          100,
+          24,
+          100,
+          24
+        ],
+        "gap": 20
+      },
+      "css": {
+        "padding-top": "100px",
+        "padding-bottom": "100px",
+        "padding-left": "24px",
+        "padding-right": "24px",
+        "row-gap": "20px"
+      },
+      "_근거": "피그마 6:148 의 모든 섹션이 100/24 · gap 20. 섹션 사이 간격은 200 으로 일정하다."
     }
-  ]
+  ],
+  "_여백설명": "여백·간격 항목(id 가 spacing- 으로 시작)은 2026-08-02 추가. lockedStyles 정규식이 소스 문자열만 보기 때문에 뒤에 붙은 규칙이 값을 덮어도 통과하던 구멍(.chips 의 50px 이 4px 보정에 덮인 사건)을 메운다. 이쪽은 브라우저 계산값을 보므로 무엇이 덮든 실제 결과가 잡힌다."
 }
