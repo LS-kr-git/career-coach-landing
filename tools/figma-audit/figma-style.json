@@ -7,25 +7,21 @@
   "generatedAt": "2026-08-02",
   "items": [
     {
-      "id": "hero-badge",
-      "label": "히어로 배지",
-      "sel": ".hero-badge",
-      "node": "6:169",
+      "id": "hero-eyebrow",
+      "label": "히어로 아이브로우(칩 제거 후 텍스트)",
+      "sel": ".hero .eyebrow",
+      "node": "6:170",
       "figma": {
-        "fill": "#fef3c7",
-        "stroke": "#fde68a",
-        "sw": 1,
-        "radius": 999,
-        "shadow": false,
-        "textFill": "#d97706"
+        "textFill": "#d97706",
+        "h": 20
       },
       "css": {
-        "background-color": "#FEF3C7",
-        "border-top-width": "1px",
-        "border-top-color": "#FDE68A",
-        "border-top-left-radius": "999px",
-        "color": "#D97706"
-      }
+        "color": "#D97706",
+        "font-size": "14px",
+        "font-weight": "700",
+        "line-height": "20px"
+      },
+      "_근거": "2026-08-02 칩(필+보더) 제거 — text/label 로 통일. 배경·보더가 되살아나면 잡는다."
     },
     {
       "id": "alim-bubble",
@@ -492,20 +488,6 @@
         "width": "330px"
       },
       "_근거": "피그마 6:188 고정폭 330 + 중앙정렬 (2026-08-02 사용자 확정)."
-    },
-    {
-      "id": "width-steps-312",
-      "label": "스텝 카드 폭(넓은 화면 회귀 방지)",
-      "sel": ".steps",
-      "node": "6:340",
-      "viewport": 1280,
-      "figma": {
-        "w": 312
-      },
-      "css": {
-        "width": "312px"
-      },
-      "_근거": "피그마 6:341~6:356 sizeH FIXED 312 + 6:340 CENTER (2026-08-02 사용자 확정)."
     }
   ],
   "_여백설명": "여백·간격 항목(id 가 spacing- 으로 시작)은 2026-08-02 추가. lockedStyles 정규식이 소스 문자열만 보기 때문에 뒤에 붙은 규칙이 값을 덮어도 통과하던 구멍(.chips 의 50px 이 4px 보정에 덮인 사건)을 메운다. 이쪽은 브라우저 계산값을 보므로 무엇이 덮든 실제 결과가 잡힌다.",
