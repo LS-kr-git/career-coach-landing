@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="only light">
+<meta name="format-detection" content="telephone=no">
+<title>로그인 중 — 커리어코치</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root{
+    color-scheme: only light;
+    --amber-500:#F59E0B; --amber-600:#D97706;
+    --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-500:#64748B; --gray-800:#1E293B;
+    --card-max: 450px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{background:var(--gray-100)}
+  body{font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;
+    background:#fff;color:var(--gray-800);-webkit-font-smoothing:antialiased}
+  .page{width:100%;max-width:var(--card-max);margin:0 auto;background:#fff;
+    min-height:100vh;min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+  .spin{width:28px;height:28px;border:3px solid var(--gray-200);border-top-color:var(--amber-500);
+    border-radius:50%;animation:sp .8s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){.spin{animation-duration:2.4s}}
+  p{font-size:14px;line-height:20px;color:var(--gray-500)}
+  @media (min-width:451px){
+    body{background:var(--gray-100)}
+    .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="spin" aria-hidden="true"></div>
+  <p role="status">로그인 중입니다…</p>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+  const supabase = createClient(
+    'https://sxooygwggxeplzkfdbth.supabase.co',
+    'sb_publishable_qKgzeXLu4fX9T_xfEjbNnQ_zPH_xPUu'
+  );
+
+  let done = false;
+  const go = (path) => { if (!done) { done = true; location.replace(path); } };
+
+  // supabase-js 는 detectSessionInUrl 기본값이 true 라 이 페이지에 도착하는 순간
+  // 인가 코드를 세션으로 교환한다. 교환이 끝나면 SIGNED_IN 이 온다.
+  supabase.auth.onAuthStateChange((_event, session) => { if (session) go('/onboarding/1/'); });
+
+  // 폴백 — 이벤트를 놓쳤거나 이미 교환이 끝난 뒤 리스너가 붙은 경우
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) go('/onboarding/1/');
+
+  // 3초 안에 세션이 안 생기면 실패로 본다 (사용자가 동의를 취소한 경우 등)
+  setTimeout(async () => {
+    const { data } = await supabase.auth.getSession();
+    go(data.session ? '/onboarding/1/' : '/signup/?error=auth');
+  }, 3000);
+</script>
+</body>
+</html>

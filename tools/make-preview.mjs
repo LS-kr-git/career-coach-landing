@@ -11,7 +11,7 @@
  *   GitHub Pages 는 푸시 → 빌드 큐 → 배포라 라이브 반영까지 10~15분이 걸린다.
  *   그 사이 "고쳤는데 안 바뀌었다" 로 시간을 버리지 않도록, 배포와 무관하게 확인할 길을 둔다.
  *
- * 다른 페이지 링크(signup/terms/privacy/letter)는 파일 하나에 담을 수 없어 비활성화된다.
+ * 다른 페이지 링크(/signup/·terms/privacy/letter)는 파일 하나에 담을 수 없어 비활성화된다.
  */
 import { readFileSync, writeFileSync, statSync } from 'node:fs';
 import { dirname, resolve, join } from 'node:path';
@@ -34,7 +34,8 @@ html = html.replace(/(src|href)="(assets\/[^"]+)"/g, (m, attr, path) => {
   } catch { missing.push(path); return m; }
 });
 
-html = html.replace(/href="(\.\/)?(signup|terms|privacy|letter)\.html"/g, 'href="#" data-preview-disabled="1"');
+html = html.replace(/href="(\.\/)?(terms|privacy|letter)\.html"/g, 'href="#" data-preview-disabled="1"');
+html = html.replace(/href="\/(signup|onboarding\/\d+)\/"/g, 'href="#" data-preview-disabled="1"');
 
 let commit = 'local';
 try { commit = execFileSync('git', ['rev-parse', '--short', 'HEAD'], { cwd: ROOT }).toString().trim(); } catch {}

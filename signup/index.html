@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="only light">
+<meta name="format-detection" content="telephone=no">
+<title>시작하기 — 커리어코치</title>
+<meta name="description" content="카카오로 로그인하고 매일 아침 채용공고 브리핑을 받아보세요.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root{
+    color-scheme: only light;   /* meta 와 같은 값 — CSS 로도 선언해 확실히 적용한다 */
+    --amber-500:#F59E0B; --amber-600:#D97706;
+    --navy-900:#1E3A8A; --navy-500:#3B82F6;
+    --gray-50:#F8FAFC; --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-400:#94A3B8;
+    --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155; --gray-800:#1E293B;
+    --kakao:#FEE500; --kakao-text:#191919;
+    --error-600:#DC2626;
+    /* CTA 토큰 — CLAUDE.md "CTA 규칙" 공통값 (높이 54 · 라운드 14 · 15/600 · 풀폭) */
+    --cta-h:54px; --cta-radius:14px; --cta-fs:15px; --cta-fw:600;
+    /* 랜딩과 동일한 폭 시스템 (index.html :root 와 같은 값) */
+    --pad-x: 24px;
+    --card-max: 450px;
+    --content-max: 402px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{background:var(--gray-100)}
+  body{
+    font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;
+    background:#fff; color:var(--gray-800); -webkit-font-smoothing:antialiased;
+  }
+  /* CLAUDE.md 규칙 — 화면 채우기 높이는 svh */
+  .page{width:100%;max-width:var(--card-max);margin:0 auto;background:#fff;
+    min-height:100vh;min-height:100svh;display:flex;flex-direction:column}
+
+  header{display:flex;align-items:center;gap:10px;padding:24px var(--pad-x)}
+  .app-icon{width:29px;height:29px;border-radius:25%;background:linear-gradient(135deg,#F59E0B,#D97706);display:flex;align-items:center;justify-content:center}
+  .app-icon img{width:21px;height:21px;display:block}
+  header .wordmark{height:21px;display:block}
+
+  main{flex:1;display:flex;flex-direction:column;padding:8px var(--pad-x) 32px}
+  .lead-group{max-width:var(--content-max);width:100%;margin:0 auto;padding:24px 0 0}
+  h1{font-size:28px;line-height:36px;font-weight:800;letter-spacing:-0.01em;color:var(--navy-900)}
+  .sub{font-size:15px;line-height:23px;color:var(--gray-600);margin-top:10px}
+
+  /* 받는 정보 안내 — 동의항목 심사에서 심사원이 이 화면을 본다. 무엇을 왜 받는지 화면에 적어 둔다. */
+  .scope{max-width:var(--content-max);width:100%;margin:28px auto 0;
+    background:var(--gray-50);border:1px solid var(--gray-200);border-radius:12px;padding:16px 18px}
+  .scope-title{font-size:13px;line-height:18px;font-weight:600;color:var(--gray-700)}
+  .scope ul{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:7px}
+  .scope li{font-size:13px;line-height:18px;color:var(--gray-600);display:flex;gap:8px;align-items:flex-start}
+  .tag{flex:none;font-size:11px;line-height:14px;font-weight:600;padding:2px 6px;border-radius:5px;margin-top:1px}
+  .tag.req{background:#EFF6FF;color:var(--navy-500)}
+  .tag.opt{background:var(--gray-100);color:var(--gray-500)}
+
+  .spacer{flex:1;min-height:24px}
+
+  .actions{max-width:410px;width:100%;margin:0 auto}
+  .kakao-btn{width:100%;height:var(--cta-h);border:0;border-radius:var(--cta-radius);
+    background:var(--kakao);color:var(--kakao-text);
+    font-size:var(--cta-fs);line-height:20px;font-weight:var(--cta-fw);font-family:inherit;
+    display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+  .kakao-btn:active{transform:scale(.98)}
+  .kakao-btn[disabled]{opacity:.6;cursor:default;transform:none}
+  .kakao-btn svg{flex:none}
+
+  .agree{font-size:12px;line-height:18px;color:var(--gray-500);text-align:center;margin-top:14px}
+  .agree a{color:var(--gray-600)}
+  .err{display:none;margin-top:14px;font-size:13px;line-height:19px;color:var(--error-600);text-align:center}
+  .err.on{display:block}
+
+  @media (min-width:451px){
+    body{background:var(--gray-100)}
+    .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
+  }
+  :focus-visible{outline:2px solid var(--amber-500);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <a href="/" aria-label="커리어코치 홈" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+      <span class="app-icon"><img src="/assets/mark-white.svg" alt=""></span>
+      <img class="wordmark" src="/assets/wordmark.svg" alt="커리어코치">
+    </a>
+  </header>
+
+  <main>
+    <div class="lead-group">
+      <h1>카카오로<br>3초 만에 시작하기</h1>
+      <p class="sub">따로 입력하실 것 없이, 카카오 계정으로 바로 시작합니다.</p>
+    </div>
+
+    <section class="scope" aria-label="제공받는 정보">
+      <p class="scope-title">카카오 계정에서 제공받는 정보</p>
+      <ul>
+        <li><span class="tag req">필수</span><span>휴대전화번호 — 채용공고 브리핑 알림톡을 보내드립니다</span></li>
+        <li><span class="tag req">필수</span><span>이름 — 결제·환불 시 본인 확인에 사용합니다</span></li>
+        <li><span class="tag opt">선택</span><span>이메일 — 알림톡 발송 실패 시 대체 발송과 결제 영수증에 사용합니다</span></li>
+      </ul>
+    </section>
+
+    <div class="spacer"></div>
+
+    <div class="actions">
+      <button type="button" class="kakao-btn" id="kakaoBtn">
+        <svg width="20" height="19" viewBox="0 0 20 19" fill="none" aria-hidden="true"><path d="M10 0C4.477 0 0 3.463 0 7.735c0 2.756 1.86 5.174 4.657 6.547-.205.744-.744 2.7-.851 3.12-.133.52.19.513.401.373.165-.11 2.62-1.755 3.683-2.468.68.1 1.386.153 2.11.153 5.523 0 10-3.463 10-7.735C20 3.463 15.523 0 10 0Z" fill="#191919"/></svg>
+        카카오로 시작하기
+      </button>
+      <p class="agree">계속하면 <a href="/terms.html">이용약관</a>과 <a href="/privacy.html">개인정보처리방침</a>에 동의하는 것으로 봅니다.</p>
+      <p class="err" id="err" role="alert"></p>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+  // Publishable key 는 브라우저에 노출하라고 만든 공개 키다(시크릿인 secret key 와 다르다).
+  // 데이터 보호는 RLS 가 한다 — supabase/migrations/0002_supabase_auth_rls.sql
+  const supabase = createClient(
+    'https://sxooygwggxeplzkfdbth.supabase.co',
+    'sb_publishable_qKgzeXLu4fX9T_xfEjbNnQ_zPH_xPUu'
+  );
+
+  const btn = document.getElementById('kakaoBtn');
+  const err = document.getElementById('err');
+
+  const showError = (msg) => { err.textContent = msg; err.classList.add('on'); };
+
+  // 로그인 실패로 돌아온 경우
+  if (new URLSearchParams(location.search).has('error')) {
+    showError('로그인이 완료되지 않았습니다. 다시 시도해 주세요.');
+  }
+
+  // 이미 로그인돼 있으면 온보딩으로 바로 보낸다
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) location.replace('/onboarding/1/');
+
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    err.classList.remove('on');
+    // scopes 는 지금 동의항목 심사를 통과한 범위만 요청한다.
+    // 이름·전화번호·이메일 심사가 통과하면 'profile_nickname name account_email phone_number' 로 넓힌다.
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'kakao',
+      options: {
+        redirectTo: 'https://careercoach.my/auth/callback/',
+        scopes: 'profile_nickname'
+      }
+    });
+    if (error) {
+      btn.disabled = false;
+      showError('카카오 로그인을 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+    }
+  });
+</script>
+</body>
+</html>
