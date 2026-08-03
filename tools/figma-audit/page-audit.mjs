@@ -191,6 +191,36 @@ for (const page of pages) {
   if (deadHref) add('WARN', '빈 링크', page, `href="#" ${deadHref}개`, '샘플이면 그대로 둬도 됩니다');
 }
 
+/* ---------- 색인 정책 ----------
+ * 색인돼도 되는 페이지는 랜딩과 법적 문서뿐이다. 나머지는 전부 noindex 여야 한다.
+ *
+ * 왜 검사로 만드는가 (2026-08-03)
+ *   letter.html 은 실제 발행물이 아니라 데모인데, 실존 인물 이름과 "표본 추적 예시"라고
+ *   각주를 단 통계가 들어 있다. 검색 결과에 뜨면 예시가 실측치로 읽힌다.
+ *   그런데 이걸 사람 기억에 맡기면 새 페이지를 만들 때마다 다시 빠뜨린다 —
+ *   실제로 signup/auth 에는 있었고 letter/onboarding 에는 없었다.
+ *   "새 HTML 을 만들었으면 색인 여부를 정해야 한다"를 파이프라인이 묻게 한다.
+ */
+const INDEXABLE = new Set(['index.html', 'terms.html', 'privacy.html']);
+
+for (const page of pages) {
+  if (INDEXABLE.has(page)) continue;
+  const html = readFileSync(join(ROOT, page), 'utf8');
+  if (!/<meta\s+name=["']robots["'][^>]*noindex/i.test(html)) {
+    add('BLOCK', '색인 정책', page,
+        'noindex 메타가 없습니다',
+        `색인해야 할 페이지면 page-audit.mjs 의 INDEXABLE 에 추가하고, 아니면 <head> 에 ` +
+        `<meta name="robots" content="noindex,nofollow"> 를 넣으세요. robots.txt 도 함께 보세요.`);
+  }
+}
+
+// robots.txt / sitemap.xml 이 사라지면 위 검사만으로는 안 잡힌다 (noindex 는 페이지에만 있다).
+for (const f of ['robots.txt', 'sitemap.xml']) {
+  if (!existsSync(join(ROOT, f))) {
+    add('WARN', '색인 정책', f, '파일이 없습니다', '검색엔진에 무엇을 보여줄지 명시하는 파일입니다');
+  }
+}
+
 /* ---------- 고아 자산 ---------- */
 
 const assetsDir = join(ROOT, 'assets');
