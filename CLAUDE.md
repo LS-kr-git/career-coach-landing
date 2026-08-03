@@ -112,6 +112,59 @@ inst.layoutSizingHorizontal = 'FILL';
 - 프레임에 **절대배치 요소(플로팅 CTA 등)가 있으면 상태바를 넣은 뒤 y 를 다시 잡는다** — `y = 프레임높이 − 80`.
 - 적용 완료: 온보딩 7개 상태 화면 · 브리핑 상세 · 이용약관 · 개인정보처리방침. **새 화면을 만들면 첫 자식으로 넣는다.**
 
+## 헤더와 뒤로가기 — 표준값 (2026-08-03 사용자 확정 · 뒤로가기가 있는 모든 페이지)
+
+| 항목 | 값 | 왜 |
+|---|---|---|
+| 헤더 높이 | **48** | iOS 내비게이션 바 44 와 안드로이드 앱 바 56 사이. **더 줄이지 않는다** — 48 이 하한선 |
+| 탭 영역 | **48×48** | 안드로이드 접근성 최소 터치 48dp. 헤더를 44 로 내리면 이 기준을 못 지킨다 |
+| 꺽쇠 글리프 | **7.5×15** | 24×24 아이콘 박스 안에서 가운데 |
+| 선 굵기 | **1.6** · 끝·모서리 둥글게 | |
+| 색 | **gray/600 `#475569`** | 흰 배경 대비 7.58:1. gray/500(4.76:1)까지가 허용선, gray/400(2.56:1)은 아이콘 최소 3:1 미달 |
+| 구분선 | **없음** | |
+| 스크롤 축약 제목 | 본문 큰 제목이 화면 밖으로 나가면 페이드인 | `rootMargin: '-48px 0px 0px 0px'` |
+
+```html
+<a class="back" href="…" aria-label="뒤로"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+<path d="M15.75 4.5L8.25 12l7.5 7.5" stroke="#475569" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+```
+```css
+.hd{position:sticky;top:0;z-index:20;display:flex;align-items:center;
+  height:calc(48px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 12px 0;background:#fff}
+.back{width:48px;height:48px;display:flex;align-items:center;justify-content:center;border-radius:12px}
+```
+
+피그마 쪽 정본은 컴포넌트 세트 **`376:2507` "온보딩/상단바"**(변형 6개, 360×48)다. 값을 바꾸려면 컴포넌트를
+고치고 웹을 따라 맞춘다. 헤더 높이를 바꾸면 **세로 오토레이아웃 프레임의 높이가 같이 변하므로 플로팅 CTA
+의 `y = 프레임높이 − 80` 을 다시 잡는다.**
+
+## 피그마 프리뷰에서 상태바·헤더·하단 CTA 는 고정한다 (2026-08-03 확정 · 새 화면도 동일)
+
+프로토타입(▶ Present)에서 스크롤해도 따라오게 하려면 플러그인 API 의 **`numberOfFixedChildren`** 를 쓴다.
+`scrollBehavior` 속성은 이 실행 환경에 **없다**(`no such property` — 2026-08-03 확인).
+
+**고정 대상은 `children` 배열의 "맨 뒤 N개"다.** (파일 안 레퍼런스 프레임들로 실측 확인:
+`115:9899` 는 n=2 이고 마지막 두 자식이 Status Bar·App bar 다.) 배열 뒤쪽 = 위에 그려지는 레이어다.
+
+```js
+const pin = (n, x, y) => { n.layoutPositioning = 'ABSOLUTE'; n.x = x; n.y = y;
+  n.constraints = { horizontal: 'STRETCH', vertical: 'MIN' }; };
+pin(상태바, 0, 0); pin(header, 0, 45);
+f.appendChild(cta); f.appendChild(상태바); f.appendChild(header);  // 고정 대상을 맨 뒤로
+f.paddingTop = 93;              // 45+48 — 흐름에서 빠진 만큼 되돌려 높이를 유지한다
+f.numberOfFixedChildren = 3;
+f.overflowDirection = 'VERTICAL';
+cta.y = Math.round(f.height - 80);
+```
+
+- 세로 오토레이아웃 프레임에서 자식을 `ABSOLUTE` 로 빼면 **그만큼 프레임이 줄어든다.** 반드시
+  `paddingTop` 으로 되돌려야 높이가 그대로 유지되고 웹과의 대조가 깨지지 않는다.
+- 고정 요소의 **배경은 불투명해야 한다.** 내용이 뒤로 지나가므로 투명하면 글자가 겹쳐 보인다
+  (상태바·헤더 모두 `#ffffff`).
+- 현재 적용: 온보딩 7개(상태바·헤더·CTA, n=3) · 랜딩 `6:148`(상태바·Link, n=2) ·
+  이용약관·개인정보·브리핑(상태바만, n=1 — 이 세 화면은 웹에서도 헤더가 sticky 가 아니다).
+- **새 화면을 만들면 같은 처리를 한다.** 하단 CTA 가 플로팅인 화면은 CTA 를 반드시 고정 대상에 넣는다.
+
 ## 모든 페이지에 `color-scheme: only light` 를 넣는다 (2026-08-03 확정 · 검수가 강제)
 
 `<head>` 의 viewport 바로 아래에 **반드시** 이 한 줄이 들어간다.
