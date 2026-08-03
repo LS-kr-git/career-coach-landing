@@ -89,6 +89,9 @@ inst.layoutSizingHorizontal = 'FILL';
 
 - **웹에는 이 요소가 없다.** 브라우저가 그리는 영역이라 HTML 로 옮기지 않는다. 피그마 프레임이 웹보다
   45px 높은 것은 **정상**이며, 높이를 웹과 맞추려고 지우지 말 것.
+- **문구 스냅샷을 다시 뽑을 때 상태바 텍스트를 제외한다.** 안 그러면 `9:41` 이 스냅샷에 들어가
+  `docs-audit` 이 "웹에서 못 찾음" 으로 푸시를 막는다 (2026-08-03 실제 발생). 덤프 스니펫의
+  `underStatusBar` 필터가 이 역할을 한다 — 아래 "스냅샷을 다시 뽑아 커밋한다" 참고.
 - 프레임에 **절대배치 요소(플로팅 CTA 등)가 있으면 상태바를 넣은 뒤 y 를 다시 잡는다** — `y = 프레임높이 − 80`.
 - 적용 완료: 온보딩 7개 상태 화면 · 브리핑 상세 · 이용약관 · 개인정보처리방침. **새 화면을 만들면 첫 자식으로 넣는다.**
 
@@ -355,11 +358,13 @@ pre-push 2겹(a)에서 `terms/privacy/letter.html` 또는 스냅샷이 바뀐 �
    ```js
    const frames = { '339:2474':'terms.html', '340:2478':'privacy.html', '362:2482':'letter.html' };
    const underChart = n => { let p=n.parent; while(p){ if(p.name==='chart-viz') return true; p=p.parent; } return false; };
+   // 상태바(9:41·배터리 등)는 웹에 없는 목업 요소다. 안 빼면 검수가 '웹에서 못 찾음' 으로 막는다.
+   const underStatusBar = n => { let p=n.parent; while(p){ if(p.name==='상태바') return true; p=p.parent; } return false; };
    const pages = [];
    for (const [fid, html] of Object.entries(frames)) {
      const f = await figma.getNodeByIdAsync(fid);
      const texts = f.findAllWithCriteria({ types:['TEXT'] })
-       .filter(t=>t.name!=='marker' && !underChart(t)).map(t=>t.characters);   // 마커·차트 눈금 제외
+       .filter(t=>t.name!=='marker' && !underChart(t) && !underStatusBar(t)).map(t=>t.characters);   // 마커·차트 눈금·상태바 제외
      pages.push({ html, figmaNode: fid, name: f.name, ignoreWebText: [], texts });
    }
    return { fileKey: figma.fileKey, pages };
