@@ -191,6 +191,32 @@ for (const page of pages) {
   if (deadHref) add('WARN', '빈 링크', page, `href="#" ${deadHref}개`, '샘플이면 그대로 둬도 됩니다');
 }
 
+/* ---------- 가격 하드코딩 ----------
+ * 페이지·약관 어디에도 **고정 금액을 쓰지 않는다.** (2026-08-03 사용자 결정)
+ *
+ * 프라이싱 테스트를 할 예정이라, 금액이 박혀 있으면 가격을 바꿀 때마다
+ * 랜딩·약관·피그마·문서를 동시에 고쳐야 하고 하나라도 빠지면 표시가격과 계약조건이
+ * 어긋난다. 약관 제5조에 있던 "월 990원(정가 2,000원)"이 정확히 그 상태였다.
+ * 대신 "결제 화면에 표시된 내용을 따른다"로 두고, 실제 금액은 결제 화면 한 곳에서만 말한다.
+ *
+ * 결제 화면이 생기면 그 파일만 PRICE_OK 에 넣는다 — 금액을 말하는 곳이 하나뿐이어야
+ * 이 규칙이 의미가 있다.
+ */
+const PRICE_OK = new Set([]);          // 결제 화면이 생기면 여기에 추가
+const PRICE_RE = /[0-9][0-9,]*\s*원/g;
+
+for (const page of pages) {
+  if (PRICE_OK.has(page)) continue;
+  const html = readFileSync(join(ROOT, page), 'utf8');
+  const live = html.replace(/<!--[\s\S]*?-->/g, '').replace(/<script[\s\S]*?<\/script>/gi, '');
+  const hits = [...new Set(live.match(PRICE_RE) || [])];
+  if (hits.length) {
+    add('BLOCK', '가격 하드코딩', page, hits.join(', '),
+        '고정 금액을 페이지에 두지 않습니다. "결제 화면에 표시된 내용을 따릅니다" 로 쓰거나, ' +
+        '결제 화면이라면 page-audit.mjs 의 PRICE_OK 에 이 파일을 추가하세요.');
+  }
+}
+
 /* ---------- 색인 정책 ----------
  * 색인돼도 되는 페이지는 랜딩과 법적 문서뿐이다. 나머지는 전부 noindex 여야 한다.
  *
