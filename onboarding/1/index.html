@@ -23,11 +23,11 @@
   @media (min-width:451px){ body{background:var(--gray-100)}
     .board{box-shadow:0 0 24px rgba(15,23,42,.06),0 0 64px rgba(15,23,42,.10)} }
 
-  /* 상단바 — 높이 56 · 아래 gray-200 구분선 · 스크롤해도 위에 붙어 있다.
+  /* 상단바 — 높이 56 · 구분선 없음 · 스크롤해도 위에 붙어 있다.
      본문 큰 제목이 화면 밖으로 나가면 축약 제목이 페이드인된다(.hd.on). */
   .hd{position:sticky;top:0;z-index:20;display:flex;align-items:center;
     height:calc(56px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 12px 0;
-    background:#fff;box-shadow:inset 0 -1px 0 var(--gray-200)}
+    background:#fff}
   .hd .htitle{position:absolute;left:50%;transform:translateX(-50%) translateY(4px);
     font-size:17px;line-height:24px;font-weight:600;color:var(--gray-900);white-space:nowrap;
     opacity:0;transition:opacity .18s,transform .18s;pointer-events:none}
@@ -112,7 +112,7 @@
   .cta .s2{opacity:.85}
   .cta.off{background:var(--gray-100);color:var(--gray-400);box-shadow:none}
 </style></head><body>
-<div class="board"><div class="hd" id="hd"><a class="back" href="/" aria-label="뒤로"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M17 2L7 12l10 10" stroke="#0F172A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><span class="htitle">직무 선택</span></div>
+<div class="board"><div class="hd" id="hd"><a class="back" href="/" aria-label="뒤로"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M16.5 3L7.5 12l9 9" stroke="#334155" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a><span class="htitle">직무 선택</span></div>
   <div class="prog"><i class="on"></i><i></i><i></i></div>
   <div class="kick"><span>직군</span><i class="off">·</i><span class="off">연차</span><i class="off">·</i><span class="off">근무지</span></div>
   <div class="title">어떤 직무의 공고를<br>받아볼까요?</div>
