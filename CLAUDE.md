@@ -122,7 +122,15 @@ inst.layoutSizingHorizontal = 'FILL';
 | 선 굵기 | **1.6** · 끝·모서리 둥글게 | |
 | 색 | **gray/600 `#475569`** | 흰 배경 대비 7.58:1. gray/500(4.76:1)까지가 허용선, gray/400(2.56:1)은 아이콘 최소 3:1 미달 |
 | 구분선 | **없음** | |
-| 스크롤 축약 제목 | 본문 큰 제목이 화면 밖으로 나가면 페이드인 | `rootMargin: '-48px 0px 0px 0px'` |
+| 헤더 안 글씨 | **없다** (2026-08-03 사용자 확정) | 아래 참고 |
+| 눌림 표시 | **40×40 · radius 12 · gray/100** | 탭 영역(48)과 분리한다 — 같으면 헤더 위아래에 딱 붙어 잘려 보인다 |
+
+**헤더에는 글씨를 넣지 않는다.** 스크롤하면 본문 제목이 헤더에 축약되어 나타나는 처리(G2)를 2026-08-02 에
+넣었다가 **2026-08-03 에 사용자 요청으로 걷어냈다.** 뒤로가기 하나만 둔다. 새 화면에도 넣지 말 것.
+(온보딩 3화면 모두에 걸려 있었지만 2·3단계는 스크롤이 짧아 실제로는 1단계에서만 보였다.)
+
+**탭 영역과 눌림 표시를 분리한다.** 손가락이 닿는 범위는 48×48 그대로 두고, 눈에 보이는 회색 박스만
+40×40 으로 줄인다(위아래 4px 여백). iOS·머티리얼 모두 터치 타깃은 손가락 기준, 눌림 표시는 아이콘 기준이다.
 
 ```html
 <a class="back" href="…" aria-label="뒤로"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -131,10 +139,14 @@ inst.layoutSizingHorizontal = 'FILL';
 ```css
 .hd{position:sticky;top:0;z-index:20;display:flex;align-items:center;
   height:calc(48px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 12px 0;background:#fff}
-.back{width:48px;height:48px;display:flex;align-items:center;justify-content:center;border-radius:12px}
+.back{width:48px;height:48px;display:flex;align-items:center;justify-content:center;position:relative}
+.back svg{position:relative;z-index:1}
+.back::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:40px;height:40px;border-radius:12px;background:transparent;transition:background .12s}
+.back:active::before{background:var(--gray-100)}
 ```
 
-피그마 쪽 정본은 컴포넌트 세트 **`376:2507` "온보딩/상단바"**(변형 6개, 360×48)다. 값을 바꾸려면 컴포넌트를
+피그마 쪽 정본은 컴포넌트 세트 **`376:2507` "온보딩/상단바"**(360×48, 변형 6개 = 단계 1·2·3 × 상태 기본·눌림)다. 값을 바꾸려면 컴포넌트를
 고치고 웹을 따라 맞춘다. 헤더 높이를 바꾸면 **세로 오토레이아웃 프레임의 높이가 같이 변하므로 플로팅 CTA
 의 `y = 프레임높이 − 80` 을 다시 잡는다.**
 

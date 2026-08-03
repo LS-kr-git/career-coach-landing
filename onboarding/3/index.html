@@ -25,19 +25,19 @@
   @media (min-width:451px){ body{background:var(--gray-100)}
     .board{box-shadow:0 0 24px rgba(15,23,42,.06),0 0 64px rgba(15,23,42,.10)} }
 
-  /* 상단바 — 높이 48 · 구분선 없음 · 스크롤해도 위에 붙어 있다.
-     본문 큰 제목이 화면 밖으로 나가면 축약 제목이 페이드인된다(.hd.on). */
+  /* 상단바 — 높이 48 · 구분선 없음 · 글씨 없음 · 스크롤해도 위에 붙어 있다. */
   .hd{position:sticky;top:0;z-index:20;display:flex;align-items:center;
     height:calc(48px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 12px 0;
     background:#fff}
-  .hd .htitle{position:absolute;left:50%;transform:translateX(-50%) translateY(4px);
-    font-size:17px;line-height:24px;font-weight:600;color:var(--gray-900);white-space:nowrap;
-    opacity:0;transition:opacity .18s,transform .18s;pointer-events:none}
-  .hd.on .htitle{opacity:1;transform:translateX(-50%)}
+  /* 탭 영역(48×48)과 눌림 표시(40×40)를 분리한다 — 손가락 기준은 48, 눈에 보이는 건 40.
+     둘이 같으면 회색 박스가 헤더 위아래에 딱 붙어 잘린 것처럼 보인다. */
   .back{width:48px;height:48px;display:flex;align-items:center;justify-content:center;
-    border:0;background:none;padding:0;border-radius:12px;cursor:pointer;text-decoration:none;
+    border:0;background:none;padding:0;cursor:pointer;text-decoration:none;position:relative;
     -webkit-tap-highlight-color:transparent}
-  .back:active{background:var(--gray-100)}
+  .back svg{position:relative;z-index:1}
+  .back::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:40px;height:40px;border-radius:12px;background:transparent;transition:background .12s}
+  .back:active::before{background:var(--gray-100)}
   /* 진행 바 — 3칸 전체가 하나의 그라디언트로 이어지도록 background-size/position 으로 잘라 쓴다 */
   .prog{display:flex;gap:5px;padding:22px 24px 0}
   .prog i{height:3px;border-radius:99px;background-color:var(--gray-100);flex:1}
@@ -114,7 +114,7 @@
   .cta .s2{opacity:.85}
   .cta.off{background:var(--gray-100);color:var(--gray-400);box-shadow:none}
 </style></head><body>
-<div class="board"><div class="hd" id="hd"><a class="back" href="/onboarding/2/" aria-label="뒤로"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15.75 4.5L8.25 12l7.5 7.5" stroke="#475569" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a><span class="htitle">근무지 선택</span></div>
+<div class="board"><div class="hd"><a class="back" href="/onboarding/2/" aria-label="뒤로"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15.75 4.5L8.25 12l7.5 7.5" stroke="#475569" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
   <div class="prog"><i class="on"></i><i class="on"></i><i class="on"></i></div>
   <div class="kick"><span>직군</span><i>·</i><span>연차</span><i>·</i><span>근무지</span></div>
   <div class="title">어디에서<br>일하고 싶으세요?</div>
@@ -140,12 +140,4 @@ sync();
 
 // 다음 화면(/onboarding/done/)은 아직 없다 — 만들어지면 여기서 연결한다
 
-/* 본문 제목이 헤더 밑으로 사라지면 헤더에 축약 제목을 띄운다 */
-(() => {
-  const hd = document.getElementById('hd');
-  const t = document.querySelector('.title');
-  if (!hd || !t || !('IntersectionObserver' in window)) return;
-  new IntersectionObserver(([e]) => hd.classList.toggle('on', !e.isIntersecting),
-    { rootMargin: '-48px 0px 0px 0px', threshold: 0 }).observe(t);
-})();
 </script></body></html>
