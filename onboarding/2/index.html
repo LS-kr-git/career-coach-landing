@@ -13,9 +13,10 @@
   html{background:#fff}
   body{font-family:'Pretendard Variable',Pretendard,'Pretendard','Noto Sans CJK KR',-apple-system,sans-serif;
     background:#fff;color:var(--gray-800);-webkit-font-smoothing:antialiased}
-  /* 100vh 는 모바일 사파리에서 '주소창이 숨겨진 큰 화면' 기준이라, 짧은 화면에서도
-     주소창 높이만큼 스크롤이 생긴다. dvh 는 지금 실제로 보이는 높이라 그게 안 생긴다. */
-  .board{width:100%;max-width:450px;margin:0 auto;min-height:100vh;min-height:100dvh;background:#fff;
+  /* 화면 채우기용 높이는 svh 로 고정한다. 100vh 는 '주소창이 숨겨진 큰 화면' 기준이라
+     내용이 짧아도 주소창 높이만큼 스크롤이 생기고, dvh 는 주소창이 접히면 값이 같이 변한다.
+     svh 는 항상 '주소창이 보이는 가장 작은 높이'라 어떤 상태에서도 넘치지 않는다. */
+  .board{width:100%;max-width:450px;margin:0 auto;min-height:100vh;min-height:100svh;background:#fff;
     padding-bottom:calc(100px + env(safe-area-inset-bottom))}
   @media (min-width:451px){ body{background:var(--gray-100)}
     .board{box-shadow:0 0 24px rgba(15,23,42,.06),0 0 64px rgba(15,23,42,.10)} }
