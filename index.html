@@ -82,7 +82,11 @@ fbq('track', 'PageView');
   /* overflow-x:clip — 칩 줄이 100vw로 삐져나올 때 가로 스크롤이 생기지 않도록 */
   /* padding-top:100vh + margin-top:-100vh — 흰 카드 배경을 문서 위로 100vh 덧댄다(위쪽 오버스크롤 흰색).
      absolute/fixed 덧댐은 iOS 크롬이 문서 위 영역에서 안 그려줘서, 요소 자신의 배경을 늘리는 이 방식만 확실하다. */
-  .page{width:100%;margin:0 auto;background:#fff;min-height:100vh;position:relative;overflow-x:clip;
+  /* min-height 는 svh 로 통일한다(CLAUDE.md 규칙). 다만 이 요소에서는 실제로는 무해한 잉여값이다 —
+     box-sizing:border-box 라 위의 padding-top:100vh 만으로 이미 border-box 높이가 100vh 를 넘기 때문에
+     min-height 가 걸릴 일이 없다(실측 확인). 나중에 오버스크롤 트릭을 걷어내면 그때 제 역할을 한다.
+     아래 padding-top/margin-top 짝은 '문서 밖으로 덧대는 흰 판'이라 크게 잡을수록 안전하므로 vh 를 유지한다. */
+  .page{width:100%;margin:0 auto;background:#fff;min-height:100vh;min-height:100svh;position:relative;overflow-x:clip;
     padding-top:100vh;margin-top:-100vh;
     /* 카드 폭은 화면과 함께 자라다 --card-max 에서 멈춘다. 브레이크포인트 없음 = 튀는 지점 없음 */
     max-width:var(--card-max)}
