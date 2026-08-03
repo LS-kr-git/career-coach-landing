@@ -94,8 +94,11 @@ onboarding/3/index.html   → /onboarding/3/
 잘려 CTA 를 못 누르게 된다. 짧은 화면은 "막는" 게 아니라 "넘치지 않게" 만든다.
 내용이 화면보다 **64px 이하로 넘칠 때만 여백을 조여 흡수**하고, 그 이상이면 그냥 스크롤을 허용한다.
 
-> 남은 것: `index.html` 의 `.page{min-height:100vh}` 한 줄은 아직 `svh` 로 안 바꿨다.
-> 랜딩을 고치면 2겹 피그마 대조가 돌아 덤프 3개가 필요하므로, 랜딩을 다음에 손댈 때 같이 바꾼다.
+적용 완료: 온보딩 3개 · `signup` · `letter` · `privacy` · `terms` · `index.html`(2026-08-02, 피그마 대조 통과).
+
+> 참고: `index.html` 의 `.page` 는 `box-sizing:border-box` 인데 `padding-top:100vh` 가 이미 border-box 높이를
+> 100vh 이상으로 만들기 때문에, 거기서는 `min-height` 가 **실제로는 한 번도 걸리지 않는 잉여값**이다(실측 확인).
+> 규칙 일관성과 나중에 오버스크롤 트릭을 걷어낼 때를 대비해 값만 맞춰 뒀다.
 
 ## 피그마에 글자를 쓸 때 — Pretendard 규칙 (2026-08-02 확정)
 
