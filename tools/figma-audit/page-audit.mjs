@@ -85,6 +85,15 @@ for (const page of pages) {
   if (!/<html[^>]*\blang="ko"/i.test(raw)) add('BLOCK', '머리 누락', page, 'html lang="ko" 가 없습니다');
   if (!/<meta[^>]*charset=/i.test(raw)) add('BLOCK', '머리 누락', page, '<meta charset> 이 없습니다');
   if (!/<meta[^>]*name="viewport"/i.test(raw)) add('BLOCK', '머리 누락', page, '<meta name="viewport"> 가 없습니다');
+  // 브라우저 자동 다크 테마 차단 — 'light' 만으로는 안 막힌다. 'only light' 여야 한다. (2026-08-03)
+  const cs = raw.match(/<meta[^>]*name="color-scheme"[^>]*content="([^"]*)"/i);
+  if (!cs) {
+    add('BLOCK', '머리 누락', page, '<meta name="color-scheme" content="only light"> 가 없습니다',
+        '없으면 안드로이드 크롬 자동 다크 테마가 페이지 색을 임의로 바꿉니다');
+  } else if (!/\bonly\s+light\b/i.test(cs[1])) {
+    add('BLOCK', 'color-scheme 값', page, `content="${cs[1]}"`,
+        "'light' 만으로는 자동 다크가 그대로 적용됩니다 — 'only light' 로 쓰세요");
+  }
   const title = raw.match(/<title>([\s\S]*?)<\/title>/i);
   if (!title || !title[1].trim()) add('BLOCK', '머리 누락', page, '<title> 이 비었습니다');
   else if (!title[1].includes('커리어코치')) add('WARN', '제목', page, `"${title[1].trim()}" — 서비스명이 없습니다`);
