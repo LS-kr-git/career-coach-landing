@@ -89,6 +89,21 @@ MSG
 fi
 
 # ─────────────────────────────────────────────────────────
+# 1.5겹 — 온보딩 직군 목록이 taxonomy.json 에서 생성된 그대로인가
+#   손으로 고치면 code(직행 조회 표기)와 label(화면 표기)이 조용히 어긋난다.
+# ─────────────────────────────────────────────────────────
+echo "▶ 온보딩 직군 목록 ↔ taxonomy.json 대조…"
+if ! node tools/roles/build.mjs --check; then
+  fail <<'MSG'
+
+✋ 푸시 중단 — 온보딩 1단계 직군 목록이 tools/roles/taxonomy.json 과 다릅니다.
+목록은 taxonomy.json 이 기준이고 HTML 은 파생물입니다.
+  node tools/roles/build.mjs
+를 돌려 다시 만든 뒤 커밋하세요. (문구·분류를 바꾸려면 taxonomy.json 을 고칩니다)
+MSG
+fi
+
+# ─────────────────────────────────────────────────────────
 # 2겹 — 피그마 대조
 #   (a) 약관·개인정보 화면 (docs-audit.mjs) — terms/privacy.html 또는 스냅샷이 바뀐 푸시.
 #       커밋된 스냅샷(figma-docs-text.json)과 문구를 대조하므로 라이브 피그마 덤프가 필요 없다.
