@@ -22,6 +22,8 @@
     --pad-x: 24px;
     --card-max: 450px;
     --content-max: 402px;
+    /* CTA 규칙(2026-08-03) — 제품 공통. 값·근거는 CLAUDE.md "CTA 규칙" */
+    --cta-h:54px; --cta-radius:14px; --cta-fs:15px; --cta-fw:600; --cta-max:410px;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth;background:var(--gray-100)}
@@ -121,8 +123,9 @@
 
   /* ===== 푸터 ===== */
   footer{margin-top:40px;text-align:center;padding:0 var(--pad-x) 56px}
-  .cta{display:inline-block;text-decoration:none;background:var(--amber-500);color:#fff;font-weight:800;font-size:15px;
-    border-radius:12px;padding:14px 28px;box-shadow:0 6px 18px rgba(245,158,11,.25)}
+  .cta{display:flex;align-items:center;justify-content:center;width:100%;max-width:var(--cta-max);height:var(--cta-h);margin:0 auto;
+    text-decoration:none;background:var(--amber-500);color:#fff;font-weight:var(--cta-fw);font-size:var(--cta-fs);
+    border-radius:var(--cta-radius);box-shadow:0 6px 18px rgba(245,158,11,.25)}
   .cta:active{transform:scale(.98)}
   .next{margin-top:16px;color:var(--gray-400);font-size:13px}
   .fine{margin-top:22px;color:var(--gray-400);font-size:11px;line-height:1.7}

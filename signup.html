@@ -15,6 +15,8 @@
     --gray-50:#F8FAFC; --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-300:#CBD5E1; --gray-400:#94A3B8;
     --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155; --gray-800:#1E293B;
     --error-600:#DC2626;
+    /* CTA 규칙(2026-08-03) — 제품 공통. 값·근거는 CLAUDE.md "CTA 규칙" */
+    --cta-h:54px; --cta-radius:14px; --cta-fs:15px; --cta-fw:600;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   body{
@@ -69,8 +71,8 @@
   .consent .req{color:var(--amber-600);font-weight:700}
 
   .submit{
-    width:100%;height:56px;border:none;border-radius:14px;margin-top:24px;
-    background:var(--amber-500);color:#fff;font:inherit;font-size:16px;font-weight:700;cursor:pointer;
+    width:100%;height:var(--cta-h);border:none;border-radius:var(--cta-radius);margin-top:24px;
+    background:var(--amber-500);color:#fff;font:inherit;font-size:var(--cta-fs);font-weight:var(--cta-fw);cursor:pointer;
     box-shadow:0 8px 20px rgba(245,158,11,.35);
   }
   .submit:active{transform:scale(.98)}

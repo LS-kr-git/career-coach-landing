@@ -10,6 +10,8 @@
     --amber-50:#FFFBEB;--amber-100:#FEF3C7;--amber-200:#FDE68A;--amber-500:#F59E0B;--amber-600:#D97706;--amber-700:#B45309;
     --gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;--gray-300:#CBD5E1;--gray-400:#94A3B8;
     --gray-500:#64748B;--gray-600:#475569;--gray-700:#334155;--gray-800:#1E293B;--gray-900:#0F172A;
+    /* CTA 규칙(2026-08-03) — 제품 공통. 값·근거는 CLAUDE.md "CTA 규칙" */
+    --cta-h:54px; --cta-radius:14px; --cta-fs:15px; --cta-fw:600;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html{background:#fff}
@@ -104,10 +106,10 @@
   .fade{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:450px;height:100px;
     background:linear-gradient(180deg,rgba(255,255,255,0),#fff 55%);pointer-events:none;z-index:9}
   .cta{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
-    width:calc(100% - 40px);max-width:410px;height:60px;
-    display:block;text-align:center;line-height:60px;
-    background:var(--amber-500);color:#fff;border-radius:14px;
-    font-size:15px;font-weight:600;
+    width:calc(100% - 40px);max-width:410px;height:var(--cta-h);
+    display:block;text-align:center;line-height:var(--cta-h);
+    background:var(--amber-500);color:#fff;border-radius:var(--cta-radius);
+    font-size:var(--cta-fs);font-weight:var(--cta-fw);
     box-shadow:0 12px 32px rgba(217,119,6,.28);cursor:pointer;z-index:10;
     -webkit-tap-highlight-color:transparent}
   .cta:active{transform:translateX(-50%) scale(.98)}
