@@ -232,7 +232,7 @@
       "id": "floating-cta",
       "label": "플로팅 CTA",
       "sel": ".floating-cta",
-      "node": "6:366",
+      "node": "450:2608",
       "figma": {
         "fill": "#fee500",
         "radius": 14,
