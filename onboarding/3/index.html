@@ -141,4 +141,9 @@ sync();
 
 // 다음 화면(/onboarding/done/)은 아직 없다 — 만들어지면 여기서 연결한다
 
-</script></body></html>
+</script>
+<script type="module">
+  import { pageView } from '/assets/track.js';
+  pageView('onboarding_step', { step: 3 });
+</script>
+</body></html>

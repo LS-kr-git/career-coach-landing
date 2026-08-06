@@ -556,5 +556,11 @@ fbq('track', 'PageView');
     })();
   </script>
 </div>
+
+<script type="module">
+  // 유입 경로 기록. 실패해도 화면에 영향이 없다 (track.js 가 예외를 삼킨다).
+  import { pageView } from '/assets/track.js';
+  pageView('visit', { p: 'landing' });
+</script>
 </body>
 </html>
