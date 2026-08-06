@@ -152,6 +152,19 @@ for (const page of pages) {
     if (clean.startsWith('assets/')) referenced.add(clean.slice('assets/'.length));
   }
 
+  /* 2-a-2) ES 모듈 import 도 자산 참조다.
+     href/src 만 훑으면 `import { x } from '/assets/track.js'` 를 못 본다.
+     2026-08-03 에 track.js 를 추가하고 실제로 '안 쓰는 자산' 오탐이 났다.
+     경로가 틀렸을 때 잡아 주는 쪽이 더 중요하므로 존재 여부도 함께 본다. */
+  for (const m of live.matchAll(/(?:from|import)\s*\(?\s*['"](\/assets\/[^'"]+)['"]/g)) {
+    const rel = m[1].replace(/^\//, '');
+    if (!existsSync(join(ROOT, rel))) {
+      add('BLOCK', '깨진 모듈 import', page, m[1], '그 경로에 파일이 없습니다');
+    } else {
+      referenced.add(rel.slice('assets/'.length));
+    }
+  }
+
   /* 2-b) 우리 도메인 절대 URL (og:image, canonical 등) 도 실제 파일이어야 한다 */
   if (domain) {
     const own = new RegExp(`https://${domain.replace(/\./g, '\\.')}(/[^"'\\s]*)`, 'gi');
