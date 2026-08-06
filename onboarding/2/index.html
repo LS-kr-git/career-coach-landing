@@ -207,4 +207,9 @@ document.querySelector('.cta').addEventListener('click',()=>{
   if(!c.classList.contains('off')) location.href='/onboarding/3/';
 });
 
-</script></body></html>
+</script>
+<script type="module">
+  import { pageView } from '/assets/track.js';
+  pageView('onboarding_step', { step: 2 });
+</script>
+</body></html>
