@@ -52,6 +52,12 @@
       "name": "STEP 3 · 근무지 — 선택됨",
       "textAudit": "docs-audit",
       "비고": "CTA 는 JS 렌더라 정적 HTML 에 없다 — 스냅샷의 jsRenderedText 로 명시했다."
+    },
+    "signup/info/index.html": {
+      "node": "567:2638",
+      "name": "회원가입",
+      "textAudit": "docs-audit",
+      "생성": "2026-08-07 — 카카오 동의항목 심사가 요구하는 '회원가입 화면'. 온보딩과 분리된 독립 페이지다"
     }
   },
   "_exempt_설명": "피그마 화면이 없어도 되는 페이지. 사유를 반드시 적는다. 빈 사유는 page-audit 이 막는다.",
