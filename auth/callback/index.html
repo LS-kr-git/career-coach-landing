@@ -41,11 +41,10 @@
 
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+  // 접속 정보는 /assets/supabase-config.js 한 곳에만 둔다 (2026-08-06 복구 훈련 결과).
+  import { SUPABASE_URL, SUPABASE_ANON_KEY } from '/assets/supabase-config.js';
 
-  const supabase = createClient(
-    'https://sxooygwggxeplzkfdbth.supabase.co',
-    'sb_publishable_qKgzeXLu4fX9T_xfEjbNnQ_zPH_xPUu'
-  );
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   const { track } = await import('/assets/track.js');
 

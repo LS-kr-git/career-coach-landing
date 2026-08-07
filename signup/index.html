@@ -130,13 +130,12 @@
 
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
+  // 접속 정보는 /assets/supabase-config.js 한 곳에만 둔다 (2026-08-06 복구 훈련 결과).
   // Publishable key 는 브라우저에 노출하라고 만든 공개 키다(시크릿인 secret key 와 다르다).
   // 데이터 보호는 RLS 가 한다 — supabase/migrations/0002_supabase_auth_rls.sql
-  const supabase = createClient(
-    'https://sxooygwggxeplzkfdbth.supabase.co',
-    'sb_publishable_qKgzeXLu4fX9T_xfEjbNnQ_zPH_xPUu'
-  );
+  import { SUPABASE_URL, SUPABASE_ANON_KEY } from '/assets/supabase-config.js';
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   const btn = document.getElementById('kakaoBtn');
   const err = document.getElementById('err');
