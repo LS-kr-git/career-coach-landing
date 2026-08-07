@@ -90,8 +90,17 @@ for (const page of snap.pages) {
   figmaCount += figma.length; webCount += blocks.length;
 
   // 1) 피그마 → 웹 : 피그마 문구가 웹에 있어야 한다
+  //
+  // 예외 — jsRenderedText: 웹이 JS 로 그리는 문구는 정적 HTML 에 없다 (2026-08-07).
+  //   온보딩 CTA 가 그렇다. 마크업에는 '다음' 만 있고, 선택 수에 따라 스크립트가
+  //   '직무를 1개 이상 골라주세요' / '다음 · N개 선택됨' 으로 바꿔 쓴다.
+  //   피그마 프레임은 그 결과 상태를 그린 것이므로 **드리프트가 아니라 검수 방식의 한계**다.
+  //   이걸 DIFF 로 두면 진짜 차이가 소음에 묻힌다. 대신 스냅샷에 그 문구를 명시하게 해서
+  //   "왜 빠지는지" 가 파일에 남게 한다 — 조용히 사라지지 않는다.
+  const jsRendered = new Set((page.jsRenderedText || []).map(key));
   for (const t of figma) {
     const k = key(t);
+    if (jsRendered.has(k)) continue;
     if (webLineKeys.has(k) || webAll.includes(k)) continue;
     if (webAllSoft.includes(softKey(t))) {
       findings.push({ level: 'PUNCT', page: page.html, kind: '문장부호', figma: t, note: '글자·구성은 같고 따옴표/말줄임표만 다름' });
