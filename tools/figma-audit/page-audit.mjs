@@ -260,6 +260,91 @@ for (const f of ['robots.txt', 'sitemap.xml']) {
   }
 }
 
+/* ---------- 피그마 대응 (완전성) ----------
+ * 피그마가 단일 기준이면, 저장소의 모든 페이지에 피그마 짝이 있어야 한다.
+ *
+ * 왜 검사로 만드는가 (2026-08-07 사고)
+ *   signup/index.html 과 auth/callback/index.html 이 피그마에 대응 화면 없이 라이브에 있었다.
+ *   기존 검수는 전부 "피그마에 있는 것" 을 목록으로 들고 웹과 대조하는 구조다 —
+ *   audit.mjs 는 프레임 6:148 하나, docs-audit.mjs 는 스냅샷 pages[] 세 개.
+ *   그래서 웹에만 새로 생긴 페이지는 어느 검수의 시야에도 안 들어왔다.
+ *   목록에 없으면 검사가 없고, 검사가 없으니 조용히 통과였다. 눈으로 찾을 때까지 몇 달이 걸렸다.
+ *
+ *   이 검사는 방향을 뒤집는다. 기준은 "저장소에 실재하는 HTML" 이고,
+ *   그 각각에 대해 피그마 짝이 등록돼 있는지를 묻는다.
+ *   등록도 면제도 없는 새 페이지는 푸시가 막힌다 — 색인 정책 검사와 같은 방식이다.
+ */
+const figmaMapPath = join(HERE, 'page-figma-map.json');
+if (!existsSync(figmaMapPath)) {
+  add('BLOCK', '피그마 대응', 'tools/figma-audit/page-figma-map.json',
+      '페이지↔피그마 등록부가 없습니다',
+      '이 파일이 있어야 "웹에는 있는데 피그마에는 없는 페이지" 를 잡을 수 있습니다.');
+} else {
+  const fmap = JSON.parse(readFileSync(figmaMapPath, 'utf8'));
+  const mapped = fmap.pages || {};
+  const exempt = fmap.exempt || {};
+
+  for (const page of pages) {
+    const entry = mapped[page];
+    const reason = exempt[page];
+
+    if (!entry && reason === undefined) {
+      add('BLOCK', '피그마 대응', page,
+          '피그마에 대응 화면이 등록돼 있지 않습니다',
+          `피그마가 단일 기준입니다. 이 페이지의 화면을 피그마에 만들고 ` +
+          `tools/figma-audit/page-figma-map.json 의 pages 에 {"node":"<프레임 id>","name":"<프레임 이름>","textAudit":"docs-audit"} 로 ` +
+          `등록하세요. 피그마 화면이 필요 없는 페이지라면 같은 파일의 exempt 에 사유를 적으세요.`);
+      continue;
+    }
+    if (!entry) {
+      if (!String(reason).trim()) {
+        add('BLOCK', '피그마 대응', page,
+            'exempt 에 있지만 사유가 비어 있습니다',
+            '왜 피그마 화면이 필요 없는지 한 문장으로 적으세요. 빈 사유는 "생각하지 않고 넘긴 것" 과 구별되지 않습니다.');
+      }
+      continue;
+    }
+    if (!/^\d+:\d+$/.test(String(entry.node || ''))) {
+      add('BLOCK', '피그마 대응', page,
+          `node 가 프레임 id 형식이 아닙니다: ${JSON.stringify(entry.node)}`,
+          '"6:148" 처럼 <숫자>:<숫자> 형태여야 합니다.');
+    }
+    // 등록은 됐지만 문구 동기화 검수에 아직 안 들어간 페이지는 조용히 두지 않는다.
+    if (entry.textAudit === 'pending') {
+      add('WARN', '피그마 대응', page,
+          `문구 동기화 미적용 (프레임 ${entry.node})`,
+          entry.pendingSync || '사유가 적혀 있지 않습니다. page-figma-map.json 에 pendingSync 로 남기세요.');
+    } else if (entry.textAudit !== 'docs-audit' && entry.textAudit !== 'audit') {
+      add('BLOCK', '피그마 대응', page,
+          `textAudit 값이 올바르지 않습니다: ${JSON.stringify(entry.textAudit)}`,
+          '"audit"(랜딩 전용) · "docs-audit"(스냅샷 대조) · "pending"(사유 필수) 중 하나여야 합니다.');
+    }
+  }
+
+  // 등록부가 낡는 것도 막는다 — 지운 페이지가 목록에 남아 있으면 "검사 중" 으로 착각한다.
+  const live = new Set(pages);
+  for (const p of [...Object.keys(mapped), ...Object.keys(exempt)]) {
+    if (!live.has(p)) {
+      add('BLOCK', '피그마 대응', 'tools/figma-audit/page-figma-map.json',
+          `등록부에 있는 ${p} 가 저장소에 없습니다`,
+          '페이지를 지웠다면 등록부에서도 지우세요. 낡은 항목은 "덮여 있다" 는 착각을 만듭니다.');
+    }
+  }
+
+  // docs-audit 대상으로 등록해 놓고 스냅샷에는 안 넣은 경우 — 두 파일이 어긋나면 역시 사각지대다.
+  const snapPath = join(HERE, 'figma-docs-text.json');
+  if (existsSync(snapPath)) {
+    const snapPages = new Set((JSON.parse(readFileSync(snapPath, 'utf8')).pages || []).map((p) => p.html));
+    for (const [p, e] of Object.entries(mapped)) {
+      if (e.textAudit === 'docs-audit' && !snapPages.has(p)) {
+        add('BLOCK', '피그마 대응', p,
+            'textAudit 이 docs-audit 인데 figma-docs-text.json 스냅샷에 없습니다',
+            'CLAUDE.md "약관·개인정보·브리핑 화면 — 피그마↔웹 동기화" 의 덤프 스니펫으로 이 페이지를 스냅샷에 추가하세요.');
+      }
+    }
+  }
+}
+
 /* ---------- 고아 자산 ---------- */
 
 const assetsDir = join(ROOT, 'assets');
