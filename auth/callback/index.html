@@ -64,18 +64,18 @@
   // supabase-js 는 detectSessionInUrl 기본값이 true 라 이 페이지에 도착하는 순간
   // 인가 코드를 세션으로 교환한다. 교환이 끝나면 SIGNED_IN 이 온다.
   supabase.auth.onAuthStateChange((_event, session) => {
-    if (session) { markLogin(session); go('/onboarding/1/'); }
+    if (session) { markLogin(session); go('/signup/info/'); }
   });
 
   // 폴백 — 이벤트를 놓쳤거나 이미 교환이 끝난 뒤 리스너가 붙은 경우
   const { data: { session } } = await supabase.auth.getSession();
-  if (session) { markLogin(session); go('/onboarding/1/'); }
+  if (session) { markLogin(session); go('/signup/info/'); }
 
   // 3초 안에 세션이 안 생기면 실패로 본다 (사용자가 동의를 취소한 경우 등)
   setTimeout(async () => {
     const { data } = await supabase.auth.getSession();
     markLogin(data.session);
-    go(data.session ? '/onboarding/1/' : '/signup/?error=auth');
+    go(data.session ? '/signup/info/' : '/signup/?error=auth');
   }, 3000);
 </script>
 </body>
