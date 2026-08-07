@@ -19,9 +19,13 @@
  *   저장은 localStorage 하나(cc_attr)뿐이고 개인 식별자는 담기지 않는다.
  */
 
-const API = 'https://sxooygwggxeplzkfdbth.supabase.co';
-// Publishable key 는 브라우저에 노출하라고 만든 공개 키다(secret key 와 다르다).
-const KEY = 'sb_publishable_qKgzeXLu4fX9T_xfEjbNnQ_zPH_xPUu';
+// 접속 정보는 /assets/supabase-config.js 한 곳에만 둔다 (2026-08-06 복구 훈련 결과).
+// 복원하면 프로젝트 ref 가 바뀌는데, 그때 고칠 곳이 세 군데였다. 이제 한 군데다.
+// 같은 오리진 파일이라 서드파티 CDN 의존이 생기지 않는다 — 그건 아래 주의사항 그대로다.
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '/assets/supabase-config.js';
+
+const API = SUPABASE_URL;
+const KEY = SUPABASE_ANON_KEY;
 const STORE = 'cc_attr';
 
 const UTM = ['source', 'medium', 'campaign', 'content', 'term'];
