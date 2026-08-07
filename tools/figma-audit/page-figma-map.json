@@ -1,0 +1,60 @@
+{
+  "_설명": "저장소의 모든 HTML 페이지 ↔ 피그마 화면 프레임 등록부. page-audit.mjs 가 이 파일을 기준으로 '웹에는 있는데 피그마에는 없는 페이지' 를 잡아 푸시를 막는다. 새 페이지를 만들면 여기에 반드시 등록하거나 exempt 에 사유와 함께 적어야 한다.",
+  "_왜_만들었나": "2026-08-07 사고. signup/index.html 과 auth/callback/index.html 이 피그마에 대응 화면 없이 몇 달간 라이브에 있었다. 기존 검수는 전부 '피그마에 있는 것' 을 목록으로 들고 웹과 대조하는 구조라(audit.mjs=6:148 하나, docs-audit.mjs=스냅샷의 pages[] 세 개), 웹에만 새로 생긴 페이지는 어느 검수의 시야에도 들어오지 않았다. 목록에 없으면 검사도 없고, 검사가 없으니 통과였다. 이 파일은 방향을 뒤집는다 — 기준은 '저장소에 실재하는 HTML' 이고, 그 각각이 피그마에 짝이 있는지를 묻는다.",
+  "fileKey": "LnT8TgFVBxky0bVyaF6Tob",
+  "_pages_설명": "node = 대응 피그마 프레임 id. textAudit = 문구 동기화를 강제하는 검수 이름. 'docs-audit' 이면 figma-docs-text.json 스냅샷과 대조해 한쪽만 고치면 푸시가 막힌다. 'audit' 이면 랜딩 전용 3종 덤프 검수가 본다.",
+  "pages": {
+    "index.html": {
+      "node": "6:148",
+      "name": "랜딩페이지_커리어코치",
+      "textAudit": "audit"
+    },
+    "terms.html": {
+      "node": "339:2474",
+      "name": "이용약관",
+      "textAudit": "docs-audit"
+    },
+    "privacy.html": {
+      "node": "340:2478",
+      "name": "개인정보처리방침",
+      "textAudit": "docs-audit"
+    },
+    "letter.html": {
+      "node": "362:2482",
+      "name": "브리핑 상세페이지",
+      "textAudit": "docs-audit"
+    },
+    "signup/index.html": {
+      "node": "536:2611",
+      "name": "가입 (카카오 시작)",
+      "textAudit": "docs-audit",
+      "생성": "2026-08-07 — 웹에만 있던 것을 피그마에 신규 제작"
+    },
+    "auth/callback/index.html": {
+      "node": "536:2612",
+      "name": "로그인 처리 중",
+      "textAudit": "docs-audit",
+      "생성": "2026-08-07 — 웹에만 있던 것을 피그마에 신규 제작"
+    },
+    "onboarding/2/index.html": {
+      "node": "275:2422",
+      "name": "STEP 2 · 연차 — 선택됨",
+      "textAudit": "docs-audit"
+    },
+    "onboarding/1/index.html": {
+      "node": "278:2693",
+      "name": "STEP 1 · 직군 — 전부 접힘 (시작 상태)",
+      "textAudit": "pending",
+      "pendingSync": "피그마 프레임이 웹보다 낡았다 (2026-08-07 실측). 아코디언 헤더 '주 N건' 24개가 옛 실측치이고(웹 마케팅 192 · IT개발 179 · AI데이터 83 ↔ 피그마 279 · 239 · 105), 게임·교육·의료보건·식음료·은행보험카드캐피탈·증권운용·공공복지 8개 그룹이 피그마에만 있다. ★ 방향 규칙은 '웹을 피그마에 맞춘다' 이지만 이 화면만은 그대로 적용할 수 없다 — 이 목록과 숫자는 tools/roles/taxonomy.json + volume.json 실측에서 build.mjs 가 생성하는 데이터이고, 웹을 손으로 고치면 pre-push 1.5겹(build.mjs --check)이 막는다. 피그마도 웹도 파생물이므로 '측정값으로 피그마를 갱신 → 웹이 피그마를 따른다' 순서로 풀어야 한다. 사용자 판단 대기.",
+      "ignoreWebText_예정": "depth2 직무 칩 296개는 docs-audit 대상이 아니다. tools/roles/build.mjs --check (pre-push 1.5겹)가 taxonomy.json 과 이미 대조한다. CTA('직무를 1개 이상 골라주세요')는 JS 렌더라 jsRenderedText 로 넣는다."
+    },
+    "onboarding/3/index.html": {
+      "node": "275:2440",
+      "name": "STEP 3 · 근무지 — 선택됨",
+      "textAudit": "docs-audit",
+      "비고": "CTA 는 JS 렌더라 정적 HTML 에 없다 — 스냅샷의 jsRenderedText 로 명시했다."
+    }
+  },
+  "_exempt_설명": "피그마 화면이 없어도 되는 페이지. 사유를 반드시 적는다. 빈 사유는 page-audit 이 막는다.",
+  "exempt": {}
+}
