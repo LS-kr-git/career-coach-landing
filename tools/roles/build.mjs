@@ -24,12 +24,15 @@ const TAX = JSON.parse(readFileSync(join(HERE, 'taxonomy.json'), 'utf8'));
 const VOL = JSON.parse(readFileSync(join(HERE, 'volume.json'), 'utf8'));
 const PAGE = join(ROOT, 'onboarding', '1', 'index.html');
 
-/** 노출 기준 (2026-08-04 사용자 확정)
- *  대분류: 주당 신규 10건 미만이면 뺀다. 주 10건이 "브리핑이 매주 새로 채워지는" 하한선이다.
+/** 노출 기준 (2026-08-04 사용자 확정 → 같은 날 10 → 5 로 완화)
+ *  대분류: 주당 신규 5건 미만이면 뺀다.
+ *    처음엔 10 이었는데, 그 기준이 게임(주 7)·증권(주 7)·교육(주 9)·서비스(주 9)·공공복지(주 9)·
+ *    의료보건(주 6)까지 잘라내 "그 직군 사람은 온보딩에서 그냥 이탈" 하는 쪽이 더 컸다.
+ *    주 5 면 한 주에 최소 몇 건은 새로 채워진다.
  *  중분류: 30일 신규 0건이면 뺀다. 한 달 내내 새 공고가 없었다 = 골라도 아무것도 안 온다.
  *  판단 지표는 재고(open)가 아니라 유입(new30)이다 — 재고만 많으면 매주 같은 공고를 다시 보낸다.
  *  (실제로 어긋난다: 게임은 재고 319건으로 15위인데 주당 신규는 7건으로 20위다) */
-const MIN_D1_PER_WEEK = 10;
+const MIN_D1_PER_WEEK = 5;
 const MIN_D2_NEW30 = 1;
 const WEEKS = 30 / 7;
 
