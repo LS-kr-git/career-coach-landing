@@ -44,9 +44,8 @@
     "onboarding/1/index.html": {
       "node": "278:2693",
       "name": "STEP 1 · 직군 — 전부 접힘 (시작 상태)",
-      "textAudit": "pending",
-      "pendingSync": "피그마 프레임이 웹보다 낡았다 (2026-08-07 실측). 아코디언 헤더 '주 N건' 24개가 옛 실측치이고(웹 마케팅 192 · IT개발 179 · AI데이터 83 ↔ 피그마 279 · 239 · 105), 게임·교육·의료보건·식음료·은행보험카드캐피탈·증권운용·공공복지 8개 그룹이 피그마에만 있다. ★ 방향 규칙은 '웹을 피그마에 맞춘다' 이지만 이 화면만은 그대로 적용할 수 없다 — 이 목록과 숫자는 tools/roles/taxonomy.json + volume.json 실측에서 build.mjs 가 생성하는 데이터이고, 웹을 손으로 고치면 pre-push 1.5겹(build.mjs --check)이 막는다. 피그마도 웹도 파생물이므로 '측정값으로 피그마를 갱신 → 웹이 피그마를 따른다' 순서로 풀어야 한다. 사용자 판단 대기.",
-      "ignoreWebText_예정": "depth2 직무 칩 296개는 docs-audit 대상이 아니다. tools/roles/build.mjs --check (pre-push 1.5겹)가 taxonomy.json 과 이미 대조한다. CTA('직무를 1개 이상 골라주세요')는 JS 렌더라 jsRenderedText 로 넣는다."
+      "textAudit": "docs-audit",
+      "비고": "'주 N건' 과 노출 그룹은 tools/roles/volume.json 실측에서 build.mjs 가 웹을 생성한 값이고, 피그마도 같은 측정값을 그린 것이다. 다시 재면 volume.json → 피그마 3프레임 → 스냅샷 → 웹(build.mjs) 순서로 함께 갱신한다. depth2 칩은 build.mjs --check 가 대조하므로 ignoreWebText, CTA 는 JS 렌더라 jsRenderedText."
     },
     "onboarding/3/index.html": {
       "node": "275:2440",
