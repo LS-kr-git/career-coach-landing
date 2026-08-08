@@ -138,7 +138,8 @@ const sync=()=>{let total=0;
   if(locked){const body=a.querySelector('.abody'); if(body.hidden){body.hidden=false; cv.textContent='▲';}}});
  const cta=document.querySelector('.cta');
  if(total===0){cta.classList.add('off');cta.textContent='직무를 1개 이상 골라주세요';}
- else{cta.classList.remove('off');cta.innerHTML='다음 <span class="s2">· '+total+'개 선택됨</span>';}};
+ else{cta.classList.remove('off');cta.innerHTML='다음 <span class="s2">· '+total+'개 선택됨</span>';}
+ if(window.ccOnChange) window.ccOnChange();};
 accs.forEach(a=>{const row=a.querySelector('.arow'),body=a.querySelector('.abody'),cv=a.querySelector('.cv');
  row.addEventListener('click',()=>{if(a.dataset.locked==='1')return;const o=!body.hidden;body.hidden=o;cv.textContent=o?'▼':'▲';});
  a.querySelectorAll('.c').forEach(c=>c.addEventListener('click',e=>{e.stopPropagation();c.classList.toggle('on');sync();}));
@@ -146,6 +147,13 @@ accs.forEach(a=>{const row=a.querySelector('.arow'),body=a.querySelector('.abody
   const chips=[...a.querySelectorAll('.c')],allOn=chips.every(c=>c.classList.contains('on'));
   chips.forEach(c=>c.classList.toggle('on',!allOn));sync();});});
 sync();
+
+// 선택값을 읽고 되살리는 최소 접점. 화면 동작은 그대로다 — 칩의 on 상태만 오간다.
+// 저장에 쓰는 값은 라벨이 아니라 data-d2(= taxonomy.json 의 code)다.
+window.ccStep1={
+ get:()=>[...document.querySelectorAll('.acc .c.on')].map(c=>c.dataset.d2).filter(Boolean),
+ set:codes=>{const want=new Set(codes);
+  document.querySelectorAll('.acc .c').forEach(c=>c.classList.toggle('on',want.has(c.dataset.d2)));sync();}};
 
 document.querySelector('.cta').addEventListener('click',()=>{
   const c=document.querySelector('.cta');
@@ -156,5 +164,14 @@ document.querySelector('.cta').addEventListener('click',()=>{
 <script type="module">
   import { pageView } from '/assets/track.js';
   pageView('onboarding_step', { step: 1 });
+</script>
+<script type="module">
+  // 고른 직무를 들고 간다. 실제 저장(RPC)은 3단계에서 한 번만 한다 — assets/onboarding-store.js
+  import { readState, writeState, retryPending } from '/assets/onboarding-store.js';
+  const saved = readState();
+  if (saved.jobs.length) window.ccStep1.set(saved.jobs);   // 뒤로 왔을 때 체크 상태를 되살린다
+  window.ccOnChange = () => writeState({ jobs: window.ccStep1.get() });
+  window.ccOnChange();
+  retryPending();     // 지난 저장이 실패한 채 남아 있으면 여기서 조용히 다시 보낸다
 </script>
 </body></html>
