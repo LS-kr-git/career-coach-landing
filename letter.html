@@ -87,7 +87,10 @@
   .more-note{text-align:center;color:var(--gray-400);margin-top:14px}
 
   /* ===== 트렌드 타일 ===== */
-  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+  /* 2026-08-08 — '어제 마감된 공고' 타일을 뺐다(사용자 결정). 칸 수를 1fr 1fr 로 박아 두면
+     남은 타일이 왼쪽 절반만 차지해 오른쪽이 빈다. auto-fit 으로 두면 타일 수가 몇이든
+     알아서 채운다 — 나중에 지표를 다시 늘려도 이 줄을 고칠 필요가 없다. */
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:10px;margin-bottom:12px}
   .tile{background:#fff;border:1px solid var(--gray-200);box-shadow:0 1px 3px rgba(15,23,42,.05);border-radius:14px;padding:14px 16px}
   .tile .t-label{color:var(--gray-500);font-weight:600}
   .tile .t-value{color:var(--navy-900);font-size:28px;line-height:34px;font-weight:800;letter-spacing:-0.01em;margin-top:2px}
@@ -150,7 +153,7 @@
     <div class="hero">
       <div class="kicker t-caption-strong">프로덕트 디자이너 데일리 · 7월 29일 수요일</div>
       <h1 class="t-display hero-title">석준님, 오늘도<br>한 걸음 앞서 시작해요</h1>
-      <p class="t-body lead">어제 하루 새로 나온 공고 16건, 그 사이 조용히 마감된 공고 3건.<br>출근길 1분으로 정리했어요.</p>
+      <p class="t-body lead">내 직군에서 나온 새 공고 16건.<br>출근길 1분으로 정리했어요.</p>
       <div class="prefs">
         <span class="p-label t-caption">내 설정</span>
         <span class="pref-chip t-caption-strong">프로덕트 디자이너</span>
@@ -161,7 +164,7 @@
     </div>
 
     <section>
-      <div class="sec-label"><span class="sec-num t-caption-strong">01</span><h2 class="t-h2">어제 새로 나온 채용공고</h2></div>
+      <div class="sec-label"><span class="sec-num t-caption-strong">01</span><h2 class="t-h2">최신 채용공고</h2></div>
       <p class="sec-sub t-body-s">국내 15개 사이트의 모든 공고를 종합한 뒤 — 회사마다 부르는 이름이 달라도 빠짐없이 — 설정하신 <b>연차와 근무지</b>에 맞는 공고부터 보여드려요.</p>
 
       <a class="job" target="_blank" rel="noopener" href="https://www.wanted.co.kr/wd/377044">
@@ -212,12 +215,8 @@
 
       <div class="tiles">
         <div class="tile">
-          <div class="t-label">어제 새로 나온 공고</div>
+          <div class="t-label">최신 공고</div>
           <div class="t-value">16건</div>
-        </div>
-        <div class="tile">
-          <div class="t-label">어제 마감된 공고</div>
-          <div class="t-value">3건</div>
         </div>
       </div>
 
@@ -245,10 +244,10 @@
           <rect class="hover-col" data-tip="1주 전 · 마감 20건"  x="385" y="30" width="111" height="160"/>
           <rect class="hover-col" data-tip="이번 주 · 마감 7건"  x="496" y="30" width="40" height="160"/>
         </svg>
-        <div class="viz-note">* 그래프 추이는 표본 추적 예시입니다. 어제 신규 16건은 7/29 실측 기준.</div>
+        <div class="viz-note">* 그래프 추이는 표본 추적 예시입니다. 최신 공고 16건은 7/29 실측 기준.</div>
       </div>
 
-      <p class="trend-copy">기회는 쉬는 날 없이 <b>매일 몇 건씩 조용히 닫혀요.</b> 어제 공고 중 관심 가는 게 있다면, 이력서가 쌓이기 전 <b>첫날 지원</b>이 가장 주목받아요.</p>
+      <p class="trend-copy">기회는 쉬는 날 없이 <b>매일 몇 건씩 조용히 닫혀요.</b> 최신 공고 중 관심 가는 게 있다면, 이력서가 쌓이기 전 <b>첫날 지원</b>이 가장 주목받아요.</p>
     </section>
 
     <section>
