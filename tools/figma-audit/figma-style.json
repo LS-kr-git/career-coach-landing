@@ -234,12 +234,12 @@
       "sel": ".floating-cta",
       "node": "450:2608",
       "figma": {
-        "fill": "#fee500",
+        "fill": "#f59e0b",
         "radius": 14,
         "shadow": true
       },
       "css": {
-        "background-color": "#FEE500",
+        "background-color": "#F59E0B",
         "border-top-left-radius": "14px",
         "shadow": "있음"
       }
