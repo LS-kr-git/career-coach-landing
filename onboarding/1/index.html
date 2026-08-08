@@ -101,9 +101,10 @@
   .b5 div.hit b{color:var(--amber-600)}
   .note{margin-top:14px;font-size:11.5px;line-height:18px;color:var(--gray-400)}
 
-  /* 플로팅 CTA — 크기·위치는 랜딩(index.html .floating-cta)과 동일:
-     width calc(100% - 40px) / max 410 / height 60 / bottom 20 / radius 14 / 가운데 정렬.
-     색·그림자색·글자 스타일만 온보딩 값이다. */
+  /* 플로팅 CTA — 폭·위치는 랜딩(index.html .floating-cta)과 같다:
+     width calc(100% - 40px) / max 410 / bottom 20 / 가운데 정렬.
+     높이·라운드·글자는 제품 공통 토큰(--cta-h 54 / --cta-radius 14 / 15·700)이고,
+     랜딩만 60 을 쓰는 의도된 예외다 (CLAUDE.md "CTA 규칙"). 색·그림자색은 온보딩 값. */
   .fade{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:450px;height:100px;
     background:linear-gradient(180deg,rgba(255,255,255,0),#fff 55%);pointer-events:none;z-index:9}
   .cta{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
