@@ -30,12 +30,6 @@
       "textAudit": "docs-audit",
       "비고": "2026-08-07 — 옛 '가입 (카카오 시작)' 화면(536:2611)과 회원가입 확인 화면(/signup/info/)을 이 한 장으로 병합했다. 섹션 566:2654 안에 있다"
     },
-    "auth/callback/index.html": {
-      "node": "536:2612",
-      "name": "로그인 처리 중",
-      "textAudit": "docs-audit",
-      "생성": "2026-08-07 — 웹에만 있던 것을 피그마에 신규 제작"
-    },
     "onboarding/2/index.html": {
       "node": "275:2422",
       "name": "STEP 2 · 연차 — 선택됨",
@@ -55,5 +49,7 @@
     }
   },
   "_exempt_설명": "피그마 화면이 없어도 되는 페이지. 사유를 반드시 적는다. 빈 사유는 page-audit 이 막는다.",
-  "exempt": {}
+  "exempt": {
+    "auth/callback/index.html": "OAuth 리다이렉트 처리 전용 화면. 2026-08-08 사용자 지시로 피그마 프레임(536:2612)과 '가입 / 로그인' 섹션(536:2610)을 삭제했다. ⚠️ 웹 파일은 지우지 않는다 — Supabase OAuth 의 redirectTo 목적지라 지우면 카카오 로그인이 통째로 깨진다."
+  }
 }
