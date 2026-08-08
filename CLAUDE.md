@@ -281,7 +281,28 @@ git clone https://github.com/LS-kr-git/career-coach.git   # 비공개 — PAT �
 
 **새 페이지 만드는 순서**: ① 피그마에 화면 프레임 제작(아래 "피그마 화면 프레임 맨 위에는 상태바"·"헤더와
 뒤로가기" 규칙을 따른다) → ② `page-figma-map.json` 등록 → ③ 문구 스냅샷 덤프해서
-`figma-docs-text.json` 에 추가 → ④ `node tools/figma-audit/page-audit.mjs` 와 `docs-audit.mjs` 통과 확인.
+`figma-docs-text.json` 에 추가 → ④ `node tools/figma-audit/page-audit.mjs` 와 `docs-audit.mjs` 통과 확인
+→ ⑤ 트리 덤프를 다시 뽑아 `figma-tree.json` 갱신, `tree-audit.mjs` 통과 확인 (아래).
+
+## 🔴 피그마 안에서 노드가 섹션 밖으로 나가면 막는다 (2026-08-08 사고)
+
+**섹션의 자식은 x/y 가 섹션 기준 상대좌표다.** 그래서 프레임을 만들고 섹션에 넣는 것을
+빠뜨린 채 좌표만 맞추면, 그 숫자가 **캔버스 절대좌표**가 되어 엉뚱한 곳에 떠 있게 된다.
+
+2026-08-08 에 섹션 `625:2657` "카카오 알림톡" 이 비어 보였다. 프레임 `626:2657` 은 지워진 게
+아니라 부모가 페이지(`0:1`)였고, 좌표 `(206,126)` 이 그대로 절대좌표가 되어 섹션에서
+x 약 18,000px · y 약 10,100px 떨어진 자리(하필 REF 섹션 위)에 겹쳐 있었다.
+**그때 검수 여섯 종이 전부 통과했다** — 나머지는 방향이 "웹 → 피그마" 이거나 프레임 **안쪽**만 본다.
+
+- **섹션에 넣는 코드는 `appendChild` 직후 `parent.id` 를 반환해 확인한다.** 좌표만 맞추고
+  부모를 확인하지 않으면 이번과 똑같이 "숫자는 맞는데 딴 데 있는" 상태가 된다.
+- `tools/figma-audit/tree-audit.mjs` 가 pre-push 에서 **항상** 돈다(1.2겹).
+  페이지 직속에 섹션이 아닌 노드가 있으면 **막힌다.**
+- 라이브 고아 노드까지 보려면 트리 덤프가 필요하다 — 스니펫은
+  `tools/figma-audit/README.md` "피그마 트리 덤프". `page-figma-map.json` 이나
+  `figma-tree.json` 을 건드린 푸시에는 **덤프를 요구한다.**
+- 의도적으로 섹션 밖에 두는 노드는 `figma-tree.json` 의 `pageLevelAllowed` 에 **사유와 함께** 적는다.
+  사유가 비면 막힌다.
 
 ## 새 페이지는 폴더 주소로 만든다 (2026-08-02 확정)
 
