@@ -5,26 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="only light">
 <meta name="format-detection" content="telephone=no">
-<title>시작하기 — 커리어코치</title>
-<meta name="description" content="카카오로 로그인하고 매일 아침 채용공고 브리핑을 받아보세요.">
+<title>회원가입 — 커리어코치</title>
+<meta name="description" content="카카오 계정으로 커리어코치 회원가입을 진행합니다.">
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
   :root{
-    color-scheme: only light;   /* meta 와 같은 값 — CSS 로도 선언해 확실히 적용한다 */
+    color-scheme: only light;
     --amber-500:#F59E0B; --amber-600:#D97706;
     --navy-900:#1E3A8A; --navy-500:#3B82F6;
     --gray-50:#F8FAFC; --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-400:#94A3B8;
     --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155; --gray-800:#1E293B;
-    --kakao:#FEE500; --kakao-text:#191919;
     --error-600:#DC2626;
-    /* CTA 토큰 — CLAUDE.md "CTA 규칙" 공통값 (높이 54 · 라운드 14 · 15/600 · 풀폭) */
+    /* CTA 토큰 — CLAUDE.md "CTA 규칙" 공통값 */
     --cta-h:54px; --cta-radius:14px; --cta-fs:15px; --cta-fw:700;
-    /* 랜딩과 동일한 폭 시스템 (index.html :root 와 같은 값) */
+    /* 랜딩과 동일한 폭 시스템 */
     --pad-x: 24px;
     --card-max: 450px;
     --content-max: 402px;
+    /* 피그마 566:2700 실측 — 라벨 열 폭. Gothic A1 자연폭 최댓값(89)+버퍼 4 */
+    --label-w: 93px;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html{background:var(--gray-100)}
@@ -42,23 +43,28 @@
   header .wordmark{height:21px;display:block}
 
   main{flex:1;display:flex;flex-direction:column;padding:8px var(--pad-x) 32px}
-  .lead-group{max-width:var(--content-max);width:100%;margin:0 auto;padding:24px 0 0}
+  .content{max-width:var(--content-max);width:100%;margin:0 auto;
+    display:flex;flex-direction:column;gap:28px;padding:24px 0 0}
   h1{font-size:28px;line-height:36px;font-weight:800;letter-spacing:-0.01em;color:var(--navy-900)}
   .sub{font-size:15px;line-height:23px;color:var(--gray-600);margin-top:10px}
 
-  .spacer{flex:1;min-height:24px}
+  .sec{display:flex;flex-direction:column;gap:10px}
+  .sec-head{background:var(--gray-100);border-radius:8px;padding:6px 10px;
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    font-size:13px;line-height:18px;font-weight:600;color:var(--gray-700)}
+  .sec-head .req{color:var(--navy-500)}
+  .sec-head .opt{color:var(--gray-500)}
 
-  .actions{max-width:410px;width:100%;margin:0 auto}
-  .kakao-btn{width:100%;height:var(--cta-h);border:0;border-radius:var(--cta-radius);
-    background:var(--kakao);color:var(--kakao-text);
-    font-size:var(--cta-fs);line-height:20px;font-weight:var(--cta-fw);font-family:inherit;
-    display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
-  .kakao-btn:active{transform:scale(.98)}
-  .kakao-btn[disabled]{opacity:.6;cursor:default;transform:none}
-  .kakao-btn svg{flex:none}
+  .fields{display:flex;flex-direction:column;gap:8px}
+  .field{display:flex;align-items:center;gap:10px}
+  .field .k{flex:none;width:var(--label-w);font-size:13px;line-height:18px;color:var(--gray-600)}
+  .field .v{flex:1;min-width:0;height:38px;border:1px solid var(--gray-200);border-radius:8px;
+    background:#fff;display:flex;align-items:center;padding:0 12px;
+    font-size:13px;line-height:18px;color:var(--gray-700);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .note{font-size:13px;line-height:18px;color:var(--gray-500)}
 
-  /* 동의 체크박스 — 피그마 agree-list(553:2638). 필수 2건, 기본 미동의 → CTA 비활성 */
-  .agree{list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
+  .agree{list-style:none;display:flex;flex-direction:column;gap:12px}
   .agree li{display:flex;align-items:center;justify-content:space-between;gap:8px}
   .agree-item{display:flex;align-items:center;gap:8px;cursor:pointer;
     padding:6px 0;margin:-6px 0}   /* 탭 영역만 넓힌다 — 보이는 높이는 20 그대로 */
@@ -75,6 +81,16 @@
   .agree-txt em{font-style:normal;color:var(--navy-500)}
   .agree .view{flex:none;font-size:13px;line-height:18px;color:var(--gray-500);
     text-decoration:none;padding:6px 0;margin:-6px 0}
+
+  .spacer{flex:1;min-height:24px}
+
+  .actions{max-width:var(--content-max);width:100%;margin:0 auto}
+  .cta{width:100%;height:var(--cta-h);border:0;border-radius:var(--cta-radius);
+    background:var(--amber-500);color:#fff;
+    font-size:var(--cta-fs);line-height:20px;font-weight:var(--cta-fw);font-family:inherit;
+    display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .cta:active{transform:scale(.98)}
+  .cta[disabled]{opacity:.6;cursor:default;transform:none}
   .err{display:none;margin-top:14px;font-size:13px;line-height:19px;color:var(--error-600);text-align:center}
   .err.on{display:block}
 
@@ -95,36 +111,51 @@
   </header>
 
   <main>
-    <div class="lead-group">
-      <h1>카카오로<br>3초 만에 시작하기</h1>
-      <p class="sub">간편한 카카오 계정으로<br>바로 시작합니다.</p>
+    <div class="content">
+      <div class="lead-group">
+        <h1>회원가입</h1>
+        <p class="sub">커리어코치에 오신 것을 환영합니다.<br>회원가입을 진행해주세요.</p>
+      </div>
+
+      <section class="sec" aria-label="회원 정보">
+        <div class="sec-head"><span>회원 정보</span></div>
+        <div class="fields">
+          <div class="field"><span class="k">이름</span><span class="v" id="fName"></span></div>
+          <div class="field"><span class="k">휴대전화번호</span><span class="v" id="fPhone"></span></div>
+          <div class="field"><span class="k">이메일</span><span class="v" id="fEmail"></span></div>
+          <div class="field"><span class="k">성별</span><span class="v" id="fGender"></span></div>
+          <div class="field"><span class="k">출생 연도</span><span class="v" id="fBirthyear"></span></div>
+          <div class="field"><span class="k">생일</span><span class="v" id="fBirthday"></span></div>
+        </div>
+        <p class="note">*회원 식별·본인 확인, 알림톡 브리핑 발송, 결제·환불 고지, 맞춤형 브리핑(유료 구독 기능) 제공, 기념일 맞춤 브리핑(유료 구독 기능에 포함)에 사용됩니다.</p>
+      </section>
+
+      <section class="sec" aria-label="약관 동의">
+        <ul class="agree">
+          <li>
+            <label class="agree-item">
+              <input type="checkbox" id="agreeTerms" data-required>
+              <span class="box" aria-hidden="true"></span>
+              <span class="agree-txt"><em>[필수]</em> 이용약관 동의</span>
+            </label>
+            <a class="view" href="/terms.html" target="_blank" rel="noopener" aria-label="이용약관 보기">보기</a>
+          </li>
+          <li>
+            <label class="agree-item">
+              <input type="checkbox" id="agreePrivacy" data-required>
+              <span class="box" aria-hidden="true"></span>
+              <span class="agree-txt"><em>[필수]</em> 개인정보 수집·이용 동의</span>
+            </label>
+            <a class="view" href="/privacy.html" target="_blank" rel="noopener" aria-label="개인정보 수집·이용 동의 내용 보기">보기</a>
+          </li>
+        </ul>
+      </section>
     </div>
 
     <div class="spacer"></div>
 
     <div class="actions">
-      <ul class="agree">
-        <li>
-          <label class="agree-item">
-            <input type="checkbox" id="agreeTerms">
-            <span class="box" aria-hidden="true"></span>
-            <span class="agree-txt"><em>[필수]</em> 이용약관 동의</span>
-          </label>
-          <a class="view" href="/terms.html" target="_blank" rel="noopener" aria-label="이용약관 보기">보기</a>
-        </li>
-        <li>
-          <label class="agree-item">
-            <input type="checkbox" id="agreePrivacy">
-            <span class="box" aria-hidden="true"></span>
-            <span class="agree-txt"><em>[필수]</em> 개인정보 수집·이용 동의</span>
-          </label>
-          <a class="view" href="/privacy.html" target="_blank" rel="noopener" aria-label="개인정보 수집·이용 동의 내용 보기">보기</a>
-        </li>
-      </ul>
-      <button type="button" class="kakao-btn" id="kakaoBtn" disabled>
-        <svg width="20" height="19" viewBox="0 0 20 19" fill="none" aria-hidden="true"><path d="M10 0C4.477 0 0 3.463 0 7.735c0 2.756 1.86 5.174 4.657 6.547-.205.744-.744 2.7-.851 3.12-.133.52.19.513.401.373.165-.11 2.62-1.755 3.683-2.468.68.1 1.386.153 2.11.153 5.523 0 10-3.463 10-7.735C20 3.463 15.523 0 10 0Z" fill="#191919"/></svg>
-        카카오로 시작하기
-      </button>
+      <button type="button" class="cta" id="startBtn" disabled>가입 완료하고 시작하기</button>
       <p class="err" id="err" role="alert"></p>
     </div>
   </main>
@@ -134,23 +165,22 @@
   // ★ supabase-js 를 부르는 아래 블록과 **일부러 분리**했다.
   //   같은 모듈에 두면 CDN 이 느리거나 막힌 순간 추적도 같이 죽는다
   //   (2026-08-03 검증에서 실제로 signup_view 가 통째로 안 찍혔다).
-  //   추적은 서드파티 의존성 뒤에 서면 안 된다.
   import { pageView, track } from '/assets/track.js';
   pageView('signup_view');
   // 클릭 시점을 남긴다 — 여기와 login 사이의 차이가 카카오 동의 화면 이탈률이다.
-  document.getElementById('kakaoBtn')
+  document.getElementById('startBtn')
     ?.addEventListener('click', () => track('signup_start'), { once: true });
 </script>
 
 <script type="module">
   // 필수 동의 게이트. ★ supabase CDN 블록과 **분리**한다 — 같은 모듈에 두면 CDN 이
   //   느리거나 막힌 순간 체크박스가 통째로 안 먹어 버튼이 영영 비활성으로 남는다.
-  const btn = document.getElementById('kakaoBtn');
-  const boxes = [...document.querySelectorAll('.agree input[type="checkbox"]')];
+  const btn = document.getElementById('startBtn');
+  const required = [...document.querySelectorAll('.agree input[data-required]')];
   // 전역으로 노출 — OAuth 실패 후 버튼을 되살릴 때 동의 상태를 다시 본다.
-  window.ccAgreeOk = () => boxes.every((b) => b.checked);
+  window.ccAgreeOk = () => required.every((b) => b.checked);
   const sync = () => { btn.disabled = !window.ccAgreeOk(); };
-  boxes.forEach((b) => b.addEventListener('change', sync));
+  required.forEach((b) => b.addEventListener('change', sync));
   sync();   // 뒤로가기로 돌아왔을 때 브라우저가 복원한 체크 상태를 반영한다
 </script>
 
@@ -162,10 +192,8 @@
   import { SUPABASE_URL, SUPABASE_ANON_KEY } from '/assets/supabase-config.js';
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  const btn = document.getElementById('kakaoBtn');
+  const btn = document.getElementById('startBtn');
   const err = document.getElementById('err');
-
   const showError = (msg) => { err.textContent = msg; err.classList.add('on'); };
 
   // 로그인 실패로 돌아온 경우
@@ -173,15 +201,19 @@
     showError('로그인이 완료되지 않았습니다. 다시 시도해 주세요.');
   }
 
-  // 이미 로그인돼 있으면 온보딩으로 바로 보낸다
+  // 이미 로그인돼 있으면 온보딩으로 바로 보낸다.
+  // ★ 그래서 이 화면은 언제나 '개인정보 미입력 상태' 로 열린다 — 카카오 동의항목 심사가
+  //   요구하는 회원가입 화면이 곧 라이브 화면이고, 목업을 따로 만들 필요가 없다.
   const { data: { session } } = await supabase.auth.getSession();
   if (session) location.replace('/onboarding/1/');
 
   btn.addEventListener('click', async () => {
+    if (!window.ccAgreeOk()) return;
     btn.disabled = true;
     err.classList.remove('on');
     // scopes 는 지금 동의항목 심사를 통과한 범위만 요청한다.
-    // 이름·전화번호·이메일 심사가 통과하면 'profile_nickname name account_email phone_number' 로 넓힌다.
+    // 이름·전화번호·성별·생일·출생연도 심사가 통과하면 아래로 넓힌다:
+    // 'profile_nickname name account_email phone_number gender birthday birthyear'
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'kakao',
       options: {
