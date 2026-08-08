@@ -830,6 +830,7 @@ this session's authorized repository set … add the repository to the session's
 **⚠️ 이 경로는 푸시 훅을 건너뛴다.** 0겹(배포 쿨다운)·1겹(page-audit)·1.5겹(직군 목록)·2겹(피그마 대조)이
 안 돈다. **올리기 전에 로컬에서 손으로 다 돌리고**, 결과를 PR 본문에 적는다.
 특히 쿨다운이 없으므로 **직전 푸시로부터 15분이 지났는지 직접 확인**한다 — 안 그러면 앞 배포가 취소된다.
+
 ## 공유 상태를 바꾸기 직전에 세션 충돌을 확인한다 (2026-08-08 신설)
 
 겹친 배포·푸시는 서로 취소된다. `Timeout reached, aborting!` 의 원인이
