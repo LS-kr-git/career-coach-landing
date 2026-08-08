@@ -309,22 +309,41 @@ node tools/figma-audit/page-audit.mjs --json
 | 페이지 직속에 섹션이 아닌 노드가 있다 (= 고아) | ❌ 막힘 |
 | `page-figma-map.json` 의 기준 프레임이 **어느 섹션에도** 안 들어 있다 | ❌ 막힘 |
 | 기준 프레임이 피그마에서 사라졌다 (`found:false`) | ❌ 막힘 |
-| 등록부에 있는 프레임이 `figma-tree.json` 의 `frames` 에 없다 | ❌ 막힘 |
-| `frames` 에 있는데 등록부에 없다 (낡은 항목) | ❌ 막힘 |
-| `pageLevelAllowed` 항목에 사유가 비어 있다 | ❌ 막힘 |
 | 기준 프레임이 든 섹션이 피그마에 없다 | ❌ 막힘 |
-| 기준 프레임의 섹션이 스냅샷과 다르다 / 새 섹션 / 안 쓰는 섹션 사라짐 | ⚠️ 경고 |
+| `pageLevelAllowed` 항목에 사유가 비어 있다 | ❌ 막힘 |
+| 새 섹션 / 섹션 이름 바뀜 / 안 쓰는 섹션 사라짐 | ↺ 스냅샷 낡음 (막지 않음) |
 | 덤프를 안 줘서 라이브 대조를 못 했다 | ⚠️ 경고(미확인) |
 
 **의도적으로 섹션 밖에 두는 노드**는 `figma-tree.json` 의 `pageLevelAllowed` 에
 **사유와 함께** 적는다. 사유가 비면 막힌다 — 사유 없는 면제는 검사를 조용히 끄는 것과 같다.
 
+### 🔴 스냅샷은 손으로 관리하지 않는다
+
+`figma-tree.json` 에서 **사람이 유지하는 것은 `pageLevelAllowed` 하나뿐이다.**
+`sections` 는 `--update` 가 덤프에서 다시 쓴다.
+
+사람이 피그마에 섹션을 하나 만들면 스냅샷은 **즉시** 낡는다. 그 갱신을 사람 손에 맡기면
+경고가 상주하고, 상주하는 경고는 결국 안 읽힌다 — 이 저장소가 여러 번 겪은 실패 방식이다.
+그래서 낡음은 **막힘이 아니라 `↺`** 로만 분류하고, 세 겹으로 자동화했다.
+
+1. `↺` 는 **푸시를 막지 않는다.** 진짜 사고(고아 노드·기준 프레임 이탈)만 막는다.
+2. 출력이 **맞추는 한 줄을 그대로 찍어 준다** — `… --update`.
+3. **예약 점검(라이브↔피그마, 하루 1회)이 매일 그 한 줄을 대신 돌리고 커밋한다.**
+   손대지 않아도 24시간 안에 스스로 맞는다.
+
+기준 프레임이 **어느** 섹션에 있어야 하는지는 아예 저장하지 않는다. "어딘가 섹션 안" 이면 되고,
+그건 덤프에서 그때그때 읽으면 된다 — 저장하지 않으면 낡지도 않는다.
+
 ### 쓰는 법
 
 ```
-node tools/figma-audit/tree-audit.mjs                    # 준비물 없음 — 등록부↔스냅샷 정합성만
-node tools/figma-audit/tree-audit.mjs figma_tree.json    # 라이브 덤프까지 대조 (고아 노드)
+node tools/figma-audit/tree-audit.mjs                            # 준비물 없음 — 스냅샷 정합성만
+node tools/figma-audit/tree-audit.mjs figma_tree.json            # 라이브 덤프까지 대조 (고아 노드)
+node tools/figma-audit/tree-audit.mjs figma_tree.json --update   # ↺ 를 자동으로 맞춘다 (sections 재작성)
 ```
+
+`--update` 는 `sections` 와 `dumpedAt` 만 다시 쓴다. `pageLevelAllowed` 와 설명 문구는 건드리지 않는다.
+`❌ 막힘` 은 `--update` 로 사라지지 않는다 — 갱신하고도 종료코드 1 이다.
 
 pre-push 훅에서 **항상** 돈다(1.2겹). 덤프는 `FIGMA_TREE` → 저장소 루트 →
 상위 디렉터리 → `$HOME` 순으로 찾는다. **`page-figma-map.json` 이나 `figma-tree.json` 을
@@ -360,10 +379,16 @@ return { pageId: page.id, pageName: page.name, children, registered };
 파일이 여러 페이지가 되면 `figma.currentPage` 대신 페이지별로 나눠 돌려야 한다
 (`use_figma` 한 번에 `setCurrentPageAsync` 는 한 번만). 지금은 `Page 1` 하나뿐이다.
 
-### 섹션을 새로 만들었으면
+### 섹션을 새로 만들었으면 — 아무것도 안 해도 된다
 
-`figma-tree.json` 의 `sections`(그리고 기준 프레임을 옮겼으면 `frames`)를 다시 뽑아 커밋한다.
-안 하면 ⚠️ 경고가 푸시할 때마다 찍힌다 — **조용해지지 않는 것이 요점이다.**
+`↺ 스냅샷 낡음` 이 찍히지만 **푸시는 그대로 나간다.** 예약 점검이 그날 안에 `--update` 를 돌려
+`figma-tree.json` 을 커밋한다. 지금 당장 조용히 하고 싶으면 덤프를 뽑아 한 줄 돌리면 된다:
+
+```
+node tools/figma-audit/tree-audit.mjs figma_tree.json --update
+```
+
+**손으로 `sections` 를 편집하지 마라.** 다음 `--update` 가 덮어쓴다.
 
 ---
 
