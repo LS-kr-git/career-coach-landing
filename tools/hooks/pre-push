@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # 푸시 전 검수 훅 — 두 겹으로 막는다.
 #
-#   1겹 · 결과물 공통 점검 (page-audit.mjs) — 항상 돌다
+#   1겹 · 결과물 공통 점검 (page-audit.mjs) — 항상 돈다
 #       저장소의 모든 *.html + CNAME + assets 를 본다. 새 페이지를 추가해도
 #       설정을 고칠 필요 없이 자동으로 대상에 들어온다. 외부 준비물이 없어
 #       어느 세션에서든 무조건 실행된다.
 #
-#   2겹 · 피그마 대조 (audit.mjs) — index.html / assets 가 바뀐 푸시에만 돌다
+#   2겹 · 피그마 대조 (audit.mjs) — index.html / assets 가 바뀐 푸시에만 돈다
 #       기준 프레임(6:148)이 있는 랜딩만 해당. 피그마 덤프 3개(메타/타이포/스타일)가 필요하다.
 #
 #   0겹 · 배포 쿨다운 — 직전 푸시 직후의 연속 푸시를 막는다 (아래 상세)
@@ -42,7 +42,7 @@ fail() {
 # 그래서 직전 푸시로부터 CC_PUSH_COOLDOWN 초가 지나기 전에는 푸시를 막는다.
 # "직전 푸시 시각" 은 origin/main 최신 커밋의 커밋 시각으로 근사한다(세션이 달라도 통한다).
 #
-#   조절:  CC_PUSH_COOLDOWN=<초> git push …    (0 이면 쿨다운만 끔, 검수는 그대로 돌다)
+#   조절:  CC_PUSH_COOLDOWN=<초> git push …    (0 이면 쿨다운만 끔, 검수는 그대로 돈다)
 #   기본:  900초(15분)
 # ───────────────────────────────────────────────────
 COOLDOWN="${CC_PUSH_COOLDOWN:-900}"
@@ -118,14 +118,14 @@ diff_names() {
 # (a) 문서·가입·온보딩 화면 ↔ 피그마 문구 동기화
 #   대상 파일을 손으로 나열하지 않는다 — 2026-08-07 에 그 목록이 낡아서
 #   signup/onboarding 이 대조 대상에서 빠져 있었다(같은 종류의 사고가 두 번 났다).
-#   HTML 이 하나라도 바뀎으면 돌린다. 브라우저·피그마 덤프가 필요 없어 싸다.
+#   HTML 이 하나라도 바뀌었으면 돌린다. 브라우저·피그마 덤프가 필요 없어 싸다.
 CHANGED_DOCS="$(diff_names '*.html' tools/figma-audit/figma-docs-text.json tools/figma-audit/page-figma-map.json)"
 if [ -n "$CHANGED_DOCS" ]; then
   echo "▶ 약관·개인정보 화면 ↔ 피그마 문구 대조…"
   if ! node tools/figma-audit/docs-audit.mjs; then
     fail <<'MSG'
 
-✋ 푸시 중단 — 약관·개인정보 화면이 피그마와 어깋났습니다.
+✋ 푸시 중단 — 약관·개인정보 화면이 피그마와 어긋났습니다.
 웹과 피그마 중 한쪽만 문구를 고치면 납니다.
   · 웹을 고쳤으면 → 피그마 화면(섹션 327:2474)도 같은 문구로 고치고, 스냅샷을 다시 뽑아 커밋하세요.
   · 피그마를 고쳤으면 → 웹(terms/privacy.html)을 맞추고, 스냅샷을 다시 뽑아 커밋하세요.
@@ -159,7 +159,7 @@ if [ -z "$META" ]; then
 
 ✋ 푸시 중단 — 피그마 메타데이터(figma_meta.xml)를 찾지 못했습니다.
 
-랜딩 결과물이 바뀐는데 피그마와 대조하지 않은 상태입니다.
+랜딩 결과물이 바뀌었는데 피그마와 대조하지 않은 상태입니다.
 CLAUDE.md "랜딩을 건드렸다면 — 푸시 전에" 절차대로
   1) get_metadata → figma_meta.xml
   2) use_figma 타이포 스니펫 → figma_type.json
