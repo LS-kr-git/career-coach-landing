@@ -37,8 +37,8 @@
       "비고": "2026-08-08 — 프레임을 한 번 지웠다가 되살렸다(구 536:2612 → 595:2646, 섹션 595:2645). 웹 파일은 Supabase OAuth 의 redirectTo 목적지라 지우면 안 된다"
     },
     "onboarding/2/index.html": {
-      "node": "275:2422",
-      "name": "STEP 2 · 연차 — 선택됨",
+      "node": "592:2623",
+      "name": "STEP 2 · 연차 — 미선택",
       "textAudit": "docs-audit"
     },
     "onboarding/1/index.html": {
