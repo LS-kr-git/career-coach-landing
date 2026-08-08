@@ -261,6 +261,93 @@ node tools/figma-audit/page-audit.mjs --json
 
 ---
 
+## tree-audit.mjs — 피그마 트리 점검 (고아 노드) · 2026-08-08 신설
+
+**"피그마 안에서 노드가 섹션 밖으로 튀어나간 것" 을 잡는 유일한 검사다.**
+
+`page-audit` 의 반대 방향이다. 저 검사는 *웹 HTML → 피그마 짝이 있나* 를 묻고,
+이 검사는 *피그마 페이지의 직속 자식이 전부 섹션인가* 를 묻는다.
+
+### 왜 필요했나
+
+2026-08-08. 섹션 `625:2657` "카카오 알림톡" 이 **비어 보였다.** 프레임 `626:2657` 은
+지워진 게 아니라 **부모가 섹션이 아니라 페이지(`0:1`)** 였다.
+
+피그마에서 **섹션의 자식은 x/y 가 섹션 기준 상대좌표**다
+(`339:2474` x=266 → 절대 11835 = 섹션 11569 + 266). 그런데 이 프레임은 좌표가
+`(206, 126)` 인 채로 부모가 페이지라, 섹션 기준 오프셋으로 잡힌 숫자가 그대로
+**캔버스 절대좌표**가 되어 섹션에서 x 약 18,000px · y 약 10,100px 떨어진 자리에 떨어졌다.
+하필 그 자리가 REF 섹션의 시각적 범위 안이라, 다른 레퍼런스 위에 겹쳐서 떠 있었다.
+
+**그때 검수 여섯 종이 전부 통과했다.** 나머지는 방향이 "웹 → 피그마" 이거나
+(`page-audit`), 프레임 **안쪽 문구·타이포·스타일**만 보기 때문이다(`audit`·`docs-audit`·
+`type`·`style`·`flow`). **프레임이 어디에 있는지를 보는 검사가 하나도 없었다.**
+
+### 무엇을 보나
+
+| 상황 | 등급 |
+|---|---|
+| 페이지 직속에 섹션이 아닌 노드가 있다 (= 고아) | ❌ 막힘 |
+| `page-figma-map.json` 의 기준 프레임이 **어느 섹션에도** 안 들어 있다 | ❌ 막힘 |
+| 기준 프레임이 피그마에서 사라졌다 (`found:false`) | ❌ 막힘 |
+| 등록부에 있는 프레임이 `figma-tree.json` 의 `frames` 에 없다 | ❌ 막힘 |
+| `frames` 에 있는데 등록부에 없다 (낡은 항목) | ❌ 막힘 |
+| `pageLevelAllowed` 항목에 사유가 비어 있다 | ❌ 막힘 |
+| 기준 프레임이 든 섹션이 피그마에 없다 | ❌ 막힘 |
+| 기준 프레임의 섹션이 스냅샷과 다르다 / 새 섹션 / 안 쓰는 섹션 사라짐 | ⚠️ 경고 |
+| 덤프를 안 줘서 라이브 대조를 못 했다 | ⚠️ 경고(미확인) |
+
+**의도적으로 섹션 밖에 두는 노드**는 `figma-tree.json` 의 `pageLevelAllowed` 에
+**사유와 함께** 적는다. 사유가 비면 막힌다 — 사유 없는 면제는 검사를 조용히 끄는 것과 같다.
+
+### 쓰는 법
+
+```
+node tools/figma-audit/tree-audit.mjs                    # 준비물 없음 — 등록부↔스냅샷 정합성만
+node tools/figma-audit/tree-audit.mjs figma_tree.json    # 라이브 덤프까지 대조 (고아 노드)
+```
+
+pre-push 훅에서 **항상** 돈다(1.2겹). 덤프는 `FIGMA_TREE` → 저장소 루트 →
+상위 디렉터리 → `$HOME` 순으로 찾는다. **`page-figma-map.json` 이나 `figma-tree.json` 을
+건드린 푸시에는 덤프를 요구한다** — 그때가 어긋나기 가장 쉬운 순간이다.
+
+### 피그마 트리 덤프
+
+`use_figma` 로 아래를 돌려 출력을 `figma_tree.json` 에 저장한다. **읽기 전용이다.**
+`REG` 목록은 손으로 관리하지 말고 `page-figma-map.json` 의 `pages[].node` 에서 만든다:
+
+```
+node -e "const m=require('./tools/figma-audit/page-figma-map.json');console.log(JSON.stringify(Object.values(m.pages).map(e=>e.node)))"
+```
+
+```js
+const REG = [/* 위 명령의 출력 */];
+const page = figma.currentPage;
+const children = page.children.map(n => ({ id: n.id, name: n.name, type: n.type }));
+const registered = {};
+for (const id of REG) {
+  const n = await figma.getNodeByIdAsync(id);
+  if (!n) { registered[id] = { found: false }; continue; }
+  const chain = [];
+  let p = n.parent;
+  while (p && p.type !== 'PAGE') { chain.push({ id: p.id, name: p.name, type: p.type }); p = p.parent; }
+  const sec = chain.find(c => c.type === 'SECTION');
+  registered[id] = { found: true, name: n.name, section: sec ? sec.id : null,
+                     parent: n.parent.id, parentType: n.parent.type };
+}
+return { pageId: page.id, pageName: page.name, children, registered };
+```
+
+파일이 여러 페이지가 되면 `figma.currentPage` 대신 페이지별로 나눠 돌려야 한다
+(`use_figma` 한 번에 `setCurrentPageAsync` 는 한 번만). 지금은 `Page 1` 하나뿐이다.
+
+### 섹션을 새로 만들었으면
+
+`figma-tree.json` 의 `sections`(그리고 기준 프레임을 옮겼으면 `frames`)를 다시 뽑아 커밋한다.
+안 하면 ⚠️ 경고가 푸시할 때마다 찍힌다 — **조용해지지 않는 것이 요점이다.**
+
+---
+
 ## docs-audit.mjs — 약관·개인정보 화면 문구 동기화 (2026-08-02)
 
 `audit.mjs` 는 랜딩(index.html ↔ 프레임 6:148)만 본다. 이 스크립트는 **피그마 화면이 기준인 문서 페이지** —
