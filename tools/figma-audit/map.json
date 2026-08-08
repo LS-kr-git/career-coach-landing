@@ -91,11 +91,6 @@
       "mustMatch": "border-radius:18px;padding:20px"
     },
     {
-      "id": "insight-head",
-      "결정": "인사이트 섹션 헤딩 27px·keep-all로 2줄 고정",
-      "mustMatch": "font-size:27px;word-break:keep-all"
-    },
-    {
       "id": "label-14-bold",
       "결정": "아이브로우(t-label) = 14px Bold, 자간 1% (피그마 text/label). 2026-07-31에는 피그마가 17px였으나 360px 전환 때 14px로 바뀜 — 웹도 14px로 정정 (2026-08-01)",
       "mustMatch": "\\.t-label\\{font-size:14px;line-height:20px;font-weight:700;letter-spacing:0\\.01em\\}"
@@ -236,7 +231,7 @@
     },
     {
       "node": "6:303",
-      "reason": "인사이트 헤딩 — 웹은 <br>로 2줄 고정(insight-head 확정값)."
+      "reason": "인사이트 헤딩 — 웹은 <br>로 2줄 고정."
     },
     {
       "node": "6:364",
