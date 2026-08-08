@@ -24,7 +24,7 @@
     --pad-x: 24px;
     --card-max: 450px;
     --content-max: 402px;
-    /* 피그마 567:2638 실측 — 라벨 열 폭. Gothic A1 자연폭 최댓값(89)+버퍼 4 */
+    /* 피그마 566:2700 실측 — 라벨 열 폭. Gothic A1 자연폭 최댓값(89)+버퍼 4 */
     --label-w: 93px;
   }
   *{margin:0;padding:0;box-sizing:border-box}
@@ -79,7 +79,6 @@
   .agree-item input:focus-visible + .box{outline:2px solid var(--amber-500);outline-offset:2px}
   .agree-txt{font-size:13px;line-height:18px;color:var(--gray-700)}
   .agree-txt em{font-style:normal;color:var(--navy-500)}
-  .agree-txt em.o{color:var(--gray-500)}
   .agree .view{flex:none;font-size:13px;line-height:18px;color:var(--gray-500);
     text-decoration:none;padding:6px 0;margin:-6px 0}
 
@@ -115,22 +114,23 @@
     <div class="content">
       <div class="lead-group">
         <h1>회원가입</h1>
-        <p class="sub">카카오 계정에서 받아온 정보예요.<br>확인하고 가입을 마쳐 주세요.</p>
+        <p class="sub">커리어코치에 오신 것을 환영합니다.<br>회원가입을 진행해주세요.</p>
       </div>
 
-      <section class="sec" aria-label="필수 회원정보">
-        <div class="sec-head"><span>필수 회원정보</span><span class="req">필수</span></div>
+      <section class="sec" aria-label="회원 정보">
+        <div class="sec-head"><span>회원 정보</span></div>
         <div class="fields">
           <div class="field"><span class="k">이름</span><span class="v" id="fName"></span></div>
           <div class="field"><span class="k">휴대전화번호</span><span class="v" id="fPhone"></span></div>
           <div class="field"><span class="k">이메일</span><span class="v" id="fEmail"></span></div>
-          <div class="field"><span class="k">생일 · 출생 연도</span><span class="v" id="fBirth"></span></div>
+          <div class="field"><span class="k">성별</span><span class="v" id="fGender"></span></div>
+          <div class="field"><span class="k">출생 연도</span><span class="v" id="fBirthyear"></span></div>
+          <div class="field"><span class="k">생일</span><span class="v" id="fBirthday"></span></div>
         </div>
-        <p class="note">회원 식별·본인 확인, 알림톡 브리핑 발송, 결제·환불 고지에 사용합니다.</p>
+        <p class="note">*회원 식별·본인 확인, 알림톡 브리핑 발송, 결제·환불 고지, 맞춤형 브리핑(유료 구독 기능) 제공, 기념일 맞춤 브리핑(유료 구독 기능에 포함)에 사용됩니다.</p>
       </section>
 
       <section class="sec" aria-label="약관 동의">
-        <div class="sec-head"><span>약관 동의</span><span class="req">필수</span></div>
         <ul class="agree">
           <li>
             <label class="agree-item">
@@ -147,14 +147,6 @@
               <span class="agree-txt"><em>[필수]</em> 개인정보 수집·이용 동의</span>
             </label>
             <a class="view" href="/privacy.html" target="_blank" rel="noopener" aria-label="개인정보 수집·이용 동의 내용 보기">보기</a>
-          </li>
-          <li>
-            <label class="agree-item">
-              <input type="checkbox" id="agreeMarketing">
-              <span class="box" aria-hidden="true"></span>
-              <span class="agree-txt"><em class="o">[선택]</em> 마케팅·이벤트 정보 수신</span>
-            </label>
-            <a class="view" href="/privacy.html" target="_blank" rel="noopener" aria-label="마케팅·이벤트 정보 수신 내용 보기">보기</a>
           </li>
         </ul>
       </section>
@@ -207,13 +199,14 @@
   //   이 페이지가 그 상태로 열리므로 목업을 따로 만들 필요가 없다. 라이브 화면이 곧 제출본이다.
   if (session) {
     const m = session.user.user_metadata || {};
-    const birth = [m.birthyear, m.birthday && String(m.birthday).replace(/^(\d{2})(\d{2})$/, '$1-$2')]
-      .filter(Boolean).join(' · ');
     const put = (id, v) => { document.getElementById(id).textContent = v || ''; };
-    put('fName',  m.name || m.full_name);
-    put('fPhone', session.user.phone || m.phone_number);
-    put('fEmail', session.user.email || m.email);
-    put('fBirth', birth);
+    put('fName',      m.name || m.full_name);
+    put('fPhone',     session.user.phone || m.phone_number);
+    put('fEmail',     session.user.email || m.email);
+    put('fGender',    { male: '남성', female: '여성' }[m.gender] || m.gender);
+    put('fBirthyear', m.birthyear);
+    // 카카오 birthday 는 'MMDD' 로 온다
+    put('fBirthday',  m.birthday && String(m.birthday).replace(/^(\d{2})(\d{2})$/, '$1-$2'));
   }
 
   btn.addEventListener('click', async () => {
@@ -223,13 +216,10 @@
 
     btn.disabled = true;
     err.classList.remove('on');
-    const marketing = document.getElementById('agreeMarketing').checked;
     try {
       // ⚠️ 이건 분석 이벤트지 동의 원부가 아니다. user_consent 는 설계상 클라이언트가 못 쓴다
       //    (0002 RLS · 0006 주석 — "클라이언트가 쓰면 동의 증거력이 없다").
-      //    선택 동의를 원부로 남기려면 consent_document 에 마케팅 항목을 추가하고
-      //    SECURITY DEFINER RPC 를 여는 마이그레이션이 필요하다. 별건으로 남겨 둔다.
-      await track('signup_complete', { marketing }, session.access_token);
+      await track('signup_complete', {}, session.access_token);
     } catch (e) { /* 추적 실패로 가입을 막지 않는다 */ }
     localStorage.setItem(DONE_KEY, '1');
     location.replace('/onboarding/1/');
