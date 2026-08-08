@@ -2,7 +2,7 @@
   "_설명": "피그마 기준 프레임의 타이포 스냅샷. type-audit.mjs 가 이 값을 웹 실측값과 대조한다.",
   "_갱신방법": "build-type-snapshot.mjs 로 자동 생성. 손으로 고칠 것은 새 그룹의 sel(웹 선택자)뿐.",
   "figmaNode": "6:148",
-  "generatedAt": "2026-08-02",
+  "generatedAt": "2026-08-08",
   "_필드": "size=px, weight=CSS font-weight, lh=line-height px, ls=letter-spacing %(피그마 표기). sel=웹에서 이 스타일이 적용된 대표 요소",
   "groups": [
     {
@@ -128,6 +128,23 @@
         "6:289",
         "6:297",
         "6:305"
+      ]
+    },
+    {
+      "id": "type-15-600-22-0",
+      "label": "랜딩 헤더 로그인 (⏳ 임시)",
+      "sels": [
+        {
+          "sel": "header .login",
+          "label": "랜딩 헤더 로그인 (⏳ 임시)"
+        }
+      ],
+      "size": 15,
+      "weight": 600,
+      "lh": 22,
+      "ls": 0,
+      "figmaNodes": [
+        "587:2626"
       ]
     },
     {
