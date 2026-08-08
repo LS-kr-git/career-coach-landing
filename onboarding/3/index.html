@@ -133,12 +133,21 @@ const sync=()=>{let total=0;
   if(all) all.classList.toggle('on',chips.length>0&&on.length===chips.length);});
  const cta=document.querySelector('.cta');
  if(total===0){cta.classList.add('off');cta.textContent='지역을 1개 이상 골라주세요';}
- else{cta.classList.remove('off');cta.innerHTML='다음 <span class="s2">· '+total+'개 지역</span>';}};
+ else{cta.classList.remove('off');cta.innerHTML='다음 <span class="s2">· '+total+'개 지역</span>';}
+ if(window.ccOnChange) window.ccOnChange();};
 grps.forEach(g=>{g.querySelectorAll('.c').forEach(c=>c.addEventListener('click',()=>{c.classList.toggle('on');sync();}));
  const all=g.querySelector('.call');
  if(all) all.addEventListener('click',()=>{const chips=[...g.querySelectorAll('.c')],
   allOn=chips.every(c=>c.classList.contains('on'));chips.forEach(c=>c.classList.toggle('on',!allOn));sync();});});
 sync();
+
+// 선택값을 읽고 되살리는 최소 접점. 화면 동작은 그대로다 — 칩의 on 상태만 오간다.
+// 근무지는 생성기(tools/roles/build.mjs 같은 것)가 없다. 칩 라벨을 그대로 코드로 쓴다 —
+// save_onboarding 계약이 p_regions 를 한글 지역 코드로 받는다.
+window.ccStep3={
+ get:()=>[...document.querySelectorAll('.grp .c.on')].map(c=>c.textContent.trim()),
+ set:codes=>{const want=new Set(codes);
+  document.querySelectorAll('.grp .c').forEach(c=>c.classList.toggle('on',want.has(c.textContent.trim())));sync();}};
 
 // 다음 화면(/onboarding/done/)은 아직 없다 — 만들어지면 여기서 연결한다
 
@@ -146,5 +155,22 @@ sync();
 <script type="module">
   import { pageView } from '/assets/track.js';
   pageView('onboarding_step', { step: 3 });
+</script>
+<script type="module">
+  // 세 단계에서 고른 값을 여기서 한 번에 저장한다 — assets/onboarding-store.js
+  import { readState, writeState, retryPending, saveOnboarding } from '/assets/onboarding-store.js';
+  const saved = readState();
+  if (saved.regions.length) window.ccStep3.set(saved.regions);   // 뒤로 왔을 때 체크 상태를 되살린다
+  window.ccOnChange = () => writeState({ regions: window.ccStep3.get() });
+  window.ccOnChange();      // 처음 온 사람은 화면의 기본 선택이 그대로 값이 된다
+  retryPending();           // 지난 저장이 실패한 채 남아 있으면 여기서 조용히 다시 보낸다
+
+  // 완료 — 실패해도 사용자를 막지 않는다. pending 으로 남겨 다음 진입에서 다시 보낸다.
+  const cta = document.querySelector('.cta');
+  cta.addEventListener('click', () => {
+    if (cta.classList.contains('off')) return;
+    window.ccOnChange();
+    saveOnboarding();
+  });
 </script>
 </body></html>
