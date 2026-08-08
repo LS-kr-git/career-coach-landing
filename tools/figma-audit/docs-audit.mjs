@@ -38,6 +38,15 @@ if (!existsSync(snapPath)) {
 }
 const snap = JSON.parse(readFileSync(snapPath, 'utf8'));
 
+/* ---------- 매핑 정본은 page-figma-map.json 이다 (2026-08-08 신설) ----------
+ * 프레임 id 를 이 스냅샷과 page-figma-map.json 이 **따로** 들고 있어서, 한쪽만 고치면
+ * 조용히 어긋난다. 실제로 onboarding/2 가 "선택됨"(275:2422)을 가리킨 채 몇 달 막혀 있었고,
+ * 고칠 때도 두 파일을 각각 고쳐야 했다. 등록부가 정본이니 다르면 여기서 막는다. */
+const mapPath = join(HERE, 'page-figma-map.json');
+const pageMap = existsSync(mapPath)
+  ? (JSON.parse(readFileSync(mapPath, 'utf8')).pages || {})
+  : null;
+
 /* ---------- 공통 유틸 (audit.mjs 와 동일 규칙) ---------- */
 const ENTITIES = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&apos;': "'", '&nbsp;': ' ' };
 function decodeEntities(s) {
@@ -67,6 +76,23 @@ function webBlocks(html) {
 /* ---------- 실행 ---------- */
 const findings = [];
 let figmaCount = 0, webCount = 0;
+
+if (pageMap) {
+  for (const page of snap.pages) {
+    const reg = pageMap[page.html];
+    if (!reg) {
+      findings.push({ level: 'DIFF', page: page.html, kind: '등록부 누락',
+        detail: `${page.html} 이 page-figma-map.json 에 없습니다 — 등록부가 정본입니다` });
+    } else if (reg.node !== page.figmaNode) {
+      findings.push({ level: 'DIFF', page: page.html, kind: '매핑 불일치',
+        detail: `등록부 ${reg.node} (${reg.name}) ↔ 스냅샷 ${page.figmaNode} (${page.name}) — ` +
+                '등록부가 정본입니다. 스냅샷을 그 프레임에서 다시 뽑아 두 값을 맞추세요' });
+    }
+  }
+} else {
+  findings.push({ level: 'DIFF', page: '-', kind: '등록부 없음',
+    detail: 'page-figma-map.json 을 찾지 못해 매핑 대조를 못 했습니다' });
+}
 
 for (const page of snap.pages) {
   const htmlPath = join(ROOT, page.html);
