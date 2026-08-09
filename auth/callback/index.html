@@ -47,7 +47,19 @@
   let done = false;
   window.ccGo = (path) => { if (!done) { done = true; location.replace(path); } };
   // 모듈이 살아 있으면 자기 3초 폴백으로 먼저 나간다. 이건 그마저 못 도는 경우만 맡는다.
-  setTimeout(() => window.ccGo('/signup/?error=auth'), 8000);
+  //
+  // ★ "3초가 먼저" 는 CDN 이 빠를 때만 성립한다. 아래 3초 타이머는 CDN 로딩이 **끝난 뒤에야**
+  //   걸리므로, 느린 모바일에서 CDN 6초 + getSession 2초면 8초가 먼저 터져 **인증에 성공한
+  //   사람**을 /signup/?error=auth 로 보냈다. 8초를 키워 봐야 더 느린 기기에서 같은 일이 난다.
+  //   그래서 시간이 아니라 **진척**을 본다 — 모듈이 한 걸음 나아갈 때마다 ccAlive() 로 이 타이머를
+  //   다시 잰다. 8초 동안 아무 진척이 없을 때만 실패로 넘긴다. (2026-08-09)
+  //   인증에 성공한 경우는 모듈이 곧바로 go() 를 불러 done 이 서므로 여기서 다시 보지 않는다.
+  let timer;
+  window.ccAlive = () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => window.ccGo('/signup/?error=auth'), 8000);
+  };
+  window.ccAlive();
 </script>
 
 <script type="module">
@@ -56,6 +68,7 @@
   import { SUPABASE_URL, SUPABASE_ANON_KEY } from '/assets/supabase-config.js';
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  window.ccAlive();   // CDN 로딩이 끝났다 — 위 하드 폴백의 8초를 여기서부터 다시 잰다
 
   const { track } = await import('/assets/track.js');
 
@@ -79,10 +92,15 @@
 
   // 폴백 — 이벤트를 놓쳤거나 이미 교환이 끝난 뒤 리스너가 붙은 경우
   const { data: { session } } = await supabase.auth.getSession();
+  window.ccAlive();   // 세션 조회까지 끝났다 — 판정은 아래 3초 폴백이 한다
   if (session) { markLogin(session); go('/onboarding/1/'); }
 
   // 3초 안에 세션이 안 생기면 실패로 본다 (사용자가 동의를 취소한 경우 등)
   setTimeout(async () => {
+    // 이 폴백도 진척이다 — 여기서 다시 재지 않으면, 아래 getSession 이 5초를 넘길 때
+    // 8초 하드 폴백이 먼저 터져 **인증에 성공한 사람**을 실패로 보낸다. 판정을 내리는
+    // 구간에 진척 신호가 없던 것이 앞 판의 구멍이었다. (2026-08-09)
+    window.ccAlive();
     const { data } = await supabase.auth.getSession();
     markLogin(data.session);
     go(data.session ? '/onboarding/1/' : '/signup/?error=auth');

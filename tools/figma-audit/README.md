@@ -212,7 +212,7 @@ node tools/figma-audit/page-audit.mjs --json
 | 항목 | 내용 | 등급 |
 |---|---|---|
 | 링크 | 로컬 `href`/`src` 가 실제 파일로 존재하는가 | ❌ 막힘 |
-| JS 이동 | `location.href='…'` · `location.replace('…')` 대상이 실제 파일인가 | ❌ 막힘 |
+| JS 이동 | `location.href='…'` · `location.replace/assign('…')` 대상과 **이동 래퍼에 넘긴 문자열**이 실제 파일인가 (`.html` 의 `<script>` + `assets/*.js`) | ❌ 막힘 |
 | 절대 URL | `og:image`·`canonical` 등 우리 도메인 URL 이 실제 파일인가 | ❌ 막힘 |
 | 대소문자 | 경로 대소문자가 정확한가 (GitHub Pages 는 구분한다) | ❌ 막힘 |
 | 머리 | `DOCTYPE` · `lang="ko"` · `charset` · `viewport` · 빈 `<title>` | ❌ 막힘 |
@@ -223,7 +223,25 @@ node tools/figma-audit/page-audit.mjs --json
 | CNAME | 호스트명 한 줄인가 | ❌ 막힘 |
 | 제목·폰트·빈 링크·안 쓰는 자산 | | ⚠️ 경고 |
 
-- 대상은 저장소 루트의 `*.html` 을 **읽어서** 정한다. 페이지를 추가해도 설정을 고칠 필요가 없다.
+- 대상은 저장소의 `*.html` 을 **읽어서** 정한다. 페이지를 추가해도 설정을 고칠 필요가 없다.
+  **JS 이동·모듈 import 는 `*.js` 까지 같은 눈으로 본다** — 나머지 항목(머리·색인·피그마 대응)은 `*.html` 만.
+
+#### JS 이동은 왜 `.js` 와 래퍼까지 보나 — 2026-08-09
+
+이 항목은 처음에 `.html` 안의 **직접** `location.*` 만 봤다. 그래서 실제로 무는 것이 없었다.
+
+- `assets/onboarding-store.js` 의 `location.href='/signup/'` 은 대상 수집이 `.html` 만 모아 **영영 안 보였다.**
+- `auth/callback/index.html` 은 이동이 전부 `ccGo()` 래퍼라 정규식 매치가 **0건**이었다.
+
+검사는 도는데 무는 것이 없고, 그래서 표는 "❌ 막힘" 이라고 적혀 있었다 — 문서가 실제보다 넓은
+커버리지를 말하는 상태였다. `signup/index.html` 사각지대와 같은 구조다.
+
+지금은 `location` 에 **인자를 그대로** 넘기는 함수(`window.ccGo = (path) => location.replace(path)`)를
+먼저 찾고, 그 함수와 그 별칭(`const go = window.ccGo`)을 부르는 자리의 문자열을 대상으로 본다.
+삼항으로 두 경로를 넘기는 `go(s ? '/a/' : '/b/')` 도 양쪽 다 본다.
+
+다섯 방향 확인됨(2026-08-09): ① `.js` 안의 직접 이동 ② 래퍼 정의를 통한 이동
+③ 별칭 호출 ④ 삼항의 양쪽 ⑤ 정상 저장소에서 오탐 0건.
 
 ### 🚫 못 돈 검수는 통과가 아니다 — 2026-08-08 신설
 

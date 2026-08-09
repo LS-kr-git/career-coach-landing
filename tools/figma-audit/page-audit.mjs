@@ -35,18 +35,23 @@ const add = (level, kind, file, detail, note) => findings.push({ level, kind, fi
 // 루트뿐 아니라 하위 폴더까지 훑는다 — 온보딩처럼 /onboarding/1/index.html 로
 // 폴더 주소를 쓰는 페이지가 검수 사각지대에 남지 않도록. (2026-08-02)
 const SKIP_DIRS = new Set(['node_modules', '.git', 'tools', '.github']);
-const collectPages = (dir, prefix = '') => {
+const collectFiles = (dir, prefix = '') => {
   const out = [];
   for (const entry of readdirSync(dir)) {
     if (SKIP_DIRS.has(entry) || entry.startsWith('.')) continue;
     const full = join(dir, entry);
     const rel = prefix ? posix.join(prefix, entry) : entry;
-    if (statSync(full).isDirectory()) out.push(...collectPages(full, rel));
-    else if (entry.endsWith('.html')) out.push(rel);
+    if (statSync(full).isDirectory()) out.push(...collectFiles(full, rel));
+    else if (entry.endsWith('.html') || entry.endsWith('.js')) out.push(rel);
   }
   return out;
 };
-const pages = collectPages(ROOT).sort();
+const files = collectFiles(ROOT).sort();
+// 페이지 단위 검사(머리·색인·피그마 대응)는 .html 만 받는다.
+const pages = files.filter((f) => f.endsWith('.html'));
+// JS 이동·모듈 import 는 .html 안에만 있지 않다 — assets/onboarding-store.js 의
+// location.href='/signup/' 는 .html 만 모으던 수집기의 시야 밖이라 영영 안 보였다. (2026-08-09)
+const scripts = files.filter((f) => f.endsWith('.js'));
 const cnamePath = join(ROOT, 'CNAME');
 const domain = existsSync(cnamePath) ? readFileSync(cnamePath, 'utf8').trim() : null;
 
@@ -126,6 +131,59 @@ const checkLink = (page, url) => {
   if (clean.startsWith('assets/')) referenced.add(clean.slice('assets/'.length));
 };
 
+/* JS 로 이동하는 경로도 링크다.
+   href/src 만 훑으면 온보딩 퍼널이 통째로 사각지대다 — STEP1→2→3 이동에 <a href> 는 한 곳도
+   없고 전부 location.href/replace 다. 오타를 내도 '깨진 링크' 가 안 뜨고 404 만 라이브에 나간다. */
+const ID = '[A-Za-z_$][\\w$]*';
+
+const navTargets = (src) => {
+  const out = [];
+  // 직접 이동 — location.href='…' / location.replace('…') / location.assign('…')
+  for (const m of src.matchAll(/\blocation(?:\.href)?\s*(?:=|\.(?:replace|assign)\s*\()\s*['"]([^'"]*)['"]/g)) {
+    out.push(m[1]);
+  }
+
+  // 래퍼를 거치는 이동. auth/callback/index.html 은 이동이 전부 ccGo() 라 위 정규식이 0건이었다 —
+  // 검사는 도는데 무는 것이 없는 상태였다. (2026-08-09)
+  // location 에 **인자를 그대로** 넘기는 함수를 찾고, 그 함수를 부르는 자리의 문자열을 대상으로 본다.
+  const names = new Set();
+  for (const m of src.matchAll(new RegExp(`\\blocation(?:\\.href)?\\s*(?:=|\\.(?:replace|assign)\\s*\\()\\s*(${ID})\\s*[),;]`, 'g'))) {
+    const def = [...src.slice(0, m.index).matchAll(
+      new RegExp(`(?:function\\s+(${ID})\\s*\\(|(?:window\\.)?(${ID})\\s*=\\s*(?:async\\s+)?(?:function\\s*)?\\(?\\s*)${m[1]}\\b`, 'g'),
+    )].pop();
+    if (def) names.add(def[1] || def[2]);
+  }
+  // 다른 이름으로 받아 쓰는 경우 (const go = window.ccGo)
+  for (const name of [...names]) {
+    for (const m of src.matchAll(new RegExp(`\\b(?:const|let|var)\\s+(${ID})\\s*=\\s*(?:window\\.)?${name}\\b`, 'g'))) names.add(m[1]);
+  }
+  for (const name of names) {
+    for (const m of src.matchAll(new RegExp(`\\b(?:window\\.)?${name}\\s*\\(([^)]*)\\)`, 'g'))) {
+      // 삼항으로 두 경로를 넘기는 곳이 있어 인자 안의 문자열을 전부 본다
+      for (const s of m[1].matchAll(/['"]([^'"]*)['"]/g)) out.push(s[1]);
+    }
+  }
+  return out;
+};
+
+/** JS 이동 + ES 모듈 import. .html 의 <script> 와 .js 파일에 똑같이 돌린다. */
+const checkScriptRefs = (file, src) => {
+  for (const t of navTargets(src)) checkLink(file, t.trim());
+
+  /* ES 모듈 import 도 자산 참조다.
+     href/src 만 훑으면 `import { x } from '/assets/track.js'` 를 못 본다.
+     2026-08-03 에 track.js 를 추가하고 실제로 '안 쓰는 자산' 오탐이 났다.
+     경로가 틀렸을 때 잡아 주는 쪽이 더 중요하므로 존재 여부도 함께 본다. */
+  for (const m of src.matchAll(/(?:from|import)\s*\(?\s*['"](\/assets\/[^'"]+)['"]/g)) {
+    const rel = m[1].replace(/^\//, '');
+    if (!existsSync(join(ROOT, rel))) {
+      add('BLOCK', '깨진 모듈 import', file, m[1], '그 경로에 파일이 없습니다');
+    } else {
+      referenced.add(rel.slice('assets/'.length));
+    }
+  }
+};
+
 for (const page of pages) {
   const raw = readFileSync(join(ROOT, page), 'utf8');
 
@@ -155,25 +213,8 @@ for (const page of pages) {
   /* 2) 링크 */
   for (const m of live.matchAll(/(?:href|src)="([^"]*)"/gi)) checkLink(page, m[1].trim());
 
-  /* 2-a-1) JS 로 이동하는 경로도 링크다.
-     href/src 만 훑으면 온보딩 퍼널이 통째로 사각지대다 — STEP1→2→3 이동에 <a href> 는 한 곳도
-     없고 전부 location.href/replace 다. 오타를 내도 '깨진 링크' 가 안 뜨고 404 만 라이브에 나간다. */
-  for (const m of live.matchAll(/\blocation(?:\.href)?\s*(?:=|\.(?:replace|assign)\s*\()\s*['"]([^'"]*)['"]/g)) {
-    checkLink(page, m[1].trim());
-  }
-
-  /* 2-a-2) ES 모듈 import 도 자산 참조다.
-     href/src 만 훑으면 `import { x } from '/assets/track.js'` 를 못 본다.
-     2026-08-03 에 track.js 를 추가하고 실제로 '안 쓰는 자산' 오탐이 났다.
-     경로가 틀렸을 때 잡아 주는 쪽이 더 중요하므로 존재 여부도 함께 본다. */
-  for (const m of live.matchAll(/(?:from|import)\s*\(?\s*['"](\/assets\/[^'"]+)['"]/g)) {
-    const rel = m[1].replace(/^\//, '');
-    if (!existsSync(join(ROOT, rel))) {
-      add('BLOCK', '깨진 모듈 import', page, m[1], '그 경로에 파일이 없습니다');
-    } else {
-      referenced.add(rel.slice('assets/'.length));
-    }
-  }
+  /* 2-a) JS 이동·모듈 import — .js 파일에도 같은 검사를 돌린다 (아래 루프) */
+  checkScriptRefs(page, live);
 
   /* 2-b) 우리 도메인 절대 URL (og:image, canonical 등) 도 실제 파일이어야 한다 */
   if (domain) {
@@ -213,6 +254,9 @@ for (const page of pages) {
   const deadHref = (live.match(/href="#"/g) || []).length;
   if (deadHref) add('WARN', '빈 링크', page, `href="#" ${deadHref}개`, '샘플이면 그대로 둬도 됩니다');
 }
+
+// 페이지가 부르는 .js 도 같은 눈으로 본다. 여기 있는 이동은 페이지 HTML 어디에도 안 적혀 있다.
+for (const s of scripts) checkScriptRefs(s, readFileSync(join(ROOT, s), 'utf8'));
 
 /* ---------- 가격 하드코딩 ----------
  * 페이지·약관 어디에도 **고정 금액을 쓰지 않는다.** (2026-08-03 사용자 결정)

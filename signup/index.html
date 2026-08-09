@@ -186,11 +186,37 @@
   // ★ 그 분리의 뒷면 — CDN 이 막히면 아래 세 번째 모듈이 통째로 안 돌아 클릭 핸들러도
   //   showError 도 없는데, 버튼은 이 모듈이 살려 둔 채라 눌러도 아무 일이 없다.
   //   여기서 먼저(등록 순서상 항상 먼저) 잡아 같은 실패 문구를 띄운다.
-  btn.addEventListener('click', () => {
-    if (window.ccOAuthReady) return;
+  //
+  // ★ 단, '아직 안 왔다' 를 '영영 안 온다' 로 단정하지 않는다. 세 번째 모듈은 CDN 을 다 받은
+  //   뒤에야 이 표시를 세우므로, 느린 회선에서는 **정상인데도** 실패 문구가 떴다.
+  //   그래서 이른 클릭은 기억만 해 두고(준비되면 그 모듈이 이어받는다), 문구는 스크립트 로딩이
+  //   **실제로 실패했을 때만** 띄운다 — 시간이 아니라 결과로 가른다. (2026-08-09)
+  let failed = false;
+  const showFail = () => {
     const err = document.getElementById('err');
     err.textContent = '카카오 로그인을 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.';
     err.classList.add('on');
+  };
+  // 모듈 스크립트는 의존 fetch 가 실패하면 그 element 에 error 를 낸다 — CDN 이 막힌 경우가 이것이다.
+  addEventListener('error', (e) => {
+    if (window.ccOAuthReady || !(e.target instanceof HTMLScriptElement)) return;
+    failed = true;
+    if (window.ccPendingStart) showFail();
+  }, true);
+  btn.addEventListener('click', () => {
+    if (window.ccOAuthReady) return;
+    window.ccPendingStart = true;   // 준비되면 세 번째 모듈이 이 클릭을 이어받는다
+    if (failed) { showFail(); return; }
+    // 에러 이벤트가 **안 오는** 실패도 있다 — 방화벽이 패킷을 버리면 CDN 은 조용히 멎고,
+    // 모듈이 평가 중에 죽으면 error 의 target 이 window 라 위 판정에 안 걸린다.
+    // 그 두 경우에 클릭이 아무 표시 없이 삼켜지던 것을 막는다.
+    // 상한을 넘기면 이어받기도 취소한다 — 포기하고 떠난 사용자가 한참 뒤에 갑자기
+    // 카카오 동의 화면으로 끌려가지 않게. (2026-08-09)
+    setTimeout(() => {
+      if (window.ccOAuthReady) return;
+      window.ccPendingStart = false;
+      showFail();
+    }, 10000);
   });
 </script>
 
@@ -242,6 +268,8 @@
     }
   });
   window.ccOAuthReady = true;   // 여기까지 와야 클릭이 실제로 동작한다 — 위 게이트가 이 표시를 본다
+  // 준비되기 전에 눌린 클릭은 버리지 않고 여기서 이어받는다 — 느린 회선에서 실패 문구가 뜨던 자리.
+  if (window.ccPendingStart) btn.click();
 </script>
 </body>
 </html>
