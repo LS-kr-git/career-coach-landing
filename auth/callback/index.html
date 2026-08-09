@@ -71,6 +71,8 @@
   window.ccAlive();   // CDN 로딩이 끝났다 — 위 하드 폴백의 8초를 여기서부터 다시 잰다
 
   const { track } = await import('/assets/track.js');
+  window.ccAlive();   // track.js 도 별도 fetch 다 — 이 구간에 진척 신호가 없으면
+                      // 앞 칸에서 잰 8초가 여기서 터져 성공한 로그인을 실패로 보낸다
 
   let logged = false;
   // 로그인 성공을 한 번만 남긴다. 아래 세 경로(이벤트·폴백·타임아웃)가 겹칠 수 있다.

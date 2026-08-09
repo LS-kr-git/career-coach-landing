@@ -206,7 +206,9 @@
   btn.addEventListener('click', () => {
     if (window.ccOAuthReady) return;
     window.ccPendingStart = true;   // 준비되면 세 번째 모듈이 이 클릭을 이어받는다
-    if (failed) { showFail(); return; }
+    // 이미 실패가 확정된 뒤의 클릭은 이어받기를 남기지 않는다 — 남기면 모듈이 뒤늦게
+    // 살아났을 때 실패 문구를 본 사용자가 상한 없이 카카오로 끌려간다.
+    if (failed) { window.ccPendingStart = false; showFail(); return; }
     // 에러 이벤트가 **안 오는** 실패도 있다 — 방화벽이 패킷을 버리면 CDN 은 조용히 멎고,
     // 모듈이 평가 중에 죽으면 error 의 target 이 window 라 위 판정에 안 걸린다.
     // 그 두 경우에 클릭이 아무 표시 없이 삼켜지던 것을 막는다.
