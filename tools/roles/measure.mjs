@@ -55,7 +55,9 @@ const mapLimit = async (items, fn, limit = 8) => {
 
 const tax = JSON.parse(readFileSync(join(HERE, 'taxonomy.json'), 'utf8'));
 const d1 = tax.groups.map((g) => g.code);
-const d2 = tax.groups.flatMap((g) => g.children.map(([c]) => [g.code, c]));
+// children 은 객체다. 예전엔 ["코드","표기"] 배열이라 [c] 로 코드를 꺼냈는데,
+// label/sourceLabel 을 분리하면서 객체로 바뀔 때 build.mjs 만 따라가고 여기가 남았다.
+const d2 = tax.groups.flatMap((g) => g.children.map((c) => [g.code, c.code]));
 
 const measure = (param) => async (code) => ({
   open: await total(`${PRIV_Q}&${param}=${encodeURIComponent(code)}`),

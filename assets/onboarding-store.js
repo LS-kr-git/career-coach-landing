@@ -117,6 +117,12 @@ export async function saveOnboarding() {
     if (!complete(state)) {
       // 1·2 단계를 건너뛰고 주소로 바로 들어온 경우. 반쪽 값을 보내지 않고,
       // 재시도 대상으로도 삼지 않는다 (보낼 것이 없어 재시도해도 같은 결과다).
+      //
+      // 그런데 여기로 오는 길이 하나 더 있다: localStorage 가 막힌 브라우저는 1·2 단계를
+      // 정상으로 통과해도 값이 한 글자도 안 남아 complete() 가 거짓이 된다. 바로 위
+      // writeState({pending:true}) 조차 저장이 안 되므로 retryPending() 도 영영 안 돈다 —
+      // 진짜 실패인데 아무 데도 안 남던 자리라, 그 경우만 골라 이벤트를 남긴다.
+      if (readState().pending !== true) track('onboarding_step', { step: 3, save: 'no-store' });
       writeState({ pending: false });
       return { status: 'incomplete' };
     }

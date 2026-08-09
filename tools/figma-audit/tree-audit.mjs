@@ -20,12 +20,18 @@
  * **손으로 유지하는 것은 `pageLevelAllowed`(면제 목록) 하나뿐이다.**
  *
  * 두 가지 모드
- *   (1) 덤프 없이  — 준비물이 없다. 스냅샷 자체 정합성만 본다. 라이브 대조는 못 하므로
- *                    "미확인" 을 찍는다 (건너뜀은 통과가 아니다).
+ *   (1) 덤프 없이  — 준비물이 없다. 스냅샷 자체 정합성만 본다. 이 검사의 본체(고아 노드)는
+ *                    돌지 않으므로 `🚫 검수 미실행` 로 찍는다.
  *   (2) 덤프 있음  — README "피그마 트리 덤프" 스니펫의 출력을 인자로 준다.
  *                    페이지 직속 자식 중 섹션이 아닌 것 = 고아 → 막힘.
  *
- * 종료코드: BLOCK 0건이면 0, 아니면 1. (WARN·SYNC 는 출력만 하고 통과)
+ * 종료코드: BLOCK 0건이면 0, 아니면 1. (SKIP·WARN·SYNC 는 출력만 하고 통과)
+ *
+ * ⚠️ SKIP 이 종료코드 0 인 것은 audit.mjs 와 다르다. 이 검수는 **모든 푸시**에서 도는데
+ * 덤프는 세션마다 뽑는 물건이라, 없다고 막으면 평소 작업이 통째로 선다. 대신 결과를
+ * "통과" 로 읽을 수 없게 만든다 — 미실행 건수를 따로 세고, 라이브 대조를 안 한 실행은
+ * ✅ 를 찍지 않고 "확인한 것이 아니다" 를 명시한다. 진짜 방어는 훅 118줄이 한다
+ * (등록부·트리 스냅샷을 건드린 푸시에는 덤프를 요구한다).
  */
 import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -68,7 +74,7 @@ for (const [id, reason] of Object.entries(allowed)) {
 
 let dump = null;
 if (!dumpPath) {
-  add('WARN', '라이브 대조', '-', '피그마 트리 덤프를 주지 않아 고아 노드는 확인하지 못했습니다',
+  add('SKIP', '라이브 대조', '-', '피그마 트리 덤프를 주지 않아 고아 노드는 확인하지 못했습니다',
       'README "피그마 트리 덤프" 스니펫으로 뽑아 인자로 주세요: node tools/figma-audit/tree-audit.mjs figma_tree.json');
   if (doUpdate) add('BLOCK', '트리 스냅샷', '-', '--update 에는 덤프가 필요합니다', '갱신할 원본이 없습니다.');
 } else if (!existsSync(dumpPath)) {
@@ -77,8 +83,10 @@ if (!dumpPath) {
   dump = read(dumpPath);
   const ageMin = (Date.now() - statSync(dumpPath).mtimeMs) / 60000;
   if (ageMin > 45) {
-    add('WARN', '라이브 대조', dumpPath, `덤프가 ${Math.round(ageMin)}분 전 것입니다`,
-        '그 사이 피그마가 바뀌었을 수 있습니다. 45분이 넘으면 다시 뽑는 편이 안전합니다.');
+    // 45분은 audit.mjs 의 덤프 한도와 같은 값이다. 그 사이 피그마가 바뀌었을 수 있으므로
+    // 아래 대조 결과를 "지금 상태를 확인했다" 로 셀 수 없다.
+    add('SKIP', '라이브 대조', dumpPath, `덤프가 ${Math.round(ageMin)}분 전 것입니다 — 한도 45분`,
+        '이 실행은 현재 피그마를 확인한 것이 아닙니다. README "피그마 트리 덤프" 로 다시 뽑으세요.');
   }
 
   const children = dump.children || [];
@@ -101,7 +109,7 @@ if (!dumpPath) {
   for (const [html, e] of registered) {
     const r = dreg[e.node];
     if (!r) {
-      add('WARN', '기준 프레임', `${e.node} (${html})`, '덤프에 이 프레임이 들어 있지 않습니다',
+      add('SKIP', '기준 프레임', `${e.node} (${html})`, '덤프에 이 프레임이 들어 있지 않아 확인하지 못했습니다',
           '덤프 스니펫의 대상 목록은 page-figma-map.json 에서 만드세요 — 손으로 관리하면 낡습니다.');
       continue;
     }
@@ -162,7 +170,8 @@ if (doUpdate && dump && (dump.children || []).length) {
 /* ---------- 출력 ---------- */
 
 const blocks = findings.filter((f) => f.level === 'BLOCK');
-const label = (l) => (l === 'BLOCK' ? '❌ 막힘' : l === 'SYNC' ? '↺ 스냅샷 낡음' : '⚠️ 경고');
+const skips = findings.filter((f) => f.level === 'SKIP');
+const label = (l) => ({ BLOCK: '❌ 막힘', SKIP: '🚫 검수 미실행', SYNC: '↺ 스냅샷 낡음' }[l] || '⚠️ 경고');
 
 if (asJson) {
   console.log(JSON.stringify({ findings, updated, dump: dumpPath || null }, null, 2));
@@ -177,7 +186,7 @@ if (asJson) {
   if (!findings.length) {
     console.log('✅ 고아 노드 없음 — 기준 프레임이 전부 섹션 안에 있습니다\n');
   } else {
-    const order = { BLOCK: 0, WARN: 1, SYNC: 2 };
+    const order = { BLOCK: 0, SKIP: 1, WARN: 2, SYNC: 3 };
     findings.sort((a, b) => order[a.level] - order[b.level]);
     for (const f of findings) {
       console.log(`${label(f.level)}  ${f.kind} [${f.where}]`);
@@ -190,7 +199,14 @@ if (asJson) {
       console.log(`   한 줄이면 맞춰집니다:  node tools/figma-audit/tree-audit.mjs ${dumpPath || '<덤프>'} --update`);
       console.log(`   (예약 점검이 매일 이 한 줄을 대신 돌립니다. 그때까지 푸시를 막지 않습니다.)\n`);
     }
-    console.log(`총 ${findings.length}건 (조치 필요 ${blocks.length}건)\n`);
+    // 미실행을 조치 필요와 같은 줄에서 따로 센다 — "조치 필요 0건" 만 보고
+    // 고아 노드가 없다고 읽는 것이 이 검수가 무력해지는 방식이다.
+    console.log(`총 ${findings.length}건 (조치 필요 ${blocks.length}건${skips.length ? ` · 미실행 ${skips.length}건` : ''})\n`);
+  }
+  if (skips.length && !blocks.length) {
+    console.log('🚫 라이브 대조를 하지 않았습니다 — 이 실행은 "고아 노드 없음" 을 확인한 것이 아닙니다.');
+    console.log('   피그마 안에서만 프레임이 섹션 밖으로 나간 날은 저장소 파일이 하나도 안 바뀌므로,');
+    console.log('   덤프 없이 통과한 푸시는 2026-08-08 과 같은 상태를 그대로 지나칩니다.\n');
   }
 }
 

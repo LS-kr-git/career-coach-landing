@@ -86,6 +86,14 @@ const findings = [];
 let checkedSelectors = 0;
 for (let i = 0; i < spec.groups.length; i++) {
   const g = spec.groups[i];
+  // 선택자가 비면 아래 루프가 0회 돌아 아무 단정 없이 지나간다 — 그러면 "차이 없음" 과
+  // "아무도 안 봤음" 이 같은 출력이 된다. 미검사는 통과가 아니라 드러나야 한다.
+  if (!rows[i].measured.length) {
+    findings.push({ level: 'TYPE', id: g.id, label: g.label,
+      detail: '웹 선택자(sel/sels)가 비어 있어 이 그룹은 측정하지 못했습니다',
+      figmaNodes: g.figmaNodes });
+    continue;
+  }
   for (const w of rows[i].measured) {
     checkedSelectors++;
     if (w.missing) {

@@ -9,7 +9,7 @@
  * "이건 어느 페이지든 틀리면 안 된다" 수준의 것만 본다.
  *
  * 검사 항목
- *   1) 링크   — 로컬 href/src 가 실제 파일로 존재하는가 (대소문자 포함)
+ *   1) 링크   — 로컬 href/src 와 JS 이동 경로(location.href/replace/assign)가 실제 파일로 존재하는가 (대소문자 포함)
  *   2) 머리   — DOCTYPE / lang / charset / viewport / title 이 있는가
  *   3) 자리표시 — YOUR_*, TODO, Lorem, example.com 이 살아있는 마크업에 남아 있는가
  *   4) 도메인 — 우리 도메인 절대 URL 이 CNAME 과 일치하는가, http:// 외부 리소스가 없는가
@@ -74,19 +74,73 @@ const PLACEHOLDERS = [
 ];
 const BLOCK_TAGS = ['html', 'head', 'body', 'div', 'section', 'header', 'footer', 'main', 'ul', 'ol', 'table', 'style', 'script'];
 
+const checkLink = (page, url) => {
+  if (!url || url.startsWith('#') || url.startsWith('data:') || url.startsWith('mailto:') || url.startsWith('tel:')) return;
+
+  if (/^http:\/\//i.test(url)) {
+    add('BLOCK', '비보안 리소스', page, url, 'https 로 바꾸세요 — https 페이지에서 차단됩니다');
+    return;
+  }
+  if (/^https?:\/\//i.test(url)) {
+    if (domain) {
+      const host = url.replace(/^https?:\/\//i, '').split('/')[0];
+      if (/github\.io$/i.test(host)) {
+        add('BLOCK', '도메인 불일치', page, url, `커스텀 도메인 ${domain} 을 쓰세요`);
+      }
+    }
+    return;
+  }
+  // 로컬 경로
+  // "/onboarding/1/" 처럼 슬래시로 시작하면 저장소 루트 기준, 아니면 그 페이지가 있는 폴더 기준이다.
+  // 폴더로 끝나는 주소는 GitHub Pages 가 그 안의 index.html 을 준다 — 그걸로 판정한다. (2026-08-02)
+  const bare = url.split(/[?#]/)[0];
+  if (!bare) return;
+  const fromRoot = bare.startsWith('/');
+  const pageDir = page.includes('/') ? posix.dirname(page) : '';
+  const parts = (fromRoot ? bare : posix.join(pageDir, bare)).split('/').filter((p) => p && p !== '.');
+  // ".." 정리
+  const norm = [];
+  for (const p of parts) { if (p === '..') norm.pop(); else norm.push(p); }
+  const clean = norm.join('/');
+  const target = clean ? join(ROOT, clean) : ROOT;
+
+  if (!existsSync(target)) {
+    add('BLOCK', '깨진 링크', page, url, '해당 파일이 저장소에 없습니다');
+    return;
+  }
+  // 대소문자까지 일치하는지 (GitHub Pages 는 대소문자를 구분한다)
+  let dir = ROOT;
+  let ok = true;
+  for (const part of norm) {
+    if (!readdirSync(dir).includes(part)) { ok = false; break; }
+    dir = join(dir, part);
+  }
+  if (!ok) {
+    add('BLOCK', '대소문자 불일치', page, url, 'GitHub Pages 는 경로 대소문자를 구분합니다');
+    return;
+  }
+  if (statSync(target).isDirectory() && !existsSync(join(target, 'index.html'))) {
+    add('BLOCK', '폴더 주소에 index 없음', page, url, '폴더 주소는 그 안의 index.html 로 열립니다 — 파일을 만드세요');
+    return;
+  }
+  if (clean.startsWith('assets/')) referenced.add(clean.slice('assets/'.length));
+};
+
 for (const page of pages) {
   const raw = readFileSync(join(ROOT, page), 'utf8');
 
   // 주석 제거본(자리표시자·태그 균형 판정용) — 주석 안의 픽셀 코드까지 잡으면 오탐
   const live = raw.replace(/<!--[\s\S]*?-->/g, '');
 
-  /* 1) 머리 */
-  if (!/^﻿?\s*<!DOCTYPE html>/i.test(raw)) add('BLOCK', '머리 누락', page, '<!DOCTYPE html> 이 없습니다');
-  if (!/<html[^>]*\blang="ko"/i.test(raw)) add('BLOCK', '머리 누락', page, 'html lang="ko" 가 없습니다');
-  if (!/<meta[^>]*charset=/i.test(raw)) add('BLOCK', '머리 누락', page, '<meta charset> 이 없습니다');
-  if (!/<meta[^>]*name="viewport"/i.test(raw)) add('BLOCK', '머리 누락', page, '<meta name="viewport"> 가 없습니다');
+  /* 1) 머리 — 주석 제거본으로 본다.
+     브라우저는 주석 안의 태그를 읽지 않는다. raw 로 보면 <!-- <meta …> --> 로 죽여 놓은 태그가
+     "있는 것" 으로 통과한다. 아래 색인 정책 검사도 같은 이유로 live 를 쓴다. */
+  if (!/^﻿?\s*<!DOCTYPE html>/i.test(live)) add('BLOCK', '머리 누락', page, '<!DOCTYPE html> 이 없습니다');
+  if (!/<html[^>]*\blang="ko"/i.test(live)) add('BLOCK', '머리 누락', page, 'html lang="ko" 가 없습니다');
+  if (!/<meta[^>]*charset=/i.test(live)) add('BLOCK', '머리 누락', page, '<meta charset> 이 없습니다');
+  if (!/<meta[^>]*name="viewport"/i.test(live)) add('BLOCK', '머리 누락', page, '<meta name="viewport"> 가 없습니다');
   // 브라우저 자동 다크 테마 차단 — 'light' 만으로는 안 막힌다. 'only light' 여야 한다. (2026-08-03)
-  const cs = raw.match(/<meta[^>]*name="color-scheme"[^>]*content="([^"]*)"/i);
+  const cs = live.match(/<meta[^>]*name="color-scheme"[^>]*content="([^"]*)"/i);
   if (!cs) {
     add('BLOCK', '머리 누락', page, '<meta name="color-scheme" content="only light"> 가 없습니다',
         '없으면 안드로이드 크롬 자동 다크 테마가 페이지 색을 임의로 바꿉니다');
@@ -94,62 +148,18 @@ for (const page of pages) {
     add('BLOCK', 'color-scheme 값', page, `content="${cs[1]}"`,
         "'light' 만으로는 자동 다크가 그대로 적용됩니다 — 'only light' 로 쓰세요");
   }
-  const title = raw.match(/<title>([\s\S]*?)<\/title>/i);
+  const title = live.match(/<title>([\s\S]*?)<\/title>/i);
   if (!title || !title[1].trim()) add('BLOCK', '머리 누락', page, '<title> 이 비었습니다');
   else if (!title[1].includes('커리어코치')) add('WARN', '제목', page, `"${title[1].trim()}" — 서비스명이 없습니다`);
 
   /* 2) 링크 */
-  for (const m of live.matchAll(/(?:href|src)="([^"]*)"/gi)) {
-    const url = m[1].trim();
-    if (!url || url.startsWith('#') || url.startsWith('data:') || url.startsWith('mailto:') || url.startsWith('tel:')) continue;
+  for (const m of live.matchAll(/(?:href|src)="([^"]*)"/gi)) checkLink(page, m[1].trim());
 
-    if (/^http:\/\//i.test(url)) {
-      add('BLOCK', '비보안 리소스', page, url, 'https 로 바꾸세요 — https 페이지에서 차단됩니다');
-      continue;
-    }
-    if (/^https?:\/\//i.test(url)) {
-      if (domain) {
-        const host = url.replace(/^https?:\/\//i, '').split('/')[0];
-        if (/github\.io$/i.test(host)) {
-          add('BLOCK', '도메인 불일치', page, url, `커스텀 도메인 ${domain} 을 쓰세요`);
-        }
-      }
-      continue;
-    }
-    // 로컬 경로
-    // "/onboarding/1/" 처럼 슬래시로 시작하면 저장소 루트 기준, 아니면 그 페이지가 있는 폴더 기준이다.
-    // 폴더로 끝나는 주소는 GitHub Pages 가 그 안의 index.html 을 준다 — 그걸로 판정한다. (2026-08-02)
-    const bare = url.split(/[?#]/)[0];
-    if (!bare) continue;
-    const fromRoot = bare.startsWith('/');
-    const pageDir = page.includes('/') ? posix.dirname(page) : '';
-    const parts = (fromRoot ? bare : posix.join(pageDir, bare)).split('/').filter((p) => p && p !== '.');
-    // ".." 정리
-    const norm = [];
-    for (const p of parts) { if (p === '..') norm.pop(); else norm.push(p); }
-    const clean = norm.join('/');
-    const target = clean ? join(ROOT, clean) : ROOT;
-
-    if (!existsSync(target)) {
-      add('BLOCK', '깨진 링크', page, url, '해당 파일이 저장소에 없습니다');
-      continue;
-    }
-    // 대소문자까지 일치하는지 (GitHub Pages 는 대소문자를 구분한다)
-    let dir = ROOT;
-    let ok = true;
-    for (const part of norm) {
-      if (!readdirSync(dir).includes(part)) { ok = false; break; }
-      dir = join(dir, part);
-    }
-    if (!ok) {
-      add('BLOCK', '대소문자 불일치', page, url, 'GitHub Pages 는 경로 대소문자를 구분합니다');
-      continue;
-    }
-    if (statSync(target).isDirectory() && !existsSync(join(target, 'index.html'))) {
-      add('BLOCK', '폴더 주소에 index 없음', page, url, '폴더 주소는 그 안의 index.html 로 열립니다 — 파일을 만드세요');
-      continue;
-    }
-    if (clean.startsWith('assets/')) referenced.add(clean.slice('assets/'.length));
+  /* 2-a-1) JS 로 이동하는 경로도 링크다.
+     href/src 만 훑으면 온보딩 퍼널이 통째로 사각지대다 — STEP1→2→3 이동에 <a href> 는 한 곳도
+     없고 전부 location.href/replace 다. 오타를 내도 '깨진 링크' 가 안 뜨고 404 만 라이브에 나간다. */
+  for (const m of live.matchAll(/\blocation(?:\.href)?\s*(?:=|\.(?:replace|assign)\s*\()\s*['"]([^'"]*)['"]/g)) {
+    checkLink(page, m[1].trim());
   }
 
   /* 2-a-2) ES 모듈 import 도 자산 참조다.
@@ -216,13 +226,25 @@ for (const page of pages) {
  * 이 규칙이 의미가 있다.
  */
 const PRICE_OK = new Set([]);          // 결제 화면이 생기면 여기에 추가
-const PRICE_RE = /[0-9][0-9,]*\s*원/g;
+// 한국어 금액은 '만/억' 단위가 기본이다. 숫자+원 만 보면 '월 1만원'·'연 5만 원'·'₩9,900' 이
+// 전부 빠져나가, 정작 가장 흔한 표기가 검사 밖이었다.
+const PRICE_RE = /₩\s*[0-9][0-9,]*|[0-9][0-9,]*\s*(?:[억만천]\s*)*원/g;
+
+/** 금액처럼 보이지만 구독가가 아닌 문구 — 파일별로 사유와 함께 적는다.
+ *  사유 없는 면제는 검사를 조용히 끄는 것과 같다 (figma-tree.json 의 pageLevelAllowed 와 같은 규칙). */
+const PRICE_ALLOW = {
+  'index.html': {
+    '4,000만원': '히어로 일러스트 alt — 이직 전후 연봉 그래프 설명이지 우리 가격이 아니다',
+    '5,000만원': '히어로 일러스트 alt — 이직 전후 연봉 그래프 설명이지 우리 가격이 아니다',
+  },
+};
 
 for (const page of pages) {
   if (PRICE_OK.has(page)) continue;
   const html = readFileSync(join(ROOT, page), 'utf8');
   const live = html.replace(/<!--[\s\S]*?-->/g, '').replace(/<script[\s\S]*?<\/script>/gi, '');
-  const hits = [...new Set(live.match(PRICE_RE) || [])];
+  const allow = PRICE_ALLOW[page] || {};
+  const hits = [...new Set(live.match(PRICE_RE) || [])].filter((h) => !allow[h.trim()]);
   if (hits.length) {
     add('BLOCK', '가격 하드코딩', page, hits.join(', '),
         '고정 금액을 페이지에 두지 않습니다. "결제 화면에 표시된 내용을 따릅니다" 로 쓰거나, ' +
@@ -244,7 +266,8 @@ const INDEXABLE = new Set(['index.html', 'terms.html', 'privacy.html']);
 
 for (const page of pages) {
   if (INDEXABLE.has(page)) continue;
-  const html = readFileSync(join(ROOT, page), 'utf8');
+  // 주석 제거본으로 본다 — 주석으로 죽여 놓은 noindex 는 브라우저에 없는 것이다.
+  const html = readFileSync(join(ROOT, page), 'utf8').replace(/<!--[\s\S]*?-->/g, '');
   if (!/<meta\s+name=["']robots["'][^>]*noindex/i.test(html)) {
     add('BLOCK', '색인 정책', page,
         'noindex 메타가 없습니다',

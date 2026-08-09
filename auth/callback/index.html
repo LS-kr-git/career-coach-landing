@@ -39,6 +39,17 @@
   <p role="status">로그인 중입니다…</p>
 </div>
 
+<script>
+  // ★ supabase CDN 을 쓰는 아래 모듈과 **일부러 분리**했다. CDN 이 막히면 그 모듈은 한 줄도
+  //   실행되지 않아 3초 폴백조차 등록되지 못하고, getSession() 이 응답 없이 멎어도 그 뒤의
+  //   setTimeout 에 닿지 못한다 — 두 경우 모두 화면이 '로그인 중입니다…' 로 영영 멈춘다.
+  //   (signup/index.html 이 동의 게이트를 분리해 둔 것과 같은 이유.)
+  let done = false;
+  window.ccGo = (path) => { if (!done) { done = true; location.replace(path); } };
+  // 모듈이 살아 있으면 자기 3초 폴백으로 먼저 나간다. 이건 그마저 못 도는 경우만 맡는다.
+  setTimeout(() => window.ccGo('/signup/?error=auth'), 8000);
+</script>
+
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
   // 접속 정보는 /assets/supabase-config.js 한 곳에만 둔다 (2026-08-06 복구 훈련 결과).
@@ -48,7 +59,6 @@
 
   const { track } = await import('/assets/track.js');
 
-  let done = false;
   let logged = false;
   // 로그인 성공을 한 번만 남긴다. 아래 세 경로(이벤트·폴백·타임아웃)가 겹칠 수 있다.
   // access_token 을 넘겨야 track() 이 auth.uid() 로 사람을 알아본다 —
@@ -59,7 +69,7 @@
     track('login', {}, session.access_token);
   };
 
-  const go = (path) => { if (!done) { done = true; location.replace(path); } };
+  const go = window.ccGo;   // 이동 잠금은 위 폴백과 공유한다 — 두 경로가 겹쳐 두 번 이동하지 않게
 
   // supabase-js 는 detectSessionInUrl 기본값이 true 라 이 페이지에 도착하는 순간
   // 인가 코드를 세션으로 교환한다. 교환이 끝나면 SIGNED_IN 이 온다.
