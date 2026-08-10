@@ -8,7 +8,8 @@
  * 세 가지를 한다.
  *   1) 표기 검증 — code = sourceLabel.replace('·','_') 를 296개 전부에 건다.
  *      label(화면 표기)은 자유롭게 다듬을 수 있고, code 와의 관계는 sourceLabel 이 잡는다.
- *   2) 볼륨 필터 — volume.json 실측으로 "골라도 아무것도 못 받는" 항목을 화면에서 뺀다.
+ *   2) 볼륨 필터·정렬 — volume.json 실측으로 "골라도 아무것도 못 받는" 항목을 화면에서 빼고,
+ *      남은 것을 신규 공고 많은 순으로 세운다(대분류·중분류 모두).
  *      **taxonomy.json 에서 지우지 않는다.** 그 표는 들어오는 공고를 분류하는 데도 쓰이므로
  *      항상 전량이어야 한다. 여기서 하는 건 '보여줄지' 판단뿐이고, volume.json 을 다시 재면
  *      자동으로 늘고 준다 — 손으로 관리하는 목록이 아니게 하는 것이 요점이다.
@@ -54,15 +55,26 @@ if (bad.length) {
   process.exit(2);
 }
 
-// ── 2. 볼륨 필터 ────────────────────────────────────────────
+// ── 2. 볼륨 필터 + 정렬 ─────────────────────────────────────
+/** 정렬 기준은 **거르는 기준과 같은 값**이다 (대분류 주당 신규, 중분류 30일 신규).
+ *  화면에 "주 12건" 을 적어 놓고 다른 값으로 줄을 세우면 사용자가 보는 순서가 어긋난다.
+ *  taxonomy.json 의 배열 순서는 손대지 않는다 — 그 파일은 분류표지 화면 순서가 아니다. */
 const perWeek = (code) => VOL.depthOne[code].new30 / WEEKS;
+const childNew30 = (gcode, ccode) => VOL.depthTwo[gcode][ccode].new30;
+const desc = (f) => (a, b) => f(b) - f(a);
 const visible = TAX.groups
   .filter((g) => perWeek(g.code) >= MIN_D1_PER_WEEK)
-  .map((g) => ({ ...g, children: g.children.filter((c) => VOL.depthTwo[g.code][c.code].new30 >= MIN_D2_NEW30) }));
+  .map((g) => ({
+    ...g,
+    children: g.children
+      .filter((c) => childNew30(g.code, c.code) >= MIN_D2_NEW30)
+      .sort(desc((c) => childNew30(g.code, c.code))),
+  }))
+  .sort(desc((g) => perWeek(g.code)));
 
 const hiddenGroups = TAX.groups.filter((g) => perWeek(g.code) < MIN_D1_PER_WEEK);
 const hiddenChips = TAX.groups.flatMap((g) =>
-  perWeek(g.code) < MIN_D1_PER_WEEK ? [] : g.children.filter((c) => VOL.depthTwo[g.code][c.code].new30 < MIN_D2_NEW30).map((c) => `${g.label}/${c.label}`),
+  perWeek(g.code) < MIN_D1_PER_WEEK ? [] : g.children.filter((c) => childNew30(g.code, c.code) < MIN_D2_NEW30).map((c) => `${g.label}/${c.label}`),
 );
 
 // ── 3. HTML 생성 ────────────────────────────────────────────
