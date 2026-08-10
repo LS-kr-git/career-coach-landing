@@ -44,16 +44,33 @@
     "onboarding/1/index.html": {
       "node": "278:2693",
       "name": "STEP 1 · 직군 — 전부 접힘 (시작 상태)",
+      "stateNodes": [
+        {
+          "id": "278:2404",
+          "name": "STEP 1 · 직군 — 미선택 (버튼 잠김)"
+        },
+        {
+          "id": "275:2404",
+          "name": "STEP 1 · 직군 — 선택됨"
+        }
+      ],
       "textAudit": "docs-audit",
       "비고": "'주 N건' 과 노출 그룹은 tools/roles/volume.json 실측에서 build.mjs 가 웹을 생성한 값이고, 피그마도 같은 측정값을 그린 것이다. 다시 재면 volume.json → 피그마 3프레임 → 스냅샷 → 웹(build.mjs) 순서로 함께 갱신한다. depth2 칩은 build.mjs --check 가 대조하므로 ignoreWebText, CTA 는 JS 렌더라 jsRenderedText."
     },
     "onboarding/3/index.html": {
       "node": "275:2440",
       "name": "STEP 3 · 근무지 — 선택됨",
+      "stateNodes": [
+        {
+          "id": "278:2519",
+          "name": "STEP 3 · 근무지 — 미선택 (버튼 잠김)"
+        }
+      ],
       "textAudit": "docs-audit",
       "비고": "CTA 는 JS 렌더라 정적 HTML 에 없다 — 스냅샷의 jsRenderedText 로 명시했다."
     }
   },
   "_exempt_설명": "피그마 화면이 없어도 되는 페이지. 사유를 반드시 적는다. 빈 사유는 page-audit 이 막는다.",
-  "exempt": {}
+  "exempt": {},
+  "_stateNodes_설명": "node 는 그 페이지의 기준 프레임이고, stateNodes 는 같은 화면의 다른 상태 프레임이다. 여기 적은 id 목록은 figma-docs-text.json 의 stateFrames 와 순서까지 같아야 한다 — docs-audit 이 대조한다. 상태 프레임을 늘리려면 두 파일에 함께 적는다."
 }

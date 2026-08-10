@@ -56,6 +56,27 @@ function decodeEntities(s) {
     .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(parseInt(d, 10)))
     .replace(/&(amp|lt|gt|quot|apos|nbsp);/g, (m) => ENTITIES[m]);
 }
+/* 한 페이지가 보는 프레임 목록. node 는 기준 프레임이고 stateFrames 는 같은 화면의
+ * 다른 상태(미선택·선택됨)다.
+ *
+ * 상태 프레임을 등록해서 실제로 잡히는 것과 안 잡히는 것을 갈라 적는다 — 안 그러면
+ * "등록했으니 덮인다" 로 읽힌다.
+ *   잡힌다: 공통 문구(제목·설명·칩 라벨)를 한쪽 프레임에서만 바꾸면 그 프레임이 웹과
+ *           어긋나 피그마→웹 대조에 걸린다. 프레임별 신선도(dumpedAt)도 본다.
+ *   못 잡는다: **칩 잠김 같은 색·상태는 문구가 아니라 이 검수의 원리상 못 본다.**
+ *           CTA 의 선택 수도 런타임 숫자라 웹에 맞댈 문구가 없다 — 그래서 그것만은
+ *           아래 '목업이 상한을 넘음' 이 웹 JS 의 상한 상수와 직접 맞대 본다.
+ *
+ * texts 에 `|| []` 를 두지 않는다. 키를 빠뜨리거나 오타 내면 빈 프레임이 되어 조용히
+ * 통과하기 때문이다. 없으면 아래에서 막는다. */
+const framesOf = (page) => [{
+  node: page.figmaNode, name: page.name, dumpedAt: page.dumpedAt,
+  texts: page.texts, jsRenderedText: page.jsRenderedText || [],
+}].concat((page.stateFrames || []).map((f) => ({
+  node: f.figmaNode, name: f.name, dumpedAt: f.dumpedAt,
+  texts: f.texts, jsRenderedText: f.jsRenderedText || [],
+})));
+
 const key = (s) => s.replace(/\s+/g, '');
 const softKey = (s) => key(s)
   .replace(/[‘’‚‛']/g, "'").replace(/[“”„‟"]/g, '"')
@@ -88,6 +109,15 @@ if (pageMap) {
       findings.push({ level: 'DIFF', page: page.html, kind: '매핑 불일치',
         detail: `등록부 ${reg.node} (${reg.name}) ↔ 스냅샷 ${page.figmaNode} (${page.name}) — ` +
                 '등록부가 정본입니다. 스냅샷을 그 프레임에서 다시 뽑아 두 값을 맞추세요' });
+    } else {
+      // 상태 프레임도 같은 이유로 두 파일이 따로 들고 있으면 조용히 어긋난다
+      const regState = (reg.stateNodes || []).map((s) => s.id).join(',');
+      const snapState = (page.stateFrames || []).map((f) => f.figmaNode).join(',');
+      if (regState !== snapState) {
+        findings.push({ level: 'DIFF', page: page.html, kind: '상태 프레임 불일치',
+          detail: `등록부 stateNodes [${regState || '없음'}] ↔ 스냅샷 stateFrames [${snapState || '없음'}] — ` +
+                  '두 파일에 같은 id 를 같은 순서로 적으세요' });
+      }
     }
   }
 } else {
@@ -122,9 +152,11 @@ const now = new Date();
 const localDay = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 const today = [localDay, now.toISOString().slice(0, 10)].sort().pop();
 for (const page of snap.pages) {
-  if (!page.dumpedAt) {
+  const frames = framesOf(page);
+  const noDate = frames.filter((f) => !f.dumpedAt);
+  if (noDate.length) {
     findings.push({ level: 'STALE', page: page.html, kind: '뽑은 날 없음',
-      detail: 'dumpedAt 이 없어 신선도를 판정할 수 없습니다' });
+      detail: `dumpedAt 이 없어 신선도를 판정할 수 없습니다 (프레임 ${noDate.map((f) => f.node).join(', ')})` });
     continue;
   }
   const last = git(['log', '-1', '--format=%cs', '--', page.html]);
@@ -142,10 +174,10 @@ for (const page of snap.pages) {
       detail: `${page.html} 이 git 이력에 없어 신선도를 판정하지 못했습니다 — 커밋한 뒤 다시 검사하세요` });
     continue;
   }
-  if (edited > page.dumpedAt) {
+  for (const f of frames.filter((x) => edited > x.dumpedAt)) {
     findings.push({ level: 'STALE', page: page.html, kind: '스냅샷이 낡음',
-      detail: `${page.html} 을 ${edited} 에 고쳤는데 스냅샷은 ${page.dumpedAt} 판입니다 — ` +
-              `피그마 ${page.figmaNode} 에서 다시 뽑고 dumpedAt 을 올리세요` });
+      detail: `${page.html} 을 ${edited} 에 고쳤는데 프레임 ${f.node} (${f.name}) 스냅샷은 ` +
+              `${f.dumpedAt} 판입니다 — 다시 뽑고 dumpedAt 을 올리세요` });
   }
 }
 
@@ -164,11 +196,63 @@ for (const page of snap.pages) {
   const webAllSoft = softKey(blocks.join(''));
   const webLineKeys = new Set(lines.map(key).concat(blocks.map(key)));
 
-  const figma = page.texts.filter((t) => t && t.trim().length > 0);
-  const figmaAll = key(figma.join(''));
-  const figmaAllSoft = softKey(figma.join(''));
+  const frames = framesOf(page);
+  const noTexts = frames.filter((f) => !Array.isArray(f.texts));
+  if (noTexts.length) {
+    findings.push({ level: 'DIFF', page: page.html, kind: 'texts 없음',
+      detail: `프레임 ${noTexts.map((f) => f.node).join(', ')} 에 texts 배열이 없습니다 — ` +
+              '키 이름을 확인하세요. 빈 프레임으로 넘기지 않습니다' });
+    continue;
+  }
+
+  /* 목업의 선택 수가 화면 상한을 넘는가.
+   * 이 한 가지만은 웹과 문구를 맞대 볼 수 없다 — CTA 의 숫자는 런타임에 그려져 정적 HTML 에
+   * 없다. 대신 같은 수를 적어 둔 두 곳을 맞댄다: 피그마 목업의 'N개' 와 웹 JS 의 상한 상수.
+   * 근거: 2026-08-10 에 STEP1 CTA 가 '다음 · 13개 선택됨' 인 채로 상한 10 과 모순이었고
+   * 어느 검수도 못 봤다.
+   *
+   * 어느 상수인지는 **스냅샷의 selectionCap 에 이름을 적어 선언한다.** JS 에서 `const MAX` 를
+   * 냄새로 찾지 않는다 — 그러면 두 가지로 틀린다. 이름을 바꾸는 순간 검사가 조용히 꺼지고
+   * (같은 수가 onboarding-store 에도 있어 상수를 합칠 이유가 실제로 있다), onboarding/2 의
+   * `const MAX=15` 처럼 **선택 상한이 아닌 값**(연차 슬라이더 눈금)에 붙어 의미 없이 통과한다.
+   * 선언한 상수를 못 찾으면 통과가 아니라 막는다. 선언이 없는 화면은 넘을 상한 자체가 없다
+   * (letter.html 의 '15개 사이트' 처럼 숫자가 든 산문은 상한이 아니다). */
+  /* 선언 자체를 빠뜨리는 경로도 막는다. 상한이 있는 화면은 예외 없이 "상한이 차면 안 고른 칩을
+   * 잠그는" 코드를 갖는다 — 그 잠금이 곧 상한의 존재 증거다. 잠금이 있는데 selectionCap 이
+   * 없으면 위 검사가 통째로 안 도는 상태이므로 통과로 세지 않는다.
+   * 문구에 든 숫자로는 이 판정을 못 한다 — letter.html 의 '15개 사이트' 는 상한이 아니라 산문이다. */
+  if (/classList\.toggle\('lock'/.test(html) && !page.selectionCap) {
+    findings.push({ level: 'DIFF', page: page.html, kind: '상한 선언 없음',
+      detail: `${page.html} 에 칩 잠금(상한)이 있는데 스냅샷에 selectionCap 이 없습니다 — ` +
+              '상한 상수 이름을 selectionCap.const 에 적으세요. 목업이 상한을 넘는지 아무도 못 봅니다' });
+  }
+  if (page.selectionCap) {
+    const name = page.selectionCap.const;
+    const capM = html.match(new RegExp(`const\\s+${name}\\s*=\\s*(\\d+)`));
+    if (!capM) {
+      findings.push({ level: 'DIFF', page: page.html, kind: '상한 상수 없음',
+        detail: `스냅샷이 selectionCap.const = "${name}" 이라고 선언했는데 ${page.html} 에서 찾지 못했습니다 — ` +
+                '상수 이름을 바꿨으면 스냅샷도 바꾸세요. 못 돈 검사를 통과로 세지 않습니다' });
+    } else {
+      const cap = Number(capM[1]);
+      for (const f of frames) {
+        for (const t of new Set(f.texts.concat(f.jsRenderedText || []))) {
+          const m = String(t).match(/(\d+)\s*개/);
+          if (m && Number(m[1]) > cap) {
+            findings.push({ level: 'DIFF', page: page.html, frame: f.node, kind: '목업이 상한을 넘음', figma: t,
+              note: `웹의 const ${name}=${cap} 인데 목업은 ${m[1]}개입니다 — 프레임을 상한 안으로 고치세요` });
+          }
+        }
+      }
+    }
+  }
+
+  // 웹 → 피그마 방향은 **모든 프레임을 합쳐서** 본다. 웹 문구가 상태 프레임에만 있을 수 있다.
+  const allFigma = frames.flatMap((f) => f.texts).filter((t) => t && t.trim().length > 0);
+  const figmaAll = key(allFigma.join(''));
+  const figmaAllSoft = softKey(allFigma.join(''));
   const ignoreWeb = new Set((page.ignoreWebText || []).concat(snap.ignoreWebText || []).map(key));
-  figmaCount += figma.length; webCount += blocks.length;
+  figmaCount += allFigma.length; webCount += blocks.length;
 
   // 1) 피그마 → 웹 : 피그마 문구가 웹에 있어야 한다
   //
@@ -178,18 +262,22 @@ for (const page of snap.pages) {
   //   피그마 프레임은 그 결과 상태를 그린 것이므로 **드리프트가 아니라 검수 방식의 한계**다.
   //   이걸 DIFF 로 두면 진짜 차이가 소음에 묻힌다. 대신 스냅샷에 그 문구를 명시하게 해서
   //   "왜 빠지는지" 가 파일에 남게 한다 — 조용히 사라지지 않는다.
-  const jsRendered = new Set((page.jsRenderedText || []).map(key));
-  for (const t of figma) {
-    const k = key(t);
-    if (jsRendered.has(k)) continue;
-    if (webLineKeys.has(k) || webAll.includes(k)) continue;
-    if (webAllSoft.includes(softKey(t))) {
-      findings.push({ level: 'PUNCT', page: page.html, kind: '문장부호', figma: t, note: '글자·구성은 같고 따옴표/말줄임표만 다름' });
-      continue;
+  // 프레임마다 따로 본다 — 어느 프레임이 어긋났는지 나와야 고칠 수 있고, 공통 문구를
+  // 한쪽 프레임에서만 바꾼 경우가 여기서 걸린다.
+  for (const f of frames) {
+    const jsRendered = new Set((f.jsRenderedText || []).map(key));
+    for (const t of f.texts.filter((x) => x && x.trim().length > 0)) {
+      const k = key(t);
+      if (jsRendered.has(k)) continue;
+      if (webLineKeys.has(k) || webAll.includes(k)) continue;
+      if (webAllSoft.includes(softKey(t))) {
+        findings.push({ level: 'PUNCT', page: page.html, frame: f.node, kind: '문장부호', figma: t, note: '글자·구성은 같고 따옴표/말줄임표만 다름' });
+        continue;
+      }
+      const head = k.slice(0, 12);
+      const near = blocks.find((b) => key(b).includes(head)) || null;
+      findings.push({ level: 'DIFF', page: page.html, frame: f.node, kind: '문구', figma: t, web: near, note: near ? '웹 문구가 피그마와 다름' : '웹에서 못 찾음 — 피그마를 바꿨으면 웹도 맞추세요' });
     }
-    const head = k.slice(0, 12);
-    const near = blocks.find((b) => key(b).includes(head)) || null;
-    findings.push({ level: 'DIFF', page: page.html, kind: '문구', figma: t, web: near, note: near ? '웹 문구가 피그마와 다름' : '웹에서 못 찾음 — 피그마를 바꿨으면 웹도 맞추세요' });
   }
 
   // 2) 웹 → 피그마 : 웹 문구가 피그마에 있어야 한다
@@ -209,9 +297,9 @@ const hard = findings.filter((f) => f.level === 'DIFF' || f.level === 'EXTRA' ||
 if (asJson) {
   console.log(JSON.stringify({ findings, counts: { figmaTexts: figmaCount, webBlocks: webCount }, pages: snap.pages.map((p) => p.html) }, null, 2));
 } else {
-  const oldest = snap.pages.map((p) => p.dumpedAt).filter(Boolean).sort()[0];
+  const oldest = snap.pages.flatMap((p) => framesOf(p).map((f) => f.dumpedAt)).filter(Boolean).sort()[0];
   console.log(`\n기준: 피그마 ${snap.fileKey} / 섹션 ${snap.section} (가장 오래된 스냅샷 ${oldest})`);
-  console.log(`대상: ${snap.pages.map((p) => `${p.html} ↔ ${p.figmaNode}`).join(', ')}`);
+  console.log(`대상: ${snap.pages.map((p) => `${p.html} ↔ ${framesOf(p).map((f) => f.node).join('+')}`).join(', ')}`);
   console.log(`피그마 문구 ${figmaCount}개 ↔ 웹 블록 ${webCount}개 대조\n`);
   if (findings.length === 0) {
     console.log('✅ 차이 없음 — 약관·개인정보 화면이 피그마와 웹에서 일치합니다.\n');
@@ -220,7 +308,7 @@ if (asJson) {
     findings.sort((a, b) => order[a.level] - order[b.level]);
     for (const f of findings) {
       const tag = { STALE: '🕗 낡음', DIFF: '❌ 차이', EXTRA: 'ℹ️ 웹전용', PUNCT: '⚠️ 부호' }[f.level];
-      console.log(`${tag}  ${f.kind} [${f.page}]`);
+      console.log(`${tag}  ${f.kind} [${f.page}${f.frame ? ` · ${f.frame}` : ''}]`);
       if (f.figma) console.log(`   피그마: ${f.figma}`);
       if (f.web) console.log(`   웹    : ${f.web}`);
       if (f.detail) console.log(`   상세  : ${f.detail}`);

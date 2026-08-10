@@ -376,6 +376,15 @@ if (!existsSync(figmaMapPath)) {
           `node 가 프레임 id 형식이 아닙니다: ${JSON.stringify(entry.node)}`,
           '"6:148" 처럼 <숫자>:<숫자> 형태여야 합니다.');
     }
+    // 상태 프레임 id 도 같은 검사를 받는다 — 기준 프레임에만 걸어 두면 stateNodes 오타가
+    // 두 파일에 똑같이 적히는 한 어느 검수도 못 잡는다.
+    for (const s of entry.stateNodes || []) {
+      if (!/^\d+:\d+$/.test(String((s && s.id) || ''))) {
+        add('BLOCK', '피그마 대응', page,
+            `stateNodes 의 id 가 프레임 id 형식이 아닙니다: ${JSON.stringify(s && s.id)}`,
+            '"275:2404" 처럼 <숫자>:<숫자> 형태여야 합니다.');
+      }
+    }
     // 등록은 됐지만 문구 동기화 검수에 아직 안 들어간 페이지는 조용히 두지 않는다.
     if (entry.textAudit === 'pending') {
       add('WARN', '피그마 대응', page,

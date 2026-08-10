@@ -106,20 +106,24 @@ if (!dumpPath) {
   // 기준 프레임이 실제로 섹션 안에 있는가 — 626:2657 과 같은 형태를 여기서 잡는다.
   // 어느 섹션에 있어야 하는지는 저장하지 않는다. "어딘가 섹션 안" 이면 된다.
   const dreg = dump.registered || {};
-  for (const [html, e] of registered) {
+  // 상태 프레임(stateNodes)도 같은 검사를 받는다 — 기준 프레임만 보면 상태 프레임이
+  // 지워지거나 섹션 밖으로 나가도 아무도 모른다.
+  for (const [html, e] of registered.flatMap(([html, e]) =>
+      [[html, e]].concat((e.stateNodes || []).map((s) => [html, { ...e, node: s.id, 상태: true }])))) {
+    const 무엇 = e.상태 ? '상태 프레임' : '기준 프레임';
     const r = dreg[e.node];
     if (!r) {
-      add('SKIP', '기준 프레임', `${e.node} (${html})`, '덤프에 이 프레임이 들어 있지 않아 확인하지 못했습니다',
+      add('SKIP', 무엇, `${e.node} (${html})`, '덤프에 이 프레임이 들어 있지 않아 확인하지 못했습니다',
           '덤프 스니펫의 대상 목록은 page-figma-map.json 에서 만드세요 — 손으로 관리하면 낡습니다.');
       continue;
     }
     if (r.found === false) {
-      add('BLOCK', '기준 프레임', `${e.node} (${html})`, '피그마에 그 노드가 없습니다',
+      add('BLOCK', 무엇, `${e.node} (${html})`, '피그마에 그 노드가 없습니다',
           '프레임을 지웠거나 id 가 바뀌었습니다. page-figma-map.json 을 새 id 로 고치세요.');
       continue;
     }
     if (!r.section) {
-      add('BLOCK', '기준 프레임', `${e.node} (${html})`, '이 프레임이 어느 섹션에도 들어 있지 않습니다',
+      add('BLOCK', 무엇, `${e.node} (${html})`, '이 프레임이 어느 섹션에도 들어 있지 않습니다',
           `부모가 ${r.parentType || '?'}(${r.parent || '?'}) 입니다. 섹션 안으로 되돌리세요.`);
     }
   }
@@ -176,7 +180,8 @@ const label = (l) => ({ BLOCK: '❌ 막힘', SKIP: '🚫 검수 미실행', SYNC
 if (asJson) {
   console.log(JSON.stringify({ findings, updated, dump: dumpPath || null }, null, 2));
 } else {
-  console.log(`\n피그마 트리 점검 — 섹션 ${Object.keys(sections).length}개 · 기준 프레임 ${registered.length}개` +
+  const 상태프레임수 = registered.reduce((n, [, e]) => n + ((e.stateNodes || []).length), 0);
+  console.log(`\n피그마 트리 점검 — 섹션 ${Object.keys(sections).length}개 · 기준 프레임 ${registered.length}개(+상태 ${상태프레임수}개)` +
               `${dumpPath ? ` · 덤프 ${dumpPath}` : ' · 덤프 없음(라이브 미확인)'}\n`);
   if (updated) {
     console.log(updated.changed

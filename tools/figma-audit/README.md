@@ -378,10 +378,11 @@ pre-push 훅에서 **항상** 돈다(1.2겹). 덤프는 `FIGMA_TREE` → 저장�
 ### 피그마 트리 덤프
 
 `use_figma` 로 아래를 돌려 출력을 `figma_tree.json` 에 저장한다. **읽기 전용이다.**
-`REG` 목록은 손으로 관리하지 말고 `page-figma-map.json` 의 `pages[].node` 에서 만든다:
+`REG` 목록은 손으로 관리하지 말고 `page-figma-map.json` 의 `pages[].node` **와 `stateNodes[].id`**
+에서 만든다 (상태 프레임도 tree-audit 이 본다):
 
 ```
-node -e "const m=require('./tools/figma-audit/page-figma-map.json');console.log(JSON.stringify(Object.values(m.pages).map(e=>e.node)))"
+node -e "const m=require('./tools/figma-audit/page-figma-map.json');console.log(JSON.stringify(Object.values(m.pages).flatMap(e=>[e.node,...(e.stateNodes||[]).map(s=>s.id)])))"
 ```
 
 ```js
