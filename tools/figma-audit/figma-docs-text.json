@@ -492,10 +492,9 @@
         "환경",
         "환경미화원",
         "환경안전",
-        "회계",
-        "전체"
+        "회계"
       ],
-      "_ignoreWebText_사유": "depth2 직무 칩과 권역 ‘전체’ 는 피그마 시작상태 프레임(전부 접힘)에 없다. tools/roles/build.mjs --check (pre-push 1.5겹)가 taxonomy.json 과 이미 대조하므로 여기서 또 보면 이중 검사가 된다.",
+      "_ignoreWebText_사유": "depth2 직무 칩은 피그마 시작상태 프레임(전부 접힘)에 없다. tools/roles/build.mjs --check (pre-push 1.5겹)가 taxonomy.json 과 이미 대조하므로 여기서 또 보면 이중 검사가 된다. 그룹 ‘전체’ 칩은 2026-08-10 에 없앴다.",
       "jsRenderedText": [
         "직무를 1개 이상 골라주세요"
       ],

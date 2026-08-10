@@ -36,10 +36,6 @@ const MIN_D1_PER_WEEK = 5;
 const MIN_D2_NEW30 = 1;
 const WEEKS = 30 / 7;
 
-const CHECK_SVG =
-  '<svg width="10" height="10" viewBox="0 0 24 24" fill="none">' +
-  '<path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 // ── 1. 표기 검증 ────────────────────────────────────────────
@@ -75,9 +71,7 @@ const build = () =>
   '<div class="scroll">' +
   visible
     .map((g) => {
-      const chips =
-        `<span class="call">${CHECK_SVG}전체</span>` +
-        g.children.map((c) => `<div class="c" data-d2="${esc(c.code)}">${esc(c.label)}</div>`).join('');
+      const chips = g.children.map((c) => `<div class="c" data-d2="${esc(c.code)}">${esc(c.label)}</div>`).join('');
       return (
         `<div class="acc" data-d1="${esc(g.code)}">` +
         `<div class="arow"><div class="nm">${esc(g.label)}</div>` +
