@@ -53,7 +53,10 @@ const map = read(join(HERE, 'page-figma-map.json'));
 
 const sections = snap.sections || {};
 const allowed = snap.pageLevelAllowed || {};
-const registered = Object.entries(map.pages || {}); // [html, {node,name,...}]
+// node: null = 피그마 프레임을 아직 안 만든 페이지(page-audit 이 사유를 요구하고 매 푸시 경고한다).
+// 여기서 안 빼면 "덤프에 이 프레임이 들어 있지 않습니다" 로 뜨는데, 그건 덤프가 낡았다는 뜻이라
+// 원인을 엉뚱한 곳에서 찾게 된다. 없는 프레임은 트리 검사의 대상이 아니다.
+const registered = Object.entries(map.pages || {}).filter(([, e]) => e.node !== null); // [html, {node,name,...}]
 
 /* ---------- (1) 준비물 없는 정합성 — 항상 돈다 ---------- */
 

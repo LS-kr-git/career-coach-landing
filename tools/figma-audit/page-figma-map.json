@@ -24,6 +24,13 @@
       "name": "브리핑 상세페이지",
       "textAudit": "docs-audit"
     },
+    "insight/index.html": {
+      "node": null,
+      "name": "인사이트 전문 (미제작)",
+      "textAudit": "pending",
+      "pendingSync": "2026-08-10 — 피그마에 대응 화면이 아직 없다. 가짜 프레임 id 를 넣지 않으려고 node 를 null 로 비워 뒀고, 그 대가로 이 줄이 푸시마다 찍힌다. 프레임을 만들면 id 를 채우고 textAudit 을 docs-audit 으로 바꾼 뒤 figma-docs-text.json 에 문구 스냅샷을 추가한다. 화면 문구 정본은 career-coach docs/기획/전문-열람-규칙.md 3절이고, 그 표의 4종은 아직 사용자 확정 전(초안)이다.",
+      "비고": "알림톡 링크로 로그인 없이 열리는 인사이트 전문 페이지. 열람 판정은 전부 DB(insight_letter RPC)가 하고 이 페이지는 상태→문구만 옮긴다. 루트 letter.html 과 다른 화면이다 — 그쪽은 브리핑 상세 데모(362:2482)다."
+    },
     "signup/index.html": {
       "node": "566:2700",
       "name": "회원가입",
