@@ -56,15 +56,15 @@
   .scroll{padding:24px 24px 0}
 
   .chips{display:flex;flex-wrap:wrap;gap:7px}
-  .c,.call{border:1px solid var(--gray-200);background:#fff;color:var(--gray-600);border-radius:10px;
+  .c{border:1px solid var(--gray-200);background:#fff;color:var(--gray-600);border-radius:10px;
     padding:8px 11px;font-size:13px;line-height:18px;font-weight:400;
     cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;
     transition:background .12s,border-color .12s,color .12s}
-  .c:active,.call:active{transform:scale(.97)}
+  .c:active{transform:scale(.97)}
   .c.on{background:var(--amber-50);border-color:var(--amber-500);color:var(--amber-600)}
-  .call{display:inline-flex;align-items:center;gap:5px}
-  .call.on{background:var(--amber-500);border-color:var(--amber-500);color:#fff}
-  .call svg{display:none}
+  /* 상한이 차면 안 고른 칩은 잠긴다 — 색은 CTA 잠김과 같은 gray-100/gray-400 짝을 쓴다 */
+  .c.lock{background:var(--gray-100);border-color:var(--gray-200);color:var(--gray-400);cursor:default}
+  .c.lock:active{transform:none}
 
   /* 구분선은 inset 그림자 — 피그마의 INSIDE 스트로크처럼 높이를 안 늘린다 (행 52px 유지) */
   .acc{box-shadow:inset 0 1px 0 var(--gray-100)}
@@ -120,34 +120,37 @@
   <div class="prog"><i class="on"></i><i class="on"></i><i class="on"></i></div>
   <div class="kick"><span>직군</span><i>·</i><span>연차</span><i>·</i><span>근무지</span></div>
   <div class="title">어디에서<br>일하고 싶으세요?</div>
-  <div class="desc">여러 지역을 함께 고를 수 있어요</div>
-  <div class="scroll"><div class="grp"><div class="ghead"><h3>수도권</h3></div><div class="chips"><span class="call on"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>전체</span><div class="c on">서울</div><div class="c on">경기</div><div class="c on">인천</div></div></div><div class="grp"><div class="ghead"><h3>충청·강원</h3></div><div class="chips"><span class="call"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>전체</span><div class="c">대전</div><div class="c">세종</div><div class="c">충북</div><div class="c">충남</div><div class="c">강원</div></div></div><div class="grp"><div class="ghead"><h3>영남</h3></div><div class="chips"><span class="call"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>전체</span><div class="c">부산</div><div class="c">대구</div><div class="c">울산</div><div class="c">경북</div><div class="c">경남</div></div></div><div class="grp"><div class="ghead"><h3>호남·제주</h3></div><div class="chips"><span class="call"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>전체</span><div class="c">광주</div><div class="c">전북</div><div class="c">전남</div><div class="c">제주</div></div></div><div class="grp"><div class="ghead"><h3>기타</h3></div><div class="chips"><div class="c on">재택·원격</div></div></div></div>
+  <div class="desc">최대 3개 지역까지 함께 고를 수 있어요</div>
+  <div class="scroll"><div class="grp"><div class="ghead"><h3>수도권</h3></div><div class="chips"><div class="c">서울</div><div class="c">경기</div><div class="c">인천</div></div></div><div class="grp"><div class="ghead"><h3>충청·강원</h3></div><div class="chips"><div class="c">대전</div><div class="c">세종</div><div class="c">충북</div><div class="c">충남</div><div class="c">강원</div></div></div><div class="grp"><div class="ghead"><h3>영남</h3></div><div class="chips"><div class="c">부산</div><div class="c">대구</div><div class="c">울산</div><div class="c">경북</div><div class="c">경남</div></div></div><div class="grp"><div class="ghead"><h3>호남·제주</h3></div><div class="chips"><div class="c">광주</div><div class="c">전북</div><div class="c">전남</div><div class="c">제주</div></div></div><div class="grp"><div class="ghead"><h3>기타</h3></div><div class="chips"><div class="c">재택·원격</div></div></div></div>
 </div>
 <div class="fade"></div>
 <div class="cta">다음</div>
 <script>
-const grps=[...document.querySelectorAll('.grp')];
-const sync=()=>{let total=0;
- grps.forEach(g=>{const chips=[...g.querySelectorAll('.c')],on=chips.filter(c=>c.classList.contains('on'));
-  total+=on.length;const all=g.querySelector('.call');
-  if(all) all.classList.toggle('on',chips.length>0&&on.length===chips.length);});
+// 상한 3개. 화면 문구(desc)·onboarding-store 의 MAX_REGIONS·save_onboarding 의 검증이 같은 수를 본다.
+const MAX=3;
+const chips=[...document.querySelectorAll('.grp .c')];
+const sync=()=>{
+ const on=chips.filter(c=>c.classList.contains('on'));
+ // 상한이 차면 안 고른 칩을 잠근다 — 바꾸려면 고른 것을 먼저 하나 풀어야 한다
+ chips.forEach(c=>c.classList.toggle('lock',on.length>=MAX&&!c.classList.contains('on')));
  const cta=document.querySelector('.cta');
- if(total===0){cta.classList.add('off');cta.textContent='지역을 1개 이상 골라주세요';}
- else{cta.classList.remove('off');cta.innerHTML='다음 <span class="s2">· '+total+'개 지역</span>';}
+ if(on.length===0){cta.classList.add('off');cta.textContent='지역을 1개 이상 골라주세요';}
+ else{cta.classList.remove('off');cta.innerHTML='다음 <span class="s2">· '+on.length+'개 지역</span>';}
  if(window.ccOnChange) window.ccOnChange();};
-grps.forEach(g=>{g.querySelectorAll('.c').forEach(c=>c.addEventListener('click',()=>{c.classList.toggle('on');sync();}));
- const all=g.querySelector('.call');
- if(all) all.addEventListener('click',()=>{const chips=[...g.querySelectorAll('.c')],
-  allOn=chips.every(c=>c.classList.contains('on'));chips.forEach(c=>c.classList.toggle('on',!allOn));sync();});});
+chips.forEach(c=>c.addEventListener('click',()=>{
+ if(c.classList.contains('lock')) return;
+ c.classList.toggle('on');sync();}));
 sync();
 
 // 선택값을 읽고 되살리는 최소 접점. 화면 동작은 그대로다 — 칩의 on 상태만 오간다.
 // 근무지는 생성기(tools/roles/build.mjs 같은 것)가 없다. 칩 라벨을 그대로 코드로 쓴다 —
 // save_onboarding 계약이 p_regions 를 한글 지역 코드로 받는다.
 window.ccStep3={
- get:()=>[...document.querySelectorAll('.grp .c.on')].map(c=>c.textContent.trim()),
- set:codes=>{const want=new Set(codes);
-  document.querySelectorAll('.grp .c').forEach(c=>c.classList.toggle('on',want.has(c.textContent.trim())));sync();}};
+ get:()=>chips.filter(c=>c.classList.contains('on')).map(c=>c.textContent.trim()),
+ // 되살릴 때도 상한을 넘기지 않는다 — 상한 도입 전에 저장된 값이 남아 있을 수 있다.
+ set:codes=>{const want=new Set(codes);let n=0;
+  chips.forEach(c=>{const hit=want.has(c.textContent.trim())&&n<MAX;if(hit)n++;
+   c.classList.toggle('on',hit);});sync();}};
 
 // 다음 화면(/onboarding/done/)은 아직 없다 — 만들어지면 여기서 연결한다
 
