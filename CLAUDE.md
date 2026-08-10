@@ -699,6 +699,11 @@ pre-push 2겹(a)에서 `terms/privacy/letter.html` 또는 스냅샷이 바뀐 �
    return { fileKey: figma.fileKey, pages };
    ```
 3. 결과로 `figma-docs-text.json` 의 해당 `pages[]` 항목을 갈아끼우고 `dumpedAt` 를 오늘로 바꾼다.
+   **오늘은 KST 기준이다** — `docs-audit` 이 커밋 날짜도 KST 로 환산해 비교한다.
+   UTC 시계로 도는 세션이 KST 00~09시에 UTC 날짜를 적으면 멀쩡한 스냅샷이 '낡음' 으로 막힌다.
+   확인: `node -p "new Date(Date.now()+9*36e5).toISOString().slice(0,10)"`
+   (`TZ=Asia/Seoul date +%F` 는 쓰지 마라 — tzdata 가 없는 Git Bash 에서 UTC 를 뱉는다.
+   위 한 줄은 검수 코드와 **같은 산술**이라 어긋날 수가 없다.)
 4. 웹(terms/privacy/letter.html)도 같은 문구로 고치고 `docs-audit` 가 "차이 없음" 이면 커밋.
 
 ### 표기 규칙 (동기화가 안 깨지게)

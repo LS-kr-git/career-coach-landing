@@ -139,18 +139,28 @@ if (pageMap) {
  *   · 같은 날 뽑고 같은 날 또 고치는 것. 비교 단위가 '날' 이라 edited == dumpedAt 이면 통과한다.
  *     시각까지 보려면 dumpedAt 이 타임스탬프여야 하는데, 그 값은 사람이 손으로 적는 값이라
  *     시각을 요구하면 더 부정확해진다. */
+// 날짜 비교에 들어가는 두 값(커밋 날짜·오늘)을 **KST 하나로** 정규화한다.
+// 커밋 날짜는 커밋한 기계의 오프셋으로 박제되고(PC 는 +0900, CI 봇은 +0000), '오늘' 은
+// 검수를 도는 기계의 TZ 를 따른다. 둘을 그대로 비교하면 양방향으로 하루씩 어긋난다:
+//   · 커밋 +0900 · 검수 UTC → 커밋이 하루 늦게 보여 멀쩡한 스냅샷이 '낡음' 으로 막힌다
+//   · 커밋 +0000 늦은 밤   → 커밋이 하루 이르게 보여 낡은 스냅샷이 조용히 통과한다
+// 2026-08-11 에 앞의 것이 실제로 났고, dumpedAt 을 하루 올려 막는 바람에 뒤의 구멍이
+// 이틀 열렸다. 그래서 한쪽만 맞추지 않고 둘 다 KST 로 읽는다 — 이 저장소의 다른 날짜
+// 판정과 같은 기준이다(career-coach `docs/기획/전문-열람-규칙.md` 2절: KST 고정).
+//
+// 환산은 **산술로** 한다. KST 는 서머타임이 없어 언제나 +09:00 이므로 이걸로 충분하고,
+// 아래 둘에 기대면 조용히 꺼진다 — 실패해도 초록불이라 안 보인다:
+//   · `TZ=Asia/Seoul` 을 git 에 넘기기 — Git for Windows 는 IANA 이름을 무시할 수 있다
+//   · `Intl` 로 날짜 문자열 만들기 — small-ICU 노드는 en-CA 를 en-US 로 폴백해
+//     '08/11/2026' 을 주고, 그러면 dumpedAt 과의 문자열 비교가 늘 false 가 된다
+const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
+const kstDay = (ms) => new Date(ms + KST_OFFSET_MS).toISOString().slice(0, 10);
 const git = (args) => {
   try { return execFileSync('git', args, { cwd: ROOT, encoding: 'utf8' }); }
   catch { return null; }
 };
 const dirty = git(['status', '--porcelain']);
-// %cs 는 **커밋에 박제된 오프셋**(우리 커밋은 +0900)으로 찍히고 검수를 도는 기계의 TZ 를
-// 따라가지 않는다. 그래서 아직 커밋 안 된 수정에 쓸 '오늘' 을 기계 로컬로만 잡으면,
-// UTC 컨테이너에서 KST 00~09시에 돌 때 하루 이르게 계산돼 낡은 스냅샷이 통과한다.
-// 로컬·UTC 중 **늦은 쪽**을 택한다 — 틀려도 "다시 뽑아라" 쪽으로 틀린다.
-const now = new Date();
-const localDay = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-const today = [localDay, now.toISOString().slice(0, 10)].sort().pop();
+const today = kstDay(Date.now());
 for (const page of snap.pages) {
   const frames = framesOf(page);
   const noDate = frames.filter((f) => !f.dumpedAt);
@@ -159,19 +169,22 @@ for (const page of snap.pages) {
       detail: `dumpedAt 이 없어 신선도를 판정할 수 없습니다 (프레임 ${noDate.map((f) => f.node).join(', ')})` });
     continue;
   }
-  const last = git(['log', '-1', '--format=%cs', '--', page.html]);
+  // %cs(날짜만) 가 아니라 %cI(오프셋까지) 를 받아 위 kstDay 로 환산한다.
+  const last = git(['log', '-1', '--format=%cI', '--', page.html]);
   if (last === null || dirty === null) {
     findings.push({ level: 'STALE', page: page.html, kind: '판정 불가',
       detail: 'git 을 부르지 못해 신선도를 판정하지 못했습니다 — 못 돈 검수를 통과로 세지 않습니다' });
     continue;
   }
-  const edited = dirty.split('\n').some((l) => l.slice(3).startsWith(page.html)) ? today : last.trim();
+  const lastMs = Date.parse(last.trim());
+  const edited = dirty.split('\n').some((l) => l.slice(3).startsWith(page.html))
+    ? today : (Number.isNaN(lastMs) ? '' : kstDay(lastMs));
   // git 이 그 경로를 모르면(새로 만들고 아직 커밋 안 한 페이지 — 추적 안 되는 디렉터리는
   // porcelain 에도 'onboarding/9/' 처럼 디렉터리로만 나와 위 대조에 안 걸린다) last 가 빈
   // 문자열로 온다. 빈 값을 '안 고쳤다' 로 읽으면 새 페이지가 조용히 통과한다.
   if (!edited) {
     findings.push({ level: 'STALE', page: page.html, kind: '판정 불가',
-      detail: `${page.html} 이 git 이력에 없어 신선도를 판정하지 못했습니다 — 커밋한 뒤 다시 검사하세요` });
+      detail: `${page.html} 이 git 이력에 없거나 커밋 날짜를 읽지 못해 신선도를 판정하지 못했습니다 — 커밋한 뒤 다시 검사하세요` });
     continue;
   }
   for (const f of frames.filter((x) => edited > x.dumpedAt)) {
