@@ -2,13 +2,12 @@
   "_설명": "피그마 섹션 327:2474 '이용약관 / 개인정보처리방침' 의 텍스트 노드 스냅샷(마커 제외). docs-audit.mjs 가 이걸 웹(terms/privacy.html)과 문장 단위로 대조해 피그마↔웹 동기화를 강제한다. 피그마 화면을 고치면 CLAUDE.md '약관·개인정보 화면 — 피그마↔웹 동기화' 절차대로 이 파일을 다시 뽑아 커밋한다.",
   "fileKey": "LnT8TgFVBxky0bVyaF6Tob",
   "section": "327:2474 (약관·개인정보) · 356:3106 (브리핑 상세) · 595:2645 (가입/로그인) · 566:2654 (카카오 심사용 회원가입) · 271:2405 (온보딩)",
-  "dumpedAt": "2026-08-10",
-  "_dumpedAt_비고": "2026-08-10 에 다시 뽑은 것은 onboarding/3 (275:2440) 하나다 — 근무지 상한 3개. 나머지 페이지는 2026-08-08 판 그대로다.",
   "pages": [
     {
       "html": "terms.html",
       "figmaNode": "339:2474",
       "name": "이용약관",
+      "dumpedAt": "2026-08-08",
       "ignoreWebText": [],
       "texts": [
         "이용약관",
@@ -65,6 +64,7 @@
       "html": "privacy.html",
       "figmaNode": "340:2478",
       "name": "개인정보처리방침",
+      "dumpedAt": "2026-08-08",
       "ignoreWebText": [],
       "texts": [
         "개인정보처리방침",
@@ -132,6 +132,7 @@
       "html": "letter.html",
       "figmaNode": "362:2482",
       "name": "브리핑 상세페이지",
+      "dumpedAt": "2026-08-08",
       "ignoreWebText": [],
       "texts": [
         "프로덕트 디자이너 데일리 · 7월 29일 수요일",
@@ -220,6 +221,7 @@
       "html": "signup/index.html",
       "figmaNode": "566:2700",
       "name": "회원가입",
+      "dumpedAt": "2026-08-10",
       "ignoreWebText": [],
       "texts": [
         "회원가입",
@@ -245,6 +247,7 @@
       "html": "auth/callback/index.html",
       "figmaNode": "595:2646",
       "name": "로그인 처리 중",
+      "dumpedAt": "2026-08-10",
       "ignoreWebText": [],
       "texts": [
         "로그인 중입니다…"
@@ -254,6 +257,7 @@
       "html": "onboarding/1/index.html",
       "figmaNode": "278:2693",
       "name": "STEP 1 · 직군 — 전부 접힘 (시작 상태)",
+      "dumpedAt": "2026-08-10",
       "_비고": "아코디언 헤더의 '주 N건' 과 노출 그룹은 tools/roles/volume.json 실측에서 build.mjs 가 웹을 생성한 값이다. 피그마도 같은 측정값을 그린 것이다. 다시 재면 양쪽을 함께 갱신한다.",
       "ignoreWebText": [
         "3D·VFX",
@@ -587,6 +591,7 @@
       "html": "onboarding/2/index.html",
       "figmaNode": "592:2623",
       "name": "STEP 2 · 연차 — 미선택",
+      "dumpedAt": "2026-08-08",
       "ignoreWebText": [],
       "texts": [
         "직군",
@@ -617,6 +622,7 @@
       "html": "onboarding/3/index.html",
       "figmaNode": "275:2440",
       "name": "STEP 3 · 근무지 — 선택됨",
+      "dumpedAt": "2026-08-10",
       "ignoreWebText": [],
       "jsRenderedText": [
         "다음 · 3개 지역"
@@ -656,5 +662,6 @@
         "다음 · 3개 지역"
       ]
     }
-  ]
+  ],
+  "_dumpedAt_설명": "그 페이지의 texts 를 피그마 프레임과 **마지막으로 대조해 확인한 날**. 다시 뽑아 값이 그대로였던 날도 포함한다 — 그래야 '확인했다' 가 기록된다. docs-audit 이 이 값과 그 html 의 마지막 커밋 날짜를 대조해, 웹을 고치고 스냅샷을 확인하지 않은 것을 막는다. 상태바 목업 시각('9:41')은 어느 페이지에서도 뽑지 않는 것이 관례다. 2026-08-10: signup·auth/callback 은 이날 566:2700·595:2646 에서 다시 뽑아 texts 가 한 글자도 다르지 않음을 확인했다 — 그래서 값은 그대로고 날짜만 올랐다."
 }
