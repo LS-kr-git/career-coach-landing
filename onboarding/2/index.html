@@ -245,9 +245,9 @@ document.querySelector('.cta').addEventListener('click',()=>{
   if (saved.years !== null) window.ccStep2.set(saved.years, saved.yearsMax ?? saved.years);
   window.ccOnChange = () => {
     const r = window.ccStep2.get();
-    // 화면은 구간이고 user_preference.years_experience 는 정수 하나다("구간이 아니라 정수
-    // 하나로 받는다" — career-coach 0001_init_members.sql). 그래서 RPC 로는 아래끝(years)만
-    // 보내고, 위끝(yearsMax)은 이 화면을 되살리기 위해서만 들고 있는다.
+    // 화면도 DB 도 **구간**이다 (career-coach 0022_career_range.sql).
+    // 2026-08-09 전에는 user_preference 가 정수 하나여서 아래끝만 보내고 위끝은
+    // 이 화면 복원용으로만 들고 있었다. 지금은 둘 다 RPC 로 나간다.
     if (r) writeState({ years: r[0], yearsMax: r[1] });
   };
   retryPending();     // 지난 저장이 실패한 채 남아 있으면 여기서 조용히 다시 보낸다

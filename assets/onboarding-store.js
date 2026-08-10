@@ -47,8 +47,9 @@ export function readState() {
     return {
       jobs: strings(s.jobs),
       years: intOrNull(s.years),
-      // yearsMax 는 2단계 슬라이더(구간)를 되살리기 위한 값이다. RPC 계약에는 없다 —
-      // user_preference.years_experience 가 "구간이 아니라 정수 하나" 이기 때문.
+      // 2026-08-09 부터 위끝도 **서버에 저장된다** (career-coach 0022_career_range.sql).
+      // 그 전에는 user_preference 가 정수 하나였고 이 값이 브라우저에만 있었다 —
+      // 기기를 바꾸면 사라지고 발송 필터는 아래끝 하나로만 돌았다.
       yearsMax: intOrNull(s.yearsMax),
       regions: strings(s.regions),
       pending: s.pending === true,
@@ -120,9 +121,14 @@ function client() {
 let inflight = false;
 
 async function commit(state, supabase, session, retry) {
+  // 연차는 **구간**이다. 위끝이 없으면 아래끝과 같은 값으로 폭 0 구간을 보낸다 —
+  // 서버 제약이 "한쪽만" 을 거부하므로 null 을 섞어 보내면 저장이 통째로 실패한다.
+  const lo = Math.min(60, Math.max(0, state.years));
+  const hi = Math.min(60, Math.max(lo, state.yearsMax ?? lo));
   const { error } = await supabase.rpc('save_onboarding', {
     p_jobs: state.jobs,                                          // string[] taxonomy code(중분류)
-    p_years: Math.min(60, Math.max(0, state.years)),             // number 0..60
+    p_years_min: lo,                                             // number 0..60
+    p_years_max: hi,                                             // number lo..60
     p_regions: state.regions,                                    // string[] 지역 코드
   });
   if (error) {
