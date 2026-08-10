@@ -28,8 +28,8 @@ import { track } from '/assets/track.js';
 
 const KEY = 'cc_onboarding';
 
-/** 선택 상한. 화면(onboarding/1·3)과 뒷단(save_onboarding — 0020·0021)이 같은 값을 쓴다. */
-const MAX_JOBS = 10;
+/** 선택 상한. 화면(onboarding/1·3)과 뒷단(save_onboarding — 0020·0024)이 같은 값을 쓴다. */
+const MAX_JOBS = 7;
 const MAX_REGIONS = 3;
 
 /** 상태 모양 — jobs: taxonomy code(중분류) · years: 정수 · regions: 지역 코드 */
@@ -67,8 +67,8 @@ export function writeState(patch) {
 }
 
 /**
- * 상한(직군 10 · 근무지 3)이 생기기 **전에** 그보다 많이 골라 둔 사람의 저장분을
- * 한 번만 잘라 굳힌다.
+ * 상한(직군 7 · 근무지 3)보다 많이 골라 둔 사람의 저장분을 한 번만 잘라 굳힌다.
+ * 상한이 생기기 전에 고른 사람과, 상한이 10 이던 때 8~10개를 고른 사람이 여기 걸린다.
  *
  * 안 자르면: 그 사람이 해당 단계를 다시 안 밟고 다음 단계로 바로 들어오는 순간 RPC 가
  * 상한에 걸려 거부하고, pending 이 남아 진입할 때마다 같은 값을 영원히 다시 보낸다 —
