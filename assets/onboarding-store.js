@@ -28,6 +28,9 @@ import { track } from '/assets/track.js';
 
 const KEY = 'cc_onboarding';
 
+/** 직군 상한. 화면(onboarding/1)과 뒷단(save_onboarding, 0020)이 같은 값을 쓴다. */
+const MAX_JOBS = 10;
+
 /** 상태 모양 — jobs: taxonomy code(중분류) · years: 정수 · regions: 지역 코드 */
 const EMPTY = { jobs: [], years: null, yearsMax: null, regions: [], pending: false };
 
@@ -60,6 +63,29 @@ export function writeState(patch) {
   try { localStorage.setItem(KEY, JSON.stringify(next)); } catch { /* 무시 */ }
   return next;
 }
+
+/**
+ * 상한(10개)이 생기기 **전에** 11개 이상을 골라 둔 사람의 저장분을 한 번만 잘라 굳힌다.
+ *
+ * 안 자르면: 그 사람이 1단계를 다시 안 밟고 2·3단계로 바로 들어오는 순간 RPC 가 상한에 걸려
+ * 거부하고, pending 이 남아 진입할 때마다 같은 값을 영원히 다시 보낸다 — 레터가 영구히 0건이다.
+ *
+ * 여기서(모듈 로드 시) 하는 이유: readState 안에서 자르면 3단계가 화면을 켜면서 부르는
+ * writeState 가 그 결과를 먼저 굳혀 버려, 정작 저장할 때는 "잘랐다" 는 사실이 사라진다.
+ * 자르는 곳과 알리는 곳이 같아야 한다.
+ */
+(function trimStoredJobsOnce() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return;
+    const s = JSON.parse(raw) || {};
+    const jobs = strings(s.jobs);
+    if (jobs.length <= MAX_JOBS) return;
+    localStorage.setItem(KEY, JSON.stringify({ ...s, jobs: jobs.slice(0, MAX_JOBS) }));
+    // 사용자는 1단계에 오면 10개만 켜진 것을 보지만, 2·3단계로 바로 온 사람은 못 본다.
+    track('onboarding_step', { step: 1, jobs: 'trimmed' });
+  } catch { /* localStorage 가 막힌 브라우저 — 저장된 것도 없다 */ }
+})();
 
 /** 보낼 값이 다 모였나. 3단계까지 정상으로 온 사람은 항상 참이다. */
 function complete(s) {
