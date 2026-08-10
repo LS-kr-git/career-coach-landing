@@ -47,8 +47,58 @@ fail() {
 # ───────────────────────────────────────────────────
 COOLDOWN="${CC_PUSH_COOLDOWN:-900}"
 if [ "$COOLDOWN" -gt 0 ] 2>/dev/null; then
-  git fetch -q origin main 2>/dev/null || true
+  # 브레이크 둘. 이 fetch 가 자격증명을 물으면 Git Credential Manager 가 **화면 밖에
+  # 창을 띄우고 무한정 매달린다** — 사용자의 `git push` 가 아무 출력 없이 멈춘다.
+  # 2026-08-10 에 career-coach 쪽에서 같은 형태가 11.9시간 매달렸다(계정 고정이
+  # 걸린 PC 에서도 났다). 접두형을 쓸 수 있는 것은 이 파일이 **항상 bash 로 돌기**
+  # 때문이다(상시 규칙이 접두형을 금지한 이유는 cmd·PowerShell 함정이다).
+  #
+  # 둘이 막는 것이 다르다. 넘겨짚지 않고 아는 것만 적는다.
+  #   · GIT_TERMINAL_PROMPT=0        git **본체**의 터미널 프롬프트를 닫는다.
+  #                                  자격증명 **헬퍼**(GCM)의 GUI 창은 못 닫는다.
+  #   · credential.interactive=false GCM 의 GUI·TTY 를 닫는다. git 본체가 이 키를
+  #                                  아는 것은 2.47+ 다. 그 미만에서 `-c` 값이
+  #                                  헬퍼까지 닿는지는 **확인하지 못했다** — 내가
+  #                                  닿을 수 있는 환경에 GCM 이 없다.
+  # 잰 PC 는 2대(git 2.54·2.55)로 둘 다 2.47 이상이고, 나머지 1대는 미측정이다.
+  # 그 1대가 2.47 미만이면 이 두 줄로도 GCM GUI 는 못 막는다 — 그때는 규칙 2)의
+  # 계정 고정과 원격 URL 점검이 먼저다.
+  #
+  # 갱신에 실패해도 **로컬에 남은 origin/main 으로 그대로 판정한다.** 버리지 않는다 —
+  # `git push` 는 성공하면 스스로 `refs/remotes/origin/main` 을 갱신하므로, 이 훅이
+  # 가장 막고 싶은 경우(같은 클론에서 몇 분 뒤 재푸시)의 로컬 ref 는 **정확하다.**
+  # 자격증명이 필요한 PC 에서는 이 fetch 가 매번 실패하는데, 실패했다고 판정을 버리면
+  # 그 PC 에서 0겹이 **영구히 꺼진다**(검사관 지적, 2026-08-10 재현).
+  # 안전 방향도 한쪽뿐이다 — 낡은 ref 는 ELAPSED 를 **크게만** 만든다. 즉 헛막음은
+  # 만들 수 없고 놓침만 만든다. 그래서 판정은 살리고 **못 갱신했다는 사실만 띄운다.**
+  COOLDOWN_STALE=""
+  if ! GIT_TERMINAL_PROMPT=0 git -c credential.interactive=false \
+         fetch -q origin main 2>/dev/null; then
+    COOLDOWN_STALE=1
+  fi
   LAST="$(git log -1 --format=%ct origin/main 2>/dev/null || echo '')"
+
+  if [ -z "$LAST" ]; then
+    # ref 자체가 없다 — 잴 것이 없다. 막지는 않되(오탐으로 푸시가 통째로 막히는 쪽이
+    # 더 비싸다, 2026-08-09 사용자 결정) 조용히 넘어가지도 않는다.
+    {
+      echo ""
+      echo "⚪ 배포 쿨다운을 못 쟀습니다 — origin/main 참조가 없습니다."
+      echo "   직전 푸시로부터 $(( COOLDOWN / 60 ))분이 지났는지 **모른 채** 푸시합니다."
+      echo ""
+    } >&2
+  elif [ -n "$COOLDOWN_STALE" ]; then
+    {
+      echo ""
+      echo "⚪ origin/main 을 갱신하지 못했습니다 (네트워크·자격증명)."
+      echo "   아래 판정은 로컬에 남은 origin/main 기준이라 **실제보다 느슨할 수 있습니다**"
+      echo "   (다른 세션이 그 사이 민 것은 안 보입니다). 막는 쪽으로는 틀리지 않습니다."
+      echo "   확인(이 형태 그대로 — 브레이크를 빼면 그 자리에서 매달릴 수 있습니다):"
+      echo "     GIT_TERMINAL_PROMPT=0 git -c credential.interactive=false fetch origin main"
+      echo ""
+    } >&2
+  fi
+
   if [ -n "$LAST" ]; then
     NOW="$(date +%s)"
     ELAPSED=$(( NOW - LAST ))
@@ -62,7 +112,7 @@ if [ "$COOLDOWN" -gt 0 ] 2>/dev/null; then
         echo "취소되고(higher priority waiting request) 큐를 처음부터 다시 탑니다."
         echo "결과적으로 라이브 반영이 더 늦어집니다."
         echo ""
-        echo "  → 약 $(( (WAIT + 59) / 60 ))분 뒤에 다시 푸시하세요."
+        echo "  → 약 $(( (WAIT + 59) / 60 ))분 뒤에 다시 푸시하세요 (쿨다운 $(( COOLDOWN / 60 ))분)."
         echo "  → 그동안 커밋을 더 쌓아 두면 한 번에 나갑니다 (그게 가장 빠릅니다)."
         echo "  → 확인만 급하면 미리보기로: node tools/make-preview.mjs"
         echo ""
