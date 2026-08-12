@@ -371,7 +371,18 @@ if (!existsSync(figmaMapPath)) {
       }
       continue;
     }
-    if (!/^\d+:\d+$/.test(String(entry.node || ''))) {
+    // node 를 null 로 둘 수 있는 경우는 하나뿐이다 — 피그마 프레임을 아직 안 만든 페이지.
+    // 가짜 id 를 넣으면 등록부가 거짓말을 하고(트리 검수가 "없는 노드" 로 막는다),
+    // exempt 로 빼면 "피그마 화면이 필요 없다" 는 뜻이 되어 영영 조용해진다 — 2026-08-07 사고가 그 모양이었다.
+    // 그래서 자리를 비워 두되 사유를 요구하고, 아래 pending 분기가 푸시마다 그 사유를 찍는다.
+    if (entry.node === null) {
+      if (entry.textAudit !== 'pending' || !String(entry.pendingSync || '').trim()) {
+        add('BLOCK', '피그마 대응', page,
+            'node 가 null 입니다',
+            '피그마 프레임을 아직 안 만든 페이지만 null 을 쓸 수 있고, 그때는 textAudit 을 "pending" 으로 ' +
+            '두고 pendingSync 에 사유를 적어야 합니다. 프레임을 만들면 id 를 채우고 textAudit 을 docs-audit 으로 바꾸세요.');
+      }
+    } else if (!/^\d+:\d+$/.test(String(entry.node || ''))) {
       add('BLOCK', '피그마 대응', page,
           `node 가 프레임 id 형식이 아닙니다: ${JSON.stringify(entry.node)}`,
           '"6:148" 처럼 <숫자>:<숫자> 형태여야 합니다.');
