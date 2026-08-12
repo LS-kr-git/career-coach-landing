@@ -91,7 +91,7 @@ $('login').addEventListener('submit', async (e) => {
       body: JSON.stringify({ email: $('email').value, password: $('pw').value }),
     });
     // 401 만 "틀렸다" 이다. 나머지는 고장이라 그렇게 말해야 한다 —
-    // 뭉뚝그리면 화이트리스트가 비었거나 감사 쓰기가 죽은 것을 오타로 착각한다.
+    // 뭉뚱그리면 화이트리스트가 비었거나 감사 쓰기가 죽은 것을 오타로 착각한다.
     if (r.status === 401) { $('err').textContent = '이메일 또는 비밀번호가 맞지 않습니다.'; return; }
     if (!r.ok) { $('err').textContent = '로그인 처리가 실패했습니다 (' + r.status + ').'; return; }
     const d = await r.json();
