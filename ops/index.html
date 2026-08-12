@@ -77,6 +77,34 @@ async function call(path, init) {
   return r;
 }
 
+// innerHTML 은 `<script>` 를 **파싱만 하고 실행하지 않는다.** 같은 내용으로 새 요소를
+// 만들어 갈아 끼우면 그때 브라우저가 실행한다. 화면을 바꿀 때마다 main 이 통째로 갈리므로
+// 앞 화면의 스크립트가 만든 DOM 과 리스너는 같이 사라진다 — 화면 쪽에서 정리할 것이 없다.
+//
+// ⚠️ 조각은 **우리 함수만** 준다(같은 인증 게이트 뒤다). 남의 HTML 을 여기 붙이지 마라.
+// ⚠️ 인라인 스크립트에서 난 예외는 이 호출로 전파되지 않는다(window.onerror 로 간다).
+//    그래서 화면 하나가 죽어도 셸이 "화면을 불러오지 못했습니다" 로 덮어쓰지 않는다.
+function runScripts(root) {
+  root.querySelectorAll('script').forEach((old) => {
+    const s = document.createElement('script');
+    for (const a of old.attributes) s.setAttribute(a.name, a.value);
+    s.textContent = old.textContent;
+    old.replaceWith(s);
+  });
+}
+
+// 화면 조각이 함수 API 에 닿는 **유일한** 통로. 토큰을 조각에 넘기지 않는다 —
+// 넘기면 조각마다 401 처리가 갈리고, 로그아웃한 뒤에도 남은 사본이 계속 쓰인다.
+window.ops = {
+  api(page, fn, body) {
+    return call('/api/' + page + '/' + fn, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body || {}),
+    }).then((r) => r.json());
+  },
+};
+
 function signOut() {
   token = ''; sessionStorage.removeItem('ops_t');
   $('app').style.display = 'none'; $('login').style.display = '';
@@ -125,6 +153,7 @@ async function open(id) {
   $('main').innerHTML = '';
   try {
     $('main').innerHTML = await (await call('/view/' + id)).text();
+    runScripts($('main'));
   } catch (x) {
     // 빈 화면을 두면 "아직 아무것도 없는 화면" 과 구분되지 않는다.
     $('main').innerHTML = '<h1>화면을 불러오지 못했습니다</h1><p class="sub"></p>';
