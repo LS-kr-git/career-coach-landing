@@ -82,6 +82,22 @@ function signOut() {
   $('app').style.display = 'none'; $('login').style.display = '';
 }
 
+// 조각이 쓰는 유일한 창구. 이게 없으면 화면마다 주소와 토큰을 다시 만들어야 하고,
+// 그러면 401 처리가 화면 수만큼 갈린다.
+window.ops = { call: call, signOut: signOut };
+
+// innerHTML 은 <script> 를 실행하지 않는다. 조각에 폼·버튼을 두려면 여기서 다시 만든다.
+// 인라인 · 클래식만 돌린다 — src 가 붙은 것은 조각의 오리진이 우리 것이 아니라 받지 않고,
+// type 이 붙은 것(application/json 등)은 애초에 코드가 아니다.
+function runScripts(root) {
+  root.querySelectorAll('script').forEach(function (old) {
+    if (old.src || (old.type && !/^(text|application)\/javascript$/i.test(old.type))) return;
+    var s = document.createElement('script');
+    s.textContent = old.textContent;
+    old.replaceWith(s);
+  });
+}
+
 $('login').addEventListener('submit', async (e) => {
   e.preventDefault();
   $('go').disabled = true; $('err').textContent = '';
@@ -125,6 +141,7 @@ async function open(id) {
   $('main').innerHTML = '';
   try {
     $('main').innerHTML = await (await call('/view/' + id)).text();
+    runScripts($('main'));
   } catch (x) {
     // 빈 화면을 두면 "아직 아무것도 없는 화면" 과 구분되지 않는다.
     $('main').innerHTML = '<h1>화면을 불러오지 못했습니다</h1><p class="sub"></p>';
