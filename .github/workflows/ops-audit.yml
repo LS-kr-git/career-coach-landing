@@ -75,3 +75,6 @@ jobs:
 
       - name: 세션 이어가기·로그아웃 검수
         run: node tools/ops-audit/session.mjs
+
+      - name: 왼쪽 탭바 검수
+        run: node tools/ops-audit/nav.mjs
