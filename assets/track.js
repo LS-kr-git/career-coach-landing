@@ -130,6 +130,18 @@ export function pageView(name, props = {}, accessToken = null) {
  * `event_props_no_pii` CHECK 가 `email`·`phone`·`name` 같은 키를 거부하고,
  * 이름은 `analytics.event_name` 허용 목록(`client_error`)에 있어야 통과한다.
  */
+// 🔴 `page` 만 안전하게 해서는 부족하다. `e.filename` 은 **인라인 스크립트에서 문서
+//    URL** 이고, rejection 의 스택 프레임도 주소를 그대로 들고 온다. `/auth/callback/`
+//    은 스크립트가 전부 인라인 모듈이고 주소에 `?code=…` · `#access_token=…` 이 남아
+//    있을 수 있다 — 그대로 실으면 **영구 보관되는 분석 원장에 자격증명이 박힌다.**
+//    `event_props_no_pii` 는 **키만** 보고 값은 안 본다. 그러니 여기서 잘라 낸다.
+/** 주소에서 쿼리·해시를 잘라낸다. 남는 것은 경로까지다. */
+function cutUrl(v) { return String(v || '').split('#')[0].split('?')[0]; }
+/** 메시지 안에 박힌 주소의 쿼리·해시만 지운다. 메시지 자체는 안 자른다. */
+function redactUrls(v) {
+  return String(v || '').replace(/(https?:\/\/[^\s'"]+?)[?#][^\s'"]*/g, '$1');
+}
+
 const ERR_MAX = 3;          // 한 번 로드에 이만큼만. 루프 안에서 터지면 원장이 잠긴다
 const ERR_CUT = 300;        // 메시지 길이 상한 (props 전체가 2,000자를 넘으면 RPC 가 거부한다)
 let errSent = 0;
@@ -143,8 +155,8 @@ function reportError(msg, src, line, col) {
     errSeen.add(key);
     errSent += 1;
     track('client_error', {
-      msg: String(msg || '').slice(0, ERR_CUT),
-      src: String(src || '').slice(0, 200),
+      msg: redactUrls(msg).slice(0, ERR_CUT),
+      src: cutUrl(src).slice(0, 200),
       line: Number(line) || 0,
       col: Number(col) || 0,
       page: location.pathname,        // ★ search·hash 를 넣지 않는다
@@ -158,7 +170,7 @@ if (typeof window !== 'undefined') {
     // 리소스 로드 실패(<img>·<script>)는 message 가 없고 target 이 있다. 그것도 고장이다.
     if (!e.message && e.target && e.target !== window) {
       const el = e.target;
-      reportError('resource load failed: ' + (el.tagName || '?'), el.src || el.href || '', 0, 0);
+      reportError('resource load failed: ' + (el.tagName || '?'), cutUrl(el.src || el.href), 0, 0);
       return;
     }
     reportError(e.message, e.filename, e.lineno, e.colno);
