@@ -238,6 +238,8 @@ async function open(id, missing) {
   }
 }
 
+// `!$('go').disabled` 를 같이 보던 판이 있었는데, 그 값을 참으로 만들던 유일한 곳이
+// 함수 이름 형식 검사였다. 주소에서 함수 이름을 뺀 뒤로는 늘 거짓이라 죽은 조건이다.
 if (token) {
   start().catch((x) => {
     signOut();
