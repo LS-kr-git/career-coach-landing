@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<!-- ★ 리퍼러 차단은 <head> 의 맨 앞이어야 한다.
+     주소창에 열람 토큰이 실려 있으므로, 이 태그보다 먼저 나오는 외부 리소스 요청은
+     Referer 헤더에 토큰이 든 전체 URL 을 붙여 보낸다. 아래 jsdelivr 스타일시트가 바로 그 경우다.
+     GitHub Pages 는 HTTP 헤더를 못 준다 — 이 meta 가 유일한 수단이다 (전문-열람-규칙 4절). -->
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="only light">
+<meta name="format-detection" content="telephone=no">
+<meta name="robots" content="noindex,nofollow">
+<title>인사이트 — 커리어코치</title>
+<link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  /* 커리어코치 디자인 시스템 — letter.html·terms.html 과 같은 토큰·폭·타이포·헤더를 쓴다.
+     새로 만든 값은 없다. */
+  :root{
+    color-scheme: only light;
+    --amber-100:#FEF3C7; --amber-200:#FDE68A; --amber-500:#F59E0B; --amber-600:#D97706;
+    --navy-900:#1E3A8A;
+    --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-400:#94A3B8;
+    --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155; --gray-800:#1E293B;
+    --pad-x: 24px;
+    --card-max: 450px;
+    /* CTA 규칙(2026-08-03) — 제품 공통. 값·근거는 CLAUDE.md "CTA 규칙" */
+    --cta-h:54px; --cta-radius:14px; --cta-fs:15px; --cta-fw:700; --cta-max:410px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{background:var(--gray-100)}
+  body{
+    font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;
+    background:#fff; color:var(--gray-800); line-height:1.6; -webkit-font-smoothing:antialiased;
+  }
+  .page{width:100%;max-width:var(--card-max);margin:0 auto;background:#fff;min-height:100vh;min-height:100svh}
+
+  header{display:flex;align-items:center;gap:10px;padding:24px var(--pad-x)}
+  .app-icon{width:29px;height:29px;border-radius:25%;background:linear-gradient(135deg,#F59E0B,#D97706);display:flex;align-items:center;justify-content:center}
+  .app-icon img{width:21px;height:21px;display:block}
+  header .wordmark{height:21px;display:block}
+
+  /* 텍스트 스타일 (피그마 text/*) — letter.html 과 동일 */
+  .t-display{font-size:28px;line-height:36px;font-weight:800;letter-spacing:-0.01em}
+  .t-h3{font-size:17px;line-height:24px;font-weight:600}
+  .t-body{font-size:15px;line-height:23px;font-weight:400}
+  .t-caption-strong{font-size:13px;line-height:18px;font-weight:600}
+
+  .brief{padding:8px var(--pad-x) 0}
+  .kicker{color:var(--amber-600);margin-bottom:6px}
+  h1{color:var(--navy-900)}
+  .summary{color:var(--gray-600);margin-top:10px}
+
+  /* 전문 */
+  .body{margin-top:24px}
+  .body p{color:var(--gray-700);margin-top:14px;font-size:15px;line-height:26px}
+
+  /* 잠김 안내 — 카드는 letter.html .insight 와 같은 값 */
+  .lock{margin-top:24px;background:#fff;border:1px solid var(--gray-200);
+    box-shadow:0 1px 3px rgba(15,23,42,.05);border-radius:14px;padding:20px;text-align:center}
+  .lock-msg{color:var(--gray-700)}
+  .cta{display:flex;align-items:center;justify-content:center;width:100%;max-width:var(--cta-max);
+    height:var(--cta-h);margin:16px auto 0;border:0;cursor:pointer;
+    background:var(--amber-500);color:#fff;font-family:inherit;
+    font-weight:var(--cta-fw);font-size:var(--cta-fs);border-radius:var(--cta-radius);
+    box-shadow:0 6px 18px rgba(245,158,11,.25)}
+  .cta:active{transform:scale(.98)}
+  .cta[disabled]{opacity:.55;box-shadow:none}
+  /* [hidden] 의 display:none 은 브라우저 기본값이라 위 display:flex 에 진다.
+     없으면 JS 가 hidden 을 걸어도 버튼이 그대로 보인다 (playwright 로 확인). */
+  .cta[hidden]{display:none}
+
+  /* 안내(로딩·오류) — 본문이 없을 때만 보인다 */
+  .notice{padding:56px var(--pad-x);text-align:center;color:var(--gray-500)}
+
+  footer{margin-top:40px;text-align:center;padding:0 var(--pad-x) 56px}
+  .fine{color:var(--gray-400);font-size:11px;line-height:1.7}
+  .fine a{color:var(--gray-500)}
+
+  @media (min-width:451px){
+    body{background:var(--gray-100)}
+    .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
+  }
+  :focus-visible{outline:2px solid var(--amber-500);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="app-icon"><img src="/assets/mark-white.svg" alt=""></div>
+    <img class="wordmark" src="/assets/wordmark.svg" alt="커리어코치">
+  </header>
+
+  <main class="brief">
+    <p class="notice" id="notice" role="status">불러오는 중이에요…</p>
+
+    <article id="letter" hidden>
+      <div class="kicker t-caption-strong">면접을 위한 업계 인사이트</div>
+      <h1 class="t-display" id="title"></h1>
+      <p class="t-body summary" id="summary"></p>
+
+      <section class="lock" id="lock" hidden>
+        <p class="t-h3 lock-msg" id="lockMsg"></p>
+        <button class="cta" id="makeup" type="button" hidden>이 편 열기</button>
+        <button class="cta" id="subscribe" type="button" hidden></button>
+      </section>
+
+      <div class="body" id="body" hidden></div>
+    </article>
+  </main>
+
+  <footer>
+    <div class="fine">
+      커리어코치 · 이 링크는 회원님 한 분을 위한 것이라 다른 분과 공유하면 열리지 않아요.<br>
+      <a href="/terms.html">이용약관</a> · <a href="/privacy.html">개인정보처리방침</a>
+    </div>
+  </footer>
+</div>
+
+<script type="module">
+  // 접속 정보는 /assets/supabase-config.js 한 곳에만 둔다 (2026-08-06 복구 훈련 결과).
+  import { SUPABASE_URL, SUPABASE_ANON_KEY } from '/assets/supabase-config.js';
+
+  // supabase-js 를 부르지 않는다. 여기서 하는 일은 RPC POST 한두 번이고,
+  // 그것 때문에 SDK 수백 KB 를 내려보낼 이유가 없다 (assets/track.js 와 같은 판단).
+  // 로그인도 필요 없다 — 자격은 토큰이 증명한다.
+
+  const $ = (id) => document.getElementById(id);
+
+  /* 열람 판정은 DB(insight_access)가 한다. 여기 있는 것은 그 결과 상태를 화면 문구로
+     옮기는 표뿐이고, 조건을 다시 계산하지 않는다.
+     문구 정본: career-coach `docs/기획/전문-열람-규칙.md` 3절.
+     상태 정본: `supabase/migrations/0023_insight_access.sql` 5절.
+     ※ locked_past 는 3절 표에 없다 — 미승인 임시 문구다(보고서에 남겼다). */
+  const LOCKED = {
+    makeup_offer:            '오늘은 지난 편 1개를 더 볼 수 있어요',
+    makeup_used:             '이번 주 보충은 다 쓰셨어요. 다음 주 일요일에 다시 열려요',
+    need_subscription:       '구독하면 지난 편도 이어서 볼 수 있어요',
+    saved_need_subscription: '소장한 글이에요. 구독을 다시 시작하면 바로 열려요',
+    locked_past:             '지난 편이에요. 같은 주에 놓친 글은 일요일에 1편 다시 열려요',
+  };
+
+  /* 구독 CTA 의 목적지. **결제 화면이 아직 없어서 비어 있다** — 비어 있으면 버튼이
+     눌리지 않는 '준비 중' 으로 그려진다(갈 곳 없는 죽은 링크를 만들지 않기 위해서다).
+     결제 화면이 생기면 이 한 줄을 채우되 **그 페이지를 먼저 저장소에 만든다** —
+     page-audit 의 깨진 링크 검사는 이 상수를 못 본다 (2026-08-10 실측).
+     이 주석에 빈 앵커나 이동문을 원문으로 쓰지 마라 — 그 검사가 주석까지 훑어 막는다.
+     ※ 아래 버튼 문구 2개는 미승인 임시 문구다. */
+  const CHECKOUT_URL = '';
+  const NEEDS_SUB = new Set(['need_subscription', 'saved_need_subscription']);
+
+  const params = new URLSearchParams(location.search);
+  const token = params.get('t') || '';
+  const id = params.get('id') || '';
+
+  // 토큰은 base64url 22자 고정이다(0023 의 length CHECK 와 같은 값).
+  // 형식이 아니면 서버에 보내지 않는다 — 오타 링크로 RPC 를 두드릴 이유가 없다.
+  const wellFormed = /^[A-Za-z0-9_-]{22}$/.test(token) && /^[0-9]{1,18}$/.test(id);
+
+  const notice = (text) => { $('notice').textContent = text; $('notice').hidden = false; $('letter').hidden = true; };
+
+  /** RPC 한 번. 토큰은 본문(POST)으로만 나간다 — 쿼리스트링·로그·이벤트에 싣지 않는다. */
+  async function call(fn) {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify({ p_token: token, p_insight_id: Number(id) }),
+    });
+    const data = await res.json().catch(() => null);
+    // 없는 글·만료 링크는 RPC 가 예외로 올린다. 그 메시지를 그대로 보여준다
+    // (사람이 읽으라고 쓴 한국어이고, 우리가 옮겨 적으면 두 곳이 갈린다).
+    if (!res.ok) throw new Error((data && data.message) || '지금은 열 수 없어요');
+    // returns table(...) 은 행 배열로 온다. 편 하나이므로 첫 행이 전부다.
+    if (!Array.isArray(data) || !data.length) throw new Error('없는 글이에요');
+    return data[0];
+  }
+
+  function render(row) {
+    $('notice').hidden = true;
+    $('letter').hidden = false;
+    $('title').textContent = row.title || '';
+    $('summary').textContent = row.summary || '';
+
+    const bodyEl = $('body');
+    bodyEl.replaceChildren();
+
+    // ★ 판정 기준은 body 가 **null 인가**다. `if (row.body)` 로 쓰면 빈 문자열이
+    //   잠김과 같은 취급을 받아, 본문이 비어 있는 편이 "잠겼어요" 로 보인다.
+    //   RPC 는 열람 가능할 때만 body 를 채운다(0023 의 `case when v_can then i.body end`).
+    if (row.body != null) {
+      // DB 의 body 는 평문이다. innerHTML 로 넣지 않는다.
+      for (const para of String(row.body).split(/\n{2,}/)) {
+        if (!para.trim()) continue;
+        const p = document.createElement('p');
+        p.textContent = para.trim();
+        bodyEl.appendChild(p);
+      }
+      bodyEl.hidden = false;
+      $('lock').hidden = true;
+      return;
+    }
+
+    // 잠김 — 제목·요약은 그대로 두고 전문만 막는다 (전문-열람-규칙 2절).
+    bodyEl.hidden = true;
+    $('lock').hidden = false;
+    $('lockMsg').textContent = LOCKED[row.state] || '지금은 열 수 없어요';
+    $('makeup').hidden = row.state !== 'makeup_offer';
+
+    const sub = $('subscribe');
+    sub.hidden = !NEEDS_SUB.has(row.state);
+    sub.disabled = !CHECKOUT_URL;
+    sub.textContent = CHECKOUT_URL ? '구독 시작하기' : '구독 준비 중이에요';
+  }
+
+  $('makeup').addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    btn.disabled = true;
+    try {
+      render(await call('insight_use_makeup'));
+    } catch (err) {
+      $('lockMsg').textContent = err.message;
+      btn.hidden = true;
+    }
+  });
+
+  // 목적지가 빌 때는 버튼이 disabled 라 이 핸들러가 돌 일이 없다(클릭 이벤트 자체가 안 난다).
+  $('subscribe').addEventListener('click', () => { location.href = CHECKOUT_URL; });
+
+  if (!wellFormed) {
+    notice('링크가 올바르지 않아요. 알림톡에서 받은 링크로 다시 열어 주세요.');
+  } else {
+    try {
+      render(await call('insight_letter'));
+    } catch (err) {
+      notice(err.message);
+    }
+  }
+</script>
+</body>
+</html>
