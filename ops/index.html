@@ -80,6 +80,10 @@ nav a.on::before{content:"";position:absolute;left:12px;top:6px;bottom:6px;width
    하나" 였다. 둘을 같이 쓰면 호버가 선택보다 세진다.
    로그아웃도 뺀다: 같은 파일 위쪽 주석대로 그 줄은 호버로 위계를 올리지 않기로 한 자리다. */
 nav a:not(.out):not(.on):hover{background:#f7f7f8}
+/* 키보드로 옮길 때 지금 어디에 있는지 (2026-08-13). 호버와 같은 문제를 키보드 쪽에서 푼다.
+   `:focus-visible` 이라 마우스 클릭에는 안 뜬다. 아웃라인은 레이아웃에 안 들어가므로
+   위 `max-content` 폭 계산에 영향이 없다. */
+nav a:focus-visible{outline:2px solid #92400E;outline-offset:-2px}
 /* 폭 예약. 위 「탭바 폭」 주석의 ② 다 — 이 규칙이 없으면 선택할 때 탭바 폭이 튄다.
    높이 0 · overflow hidden 이라 화면에는 안 보이고, **폭 계산에만** 들어간다. */
 nav a[data-t]::after{content:attr(data-t);display:block;height:0;overflow:hidden;
@@ -379,7 +383,19 @@ let seq = 0;
 
 async function open(id, missing) {
   const mine = ++seq;
-  $('nav').querySelectorAll('a').forEach((a) => a.classList.toggle('on', a.dataset.id === id));
+  // 선택 표시는 **눈에만 보인다** — 왼쪽 바도 굵기도 스크린리더에는 안 들린다.
+  // `aria-current="page"` 가 그 사실을 기계에게도 말한다 (2026-08-13 사용자 지시).
+  $('nav').querySelectorAll('a').forEach((a) => {
+    const 지금 = a.dataset.id === id;
+    a.classList.toggle('on', 지금);
+    if (지금) a.setAttribute('aria-current', 'page');
+    else a.removeAttribute('aria-current');
+  });
+  // 칸이 14개라 화면이 짧으면 탭바 안에서 스크롤이 생긴다. 그 상태로 아래쪽 화면을
+  // 북마크로 열면 선택 표시가 스크롤 밖이라 **어디가 열렸는지 안 보인다**
+  // (2026-08-13 사용자 지시). `block:'nearest'` 라 이미 보이는 칸은 안 움직인다 —
+  // 매번 가운데로 끌어오면 누를 때마다 목록이 튄다.
+  $('nav').querySelector('a.on')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   // 탭 제목에 지금 화면 이름을 넣는다 (2026-08-13 사용자 지시). 어드민을 두 탭 열면
   // 둘 다 같은 제목이라 어느 것이 어느 화면인지 구분이 안 됐다.
   document.title = (NAV_TITLE.get(id) ? NAV_TITLE.get(id) + ' · ' : '') + '커리어코치 어드민';
