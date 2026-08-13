@@ -31,7 +31,8 @@ button:disabled{opacity:.5;cursor:default}
      ③ `scrollbar-gutter:stable`   스크롤바 자리를 늘 비워 둔다. 빼면 화면이 짧은 PC 에서만
                                    223 이 되어, 재현이 안 되는 폭 차이가 생긴다.
    `max-width` 320 은 안전장치다. 아주 긴 이름이 들어와도 오른쪽 본문을 잡아먹지 않는다 —
-   대신 탭바 안에서 가로로 잘린다. `min-width` 200 은 반대쪽(이름이 다 짧아졌을 때)이다. */
+   대신 탭바 안에서 가로로 잘린다. 하한은 두지 않는다 — 사용자가 말한 것은 상한뿐이고,
+   하한을 두면 그만큼은 다시 사람이 정한 숫자가 된다. */
 #app{display:none;grid-template-columns:max-content 1fr;min-height:100vh}
 /* 스크롤을 내려도 왼쪽 탭바는 그대로 둔다 (2026-08-13 사용자 지시).
    `#app` 이 그리드라 nav 는 기본값(stretch)으로 열 높이만큼 늘어나는데, 그러면
@@ -39,7 +40,7 @@ button:disabled{opacity:.5;cursor:default}
    높이를 화면 높이로 고정하고 넘치면 탭바 안에서만 스크롤한다. 안 그러면 화면이 짧은
    기기에서 아래쪽 탭에 영영 못 닿는다. */
 nav{background:#fff;border-right:1px solid #e5e5ea;padding:18px 0;
-    white-space:nowrap;scrollbar-gutter:stable;min-width:200px;max-width:320px;
+    white-space:nowrap;scrollbar-gutter:stable;max-width:320px;
     position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;overscroll-behavior:contain;
     display:flex;flex-direction:column}
 /* 세로 flex 는 항목을 눌러서 맞추려 든다. 탭이 늘면 글자가 겹치므로 자연 높이로 고정하고,
@@ -73,10 +74,12 @@ nav a.on{font-weight:700}
 nav a.on::before{content:"";position:absolute;left:12px;top:6px;bottom:6px;width:3px;
                  background:#F59E0B;border-radius:2px}
 /* 마우스를 올렸을 때 (2026-08-13 사용자 지시: 반응이 없어 누를 수 있는지 몰랐다).
-   🔴 **선택 표시와 헷갈리면 안 된다** — 선택은 배경을 안 쓰기로 했으니(위) 호버 배경은
-   그 자리를 뺏지 않을 만큼만 옅게 둔다. 로그아웃은 뺀다: 같은 파일 위쪽 주석대로
-   그 줄은 호버로 위계를 올리지 않기로 한 자리다. */
-nav a:not(.out):hover{background:#f7f7f8;color:#000}
+   🔴 **`.on` 을 뺀다.** 선택은 배경을 안 쓰기로 한 자리인데(위), 빼지 않으면 선택된 칸에
+   마우스를 올리는 순간 배경이 생겨 그 결정이 반쯤 되돌아간다(검사관이 잡았다).
+   🔴 배경만 바꾸고 **글자색은 안 건드린다** — 사용자가 준 것은 "옅은 배경이나 글자색 중
+   하나" 였다. 둘을 같이 쓰면 호버가 선택보다 세진다.
+   로그아웃도 뺀다: 같은 파일 위쪽 주석대로 그 줄은 호버로 위계를 올리지 않기로 한 자리다. */
+nav a:not(.out):not(.on):hover{background:#f7f7f8}
 /* 폭 예약. 위 「탭바 폭」 주석의 ② 다 — 이 규칙이 없으면 선택할 때 탭바 폭이 튄다.
    높이 0 · overflow hidden 이라 화면에는 안 보이고, **폭 계산에만** 들어간다. */
 nav a[data-t]::after{content:attr(data-t);display:block;height:0;overflow:hidden;
@@ -326,10 +329,14 @@ async function start() {
   });
   $('nav').innerHTML = groups.map((g) =>
     '<div class="grp">' + g.name + '</div>' +
-    g.items.map((p) => '<a href="#' + p.id + '" data-id="' + p.id + '" data-t="' + p.title + '">' + p.title + '</a>').join('')
+    g.items.map((p) => '<a href="#' + p.id + '" data-id="' + p.id + '">' + p.title + '</a>').join('')
   ).join('') + '<div class="who"></div><a class="out" id="out">로그아웃</a>';
   // 이메일은 **본문이 아니라 값**이다. innerHTML 로 붙이면 주소에 든 문자가 태그로 읽힌다.
   $('nav').querySelector('.who').textContent = boot.user.email;
+  // 폭 예약이 쓰는 값(위 `nav a[data-t]::after`). 🔴 **속성에 문자열로 이어 붙이지 않는다** —
+  // 제목에 따옴표가 하나 들어오면 마크업이 끊기고, 그때 예약도 같이 사라져 폭이 다시 튄다
+  // (검사관이 잡았다). 그려진 글자에서 가져오므로 화면과 늘 같은 값이다.
+  $('nav').querySelectorAll('a[data-id]').forEach((a) => { a.dataset.t = a.textContent; });
   // `href` 를 주지 않는다. 주는 순간 아래 nav 클릭 처리기의 "지금 열린 탭을 다시 눌렀나"
   // 비교(`getAttribute('href') === location.hash`)에 걸려 화면을 다시 부른다.
   $('out').addEventListener('click', 로그아웃);
