@@ -64,7 +64,7 @@ await ctx.route('**/functions/v1/**', async (route) => {
   if (u.pathname.endsWith('/bootstrap')) {
     return route.fulfill({ json: { user: { email: 'a@b.c' }, nav: NAV } });
   }
-  return route.fulfill({ body: '<h1 id="t">오류 리포트</h1>', contentType: 'text/html; charset=utf-8' });
+  return route.fulfill({ body: '<h1 id="t">가나다 라마바</h1>', contentType: 'text/html; charset=utf-8' });
 });
 
 const { ok, 마무리 } = 검사기();
