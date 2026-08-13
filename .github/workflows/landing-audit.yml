@@ -37,7 +37,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      # 🔴 fetch-depth: 0 이 꼭 필요하다. 기본값(얕은 클론)에서는
+      #    `git log -1 --format=%cI -- <파일>` 이 **모든 경로에 대해 tip 커밋 날짜**를 준다.
+      #    그러면 docs-audit 의 신선도 판정이 "오늘 고쳤다" 로 읽어 멀쩡한 스냅샷을
+      #    전부 '낡음' 으로 막는다 — 이 워크플로 첫 실행이 정확히 그렇게 죽었다(2026-08-13).
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:

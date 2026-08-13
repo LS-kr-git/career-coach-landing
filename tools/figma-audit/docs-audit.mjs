@@ -160,6 +160,10 @@ const git = (args) => {
   catch { return null; }
 };
 const dirty = git(['status', '--porcelain']);
+// 얕은 클론에서는 `git log -1 -- <경로>` 가 **모든 경로에 대해 tip 커밋**을 준다. 그러면
+// 아래 신선도 판정이 "전부 오늘 고쳤다" 로 읽어 멀쩡한 스냅샷을 전부 '낡음' 으로 막는다.
+// 원인을 모르면 스냅샷을 다시 뽑으러 가게 되므로(헛수고) 그 사실을 이름으로 말한다.
+const shallow = (git(['rev-parse', '--is-shallow-repository']) || '').trim() === 'true';
 const today = kstDay(Date.now());
 for (const page of snap.pages) {
   const frames = framesOf(page);
@@ -174,6 +178,12 @@ for (const page of snap.pages) {
   if (last === null || dirty === null) {
     findings.push({ level: 'STALE', page: page.html, kind: '판정 불가',
       detail: 'git 을 부르지 못해 신선도를 판정하지 못했습니다 — 못 돈 검수를 통과로 세지 않습니다' });
+    continue;
+  }
+  if (shallow) {
+    findings.push({ level: 'STALE', page: page.html, kind: '판정 불가 (얕은 클론)',
+      detail: '얕은 클론이라 파일별 커밋 날짜를 못 읽습니다 — 모든 경로가 tip 커밋으로 나옵니다. '
+            + 'CI 라면 actions/checkout 에 fetch-depth: 0 을, 로컬이면 git fetch --unshallow 를 하세요' });
     continue;
   }
   const lastMs = Date.parse(last.trim());
