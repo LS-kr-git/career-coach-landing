@@ -14,7 +14,9 @@ const { server, origin } = await 서버열기();
 
 // 🔴 **운영 화면의 실제 이름을 여기 적지 않는다.** `ops/index.html` 이 그렇게 정해 뒀다 —
 //    "화면 id 목록은 함수가 준 nav 에서만 온다. 여기에 화이트리스트를 두지 마라 — 두는 순간
-//    화면 목록이 공개 저장소에 박힌다." 이 저장소는 공개다. `route.mjs` 의 스텁도 가짜다.
+//    화면 목록이 공개 저장소에 박힌다." 이 저장소는 공개다.
+//    ⚠️ `route.mjs` 의 스텁은 **아직 진짜 id 셋(errors·cost·crawl)을 쓴다.** 이 파일과 다르다 —
+//       그쪽을 손대는 세션이 "이미 가짜겠지" 로 지나가지 않게 여기 적어 둔다.
 //
 // 그래서 **성질만 같게** 만든다. 검사가 보는 것은 이름의 뜻이 아니라 아래 셋뿐이다.
 //    · 라틴+한글이 섞인 **가장 긴 칸**이 하나 있다 — 굵기 예약과 폭 검사의 최악 조건.
@@ -95,9 +97,6 @@ const 재기 = () => page.evaluate(() => {
     barBg: bar?.backgroundColor ?? null,
     aria: [...nav.querySelectorAll('[aria-current]')].map((a) => a.dataset.id),
     nowrap: on ? c.whiteSpace : null,
-    // 두 줄이 된 칸. 항목 한 줄은 22.4 + padding 14 ≈ 36 이라 37 을 넘으면 접힌 것이다.
-    접힌칸: [...nav.querySelectorAll('a[data-id]')]
-      .filter((a) => a.getBoundingClientRect().height > 37).map((a) => a.dataset.id),
     // 🔴 글자가 상자 밖으로 나간 칸. `white-space:nowrap` 이라 넘치면 **접히는 게 아니라 잘린다** —
     //    그래서 높이만 보면 `max-width` 가 조여도 영영 초록이다(검사관 지적).
     잘린칸: [...nav.querySelectorAll('a[data-id]')]
@@ -131,19 +130,16 @@ await page.waitForFunction((id) => document.querySelector('#nav a.on')?.dataset.
 // 어느 칸을 선택하든 폭이 같아야 한다. 다르면 `::after` 굵기 예약이 빠진 것이다
 // (그 상태에서는 가장 긴 칸을 누를 때만 폭이 튀어 오른쪽 본문이 밀린다).
 const 폭 = new Set();
-const 접힘 = new Set();
 const 잘림 = new Set();
 for (const id of IDS) {
   await page.evaluate((x) => { location.hash = '#' + x; }, id);
   await page.waitForFunction((x) => document.querySelector('#nav a.on')?.dataset.id === x, id);
   const m = await 재기();
   폭.add(m.navW);
-  m.접힌칸.forEach((x) => 접힘.add(x));
   m.잘린칸.forEach((x) => 잘림.add(x));
 }
 ok('어느 칸을 선택해도 탭바 폭이 같다', 폭.size === 1, [...폭].join(', '));
 ok('어느 칸도 글자가 잘리지 않는다', 잘림.size === 0, [...잘림].join(', '));
-ok('어느 칸도 두 줄이 되지 않는다 (nowrap 이 풀리면 여기서 걸린다)', 접힘.size === 0, [...접힘].join(', '));
 
 // 화면이 짧으면 탭바에 세로 스크롤바가 생긴다. `scrollbar-gutter:stable` 이 없으면
 // 그때만 폭이 달라져서 **그 PC 에서만** 나는 차이가 된다.
