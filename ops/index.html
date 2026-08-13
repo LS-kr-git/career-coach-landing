@@ -32,7 +32,16 @@ nav>*{flex:none}
 /* 로그인 계정은 맨 아래 (2026-08-13 사용자 지시). `margin-top:auto` 라 탭이 화면보다
    길어지면 자동으로 0 이 되어 목록 끝에 따라붙는다 — 겹치지 않는다. */
 nav .who{font-size:12px;color:#8e8e93;padding:14px 18px 0;margin-top:auto}
-nav .grp{font-size:11px;color:#8e8e93;padding:14px 18px 4px;letter-spacing:.04em}
+/* 묶음 제목은 대제목이다 (2026-08-13 사용자 지시). 탭 이름(14px)과 위계가 붙어 있어서
+   어디까지가 한 묶음인지 눈으로 안 잡혔다. 크기·굵기를 올리고, 흰 배경 대신 키 컬러
+   연한 단계를 깐다.
+   색은 새로 만들지 않는다 — `career-coach` 저장소 `docs/마케팅/브랜드-가이드.md` 의
+   확정 스케일에서 그대로 가져온다. 배경 amber-100 #FEF3C7 · 글자 amber-800 #92400E.
+   (같은 파일의 Primary 대표값 #F59E0B 를 배경으로 쓰면 흰 글씨가 필요해지고,
+    그러면 탭바가 노란 덩어리가 된다. 연한 단계 위에 진한 글자가 위계만 올린다.) */
+nav .grp{font-size:17px;font-weight:800;line-height:1.35;letter-spacing:-.01em;
+         color:#92400E;background:#FEF3C7;padding:9px 18px;margin:16px 0 6px}
+nav .grp:first-child{margin-top:0}
 nav a{display:block;padding:7px 18px;text-decoration:none;font-size:14px;cursor:pointer}
 nav a.on{background:#eceaff;font-weight:600}
 main{padding:26px 30px;max-width:1242px;margin:0 auto}
