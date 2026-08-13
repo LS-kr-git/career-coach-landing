@@ -63,10 +63,17 @@ h1{font-size:20px;margin:0 0 6px}
 <script type="module">
 import { SUPABASE_URL } from '/assets/supabase-config.js';
 
+// 주소는 `#<함수이름>/<화면id>` 두 칸이다.
+//
 // 함수 이름은 주소창 해시로 받는다 — 이 저장소는 공개라 여기 적으면 이름이 그대로 새어 나간다.
 // 자물쇠는 함수 쪽 화이트리스트(lib/auth.ts)다. 해시는 그 앞의 층일 뿐이다.
-const FN = location.hash.slice(1);
+//
+// 화면 id 를 **경로나 쿼리로 옮기지 마라.** 해시만 서버로 안 가서(Referer·CDN 로그에도 안 남는다)
+// 함수 이름을 감출 수 있다. 뒤 칸을 경로로 빼면 함수 이름이 해시에 남더라도 정적 호스팅에
+// `/ops/*` → index.html rewrite 가 따로 필요해지고, 얻는 것은 같다.
+const FN = location.hash.slice(1).split('/')[0];
 const BASE = SUPABASE_URL + '/functions/v1/' + FN;
+const hashPage = () => location.hash.slice(1).split('/')[1] || '';
 const $ = (id) => document.getElementById(id);
 let token = sessionStorage.getItem('ops_t') || '';
 
@@ -87,6 +94,8 @@ async function call(path, init) {
 
 function signOut() {
   token = ''; sessionStorage.removeItem('ops_t');
+  // 비워야 로그아웃 뒤 해시가 움직여도 401 을 다시 부르러 가지 않는다.
+  NAV_IDS = [];
   $('app').style.display = 'none'; $('login').style.display = '';
 }
 
@@ -139,19 +148,62 @@ async function start() {
   });
   $('nav').innerHTML = '<div class="who">' + boot.user.email + '</div>' + groups.map((g) =>
     '<div class="grp">' + g.name + '</div>' +
-    g.items.map((p) => '<a data-id="' + p.id + '">' + p.title + '</a>').join('')
+    g.items.map((p) => '<a href="#' + FN + '/' + p.id + '" data-id="' + p.id + '">' + p.title + '</a>').join('')
   ).join('');
-  $('nav').querySelectorAll('a').forEach((a) => a.addEventListener('click', () => open(a.dataset.id)));
-  if (boot.nav.length) open(boot.nav[0].id);
+  // 화면 이동은 앵커가 해시를 바꾸고 hashchange 하나가 받는다 — 뒤로/앞으로와
+  // 가운데 클릭(새 탭)이 따로 배선 없이 같은 길을 탄다.
+  // 다만 **지금 열린 탭을 다시 누르면 해시가 안 바뀌어 hashchange 가 안 뜬다.**
+  // 그 자리에서 다시 열지 않으면 "탭을 다시 눌러 갱신" 이 조용히 사라진다.
+  $('nav').addEventListener('click', (e) => {
+    if (e.ctrlKey || e.metaKey || e.shiftKey) return;   // 새 탭으로 여는 클릭이다
+    const a = e.target.closest('a');
+    if (a && a.getAttribute('href') === location.hash) open(a.dataset.id);
+  });
+  NAV_IDS = boot.nav.map((p) => p.id);
+  addEventListener('hashchange', show);
+  show();
 }
 
-async function open(id) {
+// 화면 id 목록은 **함수가 준 nav 에서만** 온다. 여기에 화이트리스트를 두지 마라 —
+// 두는 순간 화면 목록이 공개 저장소에 박힌다.
+let NAV_IDS = [];
+
+// 해시가 가리키는 화면을 연다. replaceState 는 hashchange 를 안 내므로 여기서 안 돈다.
+function show() {
+  // 함수 이름은 로드 시점에 굳는다(BASE 가 그 값으로 만들어졌다). 주소창에서 그것만 바꿔
+  // 넣으면 문서가 다시 안 뜨는데, 아래 replaceState 가 옛 이름으로 되돌려 놓아 **붙여 넣었는데
+  // 아무 일도 안 일어난 것**처럼 보인다. 되받아 쓰지 말고 그 주소로 다시 연다.
+  if (location.hash.slice(1).split('/')[0] !== FN) { location.reload(); return; }
+  const want = hashPage();
+  const id = NAV_IDS.includes(want) ? want : NAV_IDS[0];
+  if (!id) return;
+  if (want !== id) history.replaceState(null, '', '#' + FN + '/' + id);
+  // 빈 값은 옛 북마크(`#<함수이름>`)라 조용히 첫 화면으로 내려도 된다. 이름이 들어 있는데
+  // 모르는 것은 **낡은 링크**다 — 말하지 않으면 "그 화면이 원래 이렇게 열린다" 로 읽힌다.
+  open(id, want && want !== id ? want : '');
+}
+
+// 뒤로가기를 연타하면 요청이 겹친다. 늦게 시작한 것이 먼저 오면 주소와 화면이 갈리므로,
+// 마지막으로 연 것만 그린다.
+let seq = 0;
+
+async function open(id, missing) {
+  const mine = ++seq;
   $('nav').querySelectorAll('a').forEach((a) => a.classList.toggle('on', a.dataset.id === id));
   $('main').innerHTML = '';
   try {
-    $('main').innerHTML = await (await call('/view/' + id)).text();
+    const html = await (await call('/view/' + id)).text();
+    if (mine !== seq) return;
+    $('main').innerHTML = html;
+    if (missing) {
+      const p = document.createElement('p');
+      p.className = 'sub';
+      p.textContent = '주소의 화면 이름 "' + missing + '" 은 없습니다 — 첫 화면을 열었습니다. 북마크를 확인하세요.';
+      $('main').prepend(p);
+    }
     runScripts($('main'));
   } catch (x) {
+    if (mine !== seq) return;
     // 빈 화면을 두면 "아직 아무것도 없는 화면" 과 구분되지 않는다.
     $('main').innerHTML = '<h1>화면을 불러오지 못했습니다</h1><p class="sub"></p>';
     $('main').querySelector('.sub').textContent = String(x.message || x);
