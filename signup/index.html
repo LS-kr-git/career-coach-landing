@@ -62,7 +62,8 @@
     background:#fff;display:flex;align-items:center;padding:0 12px;
     font-size:13px;line-height:18px;color:var(--gray-700);
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .note{font-size:13px;line-height:18px;color:var(--gray-500)}
+  /* 문구가 비었어도 자리는 남긴다 — 54 = line-height 18 × 3줄, 피그마 566:2733 과 같은 값 */
+  .note{font-size:13px;line-height:18px;color:var(--gray-500);min-height:54px}
 
   .agree{list-style:none;display:flex;flex-direction:column;gap:12px}
   .agree li{display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -127,7 +128,9 @@
           <div class="field"><span class="k">출생 연도</span><span class="v" id="fBirthyear"></span></div>
           <div class="field"><span class="k">생일</span><span class="v" id="fBirthday"></span></div>
         </div>
-        <p class="note">*회원 식별·본인 확인, 알림톡 브리핑 발송, 결제·환불 고지, 맞춤형 브리핑(유료 구독 기능) 제공, 기념일 맞춤 브리핑(유료 구독 기능에 포함)에 사용됩니다.</p>
+        <!-- 피그마 566:2733 의 안내 문구는 2026-08-13 에 비웠다 — 항목별 이용 목적은 개인정보처리방침 1항이 말한다.
+             피그마의 빈 텍스트 노드가 54px(18×3) 자리를 그대로 차지하므로 웹도 여백만 남긴다. -->
+        <p class="note"></p>
       </section>
 
       <section class="sec" aria-label="약관 동의">
