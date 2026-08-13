@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="only light">
 <meta name="robots" content="noindex,nofollow">
-<title>CCA</title>
+<title>커리어코치 어드민</title>
 <link rel="icon" type="image/svg+xml" href="../assets/logo-circle.svg">
 <style>
 *{box-sizing:border-box}
@@ -17,25 +17,29 @@ input{width:100%;padding:11px 12px;margin-bottom:10px;border:1px solid #d2d2d7;b
 button{width:100%;padding:11px;border:0;border-radius:8px;background:#1c1c1e;color:#fff;font-size:15px;cursor:pointer}
 button:disabled{opacity:.5;cursor:default}
 .err{color:#c0362c;font-size:13px;min-height:18px;margin-bottom:8px}
-/* 탭바 폭 239px 은 **재서 나온 값**이다 (2026-08-13 사용자 지시: 딱 줄바꿈 안 될 만큼만).
-   가장 긴 칸은 「Unit Economics 시뮬레이터」 이고 14px 에서
-     보통(400) 173.22px · **선택(700) 178.11px** 다.
-   🔴 **재는 기준은 선택된 상태다.** 시안 13 이 선택된 칸을 700 으로 굵히므로 그때가 가장 넓다.
-      400 으로 재면 234 가 나오는데 그 값은 **그 칸을 누르는 순간 깨진다**(검사관이 잡았다).
-   라이브에서 잰 임계값 — 스크롤바가 없으면 223, 있으면 **239**(238 은 깨졌다).
-     내역: 글자 178 + 왼쪽 padding 26 + 오른쪽 padding 18 + 오른쪽 테두리 1 = 223
-           223 + 세로 스크롤바 16 = 239
-   🔴 `nav` 는 `overflow-y:auto` 이고 칸이 14개라 **화면이 짧은 PC 에서만** 스크롤바가 생긴다.
-      223 을 고르면 그 PC 에서만 줄바꿈이 나서, 재현이 안 되는 버그가 된다.
-      두 상태 모두에서 안 깨지는 최소값이 239 다.
-   **칸 이름 · 들여쓰기 · 선택 굵기 중 하나라도 건드리면 여기도 다시 재라.** */
-#app{display:none;grid-template-columns:239px 1fr;min-height:100vh}
+/* 🔴 탭바 폭은 **사람이 재지 않는다.** 브라우저가 잰다 (2026-08-13 사용자 지시).
+   그전에는 손으로 재서 박았다. 하루에 212 → 226 → 234 → 239 로 **네 번** 다시 쟀고,
+   그중 한 번은 틀렸다 — 선택된 칸이 700 으로 굵어지는 것을 빼먹어서 **가장 긴 칸을 누르는
+   순간 줄바꿈이 나는 값**이었다(검사관이 잡았다). 이름 하나만 바뀌어도 다시 재야 하는데
+   그 사실이 코드 어디에도 안 적혀 있었다.
+
+   지금은 셋이 **한 벌로** 그 일을 없앤다. 하나라도 빼면 폭이 다시 움직인다 —
+   아래 숫자는 전부 그 규칙을 꺼 보고 확인한 것이다(라이브 실측).
+     ① `max-content`               트랙을 내용에 맞춘다. 이름이 바뀌면 폭이 따라온다.
+     ② `nav a[data-t]::after`      **굵은 판을 미리 자리 잡아 둔다.** 빼면 가장 긴 칸을 누를 때만
+                                   폭이 233 → 238 로 튀어 오른쪽 본문이 5px 밀린다.
+     ③ `scrollbar-gutter:stable`   스크롤바 자리를 늘 비워 둔다. 빼면 화면이 짧은 PC 에서만
+                                   223 이 되어, 재현이 안 되는 폭 차이가 생긴다.
+   `max-width` 320 은 안전장치다. 아주 긴 이름이 들어와도 오른쪽 본문을 잡아먹지 않는다 —
+   대신 탭바 안에서 가로로 잘린다. `min-width` 200 은 반대쪽(이름이 다 짧아졌을 때)이다. */
+#app{display:none;grid-template-columns:max-content 1fr;min-height:100vh}
 /* 스크롤을 내려도 왼쪽 탭바는 그대로 둔다 (2026-08-13 사용자 지시).
    `#app` 이 그리드라 nav 는 기본값(stretch)으로 열 높이만큼 늘어나는데, 그러면
    sticky 가 붙을 자리가 없어 조용히 안 먹는다 — `align-self:start` 가 그걸 푼다.
    높이를 화면 높이로 고정하고 넘치면 탭바 안에서만 스크롤한다. 안 그러면 화면이 짧은
    기기에서 아래쪽 탭에 영영 못 닿는다. */
 nav{background:#fff;border-right:1px solid #e5e5ea;padding:18px 0;
+    white-space:nowrap;scrollbar-gutter:stable;min-width:200px;max-width:320px;
     position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;overscroll-behavior:contain;
     display:flex;flex-direction:column}
 /* 세로 flex 는 항목을 눌러서 맞추려 든다. 탭이 늘면 글자가 겹치므로 자연 높이로 고정하고,
@@ -43,14 +47,17 @@ nav{background:#fff;border-right:1px solid #e5e5ea;padding:18px 0;
 nav>*{flex:none}
 /* 로그인 계정은 맨 아래 (2026-08-13 사용자 지시). `margin-top:auto` 라 탭이 화면보다
    길어지면 자동으로 0 이 되어 목록 끝에 따라붙는다 — 겹치지 않는다. */
-nav .who{font-size:12px;color:#8e8e93;padding:14px 18px 0;margin-top:auto}
+/* 🔴 계정 블록의 왼쪽은 **묶음 라벨과 같은 12px** 다 (2026-08-13 사용자 지시).
+   시안 13 이 라벨 12 · 항목 26 두 층을 만드는데, 여기가 옛 값 18 로 남아 있어서
+   왼쪽 정렬선이 셋으로 갈라져 있었다. 계정은 항목이 아니라 묶음과 같은 층으로 본다. */
+nav .who{font-size:12px;color:#8e8e93;padding:14px 12px 0;margin-top:auto}
 /* 로그아웃은 **버튼이 아니라 글자다** (2026-08-13 사용자 지시: "버튼형식 말고 텍스트랑
    밑줄로만, 낮은 위계로"). 그래서 `nav a` 의 블록 상자·14px·밑줄 없음을 전부 덮는다.
    `width:max-content` 로 상자를 글자에 붙인다 — 안 붙이면 탭바 줄 전체가 눌려서
    결국 버튼처럼 보인다. 계정 이메일(12px 회색)보다 더 낮출 자리가 없어 같은 크기·색을
    쓰고, 밑줄만으로 "누를 수 있다" 를 말한다. 호버로 색을 올리지 않는다 — 그러면 위
    이메일보다 위계가 잠시 높아진다. */
-nav a.out{display:block;width:max-content;padding:3px 18px 0;font-size:12px;color:#8e8e93;
+nav a.out{display:block;width:max-content;padding:3px 12px 0;font-size:12px;color:#8e8e93;
           text-decoration:underline;text-underline-offset:2px}
 /* 묶음/항목/선택 — 2026-08-13 사용자가 시안 16종 중 **13번**을 골랐다.
    규칙 셋이 한 벌이다. 하나만 떼어 고치지 마라.
@@ -65,6 +72,15 @@ nav a{display:block;position:relative;padding:7px 18px 7px 26px;text-decoration:
 nav a.on{font-weight:700}
 nav a.on::before{content:"";position:absolute;left:12px;top:6px;bottom:6px;width:3px;
                  background:#F59E0B;border-radius:2px}
+/* 마우스를 올렸을 때 (2026-08-13 사용자 지시: 반응이 없어 누를 수 있는지 몰랐다).
+   🔴 **선택 표시와 헷갈리면 안 된다** — 선택은 배경을 안 쓰기로 했으니(위) 호버 배경은
+   그 자리를 뺏지 않을 만큼만 옅게 둔다. 로그아웃은 뺀다: 같은 파일 위쪽 주석대로
+   그 줄은 호버로 위계를 올리지 않기로 한 자리다. */
+nav a:not(.out):hover{background:#f7f7f8;color:#000}
+/* 폭 예약. 위 「탭바 폭」 주석의 ② 다 — 이 규칙이 없으면 선택할 때 탭바 폭이 튄다.
+   높이 0 · overflow hidden 이라 화면에는 안 보이고, **폭 계산에만** 들어간다. */
+nav a[data-t]::after{content:attr(data-t);display:block;height:0;overflow:hidden;
+                     font-weight:700;visibility:hidden}
 main{padding:26px 30px;max-width:1242px;margin:0 auto}
 h1{font-size:20px;margin:0 0 6px}
 .sub{color:#8e8e93;font-size:13px;margin:0}
@@ -249,7 +265,8 @@ async function 로그아웃() {
 function signOut() {
   token = ''; refreshToken = ''; localStorage.removeItem(KEY);
   // 비워야 로그아웃 뒤 해시가 움직여도 401 을 다시 부르러 가지 않는다.
-  NAV_IDS = [];
+  NAV_IDS = []; NAV_TITLE = new Map();
+  document.title = '커리어코치 어드민';
   $('app').style.display = 'none'; $('login').style.display = '';
 }
 
@@ -309,7 +326,7 @@ async function start() {
   });
   $('nav').innerHTML = groups.map((g) =>
     '<div class="grp">' + g.name + '</div>' +
-    g.items.map((p) => '<a href="#' + p.id + '" data-id="' + p.id + '">' + p.title + '</a>').join('')
+    g.items.map((p) => '<a href="#' + p.id + '" data-id="' + p.id + '" data-t="' + p.title + '">' + p.title + '</a>').join('')
   ).join('') + '<div class="who"></div><a class="out" id="out">로그아웃</a>';
   // 이메일은 **본문이 아니라 값**이다. innerHTML 로 붙이면 주소에 든 문자가 태그로 읽힌다.
   $('nav').querySelector('.who').textContent = boot.user.email;
@@ -326,6 +343,7 @@ async function start() {
     if (a && a.getAttribute('href') === location.hash) open(a.dataset.id);
   });
   NAV_IDS = boot.nav.map((p) => p.id);
+  NAV_TITLE = new Map(boot.nav.map((p) => [p.id, p.title]));
   addEventListener('hashchange', show);
   show();
 }
@@ -333,6 +351,8 @@ async function start() {
 // 화면 id 목록은 **함수가 준 nav 에서만** 온다. 여기에 화이트리스트를 두지 마라 —
 // 두는 순간 화면 목록이 공개 저장소에 박힌다.
 let NAV_IDS = [];
+// 탭 제목에 쓸 id → 이름. 화면 목록과 같은 곳(함수가 준 nav)에서만 온다.
+let NAV_TITLE = new Map();
 
 // 해시가 가리키는 화면을 연다. replaceState 는 hashchange 를 안 내므로 여기서 안 돈다.
 function show() {
@@ -353,7 +373,12 @@ let seq = 0;
 async function open(id, missing) {
   const mine = ++seq;
   $('nav').querySelectorAll('a').forEach((a) => a.classList.toggle('on', a.dataset.id === id));
-  $('main').innerHTML = '';
+  // 탭 제목에 지금 화면 이름을 넣는다 (2026-08-13 사용자 지시). 어드민을 두 탭 열면
+  // 둘 다 같은 제목이라 어느 것이 어느 화면인지 구분이 안 됐다.
+  document.title = (NAV_TITLE.get(id) ? NAV_TITLE.get(id) + ' · ' : '') + '커리어코치 어드민';
+  // 비워 두면 느린 화면에서 오른쪽이 하얀 채로 멈춰 있어 "안 눌렸나" 로 읽힌다
+  // (2026-08-13 사용자 지시). 아래 fetch 가 끝나면 이 줄은 통째로 갈린다.
+  $('main').innerHTML = '<p class="sub">불러오는 중…</p>';
   try {
     const html = await (await call('/view/' + id)).text();
     if (mine !== seq) return;
