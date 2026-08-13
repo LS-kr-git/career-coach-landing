@@ -1,0 +1,55 @@
+# pre-push 훅의 검수를 리눅스에서 다시 돌린다.
+#
+# 왜 있는가 (2026-08-13)
+#   훅의 1~2겹은 전부 node 로 도는데 **사용자 PC 3대에 node 가 없을 수 있다**
+#   (2026-08-11 실측: DESKTOP-F7S1OEL). 전에는 가드가 없어서 node 가 없으면 훅이
+#   "깨진 링크·빠진 head" 라는 엉뚱한 진단으로 푸시를 막았고, 이 저장소 훅에는
+#   CC_SKIP_HOOK 같은 부분 우회가 없어 빠져나갈 길이 `--no-verify`(= 6겹 전부 끄기)뿐이었다.
+#
+#   그래서 훅은 node 가 없으면 **막지 않고 건너뛴다.** 그 대신 여기가 있다 —
+#   건너뛴 것이 사라지지 않고 리눅스에서 다시 돈다. 훅을 느슨하게 한 것이 아니라 옮긴 것이다.
+#
+#   여기 있는 셋은 전부 브라우저도 피그마 덤프도 필요 없다(실측). 브라우저가 필요한
+#   어드민 셸 검수는 ops-audit.yml 에 따로 있다.
+#
+#   🔴 여기에 **넣지 않은** 것 둘 — 라이브 피그마 덤프가 필요해서다. 덤프는 저장소에 없고
+#      use_figma 는 CI 에서 못 부른다.
+#        · 2겹b (audit.mjs)      — 훅에만 있다.
+#        · 1.2겹 (tree-audit.mjs) — 덤프 없이 부르면 "🚫 검수 미실행" 을 찍고 **종료코드 0** 이다.
+#          한 번 넣었다가 뺐다 — 항상 초록인 스텝은 "봤다" 는 착각만 만든다(검사관 지적).
+name: 랜딩 검수
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: landing-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # 이 저장소에는 package.json 이 없다(.gitignore 가 막는다). 셋 다 의존성이 없어서
+      # 설치할 것이 없다 — 없다는 사실 자체를 여기서 드러내 둔다.
+      - name: 결과물 공통 점검 (1겹)
+        run: node tools/figma-audit/page-audit.mjs
+
+      - name: 온보딩 직군 목록 ↔ taxonomy.json (1.5겹)
+        run: node tools/roles/build.mjs --check
+
+      - name: 약관·개인정보·가입·온보딩 문구 대조 (2겹a)
+        run: node tools/figma-audit/docs-audit.mjs

@@ -1,15 +1,23 @@
 #!/usr/bin/env bash
-# 푸시 전 검수 훅 — 두 겹으로 막는다.
+# 푸시 전 검수 훅 — 여섯 겹이다. (머리말이 "두 겹" 이라고 적혀 있던 것을 2026-08-13 에 고쳤다 —
+# 코드에는 여섯 개가 있는데 여기는 둘, CLAUDE.md 는 셋이라고 적고 있었다.)
 #
-#   1겹 · 결과물 공통 점검 (page-audit.mjs) — 항상 돈다
-#       저장소의 모든 *.html + CNAME + assets 를 본다. 새 페이지를 추가해도
-#       설정을 고칠 필요 없이 자동으로 대상에 들어온다. 외부 준비물이 없어
-#       어느 세션에서든 무조건 실행된다.
+#   0겹   · 배포 쿨다운 — 직전 푸시 직후의 연속 푸시를 막는다 (아래 상세)
+#   1겹   · 결과물 공통 점검 (page-audit.mjs) — 모든 푸시
+#           저장소의 모든 *.html + CNAME + assets 를 본다. 새 페이지를 추가해도
+#           설정을 고칠 필요 없이 자동으로 대상에 들어온다.
+#   1.2겹 · 피그마 트리 점검 (tree-audit.mjs) — 모든 푸시. 섹션 밖 고아 노드
+#   1.5겹 · 온보딩 직군 목록 ↔ taxonomy.json (roles/build.mjs --check) — 모든 푸시
+#   2겹a  · 약관·개인정보·가입·온보딩 문구 대조 (docs-audit.mjs) — *.html 이 바뀐 푸시
+#   2겹b  · 랜딩 피그마 대조 (audit.mjs) — index.html / assets 가 바뀐 푸시
+#           기준 프레임(6:148)이 있는 랜딩만 해당.
 #
-#   2겹 · 피그마 대조 (audit.mjs) — index.html / assets 가 바뀐 푸시에만 돈다
-#       기준 프레임(6:148)이 있는 랜딩만 해당. 피그마 덤프 3개(메타/타이포/스타일)가 필요하다.
+#   🔴 1~2겹은 전부 **node 로 돈다.** node 가 없는 PC 에서는 막지 않고 건너뛴다(아래 HAVE_NODE).
+#      같은 검수가 .github/workflows/landing-audit.yml 에서 리눅스로 다시 돈다.
 #
-#   0겹 · 배포 쿨다운 — 직전 푸시 직후의 연속 푸시를 막는다 (아래 상세)
+#   🔴 피그마 덤프는 **셋 다 사실상 필수**다. 훅은 figma_meta.xml 만 없을 때 막지만,
+#      audit.mjs 가 TYPE·STYLE 을 findings 로 올리고 그 등급들로 종료코드 1 을 낸다.
+#      "없어도 경고만" 이 아니다.
 #
 # 설치 (클론한 세션에서 한 줄):
 #   git config core.hooksPath tools/hooks
@@ -23,11 +31,51 @@
 
 set -u
 ROOT="$(git rev-parse --show-toplevel)"
-cd "$ROOT" || exit 0
+# 🔴 예전에는 `|| exit 0` 이었다. 그러면 여기서 실패했을 때 **출력 한 줄 없이 6겹 전부**
+#    건너뛰고 푸시가 나간다 — "검사가 안 돈 것" 이 "통과" 로 보인다(2026-08-13 재현).
+# `cd ""` 는 bash 에서 **성공한다**(제자리에 머문다). 빈 값도 실패로 본다 — 안 그러면
+# ROOT="" 로 아래 덤프 탐색이 `/figma_meta.xml` 같은 루트 경로를 뒤진다(검사관 지적).
+[ -n "$ROOT" ] && cd "$ROOT" || {
+  echo "✋ 푸시 중단 — 저장소 루트를 못 찾았습니다 ('$ROOT'). 검수를 하나도 못 돌렸습니다." >&2
+  exit 1
+}
+
+# ── node 가 없는 PC 를 다루는 법 (2026-08-13) ────────────────────────
+# 이 훅의 검수 5종은 전부 node 로 돈다. 그런데 **사용자 PC 3대에 node 가 없을 수 있다**
+# (2026-08-11 실측: DESKTOP-F7S1OEL 에 없음 — 정본은 career-coach
+#  docs/기획/피그마-웹-동기화.md 「랜딩 pre-push 훅은 node 를 쓴다」).
+#
+# 전에는 가드가 없어서 node 가 없으면 `node …` 가 127 로 죽고, 훅이 그것을 검수 실패로 읽어
+# **"깨진 링크·빠진 head·자리표시자" 라는 엉뚱한 진단**으로 푸시를 막았다. 이 저장소 훅에는
+# career-coach 의 CC_SKIP_HOOK 같은 부분 우회가 없어서, 빠져나갈 길이 `--no-verify`
+# = **6겹 전부 끄기** 하나뿐이었다. 엄격한 규칙이 우회를 부르면 검사량이 오히려 준다.
+#
+# 그래서 node 가 없으면 **막지 않고 무엇을 못 봤는지 말한다.** 같은 검수 5종이
+# .github/workflows/landing-audit.yml 에서 리눅스로 다시 돈다 — 놓치는 것이 아니라 옮기는 것이다.
+DONE_MSG="✅ 검수 통과 — 푸시합니다."
+# `command -v` 만으로는 모자란다 — 윈도우의 Microsoft Store 별칭 스텁처럼 **있는데 안 도는**
+# node 가 있다. 실제로 `--version` 이 도는지까지 본다.
+if command -v node >/dev/null 2>&1 && node --version >/dev/null 2>&1; then
+  HAVE_NODE=1
+else
+  DONE_MSG="✅ 검수 통과(부분 — node 가 없어 이 PC 에서는 검수를 못 돌렸습니다. 셋은 CI 가, 피그마 대조 둘은 아무도 안 봅니다) — 푸시합니다."
+  HAVE_NODE=0
+  {
+    echo ""
+    echo "⚪ 돌아가는 node 가 없어 이 PC 에서는 검수를 못 돌립니다. **막지 않습니다.**"
+    echo "   · CI(landing-audit.yml)가 대신 보는 것: 결과물 공통 · 직군 목록 · 문구 대조 **셋**"
+    echo "   · 🔴 CI 도 못 보는 것: **랜딩 피그마 대조(2겹b)** — 라이브 덤프가 필요해 CI 로 못 옮겼습니다."
+    echo "     index.html/assets 를 고쳤다면 node 가 있는 곳에서 한 번 돌리고 미세요."
+    echo "   · 🔴 CI 도 못 보는 것: **피그마 트리(1.2겹)** — 덤프 없이는 라이브 대조가 안 돼"
+    echo "     CI 에서 뺐습니다(항상 초록인 스텝은 착각만 만듭니다)."
+    echo "   푸시 뒤 Actions 가 초록인지 확인하세요."
+    echo ""
+  } >&2
+fi
 
 fail() {
   cat >&2
-  echo "(정말 급하면: git push --no-verify)" >&2
+  echo "(정말 급하면: git push --no-verify — 다만 그러면 6겹이 통째로 꺼집니다)" >&2
   exit 1
 }
 
@@ -46,7 +94,16 @@ fail() {
 #   기본:  900초(15분)
 # ───────────────────────────────────────────────────
 COOLDOWN="${CC_PUSH_COOLDOWN:-900}"
-if [ "$COOLDOWN" -gt 0 ] 2>/dev/null; then
+# 🔴 숫자가 아니면 `[ -gt ]` 가 오류를 내고 2>/dev/null 이 그것을 먹어, **늘리려던 사람이
+#    쿨다운을 끄게 된다**(`CC_PUSH_COOLDOWN=15m` 으로 2026-08-13 재현). 조용히 넘어가지 않는다.
+# 자릿수까지 본다 — 전부 숫자여도 int64 를 넘으면 `[ -gt ]` 가 다시 rc=2 로 조용히 꺼진다.
+case "$COOLDOWN" in
+  ''|*[!0-9]*|??????????*)
+    echo "⚪ CC_PUSH_COOLDOWN 값이 쓸 수 있는 초가 아닙니다: '$COOLDOWN' → 기본값 900 을 씁니다." >&2
+    COOLDOWN=900
+    ;;
+esac
+if [ "$COOLDOWN" -gt 0 ]; then
   # 브레이크 둘. 이 fetch 가 자격증명을 물으면 Git Credential Manager 가 **화면 밖에
   # 창을 띄우고 무한정 매달린다** — 사용자의 `git push` 가 아무 출력 없이 멈춘다.
   # 2026-08-10 에 career-coach 쪽에서 같은 형태가 11.9시간 매달렸다(계정 고정이
@@ -128,6 +185,7 @@ fi
 # ───────────────────────────────────────────────────
 # 1겹 — 결과물 공통 점검 (항상)
 # ───────────────────────────────────────────────────
+if [ "$HAVE_NODE" = "1" ]; then
 echo "▶ 결과물 공통 점검…"
 if ! node tools/figma-audit/page-audit.mjs; then
   fail <<'MSG'
@@ -137,9 +195,10 @@ if ! node tools/figma-audit/page-audit.mjs; then
 위 "❌ 막힘" 항목을 고친 뒤 다시 푸시하세요.
 MSG
 fi
+fi
 
 # ───────────────────────────────────────────────────
-# 1.2겹 — 피그마 트리 점검 (tree-audit.mjs) — 항상 돈다
+# 1.2겹 — 피그마 트리 점검 (tree-audit.mjs) — node 가 있으면 항상 돈다
 #
 #   "섹션 밖으로 튀어나간 고아 노드" 를 잡는 유일한 검사다.
 #   2026-08-08 에 프레임 626:2657 이 섹션 625:2657 밖으로 나가 캔버스에 떠 있었는데
@@ -152,7 +211,7 @@ fi
 #   섹션이 늘거나 이름이 바뀌어 스냅샷이 낡은 것은 **막지 않는다** — `↺ 스냅샷 낡음` 으로만
 #   찍고, `--update` 한 줄이면 맞는다. 예약 점검이 매일 그 한 줄을 대신 돌려 커밋한다.
 # ───────────────────────────────────────────────────
-echo "▶ 피그마 트리 점검 (고아 노드)…"
+[ "$HAVE_NODE" = "1" ] && echo "▶ 피그마 트리 점검 (고아 노드)…"
 TREE=""
 for p in "${FIGMA_TREE:-}" "$ROOT/figma_tree.json" "$ROOT/../figma_tree.json" "$HOME/figma_tree.json"; do
   [ -n "$p" ] && [ -f "$p" ] && { TREE="$p"; break; }
@@ -165,7 +224,7 @@ else
   CHANGED_TREE="unknown"
 fi
 
-if [ -z "$TREE" ] && [ -n "$CHANGED_TREE" ]; then
+if [ "$HAVE_NODE" = "1" ] && [ -z "$TREE" ] && [ -n "$CHANGED_TREE" ]; then
   fail <<'MSG'
 
 ✋ 푸시 중단 — 피그마 등록부/트리 스냅샷을 바꿨는데 라이브 피그마와 대조하지 않았습니다.
@@ -175,7 +234,7 @@ figma_tree.json 으로 저장한 뒤 다시 푸시하세요. (섹션 밖으로 �
 MSG
 fi
 
-if ! node tools/figma-audit/tree-audit.mjs ${TREE:+"$TREE"}; then
+if [ "$HAVE_NODE" = "1" ] && ! node tools/figma-audit/tree-audit.mjs ${TREE:+"$TREE"}; then
   fail <<'MSG'
 
 ✋ 푸시 중단 — 피그마 안에서 노드가 섹션 밖으로 나갔습니다.
@@ -190,6 +249,7 @@ fi
 # 1.5겹 — 온보딩 직군 목록이 taxonomy.json 에서 생성된 그대로인가
 #   손으로 고치면 code(직행 조회 표기)와 label(화면 표기)이 조용히 어긋난다.
 # ───────────────────────────────────────────────────
+if [ "$HAVE_NODE" = "1" ]; then
 echo "▶ 온보딩 직군 목록 ↔ taxonomy.json 대조…"
 if ! node tools/roles/build.mjs --check; then
   fail <<'MSG'
@@ -199,6 +259,7 @@ if ! node tools/roles/build.mjs --check; then
   node tools/roles/build.mjs
 를 돌려 다시 만든 뒤 커밋하세요. (문구·분류를 바꾸려면 taxonomy.json 을 고칩니다)
 MSG
+fi
 fi
 
 # ───────────────────────────────────────────────────
@@ -219,8 +280,8 @@ diff_names() {
 #   HTML 이 하나라도 바뀌었으면 돌린다. 브라우저·피그마 덤프가 필요 없어 싸다.
 CHANGED_DOCS="$(diff_names '*.html' tools/figma-audit/figma-docs-text.json tools/figma-audit/page-figma-map.json)"
 if [ -n "$CHANGED_DOCS" ]; then
-  echo "▶ 약관·개인정보 화면 ↔ 피그마 문구 대조…"
-  if ! node tools/figma-audit/docs-audit.mjs; then
+  [ "$HAVE_NODE" = "1" ] && echo "▶ 약관·개인정보 화면 ↔ 피그마 문구 대조…"
+  if [ "$HAVE_NODE" = "1" ] && ! node tools/figma-audit/docs-audit.mjs; then
     fail <<'MSG'
 
 ✋ 푸시 중단 — 약관·개인정보 화면이 피그마와 어긋났습니다.
@@ -236,7 +297,17 @@ fi
 CHANGED_LANDING="$(diff_names index.html assets)"
 if [ -z "$CHANGED_LANDING" ]; then
   echo "· 랜딩(index.html/assets)은 그대로 → 랜딩 피그마 대조 건너뜀"
-  echo "✅ 검수 통과 — 푸시합니다."
+  echo "${DONE_MSG}"
+  exit 0
+fi
+
+# node 가 없으면 피그마 덤프를 **요구하지도 않는다.** 요구해 봐야 돌릴 것이 없고,
+# 못 돌리는 이유로 푸시를 막으면 --no-verify 로 6겹이 통째로 꺼진다.
+if [ "$HAVE_NODE" = "0" ]; then
+  echo "🔴 node 가 없어 랜딩 피그마 대조(2겹b)를 건너뜁니다. **CI 도 이건 못 봅니다** —"
+  echo "   라이브 피그마 덤프가 필요해 CI 로 못 옮긴 유일한 검사입니다."
+  echo "   index.html/assets 를 고쳤으니, node 가 있는 곳에서 한 번 대조하는 것이 좋습니다."
+  echo "${DONE_MSG}"
   exit 0
 fi
 
@@ -273,8 +344,10 @@ if [ -n "$STYLE" ]; then
   [ -z "$TYPE" ] && { echo "✋ figma_style.json 만 있고 figma_type.json 이 없습니다 — 인자 순서상 둘 다 필요합니다." >&2; exit 1; }
   ARGS+=("$STYLE")
 fi
-[ -z "$TYPE" ]  && echo "⚠️ figma_type.json 이 없어 타이포 신선도는 확인하지 못합니다." >&2
-[ -z "$STYLE" ] && echo "⚠️ figma_style.json 이 없어 스타일 신선도는 확인하지 못합니다." >&2
+# 🔴 "경고" 가 아니다. audit.mjs 는 TYPE·STYLE 등급을 findings 로 올리고 그것으로 종료코드 1 을
+#    낸다 — 바로 아래에서 확실히 막힌다. 안심시키는 문구를 쓰면 원인을 엉뚱한 데서 찾게 된다.
+[ -z "$TYPE" ]  && echo "✋ figma_type.json 이 없습니다 — 타이포 대조를 못 해 아래에서 막힙니다." >&2
+[ -z "$STYLE" ] && echo "✋ figma_style.json 이 없습니다 — 스타일 대조를 못 해 아래에서 막힙니다." >&2
 node tools/figma-audit/audit.mjs "${ARGS[@]}"
 STATUS=$?
 
@@ -286,5 +359,5 @@ if [ $STATUS -ne 0 ]; then
 MSG
 fi
 
-echo "✅ 검수 통과 — 푸시합니다."
+echo "${DONE_MSG}"
 exit 0
