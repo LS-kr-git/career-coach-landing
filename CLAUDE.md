@@ -191,9 +191,10 @@ career-coach 훅에는 10곳 있지만 여기는 0곳이라 `--no-verify` 는 **
 ```
 node tools/ops-audit/route.mjs     # 해시 라우팅
 node tools/ops-audit/session.mjs   # 세션 이어가기·로그아웃
+node tools/ops-audit/nav.mjs       # 왼쪽 탭바 (선택 표시 · 묶음 위계 · 폭 · 탭 제목)
 ```
 
-`ops/index.html` 을 건드렸으면 이 두 줄을 돌린다. 서버도 DB도 필요 없고 합쳐 7초다.
+`ops/index.html` 을 건드렸으면 이 세 줄을 돌린다. 서버도 DB도 필요 없고 합쳐 10초다.
 **훅에는 일부러 안 달았다** — 크로미움 600MB 가 필요한데 랜딩 훅에는 `CC_SKIP_HOOK` 같은
 부분 우회가 없어서, 브라우저 없는 PC 에서 한 번 막히면 그 뒤로는 `--no-verify`(= 전부 끄기)를
 쓰게 된다. 크로미움이 없으면 종료코드 0 으로 건너뛰고 `CI` 에서만 1 이다.
