@@ -107,3 +107,66 @@ export function pageView(name, props = {}, accessToken = null) {
   captureAttribution();
   track(name, props, accessToken);
 }
+
+/**
+ * 회원 화면에서 터진 것을 남긴다 — **이 파일을 import 하는 것만으로 걸린다.**
+ *
+ * 왜 있나 (2026-08-13)
+ *   오류가 남는 곳이 어드민 함수 하나뿐이었다(`private.error_log`). 회원이 겪는 것 —
+ *   카카오 로그인이 콜백에서 죽는다 · 온보딩 저장이 실패한다 · 특정 브라우저에서만
+ *   스크립트가 터진다 — 은 **아무 데도 안 남았다.** 그래서 어드민 「오류 리포트」가
+ *   "오류 0건" 이라고 말하며 오히려 안심시켰다.
+ *
+ * 왜 페이지가 부르지 않고 자동인가
+ *   부르게 하면 **다음에 만드는 페이지에서 반드시 빠진다.** 이 저장소가 이미 같은
+ *   모양으로 물렸다(웹에만 만든 페이지가 어느 검수에도 안 잡힌 2026-08-07 사고).
+ *   지금 이 파일을 import 하는 화면이 일곱이고, 여기 한 줄이 곧 전 화면이다.
+ *
+ * 🔴 **주소의 쿼리·해시를 절대 보내지 않는다.** `/auth/callback/` 는 해시에
+ *    `access_token` 이 들어 있다 — 넣는 순간 그게 분석 원장에 박힌다.
+ *    보내는 것은 `location.pathname` 뿐이다.
+ *
+ * 개인정보: props 키는 `msg`·`src`·`line`·`col`·`page` 뿐이다. 운영 DB 의
+ * `event_props_no_pii` CHECK 가 `email`·`phone`·`name` 같은 키를 거부하고,
+ * 이름은 `analytics.event_name` 허용 목록(`client_error`)에 있어야 통과한다.
+ */
+const ERR_MAX = 3;          // 한 번 로드에 이만큼만. 루프 안에서 터지면 원장이 잠긴다
+const ERR_CUT = 300;        // 메시지 길이 상한 (props 전체가 2,000자를 넘으면 RPC 가 거부한다)
+let errSent = 0;
+const errSeen = new Set();
+
+function reportError(msg, src, line, col) {
+  try {
+    if (errSent >= ERR_MAX) return;
+    const key = msg + '|' + src + '|' + line;
+    if (errSeen.has(key)) return;     // 같은 오류가 반복되면 한 번만
+    errSeen.add(key);
+    errSent += 1;
+    track('client_error', {
+      msg: String(msg || '').slice(0, ERR_CUT),
+      src: String(src || '').slice(0, 200),
+      line: Number(line) || 0,
+      col: Number(col) || 0,
+      page: location.pathname,        // ★ search·hash 를 넣지 않는다
+    });
+  } catch { /* 오류를 남기다 또 터지면 조용히 접는다 — 화면을 막지 않는다 */ }
+}
+
+// import 시점에 한 번만 건다. 여러 모듈이 같은 파일을 import 해도 ES 모듈은 한 번만 평가된다.
+if (typeof window !== 'undefined') {
+  window.addEventListener('error', (e) => {
+    // 리소스 로드 실패(<img>·<script>)는 message 가 없고 target 이 있다. 그것도 고장이다.
+    if (!e.message && e.target && e.target !== window) {
+      const el = e.target;
+      reportError('resource load failed: ' + (el.tagName || '?'), el.src || el.href || '', 0, 0);
+      return;
+    }
+    reportError(e.message, e.filename, e.lineno, e.colno);
+  }, true);                            // 캡처 단계 — 리소스 오류는 버블링하지 않는다
+
+  window.addEventListener('unhandledrejection', (e) => {
+    const r = e.reason;
+    reportError('unhandled rejection: ' + (r && r.message ? r.message : String(r)),
+      (r && r.stack ? String(r.stack).split('\n')[1] || '' : '').trim(), 0, 0);
+  });
+}
