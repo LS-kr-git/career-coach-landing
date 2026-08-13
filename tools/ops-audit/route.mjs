@@ -1,10 +1,10 @@
-// ops 셸의 해시 라우팅 확인 — 함수는 스턴으로 대신한다.
+// ops 셸의 해시 라우팅 확인 — 함수는 스텁으로 대신한다.
 //   node tools/ops-audit/route.mjs
 //
 // 🔴 pre-push 훅에 안 달려 있다. 일부러다.
 //    이 검사는 크로미움 600MB 를 필요로 하는데 사용자 PC 3대 중 어디에 깔려 있는지 모른다.
 //    훅에 달면 브라우저 없는 PC 에서 매번 막히고, 그러면 `--no-verify` 를 쓰게 된다 —
-//    럜딩 훅에는 CC_SKIP_HOOK 같은 부분 우회가 없어서 그 순간 **검수 전체가 꺼진다**.
+//    랜딩 훅에는 CC_SKIP_HOOK 같은 부분 우회가 없어서 그 순간 **검수 전체가 꺼진다**.
 //    (career-coach/CLAUDE.md 에 같은 일이 이미 한 번 있었다고 적혀 있다.)
 //    CI(공개 저장소라 무료)에서 돌리는 것이 이 검사의 자리다.
 import { 서버열기, 브라우저열기, 검사기 } from './harness.mjs';
@@ -60,7 +60,7 @@ await login('#errors');
 ok('옛 북마크 → 첫 화면', await page.textContent('#t') === 'errors', await page.textContent('#t'));
 ok('주소가 맞춰진다', page.url().endsWith('#errors'), page.url());
 
-// ② 탭을 누르면 주소가 바뀜다
+// ② 탭을 누르면 주소가 바뀐다
 await page.click('nav a[data-id="crawl"]');
 await page.waitForFunction(() => document.querySelector('#t')?.textContent === 'crawl');
 ok('탭 클릭 → 주소 변경', page.url().endsWith('#crawl'), page.url());

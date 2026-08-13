@@ -143,6 +143,19 @@ CC_PUSH_COOLDOWN=0    git push origin main   # 쿨다운만 끄기 — 검수 1�
 
 혼자 돌려볼 때: `node tools/figma-audit/page-audit.mjs`
 
+### 훅에 없는 검사 — 어드민 셸 (`tools/ops-audit/`)
+
+```
+node tools/ops-audit/route.mjs     # 해시 라우팅 26항목
+node tools/ops-audit/session.mjs   # 세션 이어가기·로그아웃 27항목
+```
+
+`ops/index.html` 을 건드렸으면 이 두 줄을 돌린다. 서버도 DB도 필요 없고 합쳐 7초다.
+**훅에는 일부러 안 달았다** — 크로미움 600MB 가 필요한데 랜딩 훅에는 `CC_SKIP_HOOK` 같은
+부분 우회가 없어서, 브라우저 없는 PC 에서 한 번 막히면 그 뒤로는 `--no-verify`(= 전부 끄기)를
+쓰게 된다. 크로미움이 없으면 종료코드 0 으로 건너뛰고 `CI` 에서만 1 이다.
+이유와 「무엇을 진짜로 잡는가(변이 표)」는 `tools/ops-audit/README.md` 가 정본이다.
+
 ## 프로젝트 문서는 어디에 있나
 사업기획·브랜드 가이드·검증 데이터·작업 원칙 등 **모든 프로젝트 문서의 정본은 비공개 저장소
 `LS-kr-git/career-coach` 의 `docs/` 에 있다.** (2026-08-01 이관)
