@@ -44,12 +44,15 @@ export async function 브라우저열기() {
 
 export function 검사기() {
   const 실패 = [];
+  let 전체 = 0;
   const ok = (name, cond, extra = '') => {
+    전체 += 1;
     console.log(`${cond ? '✅' : '❌'} ${name}${extra ? '  — ' + extra : ''}`);
     if (!cond) 실패.push(name);
   };
+  // 항목 수는 세어서 찍는다. 사람이 문서·스텝 이름에 적어 두면 검사를 지워도 그 숫자가 남는다.
   const 마무리 = () => {
-    console.log(실패.length ? `\n실패 ${실패.length}건: ${실패.join(', ')}` : '\n전부 통과');
+    console.log(실패.length ? `\n실패 ${실패.length}건: ${실패.join(', ')}` : `\n전부 통과 (${전체}항목)`);
     process.exit(실패.length ? 1 : 0);
   };
   return { ok, 마무리 };

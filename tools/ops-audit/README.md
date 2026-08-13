@@ -1,8 +1,8 @@
 # ops-audit — 어드민 셸(`ops/index.html`) 자동 검수
 
 ```
-node tools/ops-audit/route.mjs     # 해시 라우팅 26항목
-node tools/ops-audit/session.mjs   # 세션 이어가기·로그아웃 27항목
+node tools/ops-audit/route.mjs     # 해시 라우팅
+node tools/ops-audit/session.mjs   # 세션 이어가기·로그아웃
 ```
 
 둘 다 저장소를 그대로 정적으로 띄우고, 엣지 함수는 `page.route` 스텁으로 대신한다.
@@ -21,7 +21,8 @@ node tools/ops-audit/session.mjs   # 세션 이어가기·로그아웃 27항목
    한 번 적혀 있다 — "엄격한 규칙이 우회를 부르면 덜 엄격한 규칙보다 검사량이 적어진다."
 
 이 검사의 자리는 CI 다. 랜딩은 공개 저장소라 GitHub Actions 가 무료다.
-(워크플로 얹기는 미완 — `.github/workflows/**` 는 MCP 토큰으로 못 쓴다. 브리지가 붙은 세션에서 한다.)
+워크플로는 `.github/workflows/ops-audit.yml` 이다 — `ops/**` · `tools/ops-audit/**` ·
+`assets/supabase-config.js`(셸이 import 하는 파일) 가 바뀐 푸시·PR 에서만 돈다.
 
 ## 크로미움이 없으면
 

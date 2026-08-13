@@ -146,8 +146,8 @@ CC_PUSH_COOLDOWN=0    git push origin main   # 쿨다운만 끄기 — 검수 1�
 ### 훅에 없는 검사 — 어드민 셸 (`tools/ops-audit/`)
 
 ```
-node tools/ops-audit/route.mjs     # 해시 라우팅 26항목
-node tools/ops-audit/session.mjs   # 세션 이어가기·로그아웃 27항목
+node tools/ops-audit/route.mjs     # 해시 라우팅
+node tools/ops-audit/session.mjs   # 세션 이어가기·로그아웃
 ```
 
 `ops/index.html` 을 건드렸으면 이 두 줄을 돌린다. 서버도 DB도 필요 없고 합쳐 7초다.
