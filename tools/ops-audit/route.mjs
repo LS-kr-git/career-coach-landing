@@ -136,7 +136,10 @@ const pos = await page.evaluate(() => {
   const n = document.querySelector('#nav').getBoundingClientRect();
   return { whoTop: Math.round(w.top), whoBottom: Math.round(w.bottom),
            outTop: Math.round(o.top), outBottom: Math.round(o.bottom),
-           navBottom: Math.round(n.bottom), outWidth: Math.round(o.width), navWidth: Math.round(n.width) };
+           navBottom: Math.round(n.bottom), outWidth: Math.round(o.width), navWidth: Math.round(n.width),
+           // 글자 자체의 폭. 상자가 글자에 붙어 있는지는 **이것과 견줘야** 안다.
+           outText: Math.round((() => { const r = document.createRange();
+             r.selectNodeContents(document.querySelector('#nav .out')); return r.getBoundingClientRect().width; })()) };
 });
 // 맨 아래는 로그아웃이고 이메일이 그 바로 위다. 둘이 한 덩어리로 바닥에 붙어 있어야 한다.
 ok('이메일 → 로그아웃이 좌하단에 붙어 있다',
@@ -157,8 +160,14 @@ ok('로그아웃이 버튼 꼴이 아니다',
 ok('로그아웃이 낮은 위계다 (12px · 회색 · 굵지 않음)',
    로그아웃꼴.size === '12px' && 로그아웃꼴.color === 'rgb(142, 142, 147)' && Number(로그아웃꼴.weight) < 600,
    JSON.stringify(로그아웃꼴));
-ok('클릭 상자가 글자에 붙어 있다 (줄 전체가 아니다)', pos.outWidth < pos.navWidth / 2,
-   `${pos.outWidth} / ${pos.navWidth}`);
+// 🔴 전에는 `outWidth < navWidth / 2` 였다. **탭바 폭이 고정 239px 이던 시절의 대용품**이다.
+//    2026-08-13 에 폭을 `max-content` 로 바꾸자 탭바가 내용에 따라 좁아지는데, 이 스텁은
+//    화면 이름이 짧아 134px 까지 내려간다 — 그러면 로그아웃 상자가 멀쩡한데도 비율이 뒤집혀
+//    빨개진다(실제로 재현했다). 대용품이 아니라 **뜻하는 것을 그대로 잰다**:
+//    상자가 글자 + 좌우 padding(12+12) 안쪽이면 글자에 붙어 있는 것이다.
+ok('클릭 상자가 글자에 붙어 있다 (줄 전체가 아니다)',
+   pos.outWidth <= pos.outText + 26 && pos.outWidth < pos.navWidth,
+   `상자 ${pos.outWidth} / 글자 ${pos.outText} / 탭바 ${pos.navWidth}`);
 
 await browser.close();
 server.close();
