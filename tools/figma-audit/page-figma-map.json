@@ -71,6 +71,8 @@
     }
   },
   "_exempt_설명": "피그마 화면이 없어도 되는 페이지. 사유를 반드시 적는다. 빈 사유는 page-audit 이 막는다.",
-  "exempt": {},
+  "exempt": {
+    "ops/index.html": "내부 운영자 전용 로그인 셸(비공개 어드민). 로그인 뒤 화면 내용은 career-coach 저장소의 Supabase Edge Function 이 반환하는 조각(fragment)이라 이 저장소의 피그마 파일(랜딩 기준) 대응 프레임이 없다. 2026-08-13, 파비콘/탭제목/레이아웃 폭 조정 작업 중 이 검사가 사전부터(수정 전에도) 막고 있던 것을 발견해 등록."
+  },
   "_stateNodes_설명": "node 는 그 페이지의 기준 프레임이고, stateNodes 는 같은 화면의 다른 상태 프레임이다. 여기 적은 id 목록은 figma-docs-text.json 의 stateFrames 와 순서까지 같아야 한다 — docs-audit 이 대조한다. 상태 프레임을 늘리려면 두 파일에 함께 적는다."
 }
