@@ -102,19 +102,99 @@ function hashPage() {
 }
 
 const $ = (id) => document.getElementById(id);
-let token = sessionStorage.getItem('ops_t') || '';
 
-async function call(path, init) {
+// 🔴 **localStorage 다.** 전에는 `sessionStorage` 라 탭을 닫으면 로그아웃이었고, 액세스
+//    토큰이 만료되면 그대로 로그인 화면이었다 — 갱신을 아예 안 했다. 그래서 어드민이
+//    **하루 6~13번 로그인**하고 있었다(2026-08-13 실측). 지금은 브라우저를 껐다 켜도 이어지고,
+//    다시 로그인해야 하는 것은 **7일에 한 번**이다(상한은 함수가 잰다 — 여기 값이 아니다).
+//    대가: 갱신 토큰이 디스크에 남는다. 다만 이 셸은 함수가 준 조각의 <script> 를 그대로
+//    실행하므로, 그 자리에서 XSS 가 나면 어차피 전부 뚫린다. 실질 증가분은 작다.
+const KEY = 'ops_session';
+let token = '';
+let refreshToken = '';
+try {
+  const s = JSON.parse(localStorage.getItem(KEY) || '{}');
+  token = s.access_token || '';
+  refreshToken = s.refresh_token || '';
+} catch (_) { /* 깨진 값이면 로그인부터 다시 한다 */ }
+
+function keep(s) {
+  token = s.access_token; refreshToken = s.refresh_token;
+  localStorage.setItem(KEY, JSON.stringify({ access_token: token, refresh_token: refreshToken }));
+}
+
+// 탭이 여러 개면 한 세션을 나눠 쓴다. 갱신 토큰은 한 번 쓰면 회전하므로, 저쪽 탭이
+// 회전시킨 값을 못 보면 이쪽은 죽은 토큰으로 갱신하다 로그아웃되고 **공유 키까지 지운다.**
+// 그래서 ① 다른 탭이 저장하면 바로 받아 오고 ② 갱신 직전에 저장소를 다시 읽는다.
+addEventListener('storage', (e) => {
+  if (e.key !== KEY) return;
+  const s = e.newValue ? JSON.parse(e.newValue) : null;
+  token = s?.access_token || ''; refreshToken = s?.refresh_token || '';
+});
+
+function 읽기() {
+  try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (_) { return {}; }
+}
+
+// 갱신은 **한 번에 하나만** 돈다. 첫 화면은 질의를 여러 개 동시에 던지는데, 각자 갱신하면
+// 회전된 토큰을 서로 무효화해서 전부 로그아웃된다.
+let 갱신중 = null;
+
+// 돌려주는 값이 셋이다. 🔴 **일시 고장을 만료와 뭉치지 마라** — 뭉치면 오프라인 한 번이나
+// 함수 500 한 번에 아직 6일 남은 세션이 영구히 지워지고, 이번 작업이 없애려던 그 상태로
+// 돌아간다. 401 만 "다시 로그인" 이다.
+//   'ok'      새 토큰을 받았다
+//   'expired' 7일이 지났거나 자격이 사라졌다 → 로그인 화면
+//   'fail'    지금 못 갱신했다 → **아무것도 지우지 않는다.** 다음에 다시 해 본다
+function renew() {
+  if (!갱신중) 갱신중 = _renew().finally(() => { 갱신중 = null; });
+  return 갱신중;
+}
+
+async function _renew() {
+  // 저장소를 다시 읽는다 — 그 사이 다른 탭이 회전시켰을 수 있다.
+  const 최신 = 읽기().refresh_token || refreshToken;
+  if (!최신) return 'expired';
+  let r;
+  try {
+    r = await fetch(BASE + '/auth/refresh', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ refresh_token: 최신 }),
+    });
+  } catch (_) {
+    return 'fail';                       // 네트워크가 끊겼다. 세션은 멀쩡하다
+  }
+  if (r.ok) { keep(await r.json()); return 'ok'; }
+  if (r.status !== 401) return 'fail';   // 5xx 는 우리 쪽 고장이지 만료가 아니다
+  // 401 이다. 다만 그 사이 다른 탭이 회전시켰으면 내 토큰이 낡아서일 뿐이다 — 한 번 더 본다.
+  const 지금 = 읽기().refresh_token;
+  if (지금 && 지금 !== 최신) {
+    refreshToken = 지금;
+    return 'retry';
+  }
+  return 'expired';
+}
+
+async function call(path, init, 다시 = true) {
   const r = await fetch(BASE + path, Object.assign({}, init, {
     headers: Object.assign({ authorization: 'Bearer ' + token }, (init || {}).headers || {}),
   }));
-  if (r.status === 401) { signOut(); throw new Error('401'); }
-  if (!r.ok) throw new Error(await r.text());
-  return r;
+  if (r.status !== 401) {
+    if (!r.ok) throw new Error(await r.text());
+    return r;
+  }
+  // `다시` 가 없으면 재시도가 401 을 또 만나 무한히 돈다.
+  if (!다시) { signOut(); throw new Error('401'); }
+  let v = await renew();
+  if (v === 'retry') v = await renew();  // 다른 탭이 회전시킨 토큰으로 한 번만 더
+  if (v === 'ok') return call(path, init, false);
+  if (v === 'expired') { signOut(); throw new Error('401'); }
+  // 'fail' — 저장된 세션을 지우지 않는다. 새로고침하면 그대로 이어진다.
+  throw new Error('지금 서버에 닿지 못했습니다. 잠시 뒤 새로고침하세요.');
 }
 
 function signOut() {
-  token = ''; sessionStorage.removeItem('ops_t');
+  token = ''; refreshToken = ''; localStorage.removeItem(KEY);
   // 비워야 로그아웃 뒤 해시가 움직여도 401 을 다시 부르러 가지 않는다.
   NAV_IDS = [];
   $('app').style.display = 'none'; $('login').style.display = '';
@@ -157,8 +237,7 @@ $('login').addEventListener('submit', async (e) => {
       return;
     }
     if (!r.ok) { $('err').textContent = '로그인 처리가 실패했습니다 (' + r.status + ').'; return; }
-    const d = await r.json();
-    token = d.access_token; sessionStorage.setItem('ops_t', token);
+    keep(await r.json());
     $('pw').value = '';
     await start();
   } catch (x) { $('err').textContent = String(x.message || x); }
@@ -240,10 +319,17 @@ async function open(id, missing) {
 
 // `!$('go').disabled` 를 같이 보던 판이 있었는데, 그 값을 참으로 만들던 유일한 곳이
 // 함수 이름 형식 검사였다. 주소에서 함수 이름을 뺀 뒤로는 늘 거짓이라 죽은 조건이다.
-if (token) {
-  start().catch((x) => {
-    signOut();
-    if (String(x.message) !== '401') $('err').textContent = '세션을 여는 데 실패했습니다: ' + String(x.message || x);
+// 토큰이 없어도 갱신 토큰이 있으면 이어 간다 — 브라우저를 껐다 켠 다음이 그 경우다.
+if (token || refreshToken) {
+  (token ? start() : renew().then((v) => {
+    // 여기서도 일시 고장과 만료를 가른다. 못 갱신했다고 저장된 세션을 지우면
+    // 오프라인으로 한 번 연 것이 7일짜리 세션을 날린다.
+    if (v === 'ok') return start();
+    throw new Error(v === 'expired' ? '401' : '지금 서버에 닿지 못했습니다. 잠시 뒤 새로고침하세요.');
+  })).catch((x) => {
+    const 만료 = String(x.message) === '401';
+    if (만료) signOut(); else { $('app').style.display = 'none'; $('login').style.display = ''; }
+    if (!만료) $('err').textContent = String(x.message || x);
   });
 }
 </script>
