@@ -39,6 +39,14 @@ nav>*{flex:none}
 /* 로그인 계정은 맨 아래 (2026-08-13 사용자 지시). `margin-top:auto` 라 탭이 화면보다
    길어지면 자동으로 0 이 되어 목록 끝에 따라붙는다 — 겹치지 않는다. */
 nav .who{font-size:12px;color:#8e8e93;padding:14px 18px 0;margin-top:auto}
+/* 로그아웃은 **버튼이 아니라 글자다** (2026-08-13 사용자 지시: "버튼형식 말고 텍스트랑
+   밑줄로만, 낮은 위계로"). 그래서 `nav a` 의 블록 상자·14px·밑줄 없음을 전부 덮는다.
+   `width:max-content` 로 상자를 글자에 붙인다 — 안 붙이면 탭바 줄 전체가 눌려서
+   결국 버튼처럼 보인다. 계정 이메일(12px 회색)보다 더 낮출 자리가 없어 같은 크기·색을
+   쓰고, 밑줄만으로 "누를 수 있다" 를 말한다. 호버로 색을 올리지 않는다 — 그러면 위
+   이메일보다 위계가 잠시 높아진다. */
+nav a.out{display:block;width:max-content;padding:3px 18px 0;font-size:12px;color:#8e8e93;
+          text-decoration:underline;text-underline-offset:2px}
 /* 🔴 11px 회색 글자 · 배경 없음 이 확정이다. 2026-08-13 에 대제목(17px/800 + amber-100)으로
    올렸다가 같은 날 사용자가 크기·글자색·배경색을 전부 원래대로 돌리라고 했다. 다시 키우지 마라. */
 nav .grp{font-size:11px;color:#8e8e93;padding:14px 18px 4px;letter-spacing:.04em}
@@ -193,6 +201,38 @@ async function call(path, init, 다시 = true) {
   throw new Error('지금 서버에 닿지 못했습니다. 잠시 뒤 새로고침하세요.');
 }
 
+// 사람이 누르는 로그아웃. 🔴 **로컬만 지우면 반쪽이다** — 그 갱신 토큰으로 이어지던
+// 서버 세션이 남은 7일 동안 그대로 살아 있다.
+//
+// 🔴 **GoTrue 로 직접 가지 않는다. 함수 창구(`call`)로 간다.** 직접 가면 세션 끊기 구현이
+//    둘이 되고(함수의 `endSession` 과 여기), 실제로 `scope` 가 갈렸었다. 게다가
+//    `private.admin_audit` 은 함수만 쓸 수 있어서 **로그아웃이 원장에 영영 안 남는다** —
+//    들어온 기록만 있고 나간 기록은 없는 원장이 된다 (검사관 2026-08-13).
+//    덤으로 만료 토큰 재시도도 `call()` 이 이미 한다 — 여기서 다시 짤 것이 없다.
+let 나가는중 = false;
+
+async function 로그아웃() {
+  if (나가는중) return;              // 연타하면 두 번째가 401 을 받아 "못 끊었다" 로 오해된다
+  나가는중 = true;
+  let 결과 = '못함';
+  try {
+    await call('/auth/logout', { method: 'POST' });
+    결과 = '끊음';
+  } catch (x) {
+    // `call` 은 401 을 만나면 스스로 갱신하고 다시 부른다. 그래도 401 이면 그 세션은
+    // 이미 죽은 것이라 끊을 것이 없다 — 못 끊은 것과 다르다.
+    if (String(x.message) === '401') 결과 = '이미끊김';
+  } finally {
+    나가는중 = false;
+  }
+  signOut();
+  // 조용히 넘어가지 않는다. 못 끊었으면 이 브라우저에서만 나간 것이고 서버 세션은
+  // 남은 기간 동안 살아 있다 — 그걸 모르면 "로그아웃했으니 괜찮다" 로 읽는다.
+  if (결과 === '못함') {
+    $('err').textContent = '이 브라우저에서는 나갔지만 서버 세션을 못 끊었습니다. 네트워크를 확인하세요.';
+  }
+}
+
 function signOut() {
   token = ''; refreshToken = ''; localStorage.removeItem(KEY);
   // 비워야 로그아웃 뒤 해시가 움직여도 401 을 다시 부르러 가지 않는다.
@@ -257,9 +297,12 @@ async function start() {
   $('nav').innerHTML = groups.map((g) =>
     '<div class="grp">' + g.name + '</div>' +
     g.items.map((p) => '<a href="#' + p.id + '" data-id="' + p.id + '">' + p.title + '</a>').join('')
-  ).join('') + '<div class="who"></div>';
+  ).join('') + '<div class="who"></div><a class="out" id="out">로그아웃</a>';
   // 이메일은 **본문이 아니라 값**이다. innerHTML 로 붙이면 주소에 든 문자가 태그로 읽힌다.
   $('nav').querySelector('.who').textContent = boot.user.email;
+  // `href` 를 주지 않는다. 주는 순간 아래 nav 클릭 처리기의 "지금 열린 탭을 다시 눌렀나"
+  // 비교(`getAttribute('href') === location.hash`)에 걸려 화면을 다시 부른다.
+  $('out').addEventListener('click', 로그아웃);
   // 화면 이동은 앵커가 해시를 바꾸고 hashchange 하나가 받는다 — 뒤로/앞으로와
   // 가운데 클릭(새 탭)이 따로 배선 없이 같은 길을 탄다.
   // 다만 **지금 열린 탭을 다시 누르면 해시가 안 바뀌어 hashchange 가 안 뜬다.**
