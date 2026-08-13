@@ -12,34 +12,39 @@ import { 서버열기, 브라우저열기, 검사기 } from './harness.mjs';
 
 const { server, origin } = await 서버열기();
 
-// 🔴 스텁 목록은 **실제와 같은 성질**을 가져야 한다.
-//    · 가장 긴 이름(「Unit Economics 시뮬레이터」)이 있어야 폭 검사가 뜻을 가진다.
-//    · 칸이 충분히 많아야 짧은 화면에서 탭바가 스크롤된다 — 그게 ④ 검사의 전제다.
+// 🔴 **운영 화면의 실제 이름을 여기 적지 않는다.** `ops/index.html` 이 그렇게 정해 둑다 —
+//    "화면 id 목록은 함수가 준 nav 에서만 온다. 여기에 화이트리스트를 두지 마라 — 두는 순간
+//    화면 목록이 공개 저장소에 박힌다." 이 저장소는 공개다. `route.mjs` 의 스텁도 가짜다.
+//
+// 그래서 **성질만 같게** 만든다. 검사가 보는 것은 이름의 뜻이 아니라 아래 셋뿐이다.
+//    · 라틴+한글이 섞인 **가장 긴 칸**이 하나 있다 — 굵기 예약과 폭 검사의 최악 조건.
+//    · 칸이 14개다 — 짧은 화면에서 탭바가 스크롤된다(③ 검사의 전제).
+//    · 묶음이 여럿이다 — 라벨/항목 들여쓰기 위계를 볼 수 있다.
 const NAV = [
-  { id: 'errors', title: '오류 리포트', group: '운영', order: 10 },
-  { id: 'cost', title: '비용 리포트', group: '운영', order: 20 },
-  { id: 'crawl', title: '채용공고 크롤링', group: '채용공고', order: 10 },
-  { id: 'jobscreen', title: '채용공고 정렬', group: '채용공고', order: 50 },
-  { id: 'rank', title: '채용공고 발송 시뮬레이터', group: '채용공고', order: 60 },
-  { id: 'isources', title: '인사이트 소스 수집', group: '인사이트 아티클', order: 10 },
-  { id: 'ipick', title: '인사이트 소스 선별', group: '인사이트 아티클', order: 15 },
-  { id: 'iprompt', title: '인사이트 아티클 생성', group: '인사이트 아티클', order: 30 },
-  { id: 'bprice', title: 'Unit Economics 시뮬레이터', group: '비즈니스', order: 10 },
-  { id: 'bshare', title: '시장 점유율별 기대매출', group: '비즈니스', order: 20 },
-  { id: 'bretention', title: '리텐션/LTV 시뮬레이터', group: '비즈니스', order: 30 },
-  { id: 'bmonitor', title: '경쟁사 모니터링', group: '시장·레퍼런스', order: 10 },
-  { id: 'mbench24', title: '국내외 뉴스레터 2년 성과', group: '시장·레퍼런스', order: 20 },
-  { id: 'mkrletter', title: '국내 뉴스레터 장기 성과', group: '시장·레퍼런스', order: 30 },
+  { id: 's01', title: '가나다 라마바', group: '묶음 하나', order: 10 },
+  { id: 's02', title: '사아자 차카타', group: '묶음 하나', order: 20 },
+  { id: 's03', title: '가나다라 마바사', group: '묶음 둘', order: 10 },
+  { id: 's04', title: '아자차 카타파하', group: '묶음 둘', order: 20 },
+  { id: 's05', title: '가나다라마 바사아자', group: '묶음 둘', order: 30 },
+  { id: 's06', title: '차카타파 하가나', group: '묶음 셋', order: 10 },
+  { id: 's07', title: '다라마바 사아자차', group: '묶음 셋', order: 20 },
+  { id: 's08', title: '카타파하 가나다라', group: '묶음 셋', order: 30 },
+  { id: 's09', title: 'Sample Metrics 시뮬레이터', group: '묶음 넷', order: 10 },  // ← 가장 긴 칸
+  { id: 's10', title: '마바사아 자차카타', group: '묶음 넷', order: 20 },
+  { id: 's11', title: '파하가나 다라마바', group: '묶음 넷', order: 30 },
+  { id: 's12', title: '사아자차 카타파', group: '묶음 다섯', order: 10 },
+  { id: 's13', title: '하가나다 라마바사', group: '묶음 다섯', order: 20 },
+  { id: 's14', title: '아자차카 타파하가', group: '묶음 다섯', order: 30 },
 ];
 const IDS = NAV.map((p) => p.id);
-const 긴칸 = 'bprice';   // 가장 긴 이름. 폭·줄바꿈 검사의 최악 조건이다.
-const 끝칸 = 'mkrletter'; // 목록 맨 아래. 짧은 화면에서 스크롤 밖으로 나가는 칸이다.
+const 긴칸 = 's09';   // 가장 긴 이름. 폭·잘림 검사의 최악 조건이다.
+const 끝칸 = 's14'; // 목록 맨 아래. 짧은 화면에서 스크롤 밖으로 나가는 칸이다.
 
 const browser = await 브라우저열기();
 const page = await browser.newPage({ viewport: { width: 1200, height: 900 } });
 
 // 「불러오는 중」 을 볼 수 있어야 하므로 한 화면만 일부러 늦게 준다.
-const 느린칸 = 'cost';
+const 느린칸 = 's02';
 await page.route('**/functions/v1/**', async (route) => {
   const u = new URL(route.request().url());
   if (u.pathname.endsWith('/auth/login')) {
@@ -70,7 +75,10 @@ async function login(hash) {
       break;
     } catch { /* 부팅이 먼저 끝났다 */ }
   }
-  await page.waitForSelector('#main h1');
+  // 🔴 `#main h1` 로 기다리면 안 된다 — 셸의 **오류 화면도** `<h1>화면을 불러오지 못했습니다</h1>` 다.
+  //    스텁 경로가 어긋나면 항목들이 오류 화면을 상대로 재고도 전부 초록일 수 있다.
+  //    `#t` 는 이 파일의 스텁만 붙이는 표식이라, 그 구멍이 구조적으로 닫힌다.
+  await page.waitForSelector('#main h1#t');
 }
 
 const 재기 = () => page.evaluate(() => {
@@ -86,9 +94,14 @@ const 재기 = () => page.evaluate(() => {
     barW: bar?.width ?? null,
     barBg: bar?.backgroundColor ?? null,
     aria: [...nav.querySelectorAll('[aria-current]')].map((a) => a.dataset.id),
+    nowrap: on ? c.whiteSpace : null,
     // 두 줄이 된 칸. 항목 한 줄은 22.4 + padding 14 ≈ 36 이라 37 을 넘으면 접힌 것이다.
     접힌칸: [...nav.querySelectorAll('a[data-id]')]
       .filter((a) => a.getBoundingClientRect().height > 37).map((a) => a.dataset.id),
+    // 🔴 글자가 상자 밖으로 나간 칸. `white-space:nowrap` 이라 넘치면 **접히는 게 아니라 잘린다** —
+    //    그래서 높이만 보면 `max-width` 가 조여도 영영 초록이다(검사관 지적).
+    잘린칸: [...nav.querySelectorAll('a[data-id]')]
+      .filter((a) => a.scrollWidth > a.clientWidth + 1).map((a) => a.dataset.id),
   };
 });
 
@@ -119,15 +132,18 @@ await page.waitForFunction((id) => document.querySelector('#nav a.on')?.dataset.
 // (그 상태에서는 가장 긴 칸을 누를 때만 폭이 튀어 오른쪽 본문이 밀린다).
 const 폭 = new Set();
 const 접힘 = new Set();
+const 잘림 = new Set();
 for (const id of IDS) {
   await page.evaluate((x) => { location.hash = '#' + x; }, id);
   await page.waitForFunction((x) => document.querySelector('#nav a.on')?.dataset.id === x, id);
   const m = await 재기();
   폭.add(m.navW);
   m.접힌칸.forEach((x) => 접힘.add(x));
+  m.잘린칸.forEach((x) => 잘림.add(x));
 }
 ok('어느 칸을 선택해도 탭바 폭이 같다', 폭.size === 1, [...폭].join(', '));
-ok('어느 칸도 두 줄이 되지 않는다', 접힘.size === 0, [...접힘].join(', '));
+ok('어느 칸도 글자가 잘리지 않는다', 잘림.size === 0, [...잘림].join(', '));
+ok('어느 칸도 두 줄이 되지 않는다 (nowrap 이 풀리면 여기서 걸린다)', 접힘.size === 0, [...접힘].join(', '));
 
 // 화면이 짧으면 탭바에 세로 스크롤바가 생긴다. `scrollbar-gutter:stable` 이 없으면
 // 그때만 폭이 달라져서 **그 PC 에서만** 나는 차이가 된다.
@@ -137,7 +153,7 @@ ok('어느 칸도 두 줄이 되지 않는다', 접힘.size === 0, [...접힘].j
 //    빼도 긴 화면과 짧은 화면의 폭이 똑같이 나온다(변이로 확인: 규칙 없이 둘 다 225).
 //    `::-webkit-scrollbar{width:15px}` 로 클래식을 흉내 내 봐도 안 바뀐다(그것도 확인했다).
 //    자리를 실제로 먹는 것은 사용자 PC 의 윈도우 크롬이고(실측 15px), 거기서는 이 규칙이
-//    없으면 화면이 짧은 PC 에서만 폭이 223 으로 줄어 가장 긴 칸이 두 줄이 된다.
+//    없으면 화면이 짧은 PC 에서만 폭이 223 으로 줄어 가장 긴 칸이 잘린다.
 //    그 사고를 여기서 재현할 수는 없으므로, **규칙이 조용히 사라지는 것**만 막는다.
 await page.setViewportSize({ width: 1200, height: 420 });
 await page.evaluate((x) => { location.hash = '#' + x; }, 긴칸);
@@ -150,7 +166,8 @@ await page.waitForFunction((x) => document.querySelector('#nav a.on')?.dataset.i
   });
   ok('짧은 화면에서 탭바가 스크롤된다 (아래 검사의 전제)', 스크롤생김, String(스크롤생김));
   ok('탭바가 스크롤바 자리를 늘 비워 둔다 (효과는 이 환경에서 못 잼)', gutter === 'stable', gutter);
-  ok('짧은 화면에서도 두 줄이 안 된다', m.접힌칸.length === 0, m.접힌칸.join(', '));
+  ok('짧은 화면에서도 글자가 안 잘린다', m.잘린칸.length === 0, m.잘린칸.join(', '));
+  ok('칸은 한 줄로 유지된다 (white-space)', m.nowrap === 'nowrap', m.nowrap);
 }
 
 // ── ③ 선택된 칸이 화면 안에 보인다 (짧은 화면 + 맨 아래 칸) ──────────────────
@@ -198,15 +215,32 @@ await login('#' + 긴칸);
   ok('안 선택된 칸은 호버하면 배경이 생긴다', bg2 !== 'rgba(0, 0, 0, 0)', bg2);
 }
 
+// ── ⑤-2 키보드 포커스 표시 ───────────────────────────────────────────
+// 이 규칙도 되돌리면 아무도 모르는 자리였다 — 화면에는 마우스로만 다니면 안 보인다.
+{
+  await page.evaluate(() => document.querySelector('#nav a[data-id]').focus({ focusVisible: true }));
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Shift+Tab');
+  const o = await page.evaluate(() => {
+    const a = document.querySelector('#nav a[data-id]');
+    const c = getComputedStyle(a);
+    return { w: c.outlineWidth, s: c.outlineStyle, focused: document.activeElement === a };
+  });
+  ok('키보드 포커스에 표시가 있다', o.focused && o.s === 'solid' && parseFloat(o.w) >= 2,
+     JSON.stringify(o));
+}
+
 // ── ⑥ 탭 제목 ─────────────────────────────────────────────────────────────
 {
+  // 기대값을 손으로 적지 않는다 — 위 스텁에서 가져온다. 스텁 이름을 바꿔도 검사가 안 낡는다.
+  const 긴칸이름 = NAV.find((p) => p.id === 긴칸).title;
+  const 끝칸이름 = NAV.find((p) => p.id === 끝칸).title;
   const t1 = await page.title();
-  ok('탭 제목에 지금 화면 이름이 있다', t1.startsWith('Unit Economics 시뮬레이터'), t1);
+  ok('탭 제목에 지금 화면 이름이 있다', t1.startsWith(긴칸이름), t1);
   ok('탭 제목에 서비스명이 있다', t1.includes('커리어코치'), t1);
   await page.evaluate((x) => { location.hash = '#' + x; }, 끝칸);
-  await page.waitForFunction((x) => document.title.startsWith(x), '국내 뉴스레터 장기 성과');
-  ok('화면을 옮기면 탭 제목도 따라간다', (await page.title()).startsWith('국내 뉴스레터 장기 성과'),
-     await page.title());
+  await page.waitForFunction((x) => document.title.startsWith(x), 끝칸이름);
+  ok('화면을 옮기면 탭 제목도 따라간다', (await page.title()).startsWith(끝칸이름), await page.title());
 }
 
 // ── ⑦ 화면 전환 중 빈 화면을 두지 않는다 ────────────────────────────────────
