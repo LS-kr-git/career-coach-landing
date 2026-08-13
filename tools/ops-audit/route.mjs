@@ -11,10 +11,18 @@ import { 서버열기, 브라우저열기, 검사기 } from './harness.mjs';
 
 const { server, origin } = await 서버열기();
 
+// 🔴 **여기에 진짜 화면 이름을 쓰지 마라.** 이 저장소는 공개다 —
+//    `ops/index.html` 이 "화면 목록은 함수가 준 nav 에서만 온다. 여기에 화이트리스트를
+//    두지 마라" 고 정해 둔 그 규칙이 스텁에도 그대로 걸린다.
+//    2026-08-13 까지 `errors`·`cost`·`crawl` 이 그대로 박혀 있었고, 제목은 그 사이
+//    바뀐 이름을 안 따라가 「비용·한도」 같은 옛 값이었다 — **읽는 사람이 진짜인지
+//    스텁인지 구별할 수 없는 상태**가 새는 것보다 나빴다.
+//    이 검사들이 보는 것은 **해시 라우팅**이지 화면 이름이 아니므로 가짜로 충분하다.
+//    (`nav.mjs` 와 같은 이름 규칙을 쓴다.)
 const NAV = [
-  { id: 'errors', title: '오류 리포트', group: '운영', order: 5 },
-  { id: 'cost', title: '비용·한도', group: '운영', order: 20 },
-  { id: 'crawl', title: '공고 크롤링', group: '채용공고', order: 10 },
+  { id: 's01', title: '가나다 라마바', group: '묶음 하나', order: 5 },
+  { id: 's02', title: '사아자 차카타', group: '묶음 하나', order: 20 },
+  { id: 's03', title: '가나다라 마바사', group: '묶음 둘', order: 10 },
 ];
 
 const browser = await 브라우저열기();
@@ -28,7 +36,11 @@ await page.route('**/functions/v1/**', async (route) => {
   if (u.pathname.endsWith('/bootstrap')) {
     return route.fulfill({ json: { user: { email: 'a@b.c' }, nav: NAV } });
   }
-  const m = u.pathname.match(/\/view\/([a-z]+)$/);
+  // 🔴 `[a-z]+` 이 아니라 `[a-z0-9]+` 다. 스텁 id 에 숫자가 들어가는데(`s01`) 옛 정규식으로는
+  //    이 갈래가 통째로 안 맞아 **모든 화면 요청이 404 로 떨어진다** — 그러면 `#t` 가 영영
+  //    안 생겨 26항목이 전부 타임아웃으로 죽는다. 진짜 화면 id 도 `bprice`·`jobscreen` 처럼
+  //    지금은 다 소문자지만, 숫자를 못 받는 이유는 없다.
+  const m = u.pathname.match(/\/view\/([a-z0-9]+)$/);
   if (m) {
     viewed.push(m[1]);
     return route.fulfill({ body: `<h1 id="t">${m[1]}</h1>`, contentType: 'text/html; charset=utf-8' });
@@ -56,52 +68,52 @@ async function login(hash) {
 }
 
 // ① 옛 북마크(`#<함수>`) → 첫 화면으로 내려가고 주소가 맞춰진다
-await login('#errors');
-ok('옛 북마크 → 첫 화면', await page.textContent('#t') === 'errors', await page.textContent('#t'));
-ok('주소가 맞춰진다', page.url().endsWith('#errors'), page.url());
+await login('#s01');
+ok('옛 북마크 → 첫 화면', await page.textContent('#t') === 's01', await page.textContent('#t'));
+ok('주소가 맞춰진다', page.url().endsWith('#s01'), page.url());
 
 // ② 탭을 누르면 주소가 바뀐다
-await page.click('nav a[data-id="crawl"]');
-await page.waitForFunction(() => document.querySelector('#t')?.textContent === 'crawl');
-ok('탭 클릭 → 주소 변경', page.url().endsWith('#crawl'), page.url());
-ok('탭 클릭 → 강조 이동', await page.getAttribute('nav a[data-id="crawl"]', 'class') === 'on');
+await page.click('nav a[data-id="s03"]');
+await page.waitForFunction(() => document.querySelector('#t')?.textContent === 's03');
+ok('탭 클릭 → 주소 변경', page.url().endsWith('#s03'), page.url());
+ok('탭 클릭 → 강조 이동', await page.getAttribute('nav a[data-id="s03"]', 'class') === 'on');
 
 // ③ 뒤로가기
 await page.goBack();
-await page.waitForFunction(() => document.querySelector('#t')?.textContent === 'errors');
-ok('뒤로가기가 앞 화면을 되돌린다', page.url().endsWith('#errors'));
+await page.waitForFunction(() => document.querySelector('#t')?.textContent === 's01');
+ok('뒤로가기가 앞 화면을 되돌린다', page.url().endsWith('#s01'));
 await page.goForward();
-await page.waitForFunction(() => document.querySelector('#t')?.textContent === 'crawl');
-ok('앞으로가기', page.url().endsWith('#crawl'));
+await page.waitForFunction(() => document.querySelector('#t')?.textContent === 's03');
+ok('앞으로가기', page.url().endsWith('#s03'));
 
 // ④ 새로고침이 보던 화면을 지킨다 (세션 토큰이 남아 있다)
 await page.reload();
 await page.waitForSelector('#main h1');
-ok('새로고침이 화면을 지킨다', await page.textContent('#t') === 'crawl', await page.textContent('#t'));
+ok('새로고침이 화면을 지킨다', await page.textContent('#t') === 's03', await page.textContent('#t'));
 
 // ⑤ 딥링크 — 주소로 바로 들어간다
-await page.goto(origin + '/ops/#cost');
+await page.goto(origin + '/ops/#s02');
 await page.waitForSelector('#main h1');
-ok('딥링크로 바로 열린다', await page.textContent('#t') === 'cost', await page.textContent('#t'));
+ok('딥링크로 바로 열린다', await page.textContent('#t') === 's02', await page.textContent('#t'));
 
 // ⑥ 모르는 화면 id → 첫 화면으로 내리고 주소를 고친다. 없는 화면을 부르지 않는다
 const before = viewed.length;
 await page.goto(origin + '/ops/#zzz');
 await page.waitForSelector('#main h1');
-ok('모르는 id → 첫 화면', await page.textContent('#t') === 'errors', await page.textContent('#t'));
-ok('모르는 id → 주소 정정', page.url().endsWith('#errors'), page.url());
+ok('모르는 id → 첫 화면', await page.textContent('#t') === 's01', await page.textContent('#t'));
+ok('모르는 id → 주소 정정', page.url().endsWith('#s01'), page.url());
 ok('모르는 id 를 서버에 묻지 않는다', !viewed.slice(before).includes('zzz'), viewed.slice(before).join(','));
 
 // ⑦ nav 앵커에 href 가 있다 (가운데 클릭 새 탭)
-await login('#errors');
-ok('nav 가 진짜 링크다', await page.getAttribute('nav a[data-id="cost"]', 'href') === '#cost');
+await login('#s01');
+ok('nav 가 진짜 링크다', await page.getAttribute('nav a[data-id="s02"]', 'href') === '#s02');
 
 // ⑧ 지금 열린 탭을 다시 눌러도 다시 불러온다 (해시가 안 바뀌어도)
-await login('#cost');
+await login('#s02');
 const n0 = viewed.length;
-await page.click('nav a[data-id="cost"]');
+await page.click('nav a[data-id="s02"]');
 await page.waitForTimeout(300);
-ok('활성 탭 재클릭 → 재요청', viewed.length > n0 && viewed.at(-1) === 'cost', viewed.slice(n0).join(','));
+ok('활성 탭 재클릭 → 재요청', viewed.length > n0 && viewed.at(-1) === 's02', viewed.slice(n0).join(','));
 
 // ⑨ 모르는 화면 이름이면 그 사실을 말한다
 await page.goto(origin + '/ops/?r=' + Math.random() + '#zzz');
@@ -110,24 +122,27 @@ const note = await page.textContent('#main .sub').catch(() => '');
 ok('모르는 id → 안내문을 남긴다', note.includes('zzz'), note);
 
 // ⑩ 옛 북마크 `#<함수이름>` → 첫 화면으로 열리고 주소가 새 형식으로 갈린다 (안내문 없이)
+// 🔴 **함수 이름만은 가짜로 못 바꾼다.** 셸이 `ops/index.html` 의 `FN` 상수를 보고 이 접두사를
+//    떼어내므로, 다른 문자열을 넣으면 "모르는 id" 갈래로 빠져 정규화 자체를 안 재게 된다.
+//    새는 것도 아니다 — 같은 공개 저장소 `ops/index.html` 에 `const FN` 으로 이미 박혀 있다.
 await page.goto(origin + '/ops/?r=' + Math.random() + '#ops-1udm1xmi');
 await page.waitForSelector('#main h1');
-ok('옛 북마크(함수이름만) → 첫 화면', await page.textContent('#t') === 'errors', await page.textContent('#t'));
-ok('옛 북마크 → 주소가 새 형식으로', page.url().endsWith('#errors'), page.url());
+ok('옛 북마크(함수이름만) → 첫 화면', await page.textContent('#t') === 's01', await page.textContent('#t'));
+ok('옛 북마크 → 주소가 새 형식으로', page.url().endsWith('#s01'), page.url());
 ok('옛 북마크 → 안내문 없음', (await page.locator('#main .sub').count()) === 0);
 
 // ⑪ 옛 딥링크 `#<함수이름>/<화면id>` → 그 화면이 열리고 주소가 갈린다
-await page.goto(origin + '/ops/?r=' + Math.random() + '#ops-1udm1xmi/cost');
+await page.goto(origin + '/ops/?r=' + Math.random() + '#ops-1udm1xmi/s02');
 await page.waitForSelector('#main h1');
-ok('옛 딥링크 → 그 화면', await page.textContent('#t') === 'cost', await page.textContent('#t'));
-ok('옛 딥링크 → 주소가 새 형식으로', page.url().endsWith('#cost'), page.url());
+ok('옛 딥링크 → 그 화면', await page.textContent('#t') === 's02', await page.textContent('#t'));
+ok('옛 딥링크 → 주소가 새 형식으로', page.url().endsWith('#s02'), page.url());
 // 함수 이름이 주소에서 사라졌는가 — **여기서** 봐야 한다. 함수 이름을 넣고 들어온 직후라
 // 정규화가 없으면 그대로 남는다. 마지막에 두면 그 자리 주소에는 애초에 함수 이름이 없어서
 // 무엇을 깨도 초록이다(검사관 지적, 변이로 재현됨).
 ok('주소에 함수 이름이 없다', !page.url().includes('ops-1udm1xmi'), page.url());
 
 // ⑫ 이메일이 nav 의 마지막이고 화면 아래쪽에 있다
-await login('#errors');
+await login('#s01');
 const 끝두개 = await page.evaluate(() => [...document.querySelector('#nav').children].slice(-2).map((n) => n.className));
 ok('nav 끝은 이메일 → 로그아웃 순서', JSON.stringify(끝두개) === JSON.stringify(['who', 'out']), JSON.stringify(끝두개));
 const pos = await page.evaluate(() => {

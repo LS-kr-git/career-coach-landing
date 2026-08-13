@@ -9,7 +9,8 @@ import { 서버열기, 브라우저열기, 검사기 } from './harness.mjs';
 
 const { server, origin } = await 서버열기();
 
-const NAV = [{ id: 'errors', title: '오류 리포트', group: '운영', order: 5 }];
+// 진짜 화면 이름을 쓰지 않는 이유는 `route.mjs` 의 같은 자리 주석에 있다 (공개 저장소).
+const NAV = [{ id: 's01', title: '가나다 라마바', group: '묶음 하나', order: 5 }];
 
 // 스텁 상태 — 테스트가 조종한다
 // 🔴 `살아있는갱신토큰` 은 장식이 아니다. 진짜 GoTrue 는 갱신 토큰을 **회전**시켜서
@@ -76,9 +77,9 @@ async function 새로로그인() {
   //    `keep()` 이 clear 직후에 토큰을 다시 써서, 새 문서가 그 세션으로 바로 열린다
   //    (= 로그인 폼이 안 뜨고 이 도우미가 멎는다). 로그인 폼이 보일 때까지 다시 지운다.
   for (let i = 0; i < 5; i++) {
-    await page.goto(origin + '/ops/?r=' + Math.random() + '#errors');
+    await page.goto(origin + '/ops/?r=' + Math.random() + '#s01');
     await page.evaluate(() => localStorage.clear());
-    await page.goto(origin + '/ops/?r=' + Math.random() + '#errors');
+    await page.goto(origin + '/ops/?r=' + Math.random() + '#s01');
     if (await page.isVisible('#login')) break;
     await page.waitForTimeout(200);
   }
@@ -88,7 +89,7 @@ async function 새로로그인() {
 }
 
 // ① 로그인하면 토큰 쌍이 localStorage 에 남는다 (탭을 닫아도 살아 있어야 한다)
-await page.goto(origin + '/ops/#errors');
+await page.goto(origin + '/ops/#s01');
 await page.fill('#email', 'a@b.c'); await page.fill('#pw', 'x'); await page.click('#go');
 await page.waitForSelector('#main h1');
 let v = await 저장된값();
@@ -97,7 +98,7 @@ ok('로그인 → 토큰 쌍이 localStorage 에', v && v.access_token === 'A1' 
 // ② 액세스 토큰이 만료되면 **로그인 화면으로 안 가고** 조용히 이어간다
 S.good = 'EXPIRED';                       // 서버가 지금 토큰을 거부하기 시작
 S.refreshCount = 0;
-await page.click('nav a[data-id="errors"]');   // 활성 탭 재클릭 = 재요청
+await page.click('nav a[data-id="s01"]');   // 활성 탭 재클릭 = 재요청
 await page.waitForFunction(() => localStorage.getItem('ops_session')?.includes('A2'), null, { timeout: 5000 })
   .catch(() => {});
 v = await 저장된값();
@@ -113,7 +114,7 @@ await page.evaluate(() => {
 S.refreshCount = 0; S.loginCount = 0;
 // 🔴 같은 URL 로 goto 하면 **문서가 다시 안 뜬다**(해시만 같은 문서 내 이동).
 //    그러면 이 검사는 앞 상태를 그대로 보고 조용히 통과한다 — 실제로 한 번 그랬다.
-await page.goto(origin + '/ops/?r=' + Math.random() + '#errors');
+await page.goto(origin + '/ops/?r=' + Math.random() + '#s01');
 await page.waitForSelector('#main h1', { timeout: 5000 }).catch(() => {});
 ok('껐다 켜도 이어진다 (로그인 안 함)',
    await page.isVisible('#main h1') && S.loginCount === 0 && S.refreshCount === 1,
@@ -122,14 +123,14 @@ ok('껐다 켜도 이어진다 (로그인 안 함)',
 // ④ 동시에 여러 요청이 401 을 만나도 갱신은 한 번만 — 회전 토큰을 서로 무효화하면 안 된다
 S.good = 'EXPIRED2'; S.refreshCount = 0;
 await page.evaluate(() => Promise.allSettled([
-  window.ops.call('/view/errors'), window.ops.call('/view/errors'),
-  window.ops.call('/view/errors'), window.ops.call('/view/errors'),
+  window.ops.call('/view/s01'), window.ops.call('/view/s01'),
+  window.ops.call('/view/s01'), window.ops.call('/view/s01'),
 ]));
 ok('동시 4건 → 갱신 1회', S.refreshCount === 1, `${S.refreshCount}회`);
 
 // ⑤ 7일이 지나면(함수가 갱신을 401 로 거절) 로그인 화면으로 돌아가고 저장된 값이 지워진다
 S.refreshMode = '401'; S.good = 'EXPIRED3';
-await page.evaluate(() => window.ops.call('/view/errors').catch(() => {}));
+await page.evaluate(() => window.ops.call('/view/s01').catch(() => {}));
 await page.waitForSelector('#login', { state: 'visible', timeout: 5000 }).catch(() => {});
 ok('7일 초과 → 로그인 화면', await page.isVisible('#login'));
 ok('7일 초과 → 저장된 세션 삭제', (await 저장된값()) === null);
@@ -138,13 +139,13 @@ ok('7일 초과 → 저장된 세션 삭제', (await 저장된값()) === null);
 S.refreshMode = 'ok'; S.good = 'A9';
 await 새로로그인();
 S.good = 'EXPIRED4'; S.refreshMode = 'abort';
-const 오류1 = await page.evaluate(() => window.ops.call('/view/errors').then(() => '', (e) => String(e.message)));
+const 오류1 = await page.evaluate(() => window.ops.call('/view/s01').then(() => '', (e) => String(e.message)));
 ok('네트워크 끊김 → 세션을 안 지운다', (await 저장된값()) !== null, JSON.stringify(await 저장된값()));
 ok('네트워크 끊김 → 만료라고 말하지 않는다', 오류1.includes('닿지 못했'), 오류1);
 
 // ⑦ 함수 500 도 마찬가지 (refresh 안에서 DB 를 치므로 실제로 날 수 있다)
 S.refreshMode = '500';
-const 오류2 = await page.evaluate(() => window.ops.call('/view/errors').then(() => '', (e) => String(e.message)));
+const 오류2 = await page.evaluate(() => window.ops.call('/view/s01').then(() => '', (e) => String(e.message)));
 ok('함수 500 → 세션을 안 지운다', (await 저장된값()) !== null);
 ok('함수 500 → 만료라고 말하지 않는다', 오류2.includes('닿지 못했'), 오류2);
 
@@ -152,18 +153,18 @@ ok('함수 500 → 만료라고 말하지 않는다', 오류2.includes('닿지 �
 S.refreshMode = 'ok'; S.good = 'A10';
 const 탭A = page;
 const 탭B = await ctx.newPage();
-await 탭B.goto(origin + '/ops/?r=' + Math.random() + '#errors');
+await 탭B.goto(origin + '/ops/?r=' + Math.random() + '#s01');
 await 탭B.waitForSelector('#main h1', { timeout: 5000 }).catch(() => {});
 // A 가 갱신해 토큰이 회전한다
 S.good = 'EXPIRED5';
-await 탭A.evaluate(() => window.ops.call('/view/errors').catch(() => {}));
+await 탭A.evaluate(() => window.ops.call('/view/s01').catch(() => {}));
 // 🔴 희생자는 **A** 다. B 가 먼저 갱신해 토큰이 회전했으므로, 방어가 없으면 A 는 낡은
 //    갱신 토큰을 내밀고 401 을 받아 "만료" 로 읽고 공유 키를 지운다. B 만 보면 이 사고를
 //    못 본다 — B 는 그 뒤 스스로 갱신해 값을 되살려 놓기 때문이다(직접 변이로 확인).
 ok('탭 A 가 뒤늦게 갱신해도 세션을 안 잃는다', (await 탭A.evaluate(() => localStorage.getItem('ops_session'))) !== null);
 ok('탭 A 도 로그인 화면으로 안 간다', !(await 탭A.isVisible('#login')));
 // B 는 아직 옛 토큰을 들고 있다. B 가 요청하면?
-await 탭B.evaluate(() => window.ops.call('/view/errors').catch(() => {}));
+await 탭B.evaluate(() => window.ops.call('/view/s01').catch(() => {}));
 ok('탭 B 가 탭 A 의 세션을 안 지운다', (await 탭B.evaluate(() => localStorage.getItem('ops_session'))) !== null,
    String(await 탭B.evaluate(() => localStorage.getItem('ops_session'))).slice(0, 60));
 ok('탭 B 도 로그인 화면으로 안 간다', !(await 탭B.isVisible('#login')));
