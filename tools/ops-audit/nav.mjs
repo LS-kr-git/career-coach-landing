@@ -212,7 +212,13 @@ await login('#' + 긴칸);
 }
 
 // ── ⑤-2 키보드 포커스 표시 ─────────────────────────────────────────────────
-// 이 규칙도 되돌리면 아무도 모르는 자리였다 — 화면에는 마우스로만 다니면 안 보인다.
+// 마우스로만 다니면 안 보이는 자리라, 되돌아가도 아무도 모른다.
+// 🔴 **여기서 지키는 결정은 "우리 아웃라인이 있다" 가 아니라 "브라우저 기본값을 쓴다" 다**
+//    (2026-08-13 사용자 확정: 시안 E). 그래서 `outline-style` 이 `auto` 여야 한다.
+//    - `none`  → 누가 `outline:none` 이나 `*{outline:0}` 을 넣어 표시를 죽였다
+//    - `solid` → 누가 우리 색·두께로 덮어썼다. 그것도 결정을 뒤집은 것이다
+//    `auto` 는 크로미움에서 폭이 1px 로 계산되지만 실제로는 두 겹으로 그려진다 —
+//    그러니 **폭으로 판정하지 않는다.** `parseFloat(w) >= 2` 로 재면 기본값이 오답이 된다.
 {
   await page.evaluate(() => document.querySelector('#nav a[data-id]').focus({ focusVisible: true }));
   await page.keyboard.press('Tab');
@@ -220,9 +226,10 @@ await login('#' + 긴칸);
   const o = await page.evaluate(() => {
     const a = document.querySelector('#nav a[data-id]');
     const c = getComputedStyle(a);
-    return { w: c.outlineWidth, s: c.outlineStyle, focused: document.activeElement === a };
+    return { w: c.outlineWidth, s: c.outlineStyle, focused: document.activeElement === a,
+             visible: a.matches(':focus-visible') };
   });
-  ok('키보드 포커스에 표시가 있다', o.focused && o.s === 'solid' && parseFloat(o.w) >= 2,
+  ok('키보드 포커스 표시가 브라우저 기본값 그대로다', o.focused && o.visible && o.s === 'auto',
      JSON.stringify(o));
 }
 
