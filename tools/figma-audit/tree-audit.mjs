@@ -46,6 +46,21 @@ const dumpPath = argv.find((a) => !a.startsWith('--'));
 const findings = [];
 const add = (level, kind, where, detail, note) => findings.push({ level, kind, where, detail, note });
 
+/* 덤프 나이 — 파일 mtime 과 덤프가 스스로 적은 dumpedAt 중 **더 낡은 쪽**을 쓴다.
+   mtime 만 보면 git checkout·cp·touch 가 내용은 그대로 둔 채 시각만 새로 찍으므로
+   며칠 된 덤프가 "방금 뽑은 것" 으로 통과한다.
+   dumpedAt 만 보면 자기 신고값이라 손으로 고칠 수 있다.
+   그래서 둘 다 신선할 때만 신선한 것으로 본다.
+   dumpedAt 이 없는 덤프(옛 스니펫으로 뽑은 것)는 mtime 만 본다 — 종전 동작 그대로다.
+   다만 그때는 **무엇을 못 봤는지 반드시 찍는다**(selfDated=false). 조용히 옛 판정으로
+   되돌아가면 필드 하나를 지우는 것만으로 이 관문이 흔적 없이 꺼진다. */
+const dumpAgeMin = (path, d) => {
+  const ages = [(Date.now() - statSync(path).mtimeMs) / 60000];
+  const self = Date.parse(d && d.dumpedAt);
+  if (Number.isFinite(self)) ages.push((Date.now() - self) / 60000);
+  return { ageMin: Math.max(...ages), selfDated: Number.isFinite(self) };
+};
+
 const SNAP_PATH = join(HERE, 'figma-tree.json');
 const read = (p) => JSON.parse(readFileSync(p, 'utf8'));
 const snap = read(SNAP_PATH);
@@ -84,7 +99,11 @@ if (!dumpPath) {
   add('BLOCK', '라이브 대조', dumpPath, '덤프 파일을 찾지 못했습니다');
 } else {
   dump = read(dumpPath);
-  const ageMin = (Date.now() - statSync(dumpPath).mtimeMs) / 60000;
+  const { ageMin, selfDated } = dumpAgeMin(dumpPath, dump);
+  if (!selfDated) {
+    add('SKIP', '덤프 자기신고 시각', dumpPath, 'dumpedAt 이 없거나 읽을 수 없어 파일 mtime 만 봤습니다',
+        'mtime 은 checkout·cp·touch 로 새로 찍히므로 낡은 덤프가 신선해 보일 수 있습니다. README "피그마 트리 덤프" 의 스니펫으로 다시 뽑으세요.');
+  }
   if (ageMin > 45) {
     // 45분은 audit.mjs 의 덤프 한도와 같은 값이다. 그 사이 피그마가 바뀌었을 수 있으므로
     // 아래 대조 결과를 "지금 상태를 확인했다" 로 셀 수 없다.

@@ -400,7 +400,9 @@ for (const id of REG) {
   registered[id] = { found: true, name: n.name, section: sec ? sec.id : null,
                      parent: n.parent.id, parentType: n.parent.type };
 }
-return { pageId: page.id, pageName: page.name, children, registered };
+// dumpedAt 은 tree-audit 의 신선도 판정에 쓴다. 빼도 돌지만 그때는 파일 mtime 만 보므로,
+// 체크아웃·복사로 시각이 새로 찍힌 낡은 덤프를 "방금 뽑은 것" 으로 통과시킨다.
+return { dumpedAt: new Date().toISOString(), pageId: page.id, pageName: page.name, children, registered };
 ```
 
 파일이 여러 페이지가 되면 `figma.currentPage` 대신 페이지별로 나눠 돌려야 한다
