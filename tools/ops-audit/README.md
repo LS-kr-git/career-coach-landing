@@ -52,6 +52,8 @@ node tools/ops-audit/nav.mjs       # 왼쪽 탭바 (선택 표시 · 묶음 위�
 | `nav a:focus-visible{outline:none}` 을 넣음 | nav ❌ 1건 (포커스 표시가 죽는다) |
 | `*{outline:0}` 전역 리셋을 넣음 | nav ❌ 1건 (같은 자리 — 리셋 CSS 로 조용히 뒤집히는 길) |
 | `nav a:focus-visible{outline:2px solid …}` 로 **우리 색을 덮어씀** | nav ❌ 1건 (기본값을 쓰기로 한 결정이 뒤집힌다) |
+| `nav a:focus-visible{outline-offset:2px}` — **style 은 안 건드리는** 되돌림 | nav ❌ 1건 |
+| `nav a:focus-visible{outline-color:#F59E0B}` — 같은 모양 | nav ❌ 1건 |
 | 호버 규칙에서 `:not(.on)` 제거 | nav ❌ 1건 (선택된 칸에 배경이 생긴다) |
 | `document.title` 갱신 제거 | nav ❌ 1건 |
 | 로딩 표시를 빈 문자열로 되돌림 | nav ❌ 1건 |
@@ -64,6 +66,7 @@ node tools/ops-audit/nav.mjs       # 왼쪽 탭바 (선택 표시 · 묶음 위�
 | 망가뜨린 것 | 결과 |
 |---|---|
 | `route.mjs` 의 `/view/([^/]+)` 을 `([a-z]+)` 로 좁힘 | route ❌ **26항목 전부** (`#t` 가 안 생겨 타임아웃) |
+| `nav.mjs` 의 같은 정규식을 좁힘 | nav 이 **종료코드 1 로 죽는다** (❌ 줄도 못 찍고 타임아웃) |
 | `route.mjs` ⑪ 의 옛 딥링크 대상만 NAV 에 없는 id 로 (`…/s02` → `…/zz9`) | route ❌ 2건 — 첫 화면으로 떨어진다 |
 
 네 가지는 만드는 과정에서 실제로 헛검사였고, 고친 뒤 위 표가 됐다.
@@ -105,6 +108,22 @@ node tools/ops-audit/nav.mjs       # 왼쪽 탭바 (선택 표시 · 묶음 위�
     한때 `[a-z]+` 였고, 스텁 id 를 `s01` 로 바꾸는 순간 갈래가 통째로 안 맞아 **26항목이
     전부 죽었다**(변이로 재현). 넓혀 두면 이 함정 자체가 없다 — 여기가 하는 일은
     "화면 요청인가" 를 가르는 것뿐이고, 어떤 id 가 올지는 스텁의 `NAV` 가 정한다.
+
+### 포커스 표시는 **규칙이 없는 것**이 규칙이다 (2026-08-13 사용자 확정 · 시안 E)
+
+`nav.mjs` 의 「키보드 포커스 표시가 브라우저 기본값 그대로다」 는 **두 가지를 함께** 본다.
+
+1. `getComputedStyle(a).outlineStyle === 'auto'` — 전역 리셋(`*{outline:0}`)처럼
+   `nav a` 를 겨냥하지 않은 것까지 잡는다.
+2. `document.styleSheets` 를 훑어 **`nav a:focus-visible` 을 겨냥한 저자 규칙이 0개**인가.
+
+②가 없으면 `outline-offset` · `outline-color` 처럼 **`outline-style` 을 안 건드리는**
+되돌림이 그대로 통과한다(검사관 ②). 걷어낸 옛 규칙이 `outline-offset:-2px` 였으니
+그 자리가 특히 다시 채워지기 쉽다.
+
+⚠️ **폭으로 판정하지 않는다.** `auto` 는 크로미움에서 `outlineWidth` 가 `1px` 로 계산되지만
+실제로는 두 겹으로 그려진다. 옛 검사의 `parseFloat(w) >= 2` 를 그대로 뒀으면
+**브라우저 기본값이 오답**이 됐다.
 
 ### 🔴 잴 수 없는 것 하나 — `scrollbar-gutter:stable`
 

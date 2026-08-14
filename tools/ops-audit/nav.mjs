@@ -15,8 +15,8 @@ const { server, origin } = await 서버열기();
 // 🔴 **운영 화면의 실제 이름을 여기 적지 않는다.** `ops/index.html` 이 그렇게 정해 뒀다 —
 //    "화면 id 목록은 함수가 준 nav 에서만 온다. 여기에 화이트리스트를 두지 마라 — 두는 순간
 //    화면 목록이 공개 저장소에 박힌다." 이 저장소는 공개다.
-//    ⚠️ `route.mjs` 의 스텁은 **아직 진짜 id 셋(errors·cost·crawl)을 쓴다.** 이 파일과 다르다 —
-//       그쪽을 손대는 세션이 "이미 가짜겠지" 로 지나가지 않게 여기 적어 둔다.
+//    (`route.mjs`·`session.mjs` 의 스텁도 2026-08-13 에 같은 규칙으로 갈았다. 여기에
+//     "그쪽은 아직 진짜 id 를 쓴다" 는 경고가 남아 있었는데 지금은 사실이 아니다.)
 //
 // 그래서 **성질만 같게** 만든다. 검사가 보는 것은 이름의 뜻이 아니라 아래 셋뿐이다.
 //    · 라틴+한글이 섞인 **가장 긴 칸**이 하나 있다 — 굵기 예약과 폭 검사의 최악 조건.
@@ -55,7 +55,8 @@ await page.route('**/functions/v1/**', async (route) => {
   if (u.pathname.endsWith('/bootstrap')) {
     return route.fulfill({ json: { user: { email: 'a@b.c' }, nav: NAV } });
   }
-  const m = u.pathname.match(/\/view\/([a-z0-9]+)$/);
+  // 글자 종류로 좁히지 않는다 — 이유는 `route.mjs` 의 같은 자리 주석에 있다.
+  const m = u.pathname.match(/\/view\/([^/]+)$/);
   if (m) {
     if (m[1] === 느린칸) await new Promise((r) => setTimeout(r, 700));
     return route.fulfill({ body: `<h1 id="t">${m[1]}</h1>`, contentType: 'text/html; charset=utf-8' });
@@ -226,10 +227,23 @@ await login('#' + 긴칸);
   const o = await page.evaluate(() => {
     const a = document.querySelector('#nav a[data-id]');
     const c = getComputedStyle(a);
-    return { w: c.outlineWidth, s: c.outlineStyle, focused: document.activeElement === a,
-             visible: a.matches(':focus-visible') };
+    // 저자 규칙이 `nav a:focus-visible` 을 겨냥했는지 **규칙 목록에서** 본다.
+    // computed style 만 보면 `outline-offset` · `outline-color` 처럼 style 을 안 건드리는
+    // 되돌림이 그대로 통과한다(검사관 ②). 걷어낸 옛 규칙이 `outline-offset:-2px` 였으므로
+    // 그 자리가 특히 다시 채워지기 쉽다.
+    const 저자규칙 = [];
+    for (const ss of document.styleSheets) {
+      let rules; try { rules = ss.cssRules; } catch { continue; }   // 교차출처 시트는 못 읽는다
+      for (const r of rules) {
+        if (!r.selectorText || !r.selectorText.includes('focus-visible')) continue;
+        if (a.matches(r.selectorText.replace(/:focus-visible/g, ''))) 저자규칙.push(r.cssText);
+      }
+    }
+    return { w: c.outlineWidth, s: c.outlineStyle, offset: c.outlineOffset,
+             focused: document.activeElement === a, visible: a.matches(':focus-visible'), 저자규칙 };
   });
-  ok('키보드 포커스 표시가 브라우저 기본값 그대로다', o.focused && o.visible && o.s === 'auto',
+  ok('키보드 포커스 표시가 브라우저 기본값 그대로다',
+     o.focused && o.visible && o.s === 'auto' && o.저자규칙.length === 0,
      JSON.stringify(o));
 }
 
