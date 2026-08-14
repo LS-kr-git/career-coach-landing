@@ -36,11 +36,12 @@ await page.route('**/functions/v1/**', async (route) => {
   if (u.pathname.endsWith('/bootstrap')) {
     return route.fulfill({ json: { user: { email: 'a@b.c' }, nav: NAV } });
   }
-  // 🔴 `[a-z]+` 이 아니라 `[a-z0-9]+` 다. 스텁 id 에 숫자가 들어가는데(`s01`) 옛 정규식으로는
-  //    이 갈래가 통째로 안 맞아 **모든 화면 요청이 404 로 떨어진다** — 그러면 `#t` 가 영영
-  //    안 생겨 26항목이 전부 타임아웃으로 죽는다. 진짜 화면 id 를 여기 예로 적지 마라 —
-  //    이 커밋이 걷어낸 바로 그것이다. 소문자만 온다고 좁힐 이유도 없다.
-  const m = u.pathname.match(/\/view\/([a-z0-9]+)$/);
+  // 🔴 **글자 종류로 좁히지 마라.** 여기는 `[^/]+` 다.
+  //    `[a-z]+` 이던 시절에 스텁 id 를 `s01` 로 바꾸자 이 갈래가 통째로 안 맞아
+  //    모든 화면 요청이 404 로 떨어졌고, `#t` 가 영영 안 생겨 **26항목이 전부 타임아웃**
+  //    으로 죽었다(변이로 재현). 좁힐 이유가 없다 — 여기가 하는 일은 "화면 요청인가" 를
+  //    가르는 것뿐이고, 어떤 id 가 올지는 위 NAV 가 정한다. 좁히는 순간 그 둘이 어긋난다.
+  const m = u.pathname.match(/\/view\/([^/]+)$/);
   if (m) {
     viewed.push(m[1]);
     return route.fulfill({ body: `<h1 id="t">${m[1]}</h1>`, contentType: 'text/html; charset=utf-8' });
