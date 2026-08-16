@@ -29,14 +29,16 @@ export async function 서버열기() {
  *  시작하면 여기 없어서 그 검사가 먼저 깨진다 — 그게 이 상수가 하는 일이다.
  *  (검사가 값 자체를 보는 곳은 폭 계산뿐이라, 글자 크기만 실제 값과 같으면 된다.) */
 export const TOKENS_STUB = ':root{' + [
-  '--adm-font:"Pretendard Variable",Pretendard,-apple-system,sans-serif',
+  // 🔴 글꼴 목록은 정본과 **글자 하나까지** 같아야 한다 — 아래 폭 검사가 글꼴에 좌우된다.
+  '--adm-font:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,'
+    + '"Apple SD Gothic Neo","Malgun Gothic",sans-serif',
   '--adm-bg:#f1f5f9', '--adm-surface:#ffffff', '--adm-surface-soft:#f8fafc',
   '--adm-line:#cbd5e1', '--adm-text:#0f172a', '--adm-text-muted:#475569', '--adm-text-dim:#64748b',
   '--adm-ok-fg:#047857', '--adm-ok-bg:#d1fae5', '--adm-warn-fg:#b45309', '--adm-warn-bg:#fef3c7',
   '--adm-bad-fg:#b91c1c', '--adm-bad-bg:#fee2e2',
   '--adm-brand:#f59e0b', '--adm-btn-bg:#1e293b', '--adm-btn-fg:#ffffff',
   '--adm-t-11:11px', '--adm-t-12:12px', '--adm-t-13:13px', '--adm-t-14:14px',
-  '--adm-t-16:16px', '--adm-t-20:20px', '--adm-t-num-l:24px', '--adm-lh-num-l:28px',
+  '--adm-t-16:16px', '--adm-t-20:20px',
   '--adm-sp-2:2px', '--adm-sp-6:6px', '--adm-sp-26:26px',
   '--adm-r-8:8px', '--adm-r-12:12px', '--adm-r-99:99px',
   '--adm-sh-card:0 1px 2px rgba(15,23,42,.08)',

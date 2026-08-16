@@ -8,8 +8,7 @@
 <!-- 글꼴. 피그마 디자인 시스템이 Pretendard Variable 이라 어드민도 같은 글꼴을 쓴다
      (2026-08-16 사용자 확정). 못 받아도 화면이 안 막힌다 — 아래 `--adm-font` 의
      뒤쪽 시스템 글꼴로 읽힌다. -->
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <!-- 🔴 디자인 토큰이 들어오는 자리. 로그인 뒤 `/bootstrap` 이 준 것을 `start()` 가 넣는다.
      정본은 career-coach 의 `supabase/functions/ops-1udm1xmi/lib/tokens.ts` 다 —
      **값을 여기 적지 마라.** 로그인 화면은 이것보다 먼저 그려지므로, 그 화면이 쓰는
@@ -120,7 +119,7 @@ h1{font-size:var(--adm-t-20);margin:0 0 var(--adm-sp-6)}
 .tile{display:inline-block;min-width:150px;margin:0 10px 10px 0;padding:14px 16px;background:var(--adm-surface);
       border:1px solid var(--adm-line);border-radius:var(--adm-r-12);box-shadow:var(--adm-sh-card)}
 .t-label{font-size:var(--adm-t-12);color:var(--adm-text-muted)}
-.t-value{font-size:var(--adm-t-num-l);line-height:var(--adm-lh-num-l);font-weight:800;margin-top:var(--adm-sp-2)}
+.t-value{font-size:22px;font-weight:600;margin-top:var(--adm-sp-2)}
 .t-sub{font-size:var(--adm-t-12);color:var(--adm-text-dim);margin-top:var(--adm-sp-2)}
 </style>
 </head>
@@ -348,8 +347,13 @@ async function start() {
   const boot = await (await call('/bootstrap')).json();
   // 🔴 디자인 토큰. 화면을 그리기 **전에** 넣는다 — 뒤에 넣으면 첫 화면이 변수 없이
   //    한 번 그려졌다가 색이 바뀐다. 정본은 career-coach 의 `lib/tokens.ts` 다.
-  //    옛 함수(css 를 안 주는 판)와 만나면 비워 두고 넘어간다.
-  if (boot.css) $('ds').textContent = boot.css;
+  //
+  // 🔴 **없으면 조용히 넘어가지 않는다.** 로그인 화면 밖의 선언에는 폴백을 두지 않았으므로
+  //    (그러면 정본이 둘이 된다) css 가 안 오면 14장이 배경·선·칩 색 없이 그려진다.
+  //    막지는 않는다 — 읽기는 되니까. 대신 **화면에 말한다.** 랜딩은 푸시가 곧 배포이고
+  //    함수 배포는 다른 경로라, 셸이 함수보다 먼저 나가는 순서가 실제로 가능하다.
+  $('ds').textContent = boot.css || '';
+  const 토큰없음 = !boot.css;
   $('login').style.display = 'none';
   $('app').style.display = 'grid';
   const groups = [];
@@ -364,6 +368,15 @@ async function start() {
   ).join('') + '<div class="who"></div><a class="out" id="out">로그아웃</a>';
   // 이메일은 **본문이 아니라 값**이다. innerHTML 로 붙이면 주소에 든 문자가 태그로 읽힌다.
   $('nav').querySelector('.who').textContent = boot.user.email;
+  if (토큰없음) {
+    const b = document.createElement('div');
+    b.id = 'ds-missing';
+    b.setAttribute('style', 'grid-column:1/-1;padding:10px 16px;background:#fee2e2;color:#b91c1c;'
+      + 'font-size:13px;font-weight:600');
+    b.textContent = '디자인 토큰을 못 받았습니다 — 어드민 함수가 옛 판입니다. '
+      + '화면 색과 글자 크기가 규칙대로 나오지 않습니다. 함수를 배포하세요.';
+    $('app').prepend(b);
+  }
   // 폭 예약이 쓰는 값(위 `nav a[data-t]::after`). 🔴 **속성에 문자열로 이어 붙이지 않는다** —
   // 제목에 따옴표가 하나 들어오면 마크업이 끊기고, 그때 예약도 같이 사라져 폭이 다시 튄다
   // (검사관이 잡았다). 그려진 글자에서 가져오므로 화면과 늘 같은 값이다.
