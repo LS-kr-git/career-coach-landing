@@ -54,16 +54,45 @@ await page.route('**/functions/v1/**', async (route) => {
     return route.fulfill({ json: { access_token: 'T', user: { email: 'a@b.c' } } });
   }
   if (u.pathname.endsWith('/bootstrap')) {
-    return route.fulfill({ json: { user: { email: 'a@b.c' }, nav: NAV, css: TOKENS_STUB } });
+    부트횟수 += 1;
+    if (토큰못줌) return route.fulfill({ json: { user: { email: 'a@b.c' }, nav: NAV } });
+    return route.fulfill({
+      json: { user: { email: 'a@b.c' }, nav: NAV, css: TOKENS_STUB + 덧칠(), cssTag: 지문 },
+    });
   }
   // 글자 종류로 좁히지 않는다 — 이유는 `route.mjs` 의 같은 자리 주석에 있다.
   const m = u.pathname.match(/\/view\/([^/]+)$/);
   if (m) {
     if (m[1] === 느린칸) await new Promise((r) => setTimeout(r, 700));
-    return route.fulfill({ body: `<h1 id="t">${m[1]}</h1>`, contentType: 'text/html; charset=utf-8' });
+    return route.fulfill({
+      body: `<h1 id="t">${m[1]}</h1>`,
+      contentType: 'text/html; charset=utf-8',
+      // 조각마다 **지금 판의 지문**을 싣는다. 셸은 자기가 넣어 둔 것과 다르면 다시 받는다.
+      // 🔴 expose-headers 를 같이 준다 — 교차 오리진에서 자바스크립트가 볼 수 있는 응답
+      //    헤더는 기본 여섯 개뿐이라, 안 주면 헤더는 실려 오는데 셸이 못 읽는다.
+      //    함수 쪽 정본은 career-coach 의 `lib/ui.ts` 의 CORS 다.
+      headers: { 'x-ds': 지문, 'access-control-expose-headers': 'x-ds' },
+    });
   }
   return route.fulfill({ status: 404, json: { error: 'nf' } });
 });
+
+// ── 디자인 토큰 판 갈이 (career-coach 의 `index.ts` 의 DS_TAG · 셸의 `토큰_맞추기`) ──
+//
+// 🔴 **이 배선은 다른 어떤 검사도 안 본다.** 함수 쪽 검사는 헤더를 싣는 것까지만 보고,
+//    셸이 그것을 읽어 `<style id="ds">` 를 갈아 끼우는지는 브라우저가 있어야 보인다.
+//    안 보면, 탭을 열어 둔 채 배포가 지나갔을 때 색만 조용히 사라지는 그 고장이 그대로 남는다
+//    (2026-08-16 · 비용 리포트 달력 게이지).
+let 지문 = 'v1';
+let 부트횟수 = 0;
+let 토큰못줌 = false;
+/** 새 판에만 있는 토큰. 옛 판으로 그리면 이 값이 없어서 규칙이 통째로 버려진다 —
+ *  화면이 안 깨진 채로 색만 사라지는, 바로 그 모양이다. */
+const 덧칠 = () => (지문 === 'v1' ? '' : ':root{--adm-새것:#123456}');
+const 새것 = () =>
+  page.evaluate(() =>
+    getComputedStyle(document.documentElement).getPropertyValue('--adm-새것').trim()
+  );
 
 const { ok, 마무리 } = 검사기();
 
@@ -430,7 +459,11 @@ const 운영스타일 = '<style>main{padding:0;margin:0;max-width:none}'
 // ⚠️ 여기를 고쳐야 할 일이 생겼으면 **저쪽 BRAND_USES 도 같이 고치고 사용자에게 알린다** —
 //    career-coach `CLAUDE.md` 의 「디자인 시스템 화면이 낡게 되는 변경은 항상 알린다」.
 {
-  const 허락된자리 = ['nav a.on::before', '.ld-art circle'];   // ← career-coach BRAND_USES 의 사본
+  // ← career-coach BRAND_USES 중 **이 저장소에 있는 것만**. 2026-08-16 에 저쪽에 셋째
+  //    (`.adm-ring` — 상자를 다시 부르는 동안 도는 표시)가 생겼는데 그건 career-coach 의
+  //    `lib/ui.ts` 에 있다. **여기 적지 마라** — 아래는 이 파일의 CSS 와 대조하는 목록이라
+  //    저쪽 자리를 넣으면 '실제로 안 칠한다' 로 영영 빨간불이다.
+  const 허락된자리 = ['nav a.on::before', '.ld-art circle'];
   const 원문 = fs.readFileSync(new URL('../../ops/index.html', import.meta.url), 'utf-8');
   // 🔴 파일 전체를 문자열로 뒤지지 않는다. 이 파일의 주석에도 `--adm-brand` 가 적혀 있어서
   //    그렇게 세면 **산문이 위반으로 잡힌다**(저쪽 test_admin_design.py 가 같은 이유로
@@ -446,6 +479,37 @@ const 운영스타일 = '<style>main{padding:0;margin:0;max-width:none}'
      같다 ? 칠하는자리.join(' · ')
           : `기록 [${[...허락된자리].sort().join(' · ')}] / 실제 [${칠하는자리.join(' · ')}]`);
 }
+
+// ── ⑩ 판이 바뀌면 보던 자리를 잃지 않고 토큰만 갈아 끼운다 ──────────────────
+{
+  ok('처음에는 새 토큰이 없다', await 새것() === '', await 새것());
+  const 부트전 = 부트횟수;
+  // 같은 판으로 한 번 더 옮겨도 /bootstrap 을 다시 부르지 않는다 — 안 그러면 화면을
+  // 옮길 때마다 토큰을 통째로 다시 받는다.
+  await page.evaluate((x) => { location.hash = '#' + x; }, 긴칸);
+  await page.waitForFunction((x) => document.getElementById('t')?.textContent === x, 긴칸);
+  ok('판이 그대로면 토큰을 다시 안 받는다', 부트횟수 === 부트전, `부트 ${부트횟수 - 부트전}회`);
+
+  // 이제 배포가 지나간다. 조각 응답의 지문만 바뀐다.
+  지문 = 'v2';
+  await page.evaluate((x) => { location.hash = '#' + x; }, 끝칸);
+  await page.waitForFunction((x) => document.getElementById('t')?.textContent === x, 끝칸);
+  ok('판이 바뀌면 토큰을 다시 받는다', 부트횟수 > 부트전, `부트 ${부트횟수 - 부트전}회`);
+  ok('새 판에만 있는 토큰이 실제로 들어왔다', await 새것() === '#123456', await 새것());
+  // 🔴 **새로고침이 아니다.** 새로고침이면 보던 자리를 잃는다.
+  ok('새로고침하지 않았다 (보던 자리를 지킨다)',
+     await page.evaluate(() => performance.getEntriesByType('navigation').length === 1));
+  ok('갈아 끼운 뒤에는 경고를 안 남긴다', await page.locator('#ds-missing').count() === 0);
+
+  // 못 받았으면 조용히 넘어가지 않는다 — 옛 토큰으로 새 조각을 계속 그리는 상태다.
+  지문 = 'v3';
+  토큰못줌 = true;
+  await page.evaluate((x) => { location.hash = '#' + x; }, 긴칸);
+  await page.waitForFunction(() => document.getElementById('ds-missing') !== null, null,
+    { timeout: 4000 }).catch(() => {});
+  ok('새 판을 못 받으면 화면에 말한다', await page.locator('#ds-missing').count() === 1,
+     (await page.locator('#ds-missing').textContent().catch(() => '')).slice(0, 40));
+  ok('못 받아도 옛 토큰을 지우지 않는다', await 새것() === '#123456', await 새것());}
 
 await browser.close();
 server.close();
