@@ -7,7 +7,7 @@
 //    랜딩 훅에는 CC_SKIP_HOOK 같은 부분 우회가 없어서 그 순간 **검수 전체가 꺼진다**.
 //    (career-coach/CLAUDE.md 에 같은 일이 이미 한 번 있었다고 적혀 있다.)
 //    CI(공개 저장소라 무료)에서 돌리는 것이 이 검사의 자리다.
-import { 서버열기, 브라우저열기, 검사기 } from './harness.mjs';
+import { 서버열기, 브라우저열기, 검사기, TOKENS_STUB } from './harness.mjs';
 
 const { server, origin } = await 서버열기();
 
@@ -34,7 +34,7 @@ await page.route('**/functions/v1/**', async (route) => {
     return route.fulfill({ json: { access_token: 'T', user: { email: 'a@b.c' } } });
   }
   if (u.pathname.endsWith('/bootstrap')) {
-    return route.fulfill({ json: { user: { email: 'a@b.c' }, nav: NAV } });
+    return route.fulfill({ json: { user: { email: 'a@b.c' }, nav: NAV, css: TOKENS_STUB } });
   }
   // 🔴 **글자 종류로 좁히지 마라.** 여기는 `[^/]+` 다.
   //    `[a-z]+` 이던 시절에 스텁 id 를 `s01` 로 바꾸자 이 갈래가 통째로 안 맞아
@@ -166,15 +166,25 @@ ok('이메일 → 로그아웃이 좌하단에 붙어 있다',
 const 로그아웃꼴 = await page.evaluate(() => {
   const o = document.querySelector('#nav .out');
   const c = getComputedStyle(o);
+  // 이메일 줄의 색·크기를 같이 잰다 — 아래 「낮은 위계」 는 이 둘을 견주는 검사다.
+  const w = getComputedStyle(document.querySelector('#nav .who'));
   return { text: o.textContent, deco: c.textDecorationLine, size: c.fontSize, color: c.color,
-           weight: c.fontWeight, bg: c.backgroundColor, radius: c.borderTopLeftRadius, tag: o.tagName };
+           weight: c.fontWeight, bg: c.backgroundColor, radius: c.borderTopLeftRadius, tag: o.tagName,
+           이메일색: w.color, 이메일크기: w.fontSize };
 });
 ok('로그아웃에 밑줄이 있다', 로그아웃꼴.deco.includes('underline'), 로그아웃꼴.deco);
 ok('로그아웃이 버튼 꼴이 아니다',
    로그아웃꼴.tag === 'A' && 로그아웃꼴.bg === 'rgba(0, 0, 0, 0)' && 로그아웃꼴.radius === '0px',
    JSON.stringify(로그아웃꼴));
-ok('로그아웃이 낮은 위계다 (12px · 회색 · 굵지 않음)',
-   로그아웃꼴.size === '12px' && 로그아웃꼴.color === 'rgb(142, 142, 147)' && Number(로그아웃꼴.weight) < 600,
+// 🔴 전에는 색을 `rgb(142, 142, 147)`(=`#8e8e93`) 로 **박아** 두고 있었다. 2026-08-16 에
+//    셸이 디자인 토큰을 쓰기 시작하면서 그 회색이 `--adm-text-dim` 으로 바뀌자 여기가 빨개졌다 —
+//    화면은 규칙대로인데 검사만 옛 값을 붙들고 있던 것이다.
+//    지금은 **뜻하는 것을 그대로 잰다.** 셸 주석이 말하는 규칙이 "계정 이메일보다 더 낮출
+//    자리가 없어 **같은 크기·색**을 쓰고 밑줄만으로 누를 수 있다를 말한다" 이므로,
+//    이메일 줄과 견준다. 팔레트가 바뀌어도 살아남고, 로그아웃만 따로 튀면 잡는다.
+ok('로그아웃이 낮은 위계다 (이메일과 같은 크기·색 · 굵지 않음)',
+   로그아웃꼴.size === 로그아웃꼴.이메일크기 && 로그아웃꼴.color === 로그아웃꼴.이메일색
+   && Number(로그아웃꼴.weight) < 600,
    JSON.stringify(로그아웃꼴));
 // 🔴 전에는 `outWidth < navWidth / 2` 였다. **탭바 폭이 고정 239px 이던 시절의 대용품**이다.
 //    2026-08-13 에 폭을 `max-content` 로 바꾸자 탭바가 내용에 따라 좁아지는데, 이 스텁은

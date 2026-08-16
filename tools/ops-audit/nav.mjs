@@ -8,7 +8,7 @@
 //   여기 있는 것은 전부 **사용자가 직접 정한 것**이다. 바꾸려면 사용자에게 물어야 한다.
 //
 // 훅에 없는 이유는 `route.mjs` 머리말과 `README.md` 가 정본이다.
-import { 서버열기, 브라우저열기, 검사기 } from './harness.mjs';
+import { 서버열기, 브라우저열기, 검사기, TOKENS_STUB } from './harness.mjs';
 
 const { server, origin } = await 서버열기();
 
@@ -53,7 +53,7 @@ await page.route('**/functions/v1/**', async (route) => {
     return route.fulfill({ json: { access_token: 'T', user: { email: 'a@b.c' } } });
   }
   if (u.pathname.endsWith('/bootstrap')) {
-    return route.fulfill({ json: { user: { email: 'a@b.c' }, nav: NAV } });
+    return route.fulfill({ json: { user: { email: 'a@b.c' }, nav: NAV, css: TOKENS_STUB } });
   }
   // 글자 종류로 좁히지 않는다 — 이유는 `route.mjs` 의 같은 자리 주석에 있다.
   const m = u.pathname.match(/\/view\/([^/]+)$/);

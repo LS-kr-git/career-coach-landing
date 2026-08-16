@@ -5,7 +5,7 @@
 //          갱신이 한 번만 도는가 · 7일이 지나면(갱신 401) 로그인으로 돌아가는가 · 로그아웃.
 //
 // 🔴 pre-push 훅에 안 달려 있다 — 이유는 route.mjs 머리말에 적었다.
-import { 서버열기, 브라우저열기, 검사기 } from './harness.mjs';
+import { 서버열기, 브라우저열기, 검사기, TOKENS_STUB } from './harness.mjs';
 
 const { server, origin } = await 서버열기();
 
@@ -62,7 +62,7 @@ await ctx.route('**/functions/v1/**', async (route) => {
   // 여기부터는 토큰을 본다 — 낡은 토큰이면 401 (= 한 시간이 지난 상태)
   if (bearer !== S.good) return route.fulfill({ status: 401, json: { error: 'unauthorized' } });
   if (u.pathname.endsWith('/bootstrap')) {
-    return route.fulfill({ json: { user: { email: 'a@b.c' }, nav: NAV } });
+    return route.fulfill({ json: { user: { email: 'a@b.c' }, nav: NAV, css: TOKENS_STUB } });
   }
   return route.fulfill({ body: '<h1 id="t">가나다 라마바</h1>', contentType: 'text/html; charset=utf-8' });
 });
