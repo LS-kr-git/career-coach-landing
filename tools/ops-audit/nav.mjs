@@ -167,6 +167,37 @@ await page.waitForFunction((x) => document.querySelector('#nav a.on')?.dataset.i
   ok('칸은 한 줄로 유지된다 (white-space)', m.nowrap === 'nowrap', m.nowrap);
 }
 
+// ── ②-2 오른쪽 본문 폭은 **속 내용을 따라가지 않는다** ────────────────────────
+// 2026-08-16 실측 사고. `main` 이 `margin:0 auto` 만 갖고 있으면 그리드 칸 안에서 stretch 가
+// 꺼져 폭이 **속 내용의 max-content** 로 정해진다. 그러면 화면 안에서 접힌 절을 하나 펴는
+// 것만으로 본문이 995 → 1048 로 넓어지고, 그 폭에서 타일 줄이 한 줄에 안 들어가면
+// 줄바꿈이 생겨 세로 길이가 툭 튄다(94 → 197). 사용자가 「토글을 열면 세로 길이가 갑자기
+// 바뀐다」고 잡은 것이 이것이다. `width:100%` 한 줄이 그것을 없앤다.
+//
+// 이 항목은 규칙이 아니라 **효과**를 잰다 — 좁은 내용과 넓은 내용에서 본문 폭이 같은지 본다.
+await page.setViewportSize({ width: 1200, height: 900 });
+await login('#' + 긴칸);
+{
+  // 🔴 넓은 상자를 끼워 넣어 재면 안 된다. `1fr` 은 `minmax(auto,1fr)` 이라 **줄어들 수 없는**
+  //    자식(고정 폭 div)은 칸 자체를 밀어 넓힌다 — 그러면 규칙이 있든 없든 둘이 같아진다.
+  //    스텁 화면은 `<h1>` 하나뿐이라 max-content 가 아주 좁다. 그래서 **칸 폭과 본문 폭을
+  //    직접 맞대는 것**이 가장 곧다: 규칙이 없으면 본문이 글자 폭까지 쪼그라든다.
+  const 폭들 = await page.evaluate(() => {
+    const app = document.querySelector('#app').getBoundingClientRect();
+    const nav = document.querySelector('#nav').getBoundingClientRect();
+    return { 본문: Math.round(document.querySelector('#main').getBoundingClientRect().width),
+             칸: Math.round(app.width - nav.width),
+             gutter: getComputedStyle(document.documentElement).scrollbarGutter };
+  });
+  ok('본문이 칸을 꽉 채운다 — 속 내용 폭을 따라가면 토글마다 세로가 튄다',
+     폭들.본문 === 폭들.칸, `본문 ${폭들.본문} / 칸 ${폭들.칸}`);
+  // 🔴 위 `scrollbar-gutter` 항목과 같은 이유로 **규칙이 있는지만 본다** — headless 는
+  //    오버레이 스크롤바라 자리를 안 먹어서 효과를 잴 수 없다. 사용자 PC 의 윈도우 크롬에서는
+  //    절을 펴서 문서가 길어지는 순간 스크롤바가 나며 본문이 15px 좁아진다.
+  ok('문서가 스크롤바 자리를 늘 비워 둔다 (효과는 이 환경에서 못 잼)',
+     폭들.gutter === 'stable', 폭들.gutter);
+}
+
 // ── ③ 선택된 칸이 화면 안에 보인다 (짧은 화면 + 맨 아래 칸) ──────────────────
 await login('#' + 끝칸);
 {
