@@ -8,7 +8,7 @@
 <style>
   :root{
     color-scheme: only light;   /* meta 와 같은 값 — CSS 로도 선언해 확실히 적용한다 */
-    --amber-50:#FFFBEB;--amber-100:#FEF3C7;--amber-200:#FDE68A;--amber-500:#F59E0B;--amber-600:#D97706;--amber-700:#B45309;
+    --amber-50:#FFFBEB;--amber-100:#FEF3C7;--amber-200:#FDE68A;--amber-400:#FBBF24;--amber-500:#F59E0B;--amber-600:#D97706;--amber-700:#B45309;
     --gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;--gray-300:#CBD5E1;--gray-400:#94A3B8;
     --gray-500:#64748B;--gray-600:#475569;--gray-700:#334155;--gray-800:#1E293B;--gray-900:#0F172A;
     /* CTA 규칙(2026-08-03) — 제품 공통. 값·근거는 CLAUDE.md "CTA 규칙" */
@@ -42,7 +42,7 @@
   /* 진행 바 — 3칸 전체가 하나의 그라디언트로 이어지도록 background-size/position 으로 잘라 쓴다 */
   .prog{display:flex;gap:5px;padding:22px 24px 0}
   .prog i{height:3px;border-radius:99px;background-color:var(--gray-100);flex:1}
-  .prog i.on{background-image:linear-gradient(90deg,#FBBF24 0%,#D97706 100%);background-size:300% 100%;background-repeat:no-repeat}
+  .prog i.on{background-image:linear-gradient(90deg,var(--amber-400) 0%,var(--amber-600) 100%);background-size:300% 100%;background-repeat:no-repeat}
   .prog i:nth-child(1).on{background-position:0% 0}
   .prog i:nth-child(2).on{background-position:50% 0}
   .prog i:nth-child(3).on{background-position:100% 0}
@@ -74,7 +74,6 @@
   /* 주당 신규 건수 — 대분류를 고르기 전에 기대치를 맞춰 준다. 값은 tools/roles/volume.json 실측.
      피그마 text/caption(13/18 Regular)과 같은 값을 쓴다. 이 파일에 12px 스타일은 없다. */
   .arow .cnt{margin-left:7px;font-size:13px;line-height:18px;color:var(--gray-400);font-weight:400}
-  .arow .sel{margin-left:auto;font-size:12px;font-weight:700;color:var(--amber-600)}
   .arow .cv{margin-left:auto;color:var(--gray-300);font-size:11px;line-height:14px;font-weight:500}
   .abody{padding:2px 0 16px}
 
@@ -82,24 +81,6 @@
   .ghead{display:flex;align-items:center;margin-bottom:10px}
   .ghead h3{font-size:13px;line-height:18px;font-weight:600;color:var(--gray-500)}
 
-  /* 슬라이더 — 그림자 없음 */
-  .sumB{text-align:center}
-  .sumB .k{font-size:12px;color:var(--gray-400);font-weight:600}
-  .sumB .v{font-size:31px;line-height:40px;font-weight:700;color:var(--gray-900);letter-spacing:-0.03em;margin-top:2px}
-  .track{position:relative;height:6px;border-radius:99px;background:var(--gray-100);margin:30px 0 0}
-  .fill{position:absolute;height:6px;border-radius:99px}
-  .fill.grad{background:linear-gradient(90deg,#FBBF24,#D97706)}
-  .fill.solid{background:var(--amber-500)}
-  .knob{position:absolute;top:50%;transform:translate(-50%,-50%);width:24px;height:24px;border-radius:50%;
-    background:#fff;border:2px solid var(--amber-500)}
-  .axis{display:flex;justify-content:space-between;margin-top:11px;font-size:11px;line-height:14px;font-weight:500;color:var(--gray-400)}
-  /* B5 밴드 — 위아래 선 + 선택 구간 밑줄 */
-  .b5{display:flex;margin-top:22px;border-top:1px solid var(--gray-100);border-bottom:1px solid var(--gray-100)}
-  .b5 div{padding:11px 4px;text-align:center;font-size:11px;line-height:14px;font-weight:500;color:var(--gray-400)}
-  .b5 div b{display:block;font-size:13px;line-height:18px;font-weight:600;color:var(--gray-600);margin-bottom:2px}
-  .b5 div.hit{color:var(--amber-600);box-shadow:inset 0 -2px 0 var(--amber-500)}
-  .b5 div.hit b{color:var(--amber-600)}
-  .note{margin-top:14px;font-size:11.5px;line-height:18px;color:var(--gray-400)}
 
   /* 플로팅 CTA — 폭·위치는 랜딩(index.html .floating-cta)과 같다:
      width calc(100% - 40px) / max 410 / bottom 20 / 가운데 정렬.
