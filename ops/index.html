@@ -105,13 +105,57 @@ nav a[data-t]::after{content:attr(data-t);display:block;height:0;overflow:hidden
    접힌 절을 하나 펴는 순간 본문이 넓어지고(실측 995 → 1048), 그 폭에서 타일 줄이
    한 줄에 다 안 들어가면 줄바꿈이 생겨 세로 길이가 툭 튄다(94 → 197).
    `width:100%` 를 주면 폭은 늘 칸 폭(또는 max-width)이고, auto 마진은 남는 자리만 나눈다. */
-main{padding:var(--adm-sp-26) 30px;max-width:1242px;margin:0 auto;width:100%}
+main{padding:var(--adm-sp-26) 30px;max-width:1242px;margin:0 auto;width:100%;
+     position:relative}
 /* 세로 스크롤바 자리를 늘 비워 둔다. 없으면 절을 펴서 문서가 길어지는 순간 스크롤바가
    생기며 본문이 ~15px 좁아지고, 위와 같은 줄바꿈 튐이 난다. 탭바(`nav`)에 같은 이유로
    이미 쓰고 있는 규칙이다. */
 html{scrollbar-gutter:stable}
 h1{font-size:var(--adm-t-20);margin:0 0 var(--adm-sp-6)}
 .sub{color:var(--adm-text-muted);font-size:var(--adm-t-13);margin:0}
+/* 🔴 화면을 여는 동안 보여 주는 것 (2026-08-16 사용자 확정 — 시안 v2 ③ 「늘었다 줄었다」
+   · 40px · 브랜드 amber). 2026-08-13~16 에는 「불러오는 중…」 **글자**였다.
+   글자를 안 쓰기로 한 대가가 둘이고, 둘 다 여기서 같이 갚는다.
+
+     · `.sr` — **눈에 안 보이는 「불러오는 중」.** 접근성 때문이지 검사 때문이 아니다.
+       그림만 있는 화면은 화면 낭독기로 읽는 사람에게 "아무 일도 안 일어남" 과 같다.
+       🔴 `opacity:0` 인 보통 글자로 대신하지 마라 — 낭독기가 읽기도 하고 안 읽기도 해서
+       접근성 효과는 없는데 검사만 초록이 된다(가짜 통과). `1px + clip` 이 낭독기가
+       확실히 읽는 표준형이고, 그래서 이 모양이어야 한다.
+     · `tools/ops-audit/nav.mjs` ⑦ 이 「글자가 있다」 대신 **「.ld 가 있다」** 를 본다.
+       글자 수는 표시가 글자였던 시절의 대용품이었다. 같이 갈았다.
+
+   본문 여백(위아래 26 · 좌우 30)을 뚫고 나가 **탭바를 뺀 오른쪽 영역 한가운데**에 선다
+   (2026-08-16 사용자 지시). 화면이 오면 `main` 이 통째로 갈리므로 여백은 저절로 돌아온다. */
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
+    clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.ld,.ld-ov{display:flex;align-items:center;justify-content:center}
+.ld{margin:calc(var(--adm-sp-26) * -1) -30px;min-height:100vh}
+.ld-art{width:40px;height:40px;animation:ld-spin 1.6s linear infinite}
+.ld-art circle{fill:none;stroke:var(--adm-brand);stroke-width:9;stroke-linecap:round;
+               animation:ld-dash 1.4s ease-in-out infinite}
+@keyframes ld-spin{to{transform:rotate(360deg)}}
+@keyframes ld-dash{0%{stroke-dasharray:1 200;stroke-dashoffset:0}
+                   50%{stroke-dasharray:120 200;stroke-dashoffset:-30}
+                   100%{stroke-dasharray:120 200;stroke-dashoffset:-160}}
+/* 「동작 줄이기」를 켠 사람에게는 **멈춘 고리**가 된다. 없애지는 않는다 —
+   없애면 그 사람에게는 다시 빈 화면이고, 그건 이 표시를 만든 이유 자체를 지우는 것이다. */
+@media (prefers-reduced-motion:reduce){
+  .ld-art,.ld-art circle{animation:none}
+  .ld-art circle{stroke-dasharray:70 200;opacity:.6}
+}
+/* iframe 화면(`lib/asset.ts` 의 다섯 장)은 기다림이 **두 번**이다 — 서버가 저장소에서
+   문서를 읽어 오는 시간이 첫 번째고, 그 문서가 자기 style·script 태그를 다 도는 시간이
+   두 번째다.
+   🔴 **이 파일의 주석에 태그 이름을 꺾쇠까지 붙여 적지 마라.** 1겹 page-audit 은 태그
+   균형을 원문 글자로 세는데, 주석 안의 그 글자도 진짜 태그로 읽는다. 여는 script 를
+   주석에 한 번 적었더니 그 자리부터 파일 끝까지가 통째로 스크립트로 읽혀 head·body·style
+   의 짝이 전부 어긋난 것으로 보고됐다(2026-08-16 · 막힘 3건). 그래서 여기서는 꺾쇠 없이
+   이름만 적는다. `tokens.ts` 의 백틱 함정과 같은 종류다 — **경고를 쓰는 줄이 그 경고를
+   어기기 쉬운 자리이기도 하다**(이 문단도 한 번 그랬다).
+   첫 번째가 끝날 때 표시를 끄면 두 번째가 맨몸이라 **흰 화면이 지나간다.**
+   배경까지 덮으므로 그 흰 화면이 아예 안 보인다 (2026-08-16 사용자 확정). */
+.ld-ov{position:absolute;inset:0;z-index:3;background:var(--adm-bg)}
 .chip{display:inline-block;padding:var(--adm-sp-2) 9px;border-radius:var(--adm-r-99);
       font-size:var(--adm-t-12);font-weight:600;background:var(--adm-ok-bg);color:var(--adm-ok-fg)}
 .chip.warn{background:var(--adm-warn-bg);color:var(--adm-warn-fg)}
@@ -421,6 +465,33 @@ function show() {
 // 마지막으로 연 것만 그린다.
 let seq = 0;
 
+/** 화면을 여는 동안 보여 주는 것. 모양·크기·색은 위 `.ld-art` 가 정본이다.
+ *  `aria-hidden` 은 그림 쪽에만 붙인다 — 낭독기가 읽는 것은 뒤의 `.sr` 하나여야 한다. */
+const LD_ART = '<svg class="ld-art" viewBox="0 0 50 50" aria-hidden="true">'
+             + '<circle cx="25" cy="25" r="20"/></svg>'
+             + '<span class="sr" role="status">불러오는 중</span>';
+const LD = '<div class="ld">' + LD_ART + '</div>';
+
+/** 🔴 **이 안에 오는 화면에서는 표시를 아예 안 띄운다** (2026-08-16 사용자 확정).
+ *  빠른 화면에서는 표시가 깜빡 하고 지나가는데, 그 깜빡임이 없는 것보다 어수선하다.
+ *  `nav.mjs` ⑦ 이 이 숫자를 알고 두 시점(120ms 이르다 · 350ms 늦다)으로 문다 —
+ *  **여기를 바꾸면 그 두 시점도 같이 바꿔야 한다.** */
+const LD_DELAY = 200;
+let ldTimer = null;
+
+/** iframe 화면은 기다림이 두 번이라 뒤쪽을 따로 덮는다(위 `.ld-ov` 주석이 이유의 정본).
+ *  `load` 는 이 함수가 끝난 **다음 차례**에 오므로 붙이기 전에 지나갈 수 없다.
+ *  상한(타임아웃)을 두지 않는다 — 두면 느린 문서에서 덮개가 먼저 걷혀 흰 화면이 다시 난다. */
+function 덮개(mine) {
+  const fr = $('main').querySelector('iframe.doc');
+  if (!fr) return;
+  const ov = document.createElement('div');
+  ov.className = 'ld-ov';
+  ov.innerHTML = LD_ART;
+  $('main').append(ov);
+  fr.addEventListener('load', () => { if (mine === seq) ov.remove(); }, { once: true });
+}
+
 async function open(id, missing) {
   const mine = ++seq;
   // 선택 표시는 **눈에만 보인다** — 왼쪽 바도 굵기도 스크린리더에는 안 들린다.
@@ -442,11 +513,16 @@ async function open(id, missing) {
   // 둘 다 같은 제목이라 어느 것이 어느 화면인지 구분이 안 됐다.
   document.title = (NAV_TITLE.get(id) ? NAV_TITLE.get(id) + ' · ' : '') + '커리어코치 어드민';
   // 비워 두면 느린 화면에서 오른쪽이 하얀 채로 멈춰 있어 "안 눌렸나" 로 읽힌다
-  // (2026-08-13 사용자 지시). 아래 fetch 가 끝나면 이 줄은 통째로 갈린다.
-  $('main').innerHTML = '<p class="sub">불러오는 중…</p>';
+  // (2026-08-13 사용자 지시). 2026-08-16 에 글자에서 **도는 그림**으로 갈렸고,
+  // **200ms 가 지나야** 뜬다 — 그 안에 오는 화면에서는 깜빡임만 남기 때문이다.
+  // 앞 화면의 예약을 먼저 끈다. 안 끄면 이미 갈린 본문 위에 옛 표시가 뒤늦게 얹힌다.
+  clearTimeout(ldTimer);
+  $('main').innerHTML = '';
+  ldTimer = setTimeout(() => { if (mine === seq) $('main').innerHTML = LD; }, LD_DELAY);
   try {
     const html = await (await call('/view/' + id)).text();
     if (mine !== seq) return;
+    clearTimeout(ldTimer);
     $('main').innerHTML = html;
     if (missing) {
       const p = document.createElement('p');
@@ -455,8 +531,10 @@ async function open(id, missing) {
       $('main').prepend(p);
     }
     runScripts($('main'));
+    덮개(mine);
   } catch (x) {
     if (mine !== seq) return;
+    clearTimeout(ldTimer);
     // 빈 화면을 두면 "아직 아무것도 없는 화면" 과 구분되지 않는다.
     $('main').innerHTML = '<h1>화면을 불러오지 못했습니다</h1><p class="sub"></p>';
     $('main').querySelector('.sub').textContent = String(x.message || x);

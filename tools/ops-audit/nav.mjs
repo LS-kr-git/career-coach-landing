@@ -292,15 +292,70 @@ await login('#' + 긴칸);
 }
 
 // ── ⑦ 화면 전환 중 빈 화면을 두지 않는다 ────────────────────────────────────
+// 🔴 2026-08-16 에 **재는 대상이 바뀌었다.** 전에는 `#main` 의 **글자 수**를 봤는데,
+//    그건 표시가 「불러오는 중…」 이라는 **글자였던 시절의 대용품**이다. 지금 표시는
+//    도는 그림 하나(`.ld`)라 글자가 0이고, 그대로 뒀으면 화면은 멀쩡한데 검사만 빨개진다.
+//    이 항목이 뜻하는 것은 "빈 화면을 두지 않는다" 이지 "글자가 있다" 가 아니므로
+//    **표시 요소 자체**를 본다. (탭바 폭 검사의 `outWidth < navWidth / 2` 를 걷어낸 것과
+//    같은 자리다 — 대용품을 완화하는 게 아니라 뜻하는 것을 그대로 재는 쪽으로 바꾼다.)
+//
+// 🔴 그리고 **「200ms 안에 오면 안 띄운다」가 규칙이 됐다** (2026-08-16 사용자 확정).
+//    빠른 화면에서 표시가 깜빡 하고 지나가는 것을 없애려는 것인데, 그 규칙은 **지금까지
+//    아무도 안 보고 있었다.** 그래서 한 항목을 둘로 가른다 — 이르면 아직 없어야 하고,
+//    늦으면 반드시 있어야 한다. 셸의 `LD_DELAY`(200)를 바꾸면 아래 두 시점도 같이 바꾼다.
 {
   await page.evaluate((x) => { location.hash = '#' + x; }, 느린칸);
-  // 응답을 700ms 늦춰 뒀다. 그 사이 본문이 비어 있으면 "안 눌렸나" 로 읽힌다.
-  await page.waitForTimeout(150);
-  const 중간 = (await page.textContent('#main')).trim();
-  ok('불러오는 동안 본문이 비어 있지 않다', 중간.length > 0, 중간.slice(0, 20));
+  // ⓐ 지연 안쪽. 120 은 200 에서 넉넉히 떨어져 있으면서 첫 렌더보다는 뒤다.
+  await page.waitForTimeout(120);
+  const 이른 = await page.locator('#main .ld').count();
+  ok('200ms 안에는 로딩 표시를 안 띄운다', 이른 === 0, '.ld ' + 이른 + '개');
+  // ⓑ 지연을 넘긴 뒤. 응답을 700ms 늦춰 뒀으므로 이 시점엔 반드시 떠 있어야 한다.
+  await page.waitForTimeout(230);   // 누적 350ms
+  ok('지연을 넘기면 로딩 표시가 뜬다', await page.locator('#main .ld').count() === 1,
+     '.ld ' + (await page.locator('#main .ld').count()) + '개');
+  // ⓒ 🔴 **그림만으로는 절반이다.** 눈으로 안 보는 사람에게는 도는 그림이 빈 화면과 같다.
+  //    셸이 `.sr`(1px + clip)로 넣은 「불러오는 중」 이 같이 있어야 한다.
+  //    `opacity:0` 인 보통 글자로 바꿔도 이 검사는 통과한다 — 그래서 통과가 접근성을
+  //    증명하지는 않는다. 여기서 무는 것은 **글자가 DOM 에 있다**는 것까지다.
+  const 낭독 = (await page.textContent('#main')).trim();
+  ok('화면 낭독기에 읽힐 글자가 같이 있다', 낭독.length > 0, 낭독.slice(0, 20));
   await page.waitForFunction(() => document.querySelector('#main h1'));
   ok('다 불러오면 그 자리가 화면으로 갈린다', await page.textContent('#t') === 느린칸,
      await page.textContent('#t'));
+}
+
+// ── ⑧ iframe 화면은 안쪽이 다 그려질 때까지 덮는다 ──────────────────────────
+// 🔴 `lib/asset.ts` 의 다섯 장은 기다림이 **두 번**이다. 서버가 저장소에서 문서를 읽어
+//    오는 시간(위 ⑦ 이 덮는 구간)과, 그 문서가 자기 style·script 를 다 도는 시간이다.
+//    2026-08-16 이전에는 뒤쪽이 맨몸이라 **흰 화면이 지나갔다**(사용자 확정으로 덮는다).
+//    스텁은 그 성질만 흉내낸다 — `iframe.doc` 하나와, 안에서 시간을 쓰는 문서.
+{
+  const 느린문서 = '<!doctype html><meta charset="utf-8"><h1>doc</h1>'
+    + '<scr' + 'ipt>var t=Date.now();while(Date.now()-t<400){}</scr' + 'ipt>';
+  await page.route('**/functions/v1/**/view/s03', (route) => route.fulfill({
+    contentType: 'text/html; charset=utf-8',
+    body: '<iframe class="doc" id="t" sandbox="allow-scripts" srcdoc="'
+      + 느린문서.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;') + '"></iframe>',
+  }));
+  await page.evaluate(() => { location.hash = '#s03'; });
+  await page.waitForSelector('#main iframe.doc');
+  // 조각이 들어온 **직후**다. 여기서 덮개가 없으면 안쪽이 그려질 때까지 흰 화면이다.
+  ok('iframe 이 들어온 직후에도 덮개가 있다', await page.locator('#main .ld-ov').count() === 1,
+     '.ld-ov ' + (await page.locator('#main .ld-ov').count()) + '개');
+  // 덮개는 **가려야** 뜻이 있다. 자리만 잡고 투명하면 흰 화면이 그대로 보인다.
+  const 덮개모양 = await page.evaluate(() => {
+    const o = document.querySelector('#main .ld-ov');
+    const c = getComputedStyle(o), r = o.getBoundingClientRect();
+    const f = document.querySelector('#main iframe.doc').getBoundingClientRect();
+    return { bg: c.backgroundColor, 안가림: r.width < f.width - 1 || r.height < f.height - 1 };
+  });
+  ok('덮개가 iframe 을 다 가리고 배경이 비치지 않는다',
+     !덮개모양.안가림 && 덮개모양.bg !== 'rgba(0, 0, 0, 0)', JSON.stringify(덮개모양));
+  // 안쪽이 다 그려지면 스스로 걷힌다. 안 걷히면 화면이 영영 덮인 채로 남는다.
+  await page.waitForFunction(() => !document.querySelector('#main .ld-ov'), null, { timeout: 5000 })
+    .then(() => ok('안쪽이 다 그려지면 덮개가 걷힌다', true, '걷힘'))
+    .catch(() => ok('안쪽이 다 그려지면 덮개가 걷힌다', false, '5초 안에 안 걷혔다'));
+  await page.unroute('**/functions/v1/**/view/s03');
 }
 
 await browser.close();
