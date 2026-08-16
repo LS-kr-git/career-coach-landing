@@ -329,46 +329,87 @@ await login('#' + 긴칸);
 //    오는 시간(위 ⑦ 이 덮는 구간)과, 그 문서가 자기 스타일·스크립트를 다 도는 시간이다.
 //    2026-08-16 이전에는 뒤쪽이 맨몸이라 **흰 화면이 지나갔다**(사용자 확정으로 덮는다).
 //
-// 🔴 **안쪽을 늦추는 방법을 두 번째 판에서 갈았다.** 첫 판은 iframe 안에서 바쁜 루프로
-//    400ms 를 끌었는데, **로컬에서는 통과하고 CI 에서만 빨간불**이었다(2026-08-16 실측:
-//    `.ld-ov 0개`). 안에서 시간을 끄는 것은 러너 속도와 스크립트 실행 여부에 좌우돼서,
-//    `load` 가 먼저 나면 덮개가 걷힌 뒤를 보게 된다. 지금은 **서버가 늦게 준다** —
-//    시간을 브라우저 밖에서 잡으므로 러너가 아무리 빨라도 창이 안 닫힌다.
-//    (셸은 `srcdoc` 이든 `src` 든 `iframe.doc` 의 `load` 만 보므로 이 스텁으로 충분하다.)
-{
+// 🔴 **한 판으로는 못 잰다. 두 판이 서로 다른 것을 본다** (2026-08-16 검사관 ②).
+//    ⑧-a `src` + 서버 지연 — 창이 600ms 열려 있어 **덮개의 생김새**(가리는가·비치는가)를
+//         잴 수 있다. 시간을 브라우저 밖에서 잡으므로 러너 속도와 무관하다.
+//         (첫 판은 iframe 안 바쁜 루프로 끌었는데 **로컬만 초록이고 CI 는 빨간불**이었다 —
+//          `load` 가 먼저 나서 덮개가 걷힌 뒤를 보고 있었다.)
+//    ⑧-b `srcdoc` — **운영이 실제로 쓰는 방식.** 네트워크 왕복이 없어 `load` 가 아주
+//         이르게 날 수 있다. 창을 못 여니 **생김새 대신 사건**을 본다 — 덮개가 한 번이라도
+//         붙었는지를 MutationObserver 의 addedNodes 로 기록한다(붙자마자 걷혀도 남는다).
+//         ⚠️ **이 판이 무는 것과 안 무는 것을 분명히 해 둔다.** 무는 것은 「srcdoc 경로에도
+//         덮개가 실제로 붙었다가 걷힌다」 뿐이다. 「load 가 리스너보다 먼저 나지 않는다」는
+//         **못 문다** — 리스너 부착을 한 차례(setTimeout 0) 늦추는 변이를 넣어도 안 깨졌다
+//         (2026-08-16 실측). 그 축은 이 검사가 아니라 브라우저의 이벤트 차례가 보장한다.
+//         이름을 그렇게 붙이면 안 재는 것을 잰다고 말하는 셈이라 좁혀 적었다.
+//    두 판 모두 운영이 같이 보내는 style 을 그대로 싣는다. 안 실으면 iframe 이 기본
+//    300×150 이라, 여백이 남아 있는 main 이 덮는 그림을 재게 되어 운영 기하와 달라진다.
+const 운영스타일 = '<style>main{padding:0;margin:0;max-width:none}'
+  + '.doc{display:block;width:100%;height:100vh;border:0;background:#fff}</style>';
+
+{ // ⑧-a  src + 서버가 늦게 준다 → 덮개의 생김새를 잰다
   await page.route('**/ops/slowdoc.html', async (route) => {
     await new Promise((r) => setTimeout(r, 600));
     return route.fulfill({ contentType: 'text/html; charset=utf-8', body: '<!doctype html><h1>doc</h1>' });
   });
   await page.route('**/functions/v1/**/view/s03', (route) => route.fulfill({
     contentType: 'text/html; charset=utf-8',
-    body: '<iframe class="doc" src="slowdoc.html"></iframe>',
+    body: '<iframe class="doc" src="slowdoc.html"></iframe>' + 운영스타일,
   }));
   await page.evaluate(() => { location.hash = '#s03'; });
   await page.waitForSelector('#main iframe.doc');
-  // 조각이 들어온 **직후**다. 여기서 덮개가 없으면 안쪽이 그려질 때까지 흰 화면이다.
   const 덮개수 = await page.locator('#main .ld-ov').count();
   ok('iframe 이 들어온 직후에도 덮개가 있다', 덮개수 === 1, '.ld-ov ' + 덮개수 + '개');
   // 덮개는 **가려야** 뜻이 있다. 자리만 잡고 투명하면 흰 화면이 그대로 보인다.
   // 🔴 없을 때 던지지 않는다 — 첫 판이 `getComputedStyle(null)` 로 스크립트를 통째로
-  //    죽여서, 뒤에 남은 두 항목이 판정도 못 받고 사라졌다(2026-08-16). 검사는 터지는
-  //    것이 아니라 **빨간불을 내야** 한다.
+  //    죽여서, 뒤에 남은 두 항목이 판정도 못 받고 사라졌다(2026-08-16).
   const 덮개모양 = await page.evaluate(() => {
     const o = document.querySelector('#main .ld-ov');
     const f = document.querySelector('#main iframe.doc');
     if (!o || !f) return { 없음: true };
     const c = getComputedStyle(o), r = o.getBoundingClientRect(), b = f.getBoundingClientRect();
-    return { bg: c.backgroundColor, 안가림: r.width < b.width - 1 || r.height < b.height - 1 };
+    return { bg: c.backgroundColor, iframe: Math.round(b.width) + 'x' + Math.round(b.height),
+             안가림: r.width < b.width - 1 || r.height < b.height - 1 };
   });
   ok('덮개가 iframe 을 다 가리고 배경이 비치지 않는다',
      !덮개모양.없음 && !덮개모양.안가림 && 덮개모양.bg !== 'rgba(0, 0, 0, 0)',
      JSON.stringify(덮개모양));
-  // 안쪽이 다 그려지면 스스로 걷힌다. 안 걷히면 화면이 영영 덮인 채로 남는다.
   const 걷힘 = await page.waitForFunction(() => !document.querySelector('#main .ld-ov'),
     null, { timeout: 5000 }).then(() => true).catch(() => false);
   ok('안쪽이 다 그려지면 덮개가 걷힌다', 걷힘, 걷힘 ? '걷힘' : '5초 안에 안 걷혔다');
   await page.unroute('**/functions/v1/**/view/s03');
   await page.unroute('**/ops/slowdoc.html');
+}
+
+{ // ⑧-b  srcdoc — 운영과 같은 방식. 창이 없으니 사건으로 본다
+  const 안쪽 = '<!doctype html><meta charset="utf-8"><h1>doc</h1>';
+  const esc = (t) => t.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  await page.route('**/functions/v1/**/view/s04', (route) => route.fulfill({
+    contentType: 'text/html; charset=utf-8',
+    body: '<iframe class="doc" sandbox="allow-scripts" srcdoc="' + esc(안쪽) + '"></iframe>' + 운영스타일,
+  }));
+  // 붙었다가 같은 차례에 걷혀도 기록이 남게 **추가된 노드**로 잡는다.
+  // (콜백 시점에 DOM 을 다시 보면 이미 걷힌 뒤라 못 본다.)
+  await page.evaluate(() => {
+    window.__덮개붙음 = false;
+    new MutationObserver((recs) => {
+      for (const r of recs) {
+        for (const n of r.addedNodes) {
+          if (n.nodeType === 1 && n.classList && n.classList.contains('ld-ov')) window.__덮개붙음 = true;
+        }
+      }
+    }).observe(document.querySelector('#main'), { childList: true, subtree: true });
+  });
+  await page.evaluate(() => { location.hash = '#s04'; });
+  await page.waitForSelector('#main iframe.doc');
+  await page.waitForFunction(() => !document.querySelector('#main .ld-ov'), null, { timeout: 5000 })
+    .catch(() => {});
+  ok('srcdoc 판에서도 덮개가 실제로 붙는다',
+     await page.evaluate(() => window.__덮개붙음), '');
+  ok('srcdoc 판에서도 덮개가 끝내 걷힌다',
+     (await page.locator('#main .ld-ov').count()) === 0,
+     '.ld-ov ' + (await page.locator('#main .ld-ov').count()) + '개');
+  await page.unroute('**/functions/v1/**/view/s04');
 }
 
 await browser.close();
