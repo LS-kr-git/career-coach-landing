@@ -326,36 +326,49 @@ await login('#' + 긴칸);
 
 // ── ⑧ iframe 화면은 안쪽이 다 그려질 때까지 덮는다 ──────────────────────────
 // 🔴 `lib/asset.ts` 의 다섯 장은 기다림이 **두 번**이다. 서버가 저장소에서 문서를 읽어
-//    오는 시간(위 ⑦ 이 덮는 구간)과, 그 문서가 자기 style·script 를 다 도는 시간이다.
+//    오는 시간(위 ⑦ 이 덮는 구간)과, 그 문서가 자기 스타일·스크립트를 다 도는 시간이다.
 //    2026-08-16 이전에는 뒤쪽이 맨몸이라 **흰 화면이 지나갔다**(사용자 확정으로 덮는다).
-//    스텁은 그 성질만 흉내낸다 — `iframe.doc` 하나와, 안에서 시간을 쓰는 문서.
+//
+// 🔴 **안쪽을 늦추는 방법을 두 번째 판에서 갈았다.** 첫 판은 iframe 안에서 바쁜 루프로
+//    400ms 를 끌었는데, **로컬에서는 통과하고 CI 에서만 빨간불**이었다(2026-08-16 실측:
+//    `.ld-ov 0개`). 안에서 시간을 끄는 것은 러너 속도와 스크립트 실행 여부에 좌우돼서,
+//    `load` 가 먼저 나면 덮개가 걷힌 뒤를 보게 된다. 지금은 **서버가 늦게 준다** —
+//    시간을 브라우저 밖에서 잡으므로 러너가 아무리 빨라도 창이 안 닫힌다.
+//    (셸은 `srcdoc` 이든 `src` 든 `iframe.doc` 의 `load` 만 보므로 이 스텁으로 충분하다.)
 {
-  const 느린문서 = '<!doctype html><meta charset="utf-8"><h1>doc</h1>'
-    + '<scr' + 'ipt>var t=Date.now();while(Date.now()-t<400){}</scr' + 'ipt>';
+  await page.route('**/ops/slowdoc.html', async (route) => {
+    await new Promise((r) => setTimeout(r, 600));
+    return route.fulfill({ contentType: 'text/html; charset=utf-8', body: '<!doctype html><h1>doc</h1>' });
+  });
   await page.route('**/functions/v1/**/view/s03', (route) => route.fulfill({
     contentType: 'text/html; charset=utf-8',
-    body: '<iframe class="doc" id="t" sandbox="allow-scripts" srcdoc="'
-      + 느린문서.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;') + '"></iframe>',
+    body: '<iframe class="doc" src="slowdoc.html"></iframe>',
   }));
   await page.evaluate(() => { location.hash = '#s03'; });
   await page.waitForSelector('#main iframe.doc');
   // 조각이 들어온 **직후**다. 여기서 덮개가 없으면 안쪽이 그려질 때까지 흰 화면이다.
-  ok('iframe 이 들어온 직후에도 덮개가 있다', await page.locator('#main .ld-ov').count() === 1,
-     '.ld-ov ' + (await page.locator('#main .ld-ov').count()) + '개');
+  const 덮개수 = await page.locator('#main .ld-ov').count();
+  ok('iframe 이 들어온 직후에도 덮개가 있다', 덮개수 === 1, '.ld-ov ' + 덮개수 + '개');
   // 덮개는 **가려야** 뜻이 있다. 자리만 잡고 투명하면 흰 화면이 그대로 보인다.
+  // 🔴 없을 때 던지지 않는다 — 첫 판이 `getComputedStyle(null)` 로 스크립트를 통째로
+  //    죽여서, 뒤에 남은 두 항목이 판정도 못 받고 사라졌다(2026-08-16). 검사는 터지는
+  //    것이 아니라 **빨간불을 내야** 한다.
   const 덮개모양 = await page.evaluate(() => {
     const o = document.querySelector('#main .ld-ov');
-    const c = getComputedStyle(o), r = o.getBoundingClientRect();
-    const f = document.querySelector('#main iframe.doc').getBoundingClientRect();
-    return { bg: c.backgroundColor, 안가림: r.width < f.width - 1 || r.height < f.height - 1 };
+    const f = document.querySelector('#main iframe.doc');
+    if (!o || !f) return { 없음: true };
+    const c = getComputedStyle(o), r = o.getBoundingClientRect(), b = f.getBoundingClientRect();
+    return { bg: c.backgroundColor, 안가림: r.width < b.width - 1 || r.height < b.height - 1 };
   });
   ok('덮개가 iframe 을 다 가리고 배경이 비치지 않는다',
-     !덮개모양.안가림 && 덮개모양.bg !== 'rgba(0, 0, 0, 0)', JSON.stringify(덮개모양));
+     !덮개모양.없음 && !덮개모양.안가림 && 덮개모양.bg !== 'rgba(0, 0, 0, 0)',
+     JSON.stringify(덮개모양));
   // 안쪽이 다 그려지면 스스로 걷힌다. 안 걷히면 화면이 영영 덮인 채로 남는다.
-  await page.waitForFunction(() => !document.querySelector('#main .ld-ov'), null, { timeout: 5000 })
-    .then(() => ok('안쪽이 다 그려지면 덮개가 걷힌다', true, '걷힘'))
-    .catch(() => ok('안쪽이 다 그려지면 덮개가 걷힌다', false, '5초 안에 안 걷혔다'));
+  const 걷힘 = await page.waitForFunction(() => !document.querySelector('#main .ld-ov'),
+    null, { timeout: 5000 }).then(() => true).catch(() => false);
+  ok('안쪽이 다 그려지면 덮개가 걷힌다', 걷힘, 걷힘 ? '걷힘' : '5초 안에 안 걷혔다');
   await page.unroute('**/functions/v1/**/view/s03');
+  await page.unroute('**/ops/slowdoc.html');
 }
 
 await browser.close();
