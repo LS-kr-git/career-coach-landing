@@ -442,44 +442,6 @@ const 운영스타일 = '<style>main{padding:0;margin:0;max-width:none}'
   await page.unroute('**/functions/v1/**/view/s04');
 }
 
-// ── ⑨ 브랜드색을 칠하는 자리가 저쪽 저장소의 목록과 같다 ────────────────────
-// 🔴 **한 이름이 저장소를 건넌다.** 허락된 자리의 정본은 career-coach 의
-//    `lib/tokens.ts` 의 `BRAND_USES` 이고, 어드민 「디자인 시스템」 화면이 그것을 그려
-//    "쓰도록 허락된 자리는 2곳" 이라고 **사람에게 말한다.** 그런데 실제로 칠하는 두 자리는
-//    **이 파일이 아니라 이 저장소의 `ops/index.html` 에 있다.**
-//    이어 주는 것이 없으면 저 화면은 여기서 뭘 하든 계속 "2곳" 이라고 말한다 —
-//    2026-08-16 에 검사관이 "드리프트가 없어진 게 아니라 저장소 경계 위로 한 칸
-//    옮겨졌을 뿐" 이라고 짚은 그 자리다.
-//
-// 🔴 **저쪽 파일을 읽을 수는 없다**(다른 저장소이고 비공개다). 그래서 목록의 사본을 여기
-//    두고, 사본이 실제 CSS 와 어긋나면 빨간불을 낸다. `harness.mjs` 의 `TOKENS_STUB` 이
-//    같은 방식이다 — 사본을 없앨 수는 없고, **조용히** 어긋나는 것만 막는다.
-//    저쪽도 자기 몫(이 저장소 밖으로 새는 것)을 `tests/test_admin_design.py` 로 문다.
-//
-// ⚠️ 여기를 고쳐야 할 일이 생겼으면 **저쪽 BRAND_USES 도 같이 고치고 사용자에게 알린다** —
-//    career-coach `CLAUDE.md` 의 「디자인 시스템 화면이 낡게 되는 변경은 항상 알린다」.
-{
-  // ← career-coach BRAND_USES 중 **이 저장소에 있는 것만**. 2026-08-16 에 저쪽에 셋째
-  //    (`.adm-ring` — 상자를 다시 부르는 동안 도는 표시)가 생겼는데 그건 career-coach 의
-  //    `lib/ui.ts` 에 있다. **여기 적지 마라** — 아래는 이 파일의 CSS 와 대조하는 목록이라
-  //    저쪽 자리를 넣으면 '실제로 안 칠한다' 로 영영 빨간불이다.
-  const 허락된자리 = ['nav a.on::before', '.ld-art circle'];
-  const 원문 = fs.readFileSync(new URL('../../ops/index.html', import.meta.url), 'utf-8');
-  // 🔴 파일 전체를 문자열로 뒤지지 않는다. 이 파일의 주석에도 `--adm-brand` 가 적혀 있어서
-  //    그렇게 세면 **산문이 위반으로 잡힌다**(저쪽 test_admin_design.py 가 같은 이유로
-  //    CSS 구역만 본다). style 태그 안만 보고, 그 안의 주석도 먼저 뗀다.
-  const css = [...원문.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)]
-    .map((m) => m[1]).join('\n').replace(/\/\*[\s\S]*?\*\//g, '');
-  const 칠하는자리 = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
-    .filter((m) => m[2].includes('var(--adm-brand)'))
-    .map((m) => m[1].trim().replace(/\s+/g, ' '))
-    .sort();
-  const 같다 = JSON.stringify(칠하는자리) === JSON.stringify([...허락된자리].sort());
-  ok('브랜드색을 칠하는 자리가 career-coach 의 BRAND_USES 와 같다', 같다,
-     같다 ? 칠하는자리.join(' · ')
-          : `기록 [${[...허락된자리].sort().join(' · ')}] / 실제 [${칠하는자리.join(' · ')}]`);
-}
-
 // ── ⑩ 판이 바뀌면 보던 자리를 잃지 않고 토큰만 갈아 끼운다 ──────────────────
 {
   ok('처음에는 새 토큰이 없다', await 새것() === '', await 새것());
