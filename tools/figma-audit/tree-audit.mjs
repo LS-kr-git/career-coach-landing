@@ -15,9 +15,11 @@
  * figma-tree.json 의 `sections` 는 **이 스크립트가 덤프에서 만든다.** 사람이 피그마에
  * 섹션을 하나 만들면 스냅샷은 즉시 낡는데, 그걸 사람 손에 맡기면 경고가 상주하다가
  * 결국 무시된다. 그래서 낡음은 **막힘이 아니라 ↺(자동 갱신 대상)** 으로 분류하고,
- * `--update` 한 줄로 맞춘다. 예약 점검이 매일 이 한 줄을 대신 돌린다.
+ * `--update` 한 줄로 맞춘다. 예약 점검이 전체 모드로 도는 날 이 한 줄을 대신 돌린다(최대 3주).
  * 기준 프레임이 어느 섹션에 있는지도 저장하지 않는다 — 덤프에서 그때그때 읽으면 된다.
- * **손으로 유지하는 것은 `pageLevelAllowed`(면제 목록) 하나뿐이다.**
+ * **손으로 유지하는 것은 `pageLevelAllowed`(면제 목록) 와 `page`(검수 대상 페이지) 둘이다.**
+ * `page` 는 `--update` 가 못 고친다 — 관문이 덤프와 동치일 때만 갱신을 허용하므로 값이 굳는다.
+ * 운영 페이지를 옮기거나 나눴으면 사람이 먼저 이 값을 고쳐야 한다.
  *
  * 두 가지 모드
  *   (1) 덤프 없이  — 준비물이 없다. 스냅샷 자체 정합성만 본다. 이 검사의 본체(고아 노드)는
@@ -80,6 +82,14 @@ if (!Object.keys(sections).length && !doUpdate) {
       '한 번도 생성하지 않았습니다. 덤프를 뽑아 --update 로 만드세요.');
 }
 
+/* page 는 --update 가 못 고치는 손유지 값이다. 비면 아래 관문이 undefined === undefined 로
+   조용히 참이 되어, 페이지 고정도 --update 차단도 한 줄의 경고 없이 통째로 꺼진다.
+   준비물 없이 도는 이 자리에서 먼저 막는다. */
+if (!String(snap.page || '').trim()) {
+  add('BLOCK', '트리 스냅샷', 'figma-tree.json', 'page (검수 대상 페이지) 가 비어 있습니다',
+      '이 값이 없으면 덤프가 어느 페이지를 찍었는지 판정할 수 없어 고아 검사가 통째로 꺼집니다. 운영 페이지 id 를 적으세요.');
+}
+
 for (const [id, reason] of Object.entries(allowed)) {
   if (!String(reason || '').trim()) {
     add('BLOCK', '트리 스냅샷', 'figma-tree.json',
@@ -91,6 +101,7 @@ for (const [id, reason] of Object.entries(allowed)) {
 /* ---------- (2) 라이브 덤프 대조 ---------- */
 
 let dump = null;
+let pageOk = false;   // 덤프가 검수 대상 페이지를 찍었나. 아래 (3) 자동 갱신도 이 값을 본다
 if (!dumpPath) {
   add('SKIP', '라이브 대조', '-', '피그마 트리 덤프를 주지 않아 고아 노드는 확인하지 못했습니다',
       'README "피그마 트리 덤프" 스니펫으로 뽑아 인자로 주세요: node tools/figma-audit/tree-audit.mjs figma_tree.json');
@@ -111,23 +122,50 @@ if (!dumpPath) {
         '이 실행은 현재 피그마를 확인한 것이 아닙니다. README "피그마 트리 덤프" 로 다시 뽑으세요.');
   }
 
+  /* 덤프가 어느 페이지를 찍었는가. 파일에 페이지가 둘 이상이면 덤프 스니펫이 "지금 열려 있는
+     페이지" 를 찍어 갈 수 있고, 그러면 아래 고아 검사는 운영 페이지를 한 번도 안 보고 ✅ 를 찍는다.
+     덤프 안에 pageId 가 들어 있는데도 그 값을 아무도 안 보던 자리다.
+     (2026-08-20: 파일이 '운영 페이지들(SSOT)' 과 '레퍼런스, 기타 자료들' 로 나뉘었다.) */
+  pageOk = Boolean(snap.page) && dump.pageId === snap.page;
+  if (!pageOk) {
+    add('SKIP', '덤프 페이지', dumpPath,
+        dump.pageId
+          ? `운영 페이지(${snap.page})가 아니라 ${dump.pageId} 를 찍은 덤프입니다`
+          : `pageId 가 없어 어느 페이지를 찍었는지 알 수 없습니다 (기준 ${snap.page})`,
+        '고아 노드와 섹션 증감은 이 실행에서 확인하지 않았습니다. README "피그마 트리 덤프" 스니펫은 운영 페이지를 열고 뽑습니다.');
+    if (doUpdate) {
+      add('BLOCK', '트리 스냅샷', dumpPath, '--update 를 다른 페이지의 덤프로 돌릴 수 없습니다',
+          'sections 가 운영 페이지의 것이 아닌 값으로 덮이면, 그 뒤로는 어긋난 것을 아무도 못 봅니다.');
+    }
+  }
+
   const children = dump.children || [];
   if (!children.length) {
     add('BLOCK', '라이브 대조', dumpPath, 'children 이 비어 있습니다', '덤프가 잘못 뽑혔습니다.');
   }
 
-  // ★ 고아 노드 — 이 검사의 본체.
-  for (const c of children) {
+  // ★ 고아 노드 — 이 검사의 본체. 다른 페이지 덤프면 위에서 SKIP 을 찍고 여기서 돌지 않는다.
+  for (const c of pageOk ? children : []) {
     if (c.type === 'SECTION') continue;
     if (allowed[c.id]) continue;
     add('BLOCK', '고아 노드', `${c.id} ${c.name}`,
-        `페이지(${dump.pageId || '0:1'}) 직속에 섹션이 아닌 ${c.type} 가 있습니다`,
+        `페이지(${dump.pageId}) 직속에 섹션이 아닌 ${c.type} 가 있습니다`,
         '섹션 안으로 옮기세요. 섹션의 자식은 x/y 가 섹션 기준 상대좌표입니다 — 좌표만 맞추고 부모를 확인하지 않으면 캔버스 저편에 떠 있게 됩니다. 의도한 것이면 figma-tree.json 의 pageLevelAllowed 에 사유와 함께 적으세요.');
   }
 
   // 기준 프레임이 실제로 섹션 안에 있는가 — 626:2657 과 같은 형태를 여기서 잡는다.
   // 어느 섹션에 있어야 하는지는 저장하지 않는다. "어딘가 섹션 안" 이면 된다.
   const dreg = dump.registered || {};
+  /* 옛 스니펫으로 뽑은 덤프에는 프레임별 page 가 없다. 없는 것을 통과로 세지 않는다 —
+     그러면 필드 하나를 빠뜨리는 것만으로 아래 소속 검사가 흔적 없이 꺼진다. */
+  const 소속미상 = Object.values(dreg).filter((r) => r && r.found !== false && !r.page).length;
+  // pageOk 로 묶지 않는다 — 다른 페이지 덤프이면서 옛 스니펫이면, 「덤프 페이지」 한 줄만 뜨고
+  // 그 비고는 고아·섹션만 못 봤다고 말해 소속 검사가 아무 판정도 못 낸 사실이 화면에서 사라진다.
+  if (소속미상) {
+    add('SKIP', '프레임 소속 페이지', dumpPath,
+        `${소속미상}개 프레임에 page 가 없어 검수 대상 페이지에 있는지 확인하지 못했습니다`,
+        'README "피그마 트리 덤프" 의 최신 스니펫으로 다시 뽑으세요 — registered 항목에 page 를 넣습니다.');
+  }
   // 상태 프레임(stateNodes)도 같은 검사를 받는다 — 기준 프레임만 보면 상태 프레임이
   // 지워지거나 섹션 밖으로 나가도 아무도 모른다.
   for (const [html, e] of registered.flatMap(([html, e]) =>
@@ -147,25 +185,38 @@ if (!dumpPath) {
     if (!r.section) {
       add('BLOCK', 무엇, `${e.node} (${html})`, '이 프레임이 어느 섹션에도 들어 있지 않습니다',
           `부모가 ${r.parentType || '?'}(${r.parent || '?'}) 입니다. 섹션 안으로 되돌리세요.`);
+      continue;
+    }
+    /* "어딘가 섹션 안" 만 보면 파일이 여러 페이지가 된 뒤로는 부족하다. 등록된 프레임을
+       레퍼런스 페이지로 끌어다 놓아도 섹션 안이라 여기까지 전부 초록이고, 위 고아 검사는
+       운영 페이지만 훑으므로 그 프레임을 아예 보지 않는다. id 가 바뀌지 않는 이동
+       (같은 파일 안에서 페이지 사이로 끌기)은 어느 검사에도 안 걸리던 자리다. */
+    if (snap.page && r.page && r.page !== snap.page) {
+      add('BLOCK', 무엇, `${e.node} (${html})`,
+          `검수 대상이 아닌 페이지(${r.page})의 섹션에 들어 있습니다`,
+          `운영 페이지는 ${snap.page} 입니다. 라이브에 살아 있는 화면이면 되돌리고, 정말 죽은 화면이면 page-figma-map.json 에서 먼저 내리세요.`);
     }
   }
 
   // 섹션 증감 — 사람이 피그마를 정리하면 반드시 생긴다. 막지 않고 ↺ 로 분류한다.
-  const liveSec = new Map(children.filter((c) => c.type === 'SECTION').map((c) => [c.id, c.name]));
-  const holding = new Set(Object.values(dreg).map((r) => r && r.section).filter(Boolean));
-  for (const [id, name] of Object.entries(sections)) {
-    if (liveSec.has(id)) {
-      if (liveSec.get(id) !== name) {
-        add('SYNC', '섹션 이름 바뀜', `${id}`, `"${name}" → "${liveSec.get(id)}"`);
+  // 다른 페이지 덤프로 이것을 돌리면 운영 페이지의 섹션이 통째로 "사라짐" 으로 뜬다 — 돌리지 않는다.
+  if (pageOk) {
+    const liveSec = new Map(children.filter((c) => c.type === 'SECTION').map((c) => [c.id, c.name]));
+    const holding = new Set(Object.values(dreg).map((r) => r && r.section).filter(Boolean));
+    for (const [id, name] of Object.entries(sections)) {
+      if (liveSec.has(id)) {
+        if (liveSec.get(id) !== name) {
+          add('SYNC', '섹션 이름 바뀜', `${id}`, `"${name}" → "${liveSec.get(id)}"`);
+        }
+        continue;
       }
-      continue;
+      add(holding.has(id) ? 'BLOCK' : 'SYNC', '섹션 사라짐', `${id} ${name}`,
+          '스냅샷에 있는 섹션이 피그마에 없습니다',
+          holding.has(id) ? '이 섹션에 기준 프레임이 들어 있어야 합니다. 지운 것이면 page-figma-map.json 부터 정리하세요.' : undefined);
     }
-    add(holding.has(id) ? 'BLOCK' : 'SYNC', '섹션 사라짐', `${id} ${name}`,
-        '스냅샷에 있는 섹션이 피그마에 없습니다',
-        holding.has(id) ? '이 섹션에 기준 프레임이 들어 있어야 합니다. 지운 것이면 page-figma-map.json 부터 정리하세요.' : undefined);
-  }
-  for (const [id, name] of liveSec) {
-    if (!sections[id]) add('SYNC', '새 섹션', `${id} ${name}`, '스냅샷에 없는 섹션이 피그마에 있습니다');
+    for (const [id, name] of liveSec) {
+      if (!sections[id]) add('SYNC', '새 섹션', `${id} ${name}`, '스냅샷에 없는 섹션이 피그마에 있습니다');
+    }
   }
 }
 
@@ -174,7 +225,9 @@ if (!dumpPath) {
 const syncs = findings.filter((f) => f.level === 'SYNC');
 let updated = null;
 
-if (doUpdate && dump && (dump.children || []).length) {
+// 위 관문과 **같은 값**을 쓴다. 비교식을 여기 한 번 더 적으면 한쪽만 고쳐질 때 갈린다 —
+// 실제로 snap.page 가 빈 경우 이 자리만 undefined === undefined 로 참이 되어 파일을 덮어썼다.
+if (doUpdate && dump && pageOk && (dump.children || []).length) {
   const next = { ...snap };
   next.dumpedAt = new Date().toISOString().slice(0, 10);
   next.page = dump.pageId || snap.page;
@@ -224,7 +277,7 @@ if (asJson) {
     if (syncs.length && !updated) {
       console.log(`↺ 스냅샷 낡음 ${syncs.length}건 — 사람이 피그마를 정리하면 생기는 정상적인 차이입니다.`);
       console.log(`   한 줄이면 맞춰집니다:  node tools/figma-audit/tree-audit.mjs ${dumpPath || '<덤프>'} --update`);
-      console.log(`   (예약 점검이 매일 이 한 줄을 대신 돌립니다. 그때까지 푸시를 막지 않습니다.)\n`);
+      console.log(`   (예약 점검이 전체 모드로 도는 날 이 한 줄을 대신 돌립니다 — 최대 3주. 그때까지 푸시를 막지 않습니다.)\n`);
     }
     // 미실행을 조치 필요와 같은 줄에서 따로 센다 — "조치 필요 0건" 만 보고
     // 고아 노드가 없다고 읽는 것이 이 검수가 무력해지는 방식이다.

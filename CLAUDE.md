@@ -593,8 +593,10 @@ Pretendard 가 실제로 보이는 환경에서 작업한다면 이 제약은 �
 
 **(a) 구조·문구 메타데이터**
 ```
-get_metadata(fileKey="LnT8TgFVBxky0bVyaF6Tob", nodeId="0:1")
+get_metadata(fileKey="LnT8TgFVBxky0bVyaF6Tob", nodeId="6:148")
 ```
+랜딩 **프레임** id 다. 페이지 id(`0:1`)를 주면 운영 페이지의 섹션 전부가 딸려 와 축약하다
+`<text>` 줄을 흘리기 쉽고, 그러면 검수가 "조치 필요 0건" 으로 통과한다.
 결과가 크면 툴이 파일로 떨궈 준다. 그 파일의 `text` 필드를 이어붙여 `figma_meta.xml` 로 저장.
 
 **(b) 타이포 원본 덤프** — `use_figma` 로 아래를 그대로 실행하고 결과를 `figma_type.json` 으로 저장:

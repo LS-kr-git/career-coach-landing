@@ -64,7 +64,11 @@
 ## 쓰는 법 (Cowork 세션 안에서)
 
 1. **피그마 메타데이터 받기** — Figma MCP 호출:
-   `get_metadata(fileKey="LnT8TgFVBxky0bVyaF6Tob", nodeId="0:1")`
+   `get_metadata(fileKey="LnT8TgFVBxky0bVyaF6Tob", nodeId="6:148")`
+   `audit.mjs` 가 보는 것은 랜딩 프레임 하나뿐이므로 **프레임 id 를 준다.** 페이지 id(`0:1`)를 주면
+   운영 페이지의 섹션 전부가 XML 로 딸려 와서 축약하다 `<text>` 줄을 흘리기 쉽다 — 그러면 웹 문구가
+   전부 `ℹ️ 웹전용` 으로 빠지면서 "조치 필요 0건" 으로 통과한다.
+   프레임 id 는 `page-figma-map.json` 의 `index.html` 항목에서 읽는다.
    결과가 크면 툴이 파일로 떨궈 주므로, 그 파일의 `text` 필드를 이어붙여 `figma_meta.xml`로 저장한다.
 2. **검수 실행**
    ```
@@ -163,8 +167,28 @@ return out;
 ## 기준 섹션이 바뀌면
 
 `map.json`의 `figma.canonicalSectionId`를 새 섹션 id로 바꾼다. (2026-07-31 기준 `6:147` = `PROD`)
-캔버스 섹션은 `PROD`(기준) / `v1_archive` / `v2_archive` / `REF - 피클플러스` / `디자인 시스템` 로 정리돼 있고, **검수 대상은 `PROD` 하나뿐**이다.
+검수 대상은 랜딩 섹션 안의 `PROD` 하나뿐이다.
 다음 개편 때도 새 버전을 만들면 옛 `PROD`를 `vN_archive`로 내리고 새 것을 `PROD`로 올린다 — 이름이 곧 기준이므로 헷갈릴 일이 없다.
+
+### 파일은 페이지가 둘이다 (2026-08-20)
+
+| 페이지 | id | 무엇이 있나 |
+|---|---|---|
+| 운영 페이지들(SSOT) | `0:1` | 라이브와 대조하는 화면만. **모든 검수의 대상은 여기뿐이다** |
+| 레퍼런스, 기타 자료들 | — | 타사 레퍼런스 · 기본 디자인 시스템 · 행정 서류 · Legacy. 어느 검수도 보지 않는다 |
+
+운영 페이지의 id 는 `figma-tree.json` 의 `page` 가 정본이다. 트리 덤프는 그 값을 읽어 페이지를 열고,
+`tree-audit` 은 덤프의 `pageId` 가 그 값과 같은지 먼저 확인한다 — 다르면 「🚫 검수 미실행」 이다.
+
+**라이브에 살아 있는 화면의 시안을 레퍼런스 페이지로 옮기지 마라.** 옮기는 방식에 따라 잡히는
+자리가 다르다.
+
+| 어떻게 옮겼나 | 무엇이 잡나 |
+|---|---|
+| 복사·붙여넣기라 id 가 바뀌었다 | 등록부가 가리키는 노드가 사라져 **❌ 막힘** (2026-08-20 `signup` 이 그랬다) |
+| 끌어다 놓아 id 가 그대로다 | 섹션 안이라 문구·타이포·스타일 검수는 전부 초록이다. **`tree-audit` 의 소속 페이지 검사에서만** 잡힌다 |
+
+둘째 줄이 이 검사를 만든 이유다. 옮기기 전에 그 HTML 이 정말 죽은 것인지부터 본다.
 
 ## 이미지 기준 해시 세우기 (파일당 1회)
 
@@ -327,12 +351,17 @@ node tools/figma-audit/page-audit.mjs --json
 |---|---|
 | 페이지 직속에 섹션이 아닌 노드가 있다 (= 고아) | ❌ 막힘 |
 | `page-figma-map.json` 의 기준 프레임이 **어느 섹션에도** 안 들어 있다 | ❌ 막힘 |
+| 기준 프레임이 **검수 대상이 아닌 페이지**의 섹션에 들어 있다 | ❌ 막힘 |
+| 덤프의 `registered` 에 `page` 가 없어 소속을 못 봤다 | 🚫 검수 미실행 (막지 않음) |
 | 기준 프레임이 피그마에서 사라졌다 (`found:false`) | ❌ 막힘 |
 | 기준 프레임이 든 섹션이 피그마에 없다 | ❌ 막힘 |
 | `pageLevelAllowed` 항목에 사유가 비어 있다 | ❌ 막힘 |
+| `page` (검수 대상 페이지) 가 비어 있다 | ❌ 막힘 |
 | 새 섹션 / 섹션 이름 바뀜 / 안 쓰는 섹션 사라짐 | ↺ 스냅샷 낡음 (막지 않음) |
 | 덤프를 안 줘서 라이브 대조를 못 했다 | 🚫 검수 미실행 (막지 않음) |
 | 덤프가 45분보다 낡았다 | 🚫 검수 미실행 (막지 않음) |
+| 덤프가 운영 페이지(`figma-tree.json` 의 `page`)가 아닌 페이지를 찍었다 | 🚫 검수 미실행 (막지 않음) |
+| 그 덤프로 `--update` 를 돌리려 했다 | ❌ 막힘 |
 
 `🚫` 는 종료코드 0 이다 — 이 검수는 모든 푸시에서 도는데 덤프는 세션마다 뽑는 물건이라,
 없다고 막으면 평소 작업이 통째로 선다. 대신 **미실행 건수를 조치 필요와 따로 세고**,
@@ -345,8 +374,10 @@ node tools/figma-audit/page-audit.mjs --json
 
 ### 🔴 스냅샷은 손으로 관리하지 않는다
 
-`figma-tree.json` 에서 **사람이 유지하는 것은 `pageLevelAllowed` 하나뿐이다.**
-`sections` 는 `--update` 가 덤프에서 다시 쓴다.
+`figma-tree.json` 에서 **사람이 유지하는 것은 `pageLevelAllowed` 와 `page` 둘이다.**
+`sections` 는 `--update` 가 덤프에서 다시 쓴다. `page` 는 `--update` 가 못 고친다 —
+관문이 "덤프의 `pageId` 와 같을 때" 만 갱신을 허용하므로 그 값은 굳는다. 운영 페이지를
+옮기거나 나눴으면 사람이 **먼저** 이 값을 고친다.
 
 사람이 피그마에 섹션을 하나 만들면 스냅샷은 **즉시** 낡는다. 그 갱신을 사람 손에 맡기면
 경고가 상주하고, 상주하는 경고는 결국 안 읽힌다 — 이 저장소가 여러 번 겪은 실패 방식이다.
@@ -354,8 +385,9 @@ node tools/figma-audit/page-audit.mjs --json
 
 1. `↺` 는 **푸시를 막지 않는다.** 진짜 사고(고아 노드·기준 프레임 이탈)만 막는다.
 2. 출력이 **맞추는 한 줄을 그대로 찍어 준다** — `… --update`.
-3. **예약 점검(라이브↔피그마, 하루 1회)이 매일 그 한 줄을 대신 돌리고 커밋한다.**
-   손대지 않아도 24시간 안에 스스로 맞는다.
+3. **예약 점검(라이브↔피그마)이 전체 모드로 도는 날 그 한 줄을 대신 돌리고 커밋한다.**
+   손대지 않아도 스스로 맞는데, 전체 모드는 3주에 한 번이라 **최대 3주 걸린다.**
+   그동안 `↺` 는 계속 찍히지만 푸시를 막지 않는다. 지금 조용히 하고 싶으면 아래 한 줄을 직접 돌린다.
 
 기준 프레임이 **어느** 섹션에 있어야 하는지는 아예 저장하지 않는다. "어딘가 섹션 안" 이면 되고,
 그건 덤프에서 그때그때 읽으면 된다 — 저장하지 않으면 낡지도 않는다.
@@ -367,6 +399,18 @@ node tools/figma-audit/tree-audit.mjs                            # 준비물 없
 node tools/figma-audit/tree-audit.mjs figma_tree.json            # 라이브 덤프까지 대조 (고아 노드)
 node tools/figma-audit/tree-audit.mjs figma_tree.json --update   # ↺ 를 자동으로 맞춘다 (sections 재작성)
 ```
+
+여덟 방향 확인됨(2026-08-20, 변이로): ① 운영 페이지 덤프에 페이지 직속 프레임을 심으면 ❌ 로 잡힌다
+② 레퍼런스 페이지를 찍은 덤프는 **아무 표시 없이** 그 고아를 지나친다(관문을 `pageOk = true` 로
+무력화해 재현) ③ 관문을 되돌리면 같은 덤프가 「🚫 덤프 페이지」 로 남는다 ④ 그 덤프로 `--update` 를
+돌리면 ❌ 로 막히고 `sections` 는 그대로다 ⑤ 기준 프레임을 **id 를 유지한 채** 레퍼런스 페이지의
+섹션으로 옮긴 덤프는 ❌ 「검수 대상이 아닌 페이지」 로 잡힌다 ⑥ `registered` 에 `page` 가 없는 옛
+덤프는 그 검사를 「🚫 검수 미실행」 으로 남긴다(조용히 꺼지지 않는다) ⑦ 스냅샷의 `page` 를 지우면
+관문이 `undefined === undefined` 로 참이 되어 통째로 꺼지던 자리를, 준비물 없이 도는 정합성 검사가
+❌ 로 먼저 막는다 ⑧ 다른 페이지를 찍은 **옛** 스니펫 덤프(둘이 겹친 경우)는 「🚫 덤프 페이지」 와
+「🚫 프레임 소속 페이지」 **두 줄**을 남긴다 — 못 돈 검사가 둘인데 한 줄만 뜨면 나머지 하나가
+화면에서 사라진다.
+**이 저장소에는 이 스크립트를 도는 테스트가 없다** — 위 여덟은 손으로 만든 덤프와 변이로 확인한 것이다.
 
 `--update` 는 `sections` 와 `dumpedAt` 만 다시 쓴다. `pageLevelAllowed` 와 설명 문구는 건드리지 않는다.
 `❌ 막힘` 은 `--update` 로 사라지지 않는다 — 갱신하고도 종료코드 1 이다.
@@ -383,11 +427,16 @@ pre-push 훅에서 **항상** 돈다(1.2겹). 덤프는 `FIGMA_TREE` → 저장�
 
 ```
 node -e "const m=require('./tools/figma-audit/page-figma-map.json');console.log(JSON.stringify(Object.values(m.pages).flatMap(e=>[e.node,...(e.stateNodes||[]).map(s=>s.id)])))"
+node -e "console.log(require('./tools/figma-audit/figma-tree.json').page)"
 ```
 
 ```js
-const REG = [/* 위 명령의 출력 */];
-const page = figma.currentPage;
+const REG = [/* 위 첫 명령의 출력 */];
+// 운영 페이지를 **명시해서** 연다. figma.currentPage 로 두면 "그때 열려 있던 페이지" 를 찍어 가는데,
+// 이 파일은 페이지가 둘이라 어느 쪽을 찍었는지가 우연에 맡겨지고, 레퍼런스 페이지를 찍은 덤프도
+// "✅ 고아 노드 없음" 으로 통과한다. 페이지 id 는 위 둘째 명령의 출력이다(figma-tree.json 의 page).
+const page = await figma.getNodeByIdAsync(/* 위 둘째 명령의 출력 */ '0:1');
+await figma.setCurrentPageAsync(page);
 const children = page.children.map(n => ({ id: n.id, name: n.name, type: n.type }));
 const registered = {};
 for (const id of REG) {
@@ -397,7 +446,10 @@ for (const id of REG) {
   let p = n.parent;
   while (p && p.type !== 'PAGE') { chain.push({ id: p.id, name: p.name, type: p.type }); p = p.parent; }
   const sec = chain.find(c => c.type === 'SECTION');
+  // p 는 루프를 빠져나온 시점에 그 프레임이 실제로 올라앉은 PAGE 다. 이 값을 버리면
+  // "섹션 안에는 있는데 검수 대상이 아닌 페이지" 를 판정할 근거가 사라진다.
   registered[id] = { found: true, name: n.name, section: sec ? sec.id : null,
+                     page: p ? p.id : null,
                      parent: n.parent.id, parentType: n.parent.type };
 }
 // dumpedAt 은 tree-audit 의 신선도 판정에 쓴다. 빼도 돌지만 그때는 파일 mtime 만 보므로,
@@ -405,13 +457,15 @@ for (const id of REG) {
 return { dumpedAt: new Date().toISOString(), pageId: page.id, pageName: page.name, children, registered };
 ```
 
-파일이 여러 페이지가 되면 `figma.currentPage` 대신 페이지별로 나눠 돌려야 한다
-(`use_figma` 한 번에 `setCurrentPageAsync` 는 한 번만). 지금은 `Page 1` 하나뿐이다.
+`use_figma` 한 번에 `setCurrentPageAsync` 는 한 번만 부를 수 있다. 그래서 이 덤프는 **운영 페이지
+한 장만** 찍는다 — 레퍼런스 페이지의 고아 노드는 보지 않는다. 의도한 것이다(그쪽은 검수 대상이 아니다).
+운영 페이지를 옮기거나 나누면 `figma-tree.json` 의 `page` 를 먼저 고친다. 안 고치면 그날부터
+tree-audit 이 「🚫 덤프 페이지」 로 찍고 고아 검사를 돌리지 않는다.
 
 ### 섹션을 새로 만들었으면 — 아무것도 안 해도 된다
 
-`↺ 스냅샷 낡음` 이 찍히지만 **푸시는 그대로 나간다.** 예약 점검이 그날 안에 `--update` 를 돌려
-`figma-tree.json` 을 커밋한다. 지금 당장 조용히 하고 싶으면 덤프를 뽑아 한 줄 돌리면 된다:
+`↺ 스냅샷 낡음` 이 찍히지만 **푸시는 그대로 나간다.** 예약 점검이 전체 모드로 도는 날 `--update` 를
+돌려 `figma-tree.json` 을 커밋한다(최대 3주). 지금 당장 조용히 하고 싶으면 덤프를 뽑아 한 줄 돌리면 된다:
 
 ```
 node tools/figma-audit/tree-audit.mjs figma_tree.json --update

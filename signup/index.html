@@ -24,7 +24,7 @@
     --pad-x: 24px;
     --card-max: 450px;
     --content-max: 402px;
-    /* 피그마 566:2700 실측 — 라벨 열 폭. Gothic A1 자연폭 최댓값(89)+버퍼 4 */
+    /* 피그마 875:13723 실측 — 라벨 열 폭. Gothic A1 자연폭 최댓값(89)+버퍼 4 */
     --label-w: 93px;
   }
   *{margin:0;padding:0;box-sizing:border-box}
@@ -62,7 +62,7 @@
     background:#fff;display:flex;align-items:center;padding:0 12px;
     font-size:13px;line-height:18px;color:var(--gray-700);
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  /* 문구가 비었어도 자리는 남긴다 — 54 = line-height 18 × 3줄, 피그마 566:2733 과 같은 값 */
+  /* 문구가 비었어도 자리는 남긴다 — 54 = line-height 18 × 3줄, 피그마 875:13761 과 같은 값 */
   .note{font-size:13px;line-height:18px;color:var(--gray-500);min-height:54px}
 
   .agree{list-style:none;display:flex;flex-direction:column;gap:12px}
@@ -128,7 +128,7 @@
           <div class="field"><span class="k">출생 연도</span><span class="v" id="fBirthyear"></span></div>
           <div class="field"><span class="k">생일</span><span class="v" id="fBirthday"></span></div>
         </div>
-        <!-- 피그마 566:2733 의 안내 문구는 2026-08-13 에 비웠다 — 항목별 이용 목적은 개인정보처리방침 1항이 말한다.
+        <!-- 피그마 875:13761 의 안내 문구는 2026-08-13 에 비웠다 — 항목별 이용 목적은 개인정보처리방침 1항이 말한다.
              피그마의 빈 텍스트 노드가 54px(18×3) 자리를 그대로 차지하므로 웹도 여백만 남긴다. -->
         <p class="note"></p>
       </section>
