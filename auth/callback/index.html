@@ -74,28 +74,60 @@
   window.ccAlive();   // track.js 도 별도 fetch 다 — 이 구간에 진척 신호가 없으면
                       // 앞 칸에서 잰 8초가 여기서 터져 성공한 로그인을 실패로 보낸다
 
-  let logged = false;
+  // 카카오 확장 프로필(이름·성별·생일·출생연도·전화번호)은 GoTrue 가 세션에 안 실어 준다.
+  // 우리가 직접 가져오는데, 그 열쇠(provider_token)는 **Supabase 세션이 갱신되는 순간
+  // 세션에서 사라진다**(로그인 1시간 뒤 자동으로 일어난다). 그래서 집을 수 있는 자리가
+  // 이 페이지 하나뿐이다. DB 는 열쇠만 받아 두고 즉시 돌려주고, 카카오 왕복은 1분마다
+  // 도는 수거 작업이 한다 — 여기서 기다리는 것은 0.05~0.3초다.
+  const syncKakao = async (session) => {
+    if (!session.provider_token) return;   // 이미 갱신된 세션 — 정상이라 아무것도 안 한다
+    const ac = new AbortController();
+    const t = setTimeout(() => ac.abort(), 1500);
+    try {
+      const { error } = await supabase
+        .rpc('sync_kakao_profile', {
+          p_access_token:  session.provider_token,
+          p_refresh_token: session.provider_refresh_token ?? null,
+        })
+        .abortSignal(ac.signal);
+      if (error) throw error;
+    } catch (e) {
+      // 실패해도 이동을 막지 않는다. 값은 다음 로그인 때 처음부터 다시 시도된다.
+      track('client_error', { msg: 'kakao_sync:' + (e?.message ?? e) }, session.access_token);
+    } finally {
+      clearTimeout(t);
+      window.ccAlive();   // 이 구간도 진척이다 — 8초 하드 폴백이 먼저 터지지 않게
+    }
+  };
+
   // 로그인 성공을 한 번만 남긴다. 아래 세 경로(이벤트·폴백·타임아웃)가 겹칠 수 있다.
   // access_token 을 넘겨야 track() 이 auth.uid() 로 사람을 알아본다 —
   // 안 넘기면 익명 이벤트가 되어 퍼널이 끊긴다.
+  //
+  // ★ 약속 하나를 세 경로가 **나눠 쓴다.** 먼저 온 경로가 RPC 를 기다리는 동안 뒤에 온
+  //   경로가 그냥 이동해 버리면, 아직 안 나간 요청이 페이지와 함께 죽는다.
+  let login = null;
   const markLogin = (session) => {
-    if (logged || !session) return;
-    logged = true;
-    track('login', {}, session.access_token);
+    if (!session) return Promise.resolve();
+    if (!login) {
+      track('login', {}, session.access_token);
+      login = syncKakao(session);
+    }
+    return login;
   };
 
   const go = window.ccGo;   // 이동 잠금은 위 폴백과 공유한다 — 두 경로가 겹쳐 두 번 이동하지 않게
 
   // supabase-js 는 detectSessionInUrl 기본값이 true 라 이 페이지에 도착하는 순간
   // 인가 코드를 세션으로 교환한다. 교환이 끝나면 SIGNED_IN 이 온다.
-  supabase.auth.onAuthStateChange((_event, session) => {
-    if (session) { markLogin(session); go('/onboarding/1/'); }
+  supabase.auth.onAuthStateChange(async (_event, session) => {
+    if (session) { await markLogin(session); go('/onboarding/1/'); }
   });
 
   // 폴백 — 이벤트를 놓쳤거나 이미 교환이 끝난 뒤 리스너가 붙은 경우
   const { data: { session } } = await supabase.auth.getSession();
   window.ccAlive();   // 세션 조회까지 끝났다 — 판정은 아래 3초 폴백이 한다
-  if (session) { markLogin(session); go('/onboarding/1/'); }
+  if (session) { await markLogin(session); go('/onboarding/1/'); }
 
   // 3초 안에 세션이 안 생기면 실패로 본다 (사용자가 동의를 취소한 경우 등)
   setTimeout(async () => {
@@ -104,7 +136,7 @@
     // 구간에 진척 신호가 없던 것이 앞 판의 구멍이었다. (2026-08-09)
     window.ccAlive();
     const { data } = await supabase.auth.getSession();
-    markLogin(data.session);
+    await markLogin(data.session);
     go(data.session ? '/onboarding/1/' : '/signup/?error=auth');
   }, 3000);
 </script>

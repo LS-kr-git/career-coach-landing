@@ -251,7 +251,7 @@
       "html": "auth/callback/index.html",
       "figmaNode": "595:2646",
       "name": "로그인 처리 중",
-      "dumpedAt": "2026-08-10",
+      "dumpedAt": "2026-08-20",
       "ignoreWebText": [],
       "texts": [
         "로그인 중입니다…"
