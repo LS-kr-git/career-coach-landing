@@ -623,7 +623,7 @@ for (const n of frame.findAllWithCriteria({ types: ['TEXT'] })) {
     ls: u.s.letterSpacing && typeof u.s.letterSpacing.value === 'number' ? u.s.letterSpacing.value : 0,
   }));
 }
-return out;
+return { dumpedAt: new Date().toISOString(), nodes: out };   // dumpedAt 필수 — 없으면 audit.mjs 가 mtime 만 보고 '자기신고 없음' 으로 막는다
 ```
 > **세그먼트 단위인 이유** (2026-08-01): 이전 스크립트는 노드당 첫 세그먼트만 기록해서, 혼합 서식 노드의
 > 나머지 구간(예: 6:365 의 SemiBold "개인정보처리방침")이 검수 사각지대였다 — 실제로 굵기 드리프트가
@@ -656,7 +656,7 @@ for (const id of IDS) {
   o.h = Math.round(n.height * 10) / 10;
   out.push(o);
 }
-return out;
+return { dumpedAt: new Date().toISOString(), nodes: out };   // dumpedAt 필수 — 없으면 audit.mjs 가 mtime 만 보고 '자기신고 없음' 으로 막는다
 ```
 > **왜 필요한가**: `get_metadata` XML 에는 **색·보더·반경·패딩·그림자가 아예 없다.** 2026-08-01 검수에서 이 구멍 때문에 12건(말풍선 들여쓰기, 구분선 누락, 프로필명 색, 카드 그림자, 배지 보더 …)이 "차이 없음" 을 통과한 채 눈으로만 달라 보였다.
 
@@ -674,7 +674,9 @@ node tools/figma-audit/audit.mjs figma_meta.xml figma_type.json figma_style.json
 - **덤프를 재사용하지 않는다. 세션마다 다시 뽑는다.** 2026-08-02 에 08:24 덤프로 검수해 "차이 없음" 이
   나왔는데, 그 사이 피그마 푸터(6:364)에 문의·전화번호가 들어가 있었다. **옛 피그마 vs 새 웹**을
   비교한 것이라 통과한 것이지 실제로 같아서가 아니었다. 지금은 `🕰️ 덤프 낡음` 이 이걸 막는다 —
-  **덤프 나이 45분 초과면 차단, 15분 초과면 경고** (`CC_META_MAX_AGE=<분>` 으로 조절).
+  **덤프 나이 45분 초과면 차단, 15분 초과면 경고.**
+  🔴 `CC_META_MAX_AGE` 로 **늘릴 수 없다** (2026-08-20). 45분보다 큰 값이나 숫자가 아닌 값은
+  그 자체가 조치 필요로 올라온다 — 그 변수로 관문이 흔적 없이 꺼지던 자리였다. 줄이는 것만 된다.
   **세 덤프(meta·type·style) 모두**에 적용된다 — 같은 날 meta 만 갱신하고 `figma_type.json` 을
   90분짜리로 두는 바람에, 그 사이 바뀐 파랑 칩(254:2405) 타이포가 옛 값으로 남아 병렬 세션의
   올바른 스냅샷과 충돌해서야 드러났다. `figma_style.json` 은 237분짜리였고 노드 3개가 빠져 있었다.

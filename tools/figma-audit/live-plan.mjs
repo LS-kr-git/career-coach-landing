@@ -50,13 +50,29 @@ const visible = (html) => {
 const pick = (set, n = 2) => [...set].filter((s) => s.length >= 10 && s.length <= 60)
   .sort((a, b) => b.length - a.length).slice(0, n);
 
-let files;
+let baseSha, headSha;
 try {
-  files = git('diff', '--name-only', `${base}..${head}`).split('\n').filter(Boolean);
+  // `^{commit}` 이 있어야 **객체가 로컬에 실제로 있는지**를 본다. 맨 rev-parse 는 40자 sha 를
+  // 받으면 그 객체가 없어도 그대로 되돌려 준다 — 없는 것을 정상으로 읽는 자리다.
+  baseSha = git('rev-parse', '--verify', `${base}^{commit}`).trim();
+  headSha = git('rev-parse', '--verify', `${head}^{commit}`).trim();
 } catch {
   console.error(`❌ ${base} 을 로컬에서 못 찾습니다 — git fetch --depth 30 origin main 후 다시 실행하세요.`);
   process.exit(2);
 }
+
+/* 기준과 대상이 같으면 diff 가 비고, 출력이 **진짜로 변경이 없던 주와 글자 하나 다르지 않다.**
+   셸에서 따옴표를 빼 `$BASE` 가 빈 값이 되면 인자가 한 칸 밀려 정확히 이 상태가 된다
+   (`live-plan.mjs HEAD` → base=head='HEAD'). 시계 역행·얕은 클론에서도 난다.
+   기준을 못 잡은 것은 확인 못 한 것이므로 통과로 셀 수 없다 — 인자 오류와 같은 exit 2 다. */
+if (baseSha === headSha) {
+  console.error(`❌ 기준과 대상이 같은 커밋입니다 (${baseSha.slice(0, 7)}) — 대조할 범위가 없습니다.`);
+  console.error('   인자를 따옴표로 감쌌는지 보세요: node …/live-plan.mjs "$BASE" HEAD');
+  console.error('   ("변경 없음" 과 구분되지 않아 통과로 읽히던 자리라 여기서 멈춥니다.)');
+  process.exit(2);
+}
+
+const files = git('diff', '--name-only', `${baseSha}..${headSha}`).split('\n').filter(Boolean);
 
 const pages = files.filter((f) => f.endsWith('.html') && !f.startsWith('assets/') && !f.startsWith('node_modules/'));
 
@@ -67,7 +83,7 @@ if (!pages.length) {
   console.log('   Actions 실행 상태로만 판정한다 (아래 "배포 실행 상태" 참고).\n');
 }
 
-let checkable = 0, blind = 0;
+let checkable = 0, blind = 0, locked = 0;
 for (const p of pages) {
   const a = visible(show(base, p));
   const b = visible(show(head, p));
@@ -75,6 +91,7 @@ for (const p of pages) {
   const removed = pick(new Set([...a].filter((s) => !b.has(s))));
 
   if (!ALLOW.has(p)) {
+    locked++;
     console.log(`🔒 ${p}  → robots.txt Disallow · 배포 sha 로 간접 확인 (정상)`);
     continue;
   }
@@ -91,7 +108,8 @@ for (const p of pages) {
   removed.forEach((s) => console.log(`    없어야 함: "${s}"`));
 }
 
-console.log(`\n본문 대조 가능 ${checkable}개 · 확인 불가 ${blind}개`);
+/* 🔒 건수가 요약줄에 없으면 그 페이지들이 표에서 통째로 사라진다 — 실측으로 7건이 사라진 적이 있다. */
+console.log(`\n본문 대조 가능 ${checkable}개 · 간접확인(robots) ${locked}개 · 확인 불가 ${blind}개`);
 console.log('배포 실행 상태: github.com/<owner>/<repo>/actions/workflows/pages/pages-build-deployment');
 console.log('   → 최신 run id 를 받아 /actions/runs/<id> 를 열면 conclusion·sha·build/deploy 잡별 결과가 나온다.');
 console.log('   (api.github.com 은 이 환경에서 403 이다. github.com 웹 페이지는 열린다.)\n');

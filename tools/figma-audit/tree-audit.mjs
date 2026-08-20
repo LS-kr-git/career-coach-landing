@@ -2,7 +2,7 @@
 /**
  * 피그마 트리 점검 — "섹션 밖으로 튀어나간 고아 노드" 를 잡는 유일한 검사다.
  *
- *   node tools/figma-audit/tree-audit.mjs [figma_tree_dump.json] [--update] [--json]
+ *   node tools/figma-audit/tree-audit.mjs [figma_tree_dump.json] [--update] [--json] [--strict]
  *
  * 다른 검수는 전부 방향이 반대이거나 프레임 안쪽만 본다.
  *   page-audit  : 웹 HTML → 피그마 짝이 있나       (피그마 안의 배치는 안 본다)
@@ -35,38 +35,45 @@
  * ✅ 를 찍지 않고 "확인한 것이 아니다" 를 명시한다. 진짜 방어는 훅 118줄이 한다
  * (등록부·트리 스냅샷을 건드린 푸시에는 덤프를 요구한다).
  */
-import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { maxAgeMinutes, dumpAge } from './dump-age.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
 const asJson = argv.includes('--json');
 const doUpdate = argv.includes('--update');
+/* --strict: 미실행(🚫)도 실패로 센다. 평소 푸시 훅은 이 플래그 없이 돌아야 한다 —
+   덤프는 세션마다 뽑는 물건이라 없다고 막으면 일상 작업이 통째로 선다.
+   반면 **예약 점검은 덤프를 반드시 뽑고 들어오므로** 거기서는 미실행이 곧 고장이다.
+   같은 스크립트에 도피로를 만드는 것이 아니라, 부르는 쪽이 자기 계약을 선언하는 것이다. */
+const strict = argv.includes('--strict');
+
+/* 🔴 오타 난 플래그를 조용히 무시하지 않는다. `--strikt` 로 부르면 출력이 비-strict 실행과
+   한 글자도 다르지 않아, "돌렸는데 깨끗한 것" 과 "관문이 꺼진 것" 이 구분되지 않는다.
+   유일한 호출자가 저장소 밖(예약 점검 프롬프트)이라 grep 으로도 확인이 안 된다. */
+const KNOWN = new Set(['--json', '--update', '--strict']);
+const unknown = argv.filter((a) => a.startsWith('--') && !KNOWN.has(a));
+if (unknown.length) {
+  console.error(`모르는 인자입니다: ${unknown.join(' ')}`);
+  console.error(`쓸 수 있는 것: ${[...KNOWN].join(' ')}`);
+  process.exit(2);
+}
 const dumpPath = argv.find((a) => !a.startsWith('--'));
 
 const findings = [];
 const add = (level, kind, where, detail, note) => findings.push({ level, kind, where, detail, note });
 
-/* 덤프 나이 — 파일 mtime 과 덤프가 스스로 적은 dumpedAt 중 **더 낡은 쪽**을 쓴다.
-   mtime 만 보면 git checkout·cp·touch 가 내용은 그대로 둔 채 시각만 새로 찍으므로
-   며칠 된 덤프가 "방금 뽑은 것" 으로 통과한다.
-   dumpedAt 만 보면 자기 신고값이라 손으로 고칠 수 있다.
-   그래서 둘 다 신선할 때만 신선한 것으로 본다.
-   dumpedAt 이 없는 덤프(옛 스니펫으로 뽑은 것)는 mtime 만 본다 — 종전 동작 그대로다.
-   다만 그때는 **무엇을 못 봤는지 반드시 찍는다**(selfDated=false). 조용히 옛 판정으로
-   되돌아가면 필드 하나를 지우는 것만으로 이 관문이 흔적 없이 꺼진다. */
-const dumpAgeMin = (path, d) => {
-  const ages = [(Date.now() - statSync(path).mtimeMs) / 60000];
-  const self = Date.parse(d && d.dumpedAt);
-  if (Number.isFinite(self)) ages.push((Date.now() - self) / 60000);
-  return { ageMin: Math.max(...ages), selfDated: Number.isFinite(self) };
-};
-
 const SNAP_PATH = join(HERE, 'figma-tree.json');
 const read = (p) => JSON.parse(readFileSync(p, 'utf8'));
 const snap = read(SNAP_PATH);
 const map = read(join(HERE, 'page-figma-map.json'));
+
+/* 나이 한도는 audit.mjs 와 **같은 모듈**에서 읽는다. 앞 판은 45 를 여기 따로 박아 두어
+   CC_META_MAX_AGE 가 audit 만 움직였고, 두 검수가 다른 한도로 판정했다. */
+const { minutes: MAX_AGE_MIN, source: maxAgeSource, problems: maxAgeProblems } = maxAgeMinutes();
+for (const pr of maxAgeProblems) add('BLOCK', pr.kind, 'CC_META_MAX_AGE', pr.detail, pr.note);
 
 const sections = snap.sections || {};
 const allowed = snap.pageLevelAllowed || {};
@@ -110,15 +117,14 @@ if (!dumpPath) {
   add('BLOCK', '라이브 대조', dumpPath, '덤프 파일을 찾지 못했습니다');
 } else {
   dump = read(dumpPath);
-  const { ageMin, selfDated } = dumpAgeMin(dumpPath, dump);
+  const { ageMin, selfDated } = dumpAge(dumpPath, dump);
   if (!selfDated) {
     add('SKIP', '덤프 자기신고 시각', dumpPath, 'dumpedAt 이 없거나 읽을 수 없어 파일 mtime 만 봤습니다',
         'mtime 은 checkout·cp·touch 로 새로 찍히므로 낡은 덤프가 신선해 보일 수 있습니다. README "피그마 트리 덤프" 의 스니펫으로 다시 뽑으세요.');
   }
-  if (ageMin > 45) {
-    // 45분은 audit.mjs 의 덤프 한도와 같은 값이다. 그 사이 피그마가 바뀌었을 수 있으므로
-    // 아래 대조 결과를 "지금 상태를 확인했다" 로 셀 수 없다.
-    add('SKIP', '라이브 대조', dumpPath, `덤프가 ${Math.round(ageMin)}분 전 것입니다 — 한도 45분`,
+  if (ageMin > MAX_AGE_MIN) {
+    // 그 사이 피그마가 바뀌었을 수 있으므로 아래 대조 결과를 "지금 상태를 확인했다" 로 셀 수 없다.
+    add('SKIP', '라이브 대조', dumpPath, `덤프가 ${Math.round(ageMin)}분 전 것입니다 — 한도 ${maxAgeSource}`,
         '이 실행은 현재 피그마를 확인한 것이 아닙니다. README "피그마 트리 덤프" 로 다시 뽑으세요.');
   }
 
@@ -253,11 +259,14 @@ const skips = findings.filter((f) => f.level === 'SKIP');
 const label = (l) => ({ BLOCK: '❌ 막힘', SKIP: '🚫 검수 미실행', SYNC: '↺ 스냅샷 낡음' }[l] || '⚠️ 경고');
 
 if (asJson) {
-  console.log(JSON.stringify({ findings, updated, dump: dumpPath || null }, null, 2));
+  // 모드와 한도는 --json 쪽에도 실어야 한다. 없으면 `--json` 과 `--strict --json` 의 본문이
+  // 바이트 단위로 같아져, "돌렸는데 깨끗한 것" 과 "관문이 꺼진 것" 이 구분되지 않는다.
+  console.log(JSON.stringify({ findings, updated, dump: dumpPath || null, strict, ageLimit: maxAgeSource }, null, 2));
 } else {
   const 상태프레임수 = registered.reduce((n, [, e]) => n + ((e.stateNodes || []).length), 0);
   console.log(`\n피그마 트리 점검 — 섹션 ${Object.keys(sections).length}개 · 기준 프레임 ${registered.length}개(+상태 ${상태프레임수}개)` +
-              `${dumpPath ? ` · 덤프 ${dumpPath}` : ' · 덤프 없음(라이브 미확인)'}\n`);
+              `${dumpPath ? ` · 덤프 ${dumpPath}` : ' · 덤프 없음(라이브 미확인)'} · 나이 한도 ${maxAgeSource}` +
+              ` · 모드 ${strict ? 'strict(미실행도 실패)' : '기본(미실행은 통과)'}\n`);
   if (updated) {
     console.log(updated.changed
       ? `↺ figma-tree.json 의 sections 를 덤프 기준으로 다시 썼습니다 (섹션 ${updated.count}개). 커밋에 포함하세요.\n`
@@ -283,6 +292,9 @@ if (asJson) {
     // 고아 노드가 없다고 읽는 것이 이 검수가 무력해지는 방식이다.
     console.log(`총 ${findings.length}건 (조치 필요 ${blocks.length}건${skips.length ? ` · 미실행 ${skips.length}건` : ''})\n`);
   }
+  if (skips.length && strict) {
+    console.log(`🚫 --strict 모드라 미실행 ${skips.length}건을 실패로 셉니다 (예약 점검처럼 덤프를 반드시 뽑는 호출용).\n`);
+  }
   if (skips.length && !blocks.length) {
     console.log('🚫 라이브 대조를 하지 않았습니다 — 이 실행은 "고아 노드 없음" 을 확인한 것이 아닙니다.');
     console.log('   피그마 안에서만 프레임이 섹션 밖으로 나간 날은 저장소 파일이 하나도 안 바뀌므로,');
@@ -290,4 +302,4 @@ if (asJson) {
   }
 }
 
-process.exit(blocks.length ? 1 : 0);
+process.exit(blocks.length || (strict && skips.length) ? 1 : 0);
