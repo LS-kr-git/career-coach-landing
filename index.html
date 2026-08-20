@@ -532,11 +532,10 @@ fbq('track', 'PageView');
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const { error } = await supabase.auth.signInWithOAuth({
           provider: 'kakao',
-          // ★ 2026-08-08 — `account_email` 추가. 카카오 동의항목에서 이메일이 **필수 동의로
-          //   승인**됐는데(콘솔 확인) 요청하지 않아 한 건도 안 받고 있었다. 승인된 것만 요청한다.
-          //   나머지(이름·전화번호·성별·생일·출생연도)는 아직 `권한 없음` 이라 넣으면 로그인이 깨진다.
+          // ★ 2026-08-20 — 재심사 통과(이름·전화번호·성별·생일·출생연도)를 콘솔에서 확인하고 7개로 넓혔다.
+          //   `권한 없음` 인 scope 를 넣으면 로그인이 깨지므로, 콘솔에 열린 것만 적는다.
           //   ⚠️ 이 문자열은 /signup/ 과 **같아야 한다** (두 곳이 같은 로그인이다).
-          options: { redirectTo: 'https://careercoach.my/auth/callback/', scopes: 'profile_nickname account_email' }
+          options: { redirectTo: 'https://careercoach.my/auth/callback/', scopes: 'profile_nickname account_email name phone_number gender birthday birthyear' }
         });
         if (error) throw error;
       } catch (e) {
