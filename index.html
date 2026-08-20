@@ -112,7 +112,6 @@ fbq('track', 'PageView');
 
   /* ===== 헤더 ===== */
   header{display:flex;align-items:center;gap:10px;padding:24px var(--pad-x)}
-  /* ⏳ 임시 — 카카오 동의항목 심사 통과 후 '로그인/회원가입' 으로 문구 변경 (2026-08-08 지시) */
   header .brand{display:flex;align-items:center;gap:10px}
   header .login{margin-left:auto;background:none;border:0;font-family:inherit;cursor:pointer;
     font-size:15px;line-height:22px;font-weight:600;color:var(--gray-700);
@@ -293,7 +292,7 @@ fbq('track', 'PageView');
   .floating-cta{
     position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
     /* 폭 = 화면 − 40, 카드 폭 − 40 인 410 에서 멈춘다 (연속) */
-    width:calc(100% - 40px);max-width:410px;background:var(--amber-500);color:#fff;   /* ⏳ 임시 — 심사 통과 후 카카오 옐로로 되돌린다 */
+    width:calc(100% - 40px);max-width:410px;background:var(--kakao);color:var(--kakao-text);
     border-radius:14px;padding:18px;text-align:center;text-decoration:none;
     display:flex;align-items:center;justify-content:center;gap:8px;
     box-shadow:0 12px 32px rgba(15,23,42,.25);z-index:10;
@@ -327,7 +326,7 @@ fbq('track', 'PageView');
       <div class="app-icon"><img src="assets/mark-white.svg" alt=""></div>
       <img class="wordmark" src="assets/wordmark.svg" alt="커리어코치">
     </div>
-    <button type="button" class="login" id="loginBtn">로그인</button>
+    <button type="button" class="login" id="loginBtn">로그인/회원가입</button>
   </header>
 
   <div class="container">
@@ -517,12 +516,14 @@ fbq('track', 'PageView');
     </div>
   </footer>
 
-  <!-- ⏳ 임시 — 카카오 동의항목 심사 통과 후 카카오 옐로 + 말풍선 아이콘 + '카카오로 1분만에 시작하기' 로 되돌린다 -->
-  <a class="floating-cta t-h3" href="/signup/" id="ctaBtn">회원가입</a>
+  <a class="floating-cta t-h3" href="/signup/" id="ctaBtn">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3C6.5 3 2 6.6 2 11c0 2.8 1.9 5.3 4.7 6.7-.2.7-.7 2.6-.8 3-.1.5.2.5.4.4.2-.1 2.6-1.8 3.7-2.5.6.1 1.3.2 2 .2 5.5 0 10-3.6 10-8S17.5 3 12 3z"/></svg>
+    카카오로 1분만에 시작하기
+  </a>
 
   <script type="module">
-    // ⏳ 임시 — 헤더 '로그인'. /signup/ 은 회원가입 화면이라 기존 회원용 경로가 없어서
-    //    여기서 카카오 로그인을 바로 시작한다. 심사 통과 후 문구를 '로그인/회원가입' 으로 바꾼다.
+    // 헤더 '로그인/회원가입'. /signup/ 은 회원가입 화면이라 기존 회원용 경로가 없어서
+    //    여기서 카카오 로그인을 바로 시작한다.
     const btn = document.getElementById('loginBtn');
     btn.addEventListener('click', async () => {
       btn.disabled = true;
