@@ -114,7 +114,11 @@ await login('#s02');
 const n0 = viewed.length;
 await page.click('nav a[data-id="s02"]');
 await page.waitForTimeout(300);
-ok('활성 탭 재클릭 → 재요청', viewed.length > n0 && viewed.at(-1) === 's02', viewed.slice(n0).join(','));
+// 🔴 `at(-1)` 로 재지 않는다 (2026-08-21). 셸이 마우스가 머문 칸을 미리 받게 된 뒤로는,
+//    로그인 직후 커서가 우연히 놓인 자리의 칸 하나가 이 사이에 딸려 들어올 수 있다 —
+//    실제로 물렸다(`s02,s03`). 이 항목이 무는 것은 「다시 눌렀더니 그 화면을 다시
+//    요청했다」이지 「그것이 세상의 마지막 요청이었다」가 아니다.
+ok('활성 탭 재클릭 → 재요청', viewed.slice(n0).includes('s02'), viewed.slice(n0).join(',') || '0건');
 
 // ⑨ 모르는 화면 이름이면 그 사실을 말한다
 await page.goto(origin + '/ops/?r=' + Math.random() + '#zzz');

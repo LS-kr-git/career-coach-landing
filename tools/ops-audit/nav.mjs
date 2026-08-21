@@ -48,6 +48,21 @@ const page = await browser.newPage({ viewport: { width: 1200, height: 900 } });
 
 // 「불러오는 중」 을 볼 수 있어야 하므로 한 화면만 일부러 늦게 준다.
 const 느린칸 = 's02';
+/** 서버가 실제로 받은 화면 요청. 셸이 화면을 기억하게 된 뒤로는 **안 부른 것**을
+ *  재야 하는 항목이 생겼다(⑦-2 · ⑦-3). 스텁이 세는 것이 유일하게 믿을 수 있는 값이다. */
+const 본것 = [];
+/** 같은 화면의 **내용이 바뀐 것**을 흉내 내는 표식. ⑦-2b 가 이 값을 갈아 본다. */
+let 조각판 = 'A';
+/** 셸의 미리받기 문턱(`큰기준` 1,000,000자)을 넘는 화면. 운영에 실제로 하나 있다
+ *  (2026-08-21 실측 7,126KB). **글자가 아니라 주석으로 채운다** — 글자로 채우면
+ *  ⑦ⓒ 의 「낭독기에 읽힐 글자」 같은 항목이 이 덩어리를 보게 된다. */
+const 큰칸 = 's13';
+const 큰덩어리 = '<!--' + 'x'.repeat(1000001) + '-->';
+/** 그 화면이 **줄어든 뒤**를 흉내 내는 스위치. 사용자 지시가 「세션 4가 줄이기 전까지」라
+ *  줄어들면 미리받기로 돌아와야 한다 — ⑦-4b 가 그것을 문다. */
+let 큰칸이크다 = true;
+/** 서버가 화면을 못 주는 상태. ⑦-2c 가 이것을 켜고 잰다. */
+let 고장 = false;
 await page.route('**/functions/v1/**', async (route) => {
   const u = new URL(route.request().url());
   if (u.pathname.endsWith('/auth/login')) {
@@ -63,9 +78,19 @@ await page.route('**/functions/v1/**', async (route) => {
   // 글자 종류로 좁히지 않는다 — 이유는 `route.mjs` 의 같은 자리 주석에 있다.
   const m = u.pathname.match(/\/view\/([^/]+)$/);
   if (m) {
+    본것.push(m[1]);
     if (m[1] === 느린칸) await new Promise((r) => setTimeout(r, 700));
+    if (고장) return route.fulfill({ status: 500, json: { error: 'boom' } });
     return route.fulfill({
-      body: `<h1 id="t">${m[1]}</h1>`,
+      // 🔴 조각에는 `<script>` 가 들어 있다. `innerHTML` 은 그것을 실행하지 않으므로
+      //    셸의 `runScripts()` 가 다시 만들어 돌린다. **기억해 둔 것으로 다시 그릴 때도**
+      //    돌아야 화면이 살아난다 — 그 자리를 세려고 스텁이 횟수를 남긴다(⑦-2).
+      // 🔴 `조각판` 은 **같은 화면의 내용이 바뀌는 것**을 흉내 낸다. 운영 조각에는
+      //    「N분 전」 같은 상대시각이 들어 있어 다시 받으면 거의 매번 다르다 — 그때
+      //    갈아 끼우는 배선을 무는 것이 ⑦-2b 다.
+      body: `<h1 id="t">${m[1]}</h1><p id="v">${조각판}</p>`
+          + `<script>window.__돈횟수=(window.__돈횟수||0)+1;</script>`
+          + (m[1] === 큰칸 && 큰칸이크다 ? 큰덩어리 : ''),
       contentType: 'text/html; charset=utf-8',
       // 조각마다 **지금 판의 지문**을 싣는다. 셸은 자기가 넣어 둔 것과 다르면 다시 받는다.
       // 🔴 expose-headers 를 같이 준다 — 교차 오리진에서 자바스크립트가 볼 수 있는 응답
@@ -95,6 +120,18 @@ const 새것 = () =>
   );
 
 const { ok, 마무리 } = 검사기();
+
+/** 🔴 **재기 전에 마우스를 탭바 밖으로 뺀다.** 커서가 이미 그 칸 위에 있으면 `page.hover`
+ *  가 좌표를 안 옮기고, 그러면 `mouseover` 가 아예 안 난다 — 미리받기를 무는 항목들이
+ *  「안 받았다」를 보고 조용히 초록이 된다(실측으로 물렸다. 판을 새로 열어도 커서 좌표는
+ *  그대로다). 본문 쪽 빈 자리로 옮긴다. */
+const 마우스치우기 = () => page.mouse.move(900, 500);
+
+/** 「큰 화면」 목록이 원하는 상태가 될 때까지 기다린다. 셸은 조각을 **다 받은 뒤에** 그 목록을
+ *  고치므로, 화면이 떴다고 목록까지 끝난 것은 아니다 — 시계로 기다리면 그 틈에서 흔들린다. */
+const 목록대기 = (올라야) => page.waitForFunction(
+  ([x, 올라야]) => ((localStorage.getItem('ops_big') || '').includes(x)) === 올라야,
+  [큰칸, 올라야], { timeout: 5000 }).catch(() => {});
 
 /** route.mjs 의 것과 같은 이유로 이렇게 쓴다 — 그 파일 주석이 정본이다. */
 async function login(hash) {
@@ -333,7 +370,15 @@ await login('#' + 긴칸);
 //    빠른 화면에서 표시가 깜빡 하고 지나가는 것을 없애려는 것인데, 그 규칙은 **지금까지
 //    아무도 안 보고 있었다.** 그래서 한 항목을 둘로 가른다 — 이르면 아직 없어야 하고,
 //    늦으면 반드시 있어야 한다. 셸의 `LD_DELAY`(200)를 바꾸면 아래 두 시점도 같이 바꾼다.
+//
+// 🔴 그리고 **이 항목이 재는 것은 「처음 여는 화면」이다** (2026-08-21). 셸이 한 번 연
+//    화면을 기억하게 되면서, 앞 검사가 지나가며 캐시를 데워 놓을 수 있게 됐다 — ⑤-2 의
+//    `Tab` 이 실제로 그렇다(첫 칸에서 한 칸 넘어가면 그게 느린칸이고, 포커스만으로
+//    미리받기가 돈다). 그러면 여기 ⓐ 는 「캐시가 맞아서 본문이 이미 있다」를 보고
+//    빨개진다 — 셸은 멀쩡한데. **판을 새로 열어 전제를 되돌린다.** 캐시가 맞았을 때의
+//    옳은 모습은 아래 ⑦-2 가 따로 문다.
 {
+  await login('#' + 긴칸);
   await page.evaluate((x) => { location.hash = '#' + x; }, 느린칸);
   // ⓐ 지연 안쪽. 120 은 200 에서 넉넉히 떨어져 있으면서 첫 렌더보다는 뒤다.
   await page.waitForTimeout(120);
@@ -352,6 +397,197 @@ await login('#' + 긴칸);
   await page.waitForFunction(() => document.querySelector('#main h1'));
   ok('다 불러오면 그 자리가 화면으로 갈린다', await page.textContent('#t') === 느린칸,
      await page.textContent('#t'));
+}
+
+// ── ⑦-2 한 번 연 화면은 다시 열 때 기다림이 없다 ────────────────────────────
+// ⑦ 의 나머지 반쪽이다. 그 항목이 지키는 것은 「빈 화면을 두지 않는다」이고, 캐시가 맞은
+// 화면에서 그것을 지키는 방법은 **로딩 표시가 아니라 본문을 바로 그리는 것**이다.
+// 🔴 그래서 여기서는 로딩 표시가 **없어야** 통과다 — ⑦ⓑ 와 반대 방향이다. 200ms 지연이
+//    깜빡임을 없애려고 있는 것이니, 기다림이 0 인 자리에 표시를 걸면 깜빡임만 남는다.
+// 대상이 느린칸인 것이 요점이다. 서버는 여전히 700ms 를 끌므로, 120ms 에 본문이 있다는
+// 것은 네트워크를 안 기다렸다는 뜻이다 — 러너가 빨라서 통과할 여지가 없다.
+{
+  await page.evaluate((x) => { location.hash = '#' + x; }, 긴칸);
+  await page.waitForFunction((x) => document.getElementById('t')?.textContent === x, 긴칸);
+  await page.evaluate(() => { window.__돈횟수 = 0; });
+  await page.evaluate((x) => { location.hash = '#' + x; }, 느린칸);
+  await page.waitForTimeout(120);
+  const 이른본문 = await page.evaluate(() => document.getElementById('t')?.textContent || '');
+  const 이른표시 = await page.locator('#main .ld').count();
+  const 돈횟수 = await page.evaluate(() => window.__돈횟수);
+  ok('한 번 연 화면은 120ms 안에 이미 그려져 있다', 이른본문 === 느린칸, 이른본문 || '(빈 화면)');
+  ok('캐시가 맞은 화면에는 로딩 표시를 안 띄운다', 이른표시 === 0, '.ld ' + 이른표시 + '개');
+  // 🔴 **여기가 이 작업의 함정이다.** 글자만 되살리고 스크립트를 안 돌리면 화면은 그대로
+  //    보이는데 단추·거르개·쪽 나눔이 전부 죽은 채로 선다 — 아무 오류도 안 난다.
+  ok('기억해 둔 것으로 그려도 조각의 스크립트가 다시 돈다', 돈횟수 === 1, 돈횟수 + '회');
+  // 🔴 **120ms 한 번으로는 절반이다** (변이로 확인). 예약을 그대로 걸어 두면 그린 화면
+  //    **위에** 200ms 뒤 표시가 덮이는데, 120ms 시점에는 아직 안 덮여서 위 두 항목이
+  //    초록이다. 서버는 700ms 를 끌므로 350ms 는 「예약이 살아 있으면 반드시 덮인 뒤」다.
+  await page.waitForTimeout(230);   // 누적 350ms — ⑦ⓑ 가 「표시가 뜬다」를 재는 그 시점
+  const 늦은표시 = await page.locator('#main .ld').count();
+  const 늦은본문 = await page.evaluate(() => document.getElementById('t')?.textContent || '');
+  ok('지연 시점을 지나도 그린 화면을 표시로 덮지 않는다',
+     늦은표시 === 0 && 늦은본문 === 느린칸, `.ld ${늦은표시}개 / ${늦은본문 || '(빈 화면)'}`);
+
+  // 🔴 **같은 탭을 다시 누르는 것은 캐시를 무시하는 강제 갱신이다.** 셸에서 사람이 화면을
+  //    새로 받아 볼 수 있는 손잡이가 그것 하나뿐이라, 여기서 기억해 둔 것을 그려 버리면
+  //    그 손잡이가 조용히 사라진다 — 화면은 멀쩡해 보이고 요청도 나가므로 안 보인다.
+  //    기다린다는 것은 곧 **표시가 뜬다**는 것이라, 350ms 에 표시가 있으면 안 쓴 것이다.
+  // 🔴 **시계로 기다리지 않는다.** 뒤에서 돌던 갱신(700ms)이 끝난 뒤에 눌러야 시점이
+  //    안 흔들리는데, `waitForTimeout(500)` 으로 재면 여유가 150ms 뿐이라 느린 러너에서만
+  //    빨간불이 난다(⑧-a 주석이 적어 둔 그 자리다). 그 응답 자체를 기다린다.
+  await page.waitForResponse((r) => r.url().includes('/view/' + 느린칸), { timeout: 3000 })
+    .catch(() => {});   // 이미 지나갔으면 기다릴 것이 없다
+  await page.waitForTimeout(100);   // 셸이 그 응답을 처리할 틈
+  // 🔴 **같은 것이 왔으면 다시 안 그린다.** 다시 그리면 조각 스크립트가 한 번 더 돌아
+  //    사람이 방금 펼친 자리와 스크롤이 처음으로 되돌아간다. 위 「120ms 에 1회」로는 이걸
+  //    못 문다 — 그 시점엔 갱신이 아직 안 왔다(검사관 ②).
+  const 갱신뒤 = await page.evaluate(() => window.__돈횟수);
+  ok('같은 것이 오면 다시 안 그린다', 갱신뒤 === 1, 갱신뒤 + '회');
+  await page.click(`#nav a[data-id="${느린칸}"]`);
+  await page.waitForTimeout(350);
+  const 강제표시 = await page.locator('#main .ld').count();
+  ok('같은 탭을 다시 누르면 기억해 둔 것을 안 쓴다', 강제표시 === 1, '.ld ' + 강제표시 + '개');
+  await page.waitForFunction((x) => document.getElementById('t')?.textContent === x, 느린칸);
+}
+
+// ── ⑦-2b 뒤에서 받은 것이 다르면 그때 갈아 끼운다 ───────────────────────────
+// 🔴 **이것이 「기억해 둔다」의 뒤쪽 절반이다.** 앞쪽(바로 그린다)만 물면, 갈아 끼우는
+//    배선을 통째로 지워도 검사가 전부 초록이다 — 스텁이 늘 같은 본문을 주기 때문이다
+//    (검사관 ②, 변이로 확인). 그 상태의 운영 동작은 어드민이 낡은 숫자를 계속 읽는 것이다.
+// 느린칸으로 재는 이유는 앞 항목과 같다 — 700ms 를 끄니 120ms 시점에는 반드시 옛 것이다.
+{
+  조각판 = 'B';
+  await page.evaluate((x) => { location.hash = '#' + x; }, 긴칸);
+  await page.waitForFunction((x) => document.getElementById('t')?.textContent === x, 긴칸);
+  await page.evaluate((x) => { location.hash = '#' + x; }, 느린칸);
+  await page.waitForTimeout(120);
+  const 옛것 = await page.evaluate(() => document.getElementById('v')?.textContent || '');
+  const 갈렸다 = await page.waitForFunction(
+    () => document.getElementById('v')?.textContent === 'B', null, { timeout: 4000 })
+    .then(() => true).catch(() => false);
+  ok('기억해 둔 것을 먼저 그린다 (그 시점엔 아직 옛 것이다)', 옛것 === 'A', 옛것 || '(빈 화면)');
+  ok('뒤에서 받은 것이 다르면 갈아 끼운다', 갈렸다,
+     갈렸다 ? 'B' : await page.evaluate(() => document.getElementById('v')?.textContent || '(없음)'));
+}
+
+// ── ⑦-2c 뒤에서 도는 갱신이 실패해도 그려 둔 화면을 안 지운다 ────────────────
+// 🔴 못 받았다는 것은 **갱신이 없었다**는 뜻이지 보고 있던 것이 틀렸다는 뜻이 아니다.
+//    여기서 오류 화면으로 갈면 함수 500 한 번, 끊긴 와이파이 한 번에 읽고 있던 본문이
+//    사라진다 — 캐시가 없던 시절에는 닿을 수 없던 갈래다(검사관 ⑨).
+//    손으로 갱신하는 길(같은 탭 다시 누르기)은 기억해 둔 것을 안 쓰므로 그때는 여전히
+//    오류 화면이 뜬다 — 물어볼 자리가 사라지는 것이 아니다.
+{
+  await page.evaluate((x) => { location.hash = '#' + x; }, 긴칸);
+  await page.waitForFunction((x) => document.getElementById('t')?.textContent === x, 긴칸);
+  고장 = true;
+  await page.evaluate((x) => { location.hash = '#' + x; }, 느린칸);
+  await page.waitForResponse((r) => r.url().includes('/view/' + 느린칸), { timeout: 3000 })
+    .catch(() => {});
+  await page.waitForTimeout(200);
+  const 남은본문 = await page.evaluate(() => document.getElementById('t')?.textContent || '');
+  고장 = false;
+  ok('갱신이 실패해도 그려 둔 화면을 안 지운다', 남은본문 === 느린칸,
+     남은본문 || (await page.textContent('#main h1')));
+}
+
+// ── ⑦-3 마우스를 올리면 미리 받아 둔다 ─────────────────────────────────────
+// 🔴 **이 배선은 다른 어떤 검사도 안 본다.** 미리받기는 눈에 보이는 것을 아무것도 안
+//    바꾸므로, 통째로 사라져도 화면만 보고는 모른다. 서버가 받은 요청을 센다.
+{
+  await login('#' + 끝칸);          // 판을 새로 연다 — 캐시가 비어야 「미리 받았다」가 뜻이 있다
+  await 마우스치우기();
+  const 올리기전 = 본것.length;
+  await page.hover(`#nav a[data-id="${긴칸}"]`);
+  await page.waitForTimeout(300);
+  ok('마우스를 올리면 그 화면을 미리 받는다', 본것.slice(올리기전).includes(긴칸),
+     본것.slice(올리기전).join(',') || '(요청 없음)');
+  // 🔴 **스쳐 간 칸은 안 던진다.** 훑는 것만으로 칸 수만큼(운영은 15) 요청이 나가면,
+  //    미리받기가 아끼는 기다림보다 함수에 지우는 일(로그인 재확인 + SQL)이 많아진다.
+  // 🔴 훑는 칸에 **느린칸·긴칸·끝칸·큰칸을 넣지 마라.** 스쳐 가다 하나가 실제로 떠나면
+  //    그 칸이 캐시에 들어가고, 그것을 쓰는 아래·뒤 항목들이 전제를 잃는다(실측으로 물렸다).
+  //    자리를 **먼저 다 재 두고** 마우스만 움직인다 — `page.hover` 는 한 번에 왕복이
+  //    여러 번이라 머무름(150ms)을 넘길 수 있고, 그러면 느린 러너에서만 빨간불이 난다.
+  const 자리 = [];
+  for (const id of IDS.slice(2, 8)) 자리.push(await page.locator(`#nav a[data-id="${id}"]`).boundingBox());
+  const 훑기전 = 본것.length;
+  for (const b of 자리) await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+  await page.waitForTimeout(400);
+  ok('탭바를 훑고 지나가면 멈춘 칸만 던진다', 본것.length - 훑기전 <= 1,
+     본것.slice(훑기전).join(',') || '0건');
+  // 🔴 스쳐 가다 걸린 예약은 **이미 받아 둔 칸에 멈춰 서도** 살아남으면 안 된다.
+  //    거르기를 예약 지우기보다 먼저 두면 그 자리에서 새는데, 화면에는 아무 표도 안 난다.
+  const 안받은칸 = IDS[9];   // 위 훑기(2~7번)와 겹치지 않는 칸
+  await 마우스치우기();
+  const 스침전 = 본것.length;
+  for (const sel of [`#nav a[data-id="${안받은칸}"]`, '#nav a.on']) {
+    const b = await page.locator(sel).boundingBox();
+    await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+  }
+  await page.waitForTimeout(400);
+  ok('스쳐 간 칸의 예약은 이미 받아 둔 칸에 멈춰 서면 사라진다',
+     !본것.slice(스침전).includes(안받은칸), 본것.slice(스침전).join(',') || '0건');
+  // 🔴 **여기서 「누르면 다시 안 받는다」를 재면 안 된다** — 그건 이 셸의 규칙이 아니다.
+  //    기억해 둔 화면도 열 때마다 뒤에서 다시 받아 갱신하므로 요청은 정상적으로 는다.
+  //    미리받기가 지켜야 하는 것은 **같은 화면을 두 번 던지지 않는 것** 둘이다.
+  const 두번전 = 본것.length;
+  await page.hover('#nav a.on');
+  await page.hover(`#nav a[data-id="${긴칸}"]`);
+  await page.waitForTimeout(200);
+  ok('이미 받아 둔 칸에 다시 올려도 안 던진다', 본것.length === 두번전,
+     본것.slice(두번전).join(',') || '0건');
+  // 아직 오는 중인데 눌러도 새로 던지지 않고 그것을 그대로 쓴다. 느린칸은 서버가 700ms 를
+  // 끌므로, 미리받기가 **떠난 뒤**(머무름 150ms) 누르면 반드시 이 상태를 지난다.
+  const 눌러전 = 본것.length;
+  await page.hover(`#nav a[data-id="${느린칸}"]`);
+  await page.waitForTimeout(250);
+  await page.click(`#nav a[data-id="${느린칸}"]`);
+  await page.waitForFunction((x) => document.getElementById('t')?.textContent === x, 느린칸);
+  ok('미리받기가 오는 중에 누르면 그것을 쓴다',
+     본것.slice(눌러전).filter((x) => x === 느린칸).length === 1,
+     본것.slice(눌러전).join(',') || '(요청 없음)');
+}
+
+// ── ⑦-4 큰 화면은 미리 안 받는다 ───────────────────────────────────────────
+// 🔴 **셸은 화면 이름을 모른다** — 이 저장소가 공개라 id 를 적을 수 없어서, 셸은 한 번
+//    받아 본 **크기**로 가른다. 그 규칙이 사라지면 7MB 짜리 한 장이 마우스가 지나갈 때마다
+//    딸려 나오는데, 화면에는 아무 표도 안 난다.
+// 판을 새로 열어서 잰다 — 메모리 캐시는 비고 「큰 화면」 목록만 남는 상태가 운영에서
+// 이 규칙이 실제로 일하는 자리다.
+{
+  await login('#' + 큰칸);                    // 누르는 길로 한 번 겪는다 = 목록에 오른다
+  // 🔴 **목록에 오른 것을 보고 나서** 판을 새로 연다. 시계로 기다리면 아직 안 오른 상태로
+  //    재게 되는데, 아래는 「안 받았다」를 무는 부정 단정이라 그대로 초록이 된다.
+  await 목록대기(true);
+  // 🔴 **판을 새로 열기 전에 커서를 뺀다.** 커서가 탭바 위에 있으면 새로 뜬 문서가 그
+  //    자리에 mouseover 를 한 번 내고, 그 화면이 재기도 전에 미리받기로 들어온다 —
+  //    그러면 아래 두 항목이 「0건」을 보고 뒤집힌다(실측으로 물렸다).
+  await 마우스치우기();
+  await login('#' + 끝칸);
+  const 큰것전 = 본것.length;
+  await page.hover(`#nav a[data-id="${큰칸}"]`);
+  await page.waitForTimeout(400);
+  ok('한 번 겪은 큰 화면은 미리 안 받는다', !본것.slice(큰것전).includes(큰칸),
+     본것.slice(큰것전).join(',') || '0건');
+}
+
+// ── ⑦-4b 줄어든 화면은 미리받기로 돌아온다 ─────────────────────────────────
+// 🔴 사용자 지시가 「빼라(**세션 4가 줄이기 전까지**)」다. 넣기만 하고 빼는 길이 없으면
+//    그 화면이 작아진 뒤에도 이 브라우저에서는 영영 미리받기 밖이고, 그 사실은 아무 데도
+//    안 남는다 — 셸은 이름을 모르니 사람이 손으로 풀 방법도 없다.
+{
+  큰칸이크다 = false;
+  await page.evaluate((x) => { location.hash = '#' + x; }, 큰칸);   // 줄어든 판을 한 번 받는다
+  await page.waitForFunction((x) => document.getElementById('t')?.textContent === x, 큰칸);
+  await 목록대기(false);   // 줄어들었으니 목록에서 빠져야 한다
+  await 마우스치우기();     // 위 ⑦-4 와 같은 이유 — 판을 새로 열기 전에 커서를 뺀다
+  await login('#' + 끝칸);
+  const 줄고전 = 본것.length;
+  await page.hover(`#nav a[data-id="${큰칸}"]`);
+  await page.waitForTimeout(400);
+  ok('줄어든 화면은 다시 미리 받는다', 본것.slice(줄고전).includes(큰칸),
+     본것.slice(줄고전).join(',') || '0건');
+  큰칸이크다 = true;   // 뒤의 ⑪ 이 이 화면이 큰 것을 전제로 한다
 }
 
 // ── ⑧ iframe 화면은 안쪽이 다 그려질 때까지 덮는다 ──────────────────────────
@@ -446,16 +682,31 @@ const 운영스타일 = '<style>main{padding:0;margin:0;max-width:none}'
 {
   ok('처음에는 새 토큰이 없다', await 새것() === '', await 새것());
   const 부트전 = 부트횟수;
+  const 요청전 = 본것.length;
   // 같은 판으로 한 번 더 옮겨도 /bootstrap 을 다시 부르지 않는다 — 안 그러면 화면을
   // 옮길 때마다 토큰을 통째로 다시 받는다.
   await page.evaluate((x) => { location.hash = '#' + x; }, 긴칸);
   await page.waitForFunction((x) => document.getElementById('t')?.textContent === x, 긴칸);
-  ok('판이 그대로면 토큰을 다시 안 받는다', 부트횟수 === 부트전, `부트 ${부트횟수 - 부트전}회`);
+  // 🔴 **본문이 떴다고 다 끝난 것이 아니다** — 기억해 둔 것을 먼저 그리므로 조각 요청은
+  //    아직 안 갔을 수도 있다. 이 항목은 「안 불렀다」를 무는 부정 단정이라, 안 기다리면
+  //    「조각마다 bootstrap 을 부른다」는 회귀가 들어와도 초록이다 (검사관 ②).
+  await page.waitForResponse((r) => r.url().includes('/view/' + 긴칸), { timeout: 3000 })
+    .catch(() => {});
+  await page.waitForTimeout(150);   // 그 응답을 셸이 처리할 틈
+  ok('판이 그대로면 토큰을 다시 안 받는다',
+     부트횟수 === 부트전 && 본것.length > 요청전,
+     `부트 ${부트횟수 - 부트전}회 / 조각 ${본것.length - 요청전}건`);
 
   // 이제 배포가 지나간다. 조각 응답의 지문만 바뀐다.
   지문 = 'v2';
   await page.evaluate((x) => { location.hash = '#' + x; }, 끝칸);
   await page.waitForFunction((x) => document.getElementById('t')?.textContent === x, 끝칸);
+  // 🔴 **본문이 떴다고 다 끝난 것이 아니다** (2026-08-21). 셸이 화면을 기억하게 된 뒤로는
+  //    기억해 둔 것을 먼저 그리고 요청은 뒤에서 돈다. 새 지문은 그 뒤에 오므로, 본문만 보고
+  //    바로 재면 아직 안 온 것을 「안 받았다」로 읽는다. 무는 것은 그대로다 — 기다림에
+  //    상한을 둘 뿐이고, 끝내 안 오면 아래 두 항목이 그대로 빨개진다.
+  await page.waitForFunction(() => getComputedStyle(document.documentElement)
+    .getPropertyValue('--adm-새것').trim() === '#123456', null, { timeout: 4000 }).catch(() => {});
   ok('판이 바뀌면 토큰을 다시 받는다', 부트횟수 > 부트전, `부트 ${부트횟수 - 부트전}회`);
   ok('새 판에만 있는 토큰이 실제로 들어왔다', await 새것() === '#123456', await 새것());
   // 🔴 **새로고침이 아니다.** 새로고침이면 보던 자리를 잃는다.
@@ -472,6 +723,21 @@ const 운영스타일 = '<style>main{padding:0;margin:0;max-width:none}'
   ok('새 판을 못 받으면 화면에 말한다', await page.locator('#ds-missing').count() === 1,
      (await page.locator('#ds-missing').textContent().catch(() => '')).slice(0, 40));
   ok('못 받아도 옛 토큰을 지우지 않는다', await 새것() === '#123456', await 새것());}
+
+// ── ⑪ 로그아웃하면 「큰 화면」 목록도 같이 지운다 ───────────────────────────
+// 🔴 세션보다 오래 남기면 **공용 브라우저 디스크에 화면 이름이 남는다.** 셸이 화면 id 를
+//    저장소에 안 적기로 한 것과 같은 이유다. 세션 키는 이미 지우던 자리라 거기 붙였다.
+// 🔴 **맨 뒤에 둔다** — 이 항목은 로그아웃한 채로 끝난다.
+{
+  await login('#' + 큰칸);                    // 목록에 한 줄 올린다
+  const 나가기전 = await page.evaluate(() => localStorage.getItem('ops_big'));
+  await page.click('#out');
+  await page.waitForSelector('#login', { state: 'visible', timeout: 5000 }).catch(() => {});
+  const 나간뒤 = await page.evaluate(() => localStorage.getItem('ops_big'));
+  ok('나가기 전에는 큰 화면 목록이 남아 있다 (아래 항목의 전제)',
+     (나가기전 || '').includes(큰칸), 나가기전 || '(없음)');
+  ok('로그아웃하면 큰 화면 목록도 같이 지운다', 나간뒤 === null, 나간뒤 || '(지워짐)');
+}
 
 await browser.close();
 server.close();
