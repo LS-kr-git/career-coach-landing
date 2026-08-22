@@ -63,9 +63,18 @@ const 큰덩어리 = '<!--' + 'x'.repeat(1000001) + '-->';
 let 큰칸이크다 = true;
 /** 서버가 화면을 못 주는 상태. ⑦-2c 가 이것을 켜고 잰다. */
 let 고장 = false;
+/** 비밀번호가 틀린 상태. ⑫ 가 이것을 켜고 「덮개에 갇히지 않는가」를 잰다. */
+let 로그인거부 = false;
 await page.route('**/functions/v1/**', async (route) => {
   const u = new URL(route.request().url());
   if (u.pathname.endsWith('/auth/login')) {
+    // 🔴 **일부러 끈다.** 운영에서 이 요청 하나가 1초 가까이 걸리는데(DB 네 번 + 비밀번호
+    //    확인 한 번이 줄줄이 돈다), 스텁이 즉시 답하면 「누르는 즉시 덮는다」와 「로그인이
+    //    끝난 뒤에 덮는다」가 구별이 안 된다 — 실제로 변이를 넣어 보니 둘 다 초록이었다.
+    //    ⑫ 가 이 창(400ms) 안쪽인 120ms 에서 덮개를 찾는다.
+    await new Promise((r) => setTimeout(r, 400));
+    // ⑫ 가 이 스위치를 켜고 「비밀번호가 틀렸을 때 덮개를 걷는가」를 잰다.
+    if (로그인거부) return route.fulfill({ status: 401, json: { error: 'unauthorized' } });
     return route.fulfill({ json: { access_token: 'T', user: { email: 'a@b.c' } } });
   }
   if (u.pathname.endsWith('/bootstrap')) {
@@ -723,6 +732,96 @@ const 운영스타일 = '<style>main{padding:0;margin:0;max-width:none}'
   ok('새 판을 못 받으면 화면에 말한다', await page.locator('#ds-missing').count() === 1,
      (await page.locator('#ds-missing').textContent().catch(() => '')).slice(0, 40));
   ok('못 받아도 옛 토큰을 지우지 않는다', await 새것() === '#123456', await 새것());}
+
+// ── ⑫ 로그인한 뒤 어드민이 다 뜰 때까지 화면 전체를 덮는다 ──────────────────
+// 2026-08-22 사용자 확정: **A안**. 전에는 로그인 단추를 누르면 단추만 흐려진 채 2초쯤
+// 아무 표시가 없었다.
+//
+// 🔴 **왜 「덮는다」인가 — 그리고 왜 이 검사가 그것을 물어야 하나.** 기다림이 두 토막인데
+//    앞 토막에는 왼쪽 탭바를 그릴 수가 없다(탭 목록이 /bootstrap 응답에 들어 있다).
+//    그래서 중간에 탭바를 띄우면 고리가 화면 한가운데에서 본문 칸 한가운데로 **옆으로
+//    미끄러진다.** 사용자가 고른 것은 그 미끄러짐이 없는 쪽이다 — 그 결정은 코드로는
+//    「덮개를 중간에 걷지 않는다」로만 남아서, 물지 않으면 다음 사람이 아무 죄책감 없이
+//    되돌린다.
+// 🔴 **갇히지 않는 것이 이 항목의 절반이다.** 덮개는 화면 전체를 불투명하게 가리므로,
+//    끄는 갈래를 하나라도 빼먹으면 새로고침 말고는 빠져나갈 길이 없다. 아래에서 두 갈래를
+//    잰다 — 첫 화면이 그려질 때, 그리고 비밀번호가 틀렸을 때.
+{
+  // 🔴 **앞 항목이 남긴 세션을 먼저 버린다.** 안 버리면 판을 새로 열자마자 셸이 저장된
+  //    토큰으로 이어 가서 로그인 칸이 아예 안 뜬다 — 여기서 재려는 것은 「사람이 단추를
+  //    누른 뒤」라 그 길로는 못 잰다. (`login()` 헬퍼가 try/catch 로 넘어가는 그 자리다.)
+  await page.goto(origin + '/ops/?r=' + Math.random());
+  await page.evaluate(() => localStorage.clear());
+  await page.goto(origin + '/ops/?r=' + Math.random() + '#' + 느린칸);
+  await page.fill('#email', 'a@b.c');
+  await page.fill('#pw', 'x');
+  await page.click('#go');
+  // 🔴 **로그인 응답이 오기 전에 잰다.** 스텁이 그 응답을 400ms 끌어 두었으므로, 120ms 에
+  //    덮개가 있다는 것은 「누르는 즉시 덮었다」는 뜻이다. `waitForSelector` 로 재면
+  //    로그인이 끝난 뒤에 덮는 판도 통과한다 — 실제로 그 변이가 초록이었다.
+  //    지연(`LD_DELAY`)을 두는 자리와 다르다. 이건 사람이 방금 누른 단추에 대한 답이다.
+  await page.waitForTimeout(120);
+  const 잰것 = () => page.evaluate(() => {
+    const b = document.querySelector('.ld-boot');
+    if (!b) return null;
+    const r = b.getBoundingClientRect();
+    const art = b.querySelector('.ld-art');
+    const ar = art && art.getBoundingClientRect();
+    return {
+      // 🔴 **폭·높이를 숫자로 맞추지 마라.** 이 파일은 `scrollbar-gutter:stable` 로
+      //    스크롤바 자리를 늘 비워 두는데, position:fixed 는 그 자리를 뺀 칸에 눕는 반면
+      //    `innerWidth` 도 `clientWidth` 도 1200 을 그대로 준다(실측 덮개 1185 vs 1200).
+      //    그래서 산술로 재면 덮개가 멀쩡한데 검사만 빨개진다.
+      //    묻고 싶은 것은 애초에 크기가 아니라 **「사람 눈에 덮개 아닌 것이 보이나」**다 —
+      //    네 귀퉁이와 한가운데를 찍어 전부 덮개면 보이는 것이 덮개뿐이라는 뜻이다.
+      덮었나: [[2, 2], [r.right - 2, 2], [2, r.bottom - 2],
+              [r.right - 2, r.bottom - 2], [r.width / 2, r.height / 2]]
+        .every(([x, y]) => {
+          const el = document.elementFromPoint(x, y);
+          return !!el && !!el.closest && !!el.closest('.ld-boot');
+        }),
+      배경: getComputedStyle(b).backgroundColor,
+      // 🔴 **토큰이 오기 전이라 --adm-brand 가 아직 없다.** 폴백이 빠지면 stroke 선언이
+      //    통째로 버려져 SVG 기본값 none 이 되고, 고리가 **아예 안 보인다.** 색이 옅어지는
+      //    고장이 아니라 사라지는 고장이라 눈으로만 보면 「표시를 안 넣었다」로 읽힌다.
+      획: art ? getComputedStyle(art.querySelector('circle')).stroke : null,
+      중심: ar ? Math.round(ar.left + ar.width / 2) : null,
+      // 화면 한가운데에서 맨 위에 있는 것이 덮개인가 — 그래야 그 아래가 안 비친다.
+      맨위덮개: !!(document.elementFromPoint(innerWidth / 2, innerHeight / 2) || {}).closest
+        && !!document.elementFromPoint(innerWidth / 2, innerHeight / 2).closest('.ld-boot'),
+    };
+  });
+  const 처음 = await 잰것();
+  ok('로그인을 누르면 곧바로 화면 전체가 덮인다', !!처음 && 처음.덮었나, JSON.stringify(처음));
+  ok('덮개가 불투명하다 — 앱이 조립되는 것이 안 비친다',
+     !!처음 && 처음.맨위덮개 && !/rgba\([^)]*,\s*0?\.\d+\)/.test(처음.배경), 처음 && 처음.배경);
+  ok('토큰이 오기 전인데도 고리 색이 살아 있다 (폴백)',
+     !!처음 && 처음.획 !== 'none' && 처음.획 !== '', 처음 && 처음.획);
+  // 🔴 **이 두 줄이 A안 그 자체다.** 중간에 탭바를 띄우는 판으로 되돌리면 여기서 갈린다.
+  await page.waitForTimeout(300);
+  const 나중 = await 잰것();
+  ok('덮개가 걷힐 때까지 고리가 한 자리다 (안 미끄러진다)',
+     !!나중 && 나중.중심 === 처음.중심, `${처음 && 처음.중심} → ${나중 && 나중.중심}`);
+  ok('그때까지 탭바를 따로 보여주지 않는다', !!나중 && 나중.맨위덮개, JSON.stringify(나중));
+  await page.waitForSelector('#main h1#t', { timeout: 5000 });
+  ok('첫 화면이 그려지면 덮개가 걷힌다', await page.locator('.ld-boot').count() === 0,
+     '.ld-boot ' + (await page.locator('.ld-boot').count()) + '개');
+
+  // ── 갇히지 않는가 ──
+  로그인거부 = true;
+  await page.click('#out');
+  await page.waitForSelector('#login', { state: 'visible', timeout: 5000 });
+  await page.fill('#email', 'a@b.c');
+  await page.fill('#pw', 'x');
+  await page.click('#go');
+  await page.waitForFunction(() => (document.getElementById('err').textContent || '').length > 0,
+    null, { timeout: 5000 }).catch(() => {});
+  const 남은덮개 = await page.locator('.ld-boot').count();
+  const 오류문 = (await page.textContent('#err')).trim();
+  ok('비밀번호가 틀리면 덮개를 걷는다 — 갇히지 않는다', 남은덮개 === 0, '.ld-boot ' + 남은덮개 + '개');
+  ok('그때 왜 안 됐는지가 로그인 칸에 뜬다', 오류문.length > 0, 오류문 || '(빈 문장)');
+  로그인거부 = false;
+}
 
 // ── ⑪ 로그아웃하면 「큰 화면」 목록도 같이 지운다 ───────────────────────────
 // 🔴 세션보다 오래 남기면 **공용 브라우저 디스크에 화면 이름이 남는다.** 셸이 화면 id 를

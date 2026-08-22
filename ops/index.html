@@ -132,7 +132,12 @@ h1{font-size:var(--adm-t-20);margin:0 0 var(--adm-sp-6)}
 .ld,.ld-ov{display:flex;align-items:center;justify-content:center}
 .ld{margin:calc(var(--adm-sp-26) * -1) -30px;min-height:100vh}
 .ld-art{width:40px;height:40px;animation:ld-spin 1.6s linear infinite}
-.ld-art circle{fill:none;stroke:var(--adm-brand);stroke-width:9;stroke-linecap:round;
+/* 🔴 **여기만 폴백을 둔다** (2026-08-22). 이 파일의 규칙은 「로그인 화면이 쓰는 선언에만
+   var(--x, 기본값) 의 둘째 인자를 둔다」인데, 아래 .ld-boot 때문에 이 고리도 그 무리에
+   들어왔다 — 로그인 뒤 도는 고리는 /bootstrap 이 오기 **전**에 그려진다.
+   폴백이 없으면 stroke 선언이 통째로 버려지고 SVG 기본값 none 이 되어 **고리가 아예 안
+   보인다.** 색이 옅어지는 게 아니라 사라진다. 값은 tokens.ts 의 --cc-amber-500 이다. */
+.ld-art circle{fill:none;stroke:var(--adm-brand,#f59e0b);stroke-width:9;stroke-linecap:round;
                animation:ld-dash 1.4s ease-in-out infinite}
 @keyframes ld-spin{to{transform:rotate(360deg)}}
 @keyframes ld-dash{0%{stroke-dasharray:1 200;stroke-dashoffset:0}
@@ -156,6 +161,21 @@ h1{font-size:var(--adm-t-20);margin:0 0 var(--adm-sp-6)}
    첫 번째가 끝날 때 표시를 끄면 두 번째가 맨몸이라 **흰 화면이 지나간다.**
    배경까지 덮으므로 그 흰 화면이 아예 안 보인다 (2026-08-16 사용자 확정). */
 .ld-ov{position:absolute;inset:0;z-index:3;background:var(--adm-bg)}
+/* 🔴 로그인한 뒤 어드민이 **다 뜰 때까지** 화면 전체를 덮는다 (2026-08-22 사용자 확정: A안).
+   전에는 로그인 버튼을 누르면 단추만 흐려진 채 2초쯤 아무 일도 안 일어났다.
+
+   왜 「덮는다」인가 — 기다림이 두 토막이고 **앞 토막에는 왼쪽 탭바를 그릴 수가 없다.**
+   탭 목록 자체가 /bootstrap 응답에 들어 있어서다. 그래서 탭바를 중간에 띄우면 고리가
+   화면 한가운데에서 본문 칸 한가운데로 **옆으로 미끄러진다**(탭바 폭의 절반쯤).
+   A안은 그 미끄러짐을 없애는 대신, 탭바와 첫 화면이 **한 번에** 나타나게 한다.
+
+   불투명한 것이 요점이다 — 이 아래에서 #app 이 조립되는 것을 사람이 보면 안 된다.
+   그래서 display 를 건드리지 않는다. 조립은 지금까지 하던 대로 하고 덮개만 얹는다.
+   position:fixed 라 이 안의 고리는 **뷰포트 한가운데**다. 그 자리는 덮개가 걷힐 때까지
+   한 번도 안 바뀐다.
+   z-index 는 세 단 밖이다 — 이건 화면 안의 겹침이 아니라 화면 전체를 가리는 막이다. */
+.ld-boot{position:fixed;inset:0;z-index:10;background:var(--adm-bg,#f1f5f9);
+         display:flex;align-items:center;justify-content:center}
 .chip{display:inline-block;padding:var(--adm-sp-2) 9px;border-radius:var(--adm-r-99);
       font-size:var(--adm-t-12);font-weight:600;background:var(--adm-ok-bg);color:var(--adm-ok-fg)}
 .chip.warn{background:var(--adm-warn-bg);color:var(--adm-warn-fg)}
@@ -340,6 +360,7 @@ async function 로그아웃() {
 }
 
 function signOut() {
+  부팅(false);            // 부팅 도중 만료로 떨어지는 길이 있다. 덮인 채로 남기지 않는다
   token = ''; refreshToken = ''; localStorage.removeItem(KEY);
   // 비워야 로그아웃 뒤 해시가 움직여도 401 을 다시 부르러 가지 않는다.
   NAV_IDS = []; NAV_TITLE = new Map();
@@ -372,6 +393,10 @@ function runScripts(root) {
 $('login').addEventListener('submit', async (e) => {
   e.preventDefault();
   $('go').disabled = true; $('err').textContent = '';
+  // 🔴 **누른 즉시** 덮는다. 로그인 확인만 1초 가까이 걸리는데, 그동안 단추가 흐려지는 것
+  //    말고는 아무 표시가 없었다. 아래 갈래 중 하나라도 「못 들어갔다」면 다시 걷어
+  //    로그인 칸을 돌려준다 — 안 걷으면 틀린 비밀번호가 영영 도는 고리가 된다.
+  부팅(true);
   try {
     const r = await fetch(BASE + '/auth/login', {
       method: 'POST', headers: { 'content-type': 'application/json' },
@@ -379,20 +404,21 @@ $('login').addEventListener('submit', async (e) => {
     });
     // 401 만 "틀렸다" 이다. 나머지는 고장이라 그렇게 말해야 한다 —
     // 뭉뚱그리면 화이트리스트가 비었거나 감사 쓰기가 죽은 것을 오타로 착각한다.
-    if (r.status === 401) { $('err').textContent = '이메일 또는 비밀번호가 맞지 않습니다.'; return; }
+    if (r.status === 401) { 부팅(false); $('err').textContent = '이메일 또는 비밀번호가 맞지 않습니다.'; return; }
     // 429 는 실패가 쌓여 잠긴 것이다(`private.admin_login_fail`). 몇 초 남았는지는
     // 함수만 아니까 그쪽 문장을 그대로 보여준다 — "(429)" 로 뭉치면 본인이 맞는 비번을
     // 계속 넣으면서 잠금을 스스로 늘린다.
     if (r.status === 429) {
+      부팅(false);
       const d = await r.json().catch(() => null);
       $('err').textContent = d?.error || '로그인 시도가 많아 잠겼습니다. 잠시 뒤에 다시 시도하세요.';
       return;
     }
-    if (!r.ok) { $('err').textContent = '로그인 처리가 실패했습니다 (' + r.status + ').'; return; }
+    if (!r.ok) { 부팅(false); $('err').textContent = '로그인 처리가 실패했습니다 (' + r.status + ').'; return; }
     keep(await r.json());
     $('pw').value = '';
     await start();
-  } catch (x) { $('err').textContent = String(x.message || x); }
+  } catch (x) { 부팅(false); $('err').textContent = String(x.message || x); }
   finally { $('go').disabled = false; }
 });
 
@@ -453,6 +479,10 @@ async function 토큰_맞추기(res) {
 }
 
 async function start() {
+  // 브라우저를 껐다 켜고 들어오는 길에도 여기를 지난다. 그때는 제출 처리기를 안 거치므로
+  // 여기서 켠다 — 안 켜면 그 길만 옛날처럼 로그인 칸이 잠깐 떴다가 앱으로 바뀐다.
+  // 이미 켜져 있으면 아무 일도 안 한다.
+  부팅(true);
   const boot = await (await call('/bootstrap')).json();
   // 🔴 디자인 토큰. 화면을 그리기 **전에** 넣는다 — 뒤에 넣으면 첫 화면이 변수 없이
   //    한 번 그려졌다가 색이 바뀐다. 정본은 career-coach 의 `lib/tokens.ts` 다.
@@ -538,6 +568,29 @@ const LD_ART = '<svg class="ld-art" viewBox="0 0 50 50" aria-hidden="true">'
              + '<circle cx="25" cy="25" r="20"/></svg>'
              + '<span class="sr" role="status">불러오는 중</span>';
 const LD = '<div class="ld">' + LD_ART + '</div>';
+
+/** 로그인 뒤 어드민이 다 뜰 때까지 화면 전체를 덮는 고리 (2026-08-22 사용자 확정: A안).
+ *  모양·색은 위 `.ld-boot` 가 정본이고, 여기서는 켜고 끄기만 한다.
+ *
+ *  🔴 **끄는 곳이 여러 군데인 것이 이 함수의 전부다.** 어디 하나를 빼먹으면 그 갈래에서
+ *     화면이 영영 덮인 채로 남는다 — 새로고침 말고는 빠져나갈 길이 없는 상태다. 지금 끄는
+ *     곳은 넷이다: 첫 화면을 그릴 때(`그리기`) · 그 화면을 못 받았을 때(`open` 의 catch) ·
+ *     로그인이 실패했을 때(제출 처리기) · 저장된 세션으로 잇다 실패했을 때(파일 맨 아래).
+ *  🔴 `LD_DELAY` 같은 지연을 두지 않는다. 이 표시는 「빠르면 안 보여도 되는 것」이 아니라
+ *     **사람이 방금 누른 단추에 대한 답**이라 즉시여야 한다. */
+let 부팅덮개 = null;
+
+function 부팅(켤까) {
+  if (!켤까) {
+    if (부팅덮개) { 부팅덮개.remove(); 부팅덮개 = null; }
+    return;
+  }
+  if (부팅덮개) return;
+  부팅덮개 = document.createElement('div');
+  부팅덮개.className = 'ld-boot';
+  부팅덮개.innerHTML = LD_ART;
+  document.body.appendChild(부팅덮개);
+}
 
 /** 🔴 **이 안에 오는 화면에서는 표시를 아예 안 띄운다** (2026-08-16 사용자 확정).
  *  빠른 화면에서는 표시가 깜빡 하고 지나가는데, 그 깜빡임이 없는 것보다 어수선하다.
@@ -635,6 +688,11 @@ function 미리보기(e) {
  *  `<script>` 가 들어 있고 `innerHTML` 은 그것을 실행하지 않는다. 기억해 둔 것으로
  *  다시 그릴 때도 그 스크립트가 다시 돌아야 화면이 살아난다. */
 function 그리기(mine, html, missing) {
+  // 🔴 **innerHTML 보다 먼저 걷는다.** 여기부터 끝까지가 한 덩어리로 도는 동안 브라우저는
+  //    한 번도 안 그리므로, 먼저 걷어도 빈 앱이 비치는 순간은 없다. 반대로 맨 뒤에 두면
+  //    본문이 DOM 에 생긴 시점과 덮개가 사라지는 시점 사이가 벌어져, 그 틈에 탭바를 누르는
+  //    검사·사람의 클릭을 덮개가 가로챈다.
+  부팅(false);
   $('main').innerHTML = html;
   if (missing) {
     const p = document.createElement('p');
@@ -698,6 +756,8 @@ async function open(id, missing, 강제) {
     //       아래 오류 화면이 그대로 뜬다 — 물어볼 수 있는 자리는 남아 있다.
     if (있던) return;
     // 빈 화면을 두면 "아직 아무것도 없는 화면" 과 구분되지 않는다.
+    // 🔴 덮개도 여기서 걷는다. 안 걷으면 이 오류 문장이 덮개 뒤에 가려 영영 안 보인다.
+    부팅(false);
     $('main').innerHTML = '<h1>화면을 불러오지 못했습니다</h1><p class="sub"></p>';
     $('main').querySelector('.sub').textContent = String(x.message || x);
   }
@@ -713,6 +773,7 @@ if (token || refreshToken) {
     if (v === 'ok') return start();
     throw new Error(v === 'expired' ? '401' : '지금 서버에 닿지 못했습니다. 잠시 뒤 새로고침하세요.');
   })).catch((x) => {
+    부팅(false);
     const 만료 = String(x.message) === '401';
     if (만료) signOut(); else { $('app').style.display = 'none'; $('login').style.display = ''; }
     if (!만료) $('err').textContent = String(x.message || x);
