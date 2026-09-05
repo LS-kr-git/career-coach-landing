@@ -32,8 +32,10 @@ const KEY = 'cc_onboarding';
 const MAX_JOBS = 7;
 const MAX_REGIONS = 3;
 
-/** 상태 모양 — jobs: taxonomy code(중분류) · years: 정수 · regions: 지역 코드 */
-const EMPTY = { jobs: [], years: null, yearsMax: null, regions: [], pending: false };
+/** 상태 모양 — jobs: taxonomy code(중분류) · years: 정수 · regions: 지역 코드 ·
+ *  topic: 완료 화면에서 **직접 바꾼** 인사이트 주제. 안 바꿨으면 null 이고,
+ *  그때 주제는 고른 직군에서 푼다(대응표는 tools/roles/tracks.json). */
+const EMPTY = { jobs: [], years: null, yearsMax: null, regions: [], topic: null, pending: false };
 
 const strings = (v) => (Array.isArray(v) ? v.filter((s) => typeof s === 'string' && s) : []);
 const intOrNull = (v) => (Number.isInteger(v) ? v : null);
@@ -52,6 +54,7 @@ export function readState() {
       // 기기를 바꾸면 사라지고 발송 필터는 아래끝 하나로만 돌았다.
       yearsMax: intOrNull(s.yearsMax),
       regions: strings(s.regions),
+      topic: typeof s.topic === 'string' && s.topic ? s.topic : null,
       pending: s.pending === true,
     };
   } catch {
@@ -125,12 +128,17 @@ async function commit(state, supabase, session, retry) {
   // 서버 제약이 "한쪽만" 을 거부하므로 null 을 섞어 보내면 저장이 통째로 실패한다.
   const lo = Math.min(60, Math.max(0, state.years));
   const hi = Math.min(60, Math.max(lo, state.yearsMax ?? lo));
-  const { error } = await supabase.rpc('save_onboarding', {
+  const args = {
     p_jobs: state.jobs,                                          // string[] taxonomy code(중분류)
     p_years_min: lo,                                             // number 0..60
     p_years_max: hi,                                             // number lo..60
     p_regions: state.regions,                                    // string[] 지역 코드
-  });
+  };
+  // 주제를 **직접 바꾼 사람만** 실어 보낸다. 안 실으면 서버가 기본값(null)을 쓰고,
+  // 그러면 발송 시점에 직군에서 푼다 — 화면이 보여준 것과 같은 규칙이다.
+  // 인자를 늘 실으면 RPC 가 5인자 판으로 올라가기 전까지 온보딩 저장이 전원 실패한다.
+  if (state.topic) args.p_topic = state.topic;
+  const { error } = await supabase.rpc('save_onboarding', args);
   if (error) {
     writeState({ pending: true });
     // 이름은 analytics.event_name 허용 목록(visit·signup_view·signup_start·login·
