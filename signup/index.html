@@ -256,12 +256,14 @@
     // ★ 2026-08-20 — 재심사 통과(이름·전화번호·성별·생일·출생연도)를 콘솔에서 확인하고 7개로 넓혔다.
     //   권한 없는 scope 를 요청하면 카카오가 오류를 내며 로그인 자체가 실패하므로,
     //   콘솔에서 `권한 없음` 이 아닌 것만 적는다.
+    // ★ 2026-09-05 — 여기에 `profile_image` 를 더해 8개가 됐다. 콘솔에서 **선택 동의**로
+    //   승인돼 있고, 거부해도 로그인은 정상 완료된다(선택 동의의 정의).
     //   ⚠️ 랜딩 index.html 의 로그인 버튼과 **같은 문자열**이어야 한다.
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'kakao',
       options: {
         redirectTo: 'https://careercoach.my/auth/callback/',
-        scopes: 'profile_nickname account_email name phone_number gender birthday birthyear'
+        scopes: 'profile_nickname profile_image account_email name phone_number gender birthday birthyear'
       }
     });
     if (error) {

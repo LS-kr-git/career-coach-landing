@@ -535,8 +535,10 @@ fbq('track', 'PageView');
           provider: 'kakao',
           // ★ 2026-08-20 — 재심사 통과(이름·전화번호·성별·생일·출생연도)를 콘솔에서 확인하고 7개로 넓혔다.
           //   `권한 없음` 인 scope 를 넣으면 로그인이 깨지므로, 콘솔에 열린 것만 적는다.
+          // ★ 2026-09-05 — 여기에 `profile_image` 를 더해 8개가 됐다. 콘솔에서 **선택 동의**로
+          //   승인돼 있고, 거부해도 로그인은 정상 완료된다(선택 동의의 정의).
           //   ⚠️ 이 문자열은 /signup/ 과 **같아야 한다** (두 곳이 같은 로그인이다).
-          options: { redirectTo: 'https://careercoach.my/auth/callback/', scopes: 'profile_nickname account_email name phone_number gender birthday birthyear' }
+          options: { redirectTo: 'https://careercoach.my/auth/callback/', scopes: 'profile_nickname profile_image account_email name phone_number gender birthday birthyear' }
         });
         if (error) throw error;
       } catch (e) {
