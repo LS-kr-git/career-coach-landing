@@ -46,9 +46,6 @@
   .t-body-s{font-size:14px;line-height:20px;font-weight:400}
   .t-caption{font-size:13px;line-height:18px;font-weight:400}
   .t-micro{font-size:11px;line-height:14px;font-weight:500}
-  .t-label{font-size:14px;line-height:20px;font-weight:700}
-  .t-number-xl{font-size:32px;line-height:36px;font-weight:800;letter-spacing:-.02em}
-  .caret{font-size:20px;line-height:1;color:var(--gray-400);flex:none}
   [hidden]{display:none!important}
 
   .title{padding:20px var(--pad-x) 9px}
@@ -119,12 +116,14 @@
   </div>
 </main>
 <script>
-  /* 금액은 결제 화면에서만 말한다. 지금은 배선 전이라 목업 값을 넣는다 —
-     실제로는 구독 정보를 받아 그리는 자리다. */
+  /* 🔴 아래 값은 **목업**이다. 구독 정보를 받아 그리는 자리이고, 계정마다 다르다.
+     가격 자체가 아직 미결이다 — career-coach `docs/기획/가격-표기-원칙.md` 의
+     「아직 안 정한 것」 절. 배선할 때 이 상수를 지우고 응답 값을 넣는다.
+     ⚠️ page-audit 의 「가격 하드코딩」 검사는 <script> 를 떼고 보므로 이 자리를 못 본다. */
   (function () {
-    var plan = { period: '월', priceKrw: 3900 };
+    var MOCK_PLAN = { period: '월', priceKrw: 3900 };
     document.getElementById('amount').textContent =
-      plan.period + ' ' + plan.priceKrw.toLocaleString('ko-KR') + '원';
+      MOCK_PLAN.period + ' ' + MOCK_PLAN.priceKrw.toLocaleString('ko-KR') + '원';
   })();
 </script>
 </div>

@@ -42,19 +42,16 @@
   main{flex:1;display:flex;flex-direction:column;width:100%;max-width:var(--card-max);margin:0 auto}
   /* 피그마 텍스트 스타일 대응 (careercoach 컬렉션 text/*) */
   .t-display{font-size:28px;line-height:36px;font-weight:800;letter-spacing:-.02em;color:var(--gray-900)}
-  .t-h3{font-size:17px;line-height:24px;font-weight:600}
   .t-h4{font-size:15px;line-height:22px;font-weight:600}
-  .t-body-l{font-size:16px;line-height:23px;font-weight:400}
   .t-body-s{font-size:14px;line-height:20px;font-weight:400}
-  .t-caption{font-size:13px;line-height:18px;font-weight:400}
   .t-micro{font-size:11px;line-height:14px;font-weight:500}
-  .t-label{font-size:14px;line-height:20px;font-weight:700}
-  .t-number-xl{font-size:32px;line-height:36px;font-weight:800;letter-spacing:-.02em}
-  .caret{font-size:20px;line-height:1;color:var(--gray-400);flex:none}
   /* 하단 플로팅 CTA — 320×54, 좌우 20 (피그마와 같은 값) */
-  .cta-dock{position:sticky;bottom:0;padding:12px 20px 20px;background:#fff;
+  .cta-dock{position:sticky;bottom:0;padding:12px 0 20px;background:#fff;
     display:flex;justify-content:center}
-  .cta{width:100%;max-width:320px;height:var(--cta-h);border:0;border-radius:var(--cta-radius);
+  /* 폭은 저장소 정본을 따른다 — CLAUDE.md 「CTA 규칙」: 플로팅은 calc(100% - 40px) · max 410.
+     피그마 프레임이 320 인 것은 360 기준이라 그런 것이고, 웹 폭(카드 450)과 다른 것이 의도된 상태다
+     (career-coach docs/기획/피그마-웹-동기화.md 「폭에 관한 확정 사항」). */
+  .cta{width:calc(100% - 40px);max-width:410px;height:var(--cta-h);border:0;border-radius:var(--cta-radius);
     background:var(--amber-500);color:#fff;font:inherit;font-size:var(--cta-fs);font-weight:var(--cta-fw);
     line-height:20px;cursor:pointer;box-shadow:0 4px 12px rgba(217,120,5,.22);
     display:flex;align-items:center;justify-content:center;gap:0}
@@ -86,7 +83,7 @@
   <div class="title"><h1 class="t-display">어떤 직무의 공고를<br>받아볼까요?</h1></div>
   <div class="desc t-body-s">여러 직무를 함께 고를 수 있어요</div>
   <div class="groups">
-    <div class="group">
+    <div class="group" data-group="design">
       <button class="acc" type="button" aria-expanded="true"><span class="nm"><span class="t-h4">디자인</span><span class="t-micro cnt">주 100건</span></span><span class="ac" aria-hidden="true">▲</span></button>
       <div class="chips">
         <button class="chip" type="button" aria-pressed="false">전체</button>
@@ -107,19 +104,19 @@
         <button class="chip" type="button" aria-pressed="false">기타</button>
       </div>
     </div>
-    <div class="group">
+    <div class="group" data-group="marketing">
       <button class="acc" type="button" aria-expanded="false"><span class="nm"><span class="t-h4">마케팅·광고·홍보</span><span class="t-micro cnt">주 279건</span></span><span class="ac" aria-hidden="true">▼</span></button>
     </div>
-    <div class="group">
+    <div class="group" data-group="it">
       <button class="acc" type="button" aria-expanded="false"><span class="nm"><span class="t-h4">IT·개발</span><span class="t-micro cnt">주 239건</span></span><span class="ac" aria-hidden="true">▼</span></button>
     </div>
-    <div class="group">
+    <div class="group" data-group="ai">
       <button class="acc" type="button" aria-expanded="false"><span class="nm"><span class="t-h4">AI·데이터</span><span class="t-micro cnt">주 105건</span></span><span class="ac" aria-hidden="true">▼</span></button>
     </div>
-    <div class="group">
+    <div class="group" data-group="planning">
       <button class="acc" type="button" aria-expanded="false"><span class="nm"><span class="t-h4">기획·전략</span><span class="t-micro cnt">주 177건</span></span><span class="ac" aria-hidden="true">▼</span></button>
     </div>
-    <div class="group">
+    <div class="group" data-group="sales">
       <button class="acc" type="button" aria-expanded="false"><span class="nm"><span class="t-h4">영업·고객</span><span class="t-micro cnt">주 99건</span></span><span class="ac" aria-hidden="true">▼</span></button>
     </div>
   </div>
@@ -134,11 +131,11 @@
      그때 ignoreWebText 로 덮으면 검사만 꺼진다. 그래서 목록을 데이터로 두고 펼칠 때 그린다 —
      디자인 그룹만 마크업에 있고 그쪽은 그대로 대조된다. (원본: 디자인 캔버스의 JOB_GROUPS) */
   var JOB_CHIPS = {
-    '마케팅·광고·홍보': ['전체','마케팅기획·전략','퍼포먼스마케팅','콘텐츠마케팅','SNS마케팅','브랜드마케팅','CRM마케팅','글로벌마케팅','광고기획·AE','홍보·PR','전시·행사마케팅','기타'],
-    'IT·개발': ['전체','프론트엔드','백엔드','풀스택','안드로이드','iOS','DevOps','QA','기타'],
-    'AI·데이터': ['전체','데이터분석','데이터엔지니어','머신러닝','AI리서치','기타'],
-    '기획·전략': ['전체','서비스기획','사업기획','전략·컨설팅','PM·PO','기타'],
-    '영업·고객': ['전체','B2B영업','영업관리','CS·CX','기타']
+    marketing: ['전체','마케팅기획·전략','퍼포먼스마케팅','콘텐츠마케팅','SNS마케팅','브랜드마케팅','CRM마케팅','글로벌마케팅','광고기획·AE','홍보·PR','전시·행사마케팅','기타'],
+    it: ['전체','프론트엔드','백엔드','풀스택','안드로이드','iOS','DevOps','QA','기타'],
+    ai: ['전체','데이터분석','데이터엔지니어','머신러닝','AI리서치','기타'],
+    planning: ['전체','서비스기획','사업기획','전략·컨설팅','PM·PO','기타'],
+    sales: ['전체','B2B영업','영업관리','CS·CX','기타']
   };
   (function () {
     var lab = document.getElementById('lab');
@@ -150,17 +147,20 @@
       lab.textContent = n ? '저장 · ' + n + '개 선택됨' : '직무를 1개 이상 골라주세요';
     }
     function build(acc) {
-      var name = acc.querySelector('.t-h4').textContent;
+      /* 키는 글자가 아니라 data-group 이다 — 문구를 다듬으면 조용히 빈 목록이 되던 자리. */
+      var group = acc.closest('.group');
+      var chips = JOB_CHIPS[group.dataset.group];
+      if (!chips) throw new Error('칩 목록이 없는 그룹: ' + group.dataset.group);
       var list = document.createElement('div');
       list.className = 'chips';
-      (JOB_CHIPS[name] || []).forEach(function (label) {
+      chips.forEach(function (label) {
         var b = document.createElement('button');
         b.type = 'button'; b.className = 'chip';
         b.setAttribute('aria-pressed', 'false');
         b.textContent = label;
         list.appendChild(b);
       });
-      acc.parentNode.appendChild(list);
+      group.appendChild(list);
       return list;
     }
     document.addEventListener('click', function (e) {

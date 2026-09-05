@@ -42,19 +42,16 @@
   main{flex:1;display:flex;flex-direction:column;width:100%;max-width:var(--card-max);margin:0 auto}
   /* 피그마 텍스트 스타일 대응 (careercoach 컬렉션 text/*) */
   .t-display{font-size:28px;line-height:36px;font-weight:800;letter-spacing:-.02em;color:var(--gray-900)}
-  .t-h3{font-size:17px;line-height:24px;font-weight:600}
-  .t-h4{font-size:15px;line-height:22px;font-weight:600}
-  .t-body-l{font-size:16px;line-height:23px;font-weight:400}
   .t-body-s{font-size:14px;line-height:20px;font-weight:400}
   .t-caption{font-size:13px;line-height:18px;font-weight:400}
   .t-micro{font-size:11px;line-height:14px;font-weight:500}
-  .t-label{font-size:14px;line-height:20px;font-weight:700}
-  .t-number-xl{font-size:32px;line-height:36px;font-weight:800;letter-spacing:-.02em}
-  .caret{font-size:20px;line-height:1;color:var(--gray-400);flex:none}
   /* 하단 플로팅 CTA — 320×54, 좌우 20 (피그마와 같은 값) */
-  .cta-dock{position:sticky;bottom:0;padding:12px 20px 20px;background:#fff;
+  .cta-dock{position:sticky;bottom:0;padding:12px 0 20px;background:#fff;
     display:flex;justify-content:center}
-  .cta{width:100%;max-width:320px;height:var(--cta-h);border:0;border-radius:var(--cta-radius);
+  /* 폭은 저장소 정본을 따른다 — CLAUDE.md 「CTA 규칙」: 플로팅은 calc(100% - 40px) · max 410.
+     피그마 프레임이 320 인 것은 360 기준이라 그런 것이고, 웹 폭(카드 450)과 다른 것이 의도된 상태다
+     (career-coach docs/기획/피그마-웹-동기화.md 「폭에 관한 확정 사항」). */
+  .cta{width:calc(100% - 40px);max-width:410px;height:var(--cta-h);border:0;border-radius:var(--cta-radius);
     background:var(--amber-500);color:#fff;font:inherit;font-size:var(--cta-fs);font-weight:var(--cta-fw);
     line-height:20px;cursor:pointer;box-shadow:0 4px 12px rgba(217,120,5,.22);
     display:flex;align-items:center;justify-content:center;gap:0}
