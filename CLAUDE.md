@@ -352,6 +352,10 @@ git clone https://github.com/LS-kr-git/career-coach.git   # 비공개 — PAT �
 - `textAudit: "pending"` — 프레임은 있는데 문구 동기화를 아직 못 건 상태. **`pendingSync` 에 사유 필수**이고
   푸시할 때마다 그 사유가 화면에 찍힌다. **도피로가 아니라 "조용해지지 않게 하는 장치"** 다.
 
+🔴 **① 앞에 ⓪ 가 있다 — 시안은 캔버스에서 돌리고 컨펌된 것만 피그마로 옮긴다** (2026-09-05 사용자 확정).
+정본은 `career-coach` 저장소 `CLAUDE.md` 의 「구독자 화면은 시안을 캔버스에서 돌리고 확정본만
+피그마로 옮긴다」 절이다. **여기에 그 내용을 옮겨 적지 마라.** 아래 ①~⑤ 는 컨펌 뒤에 밟는다.
+
 **새 페이지 만드는 순서**: ① 피그마에 화면 프레임 제작(아래 "피그마 화면 프레임 맨 위에는 상태바"·"헤더와
 뒤로가기" 규칙을 따른다) → ② `page-figma-map.json` 등록 → ③ 문구 스냅샷 덤프해서
 `figma-docs-text.json` 에 추가 → ④ `node tools/figma-audit/page-audit.mjs` 와 `docs-audit.mjs` 통과 확인
