@@ -24,6 +24,12 @@ const ROOT = resolve(HERE, '..', '..');
 const TAX = JSON.parse(readFileSync(join(HERE, 'taxonomy.json'), 'utf8'));
 const VOL = JSON.parse(readFileSync(join(HERE, 'volume.json'), 'utf8'));
 const PAGE = join(ROOT, 'onboarding', '1', 'index.html');
+/** 🔴 같은 목록을 두 화면이 쓴다 (2026-09-05).
+ *  마이페이지 「채용공고 받을 직군」은 온보딩 1단계에서 고른 것을 **나중에 고치는** 화면이다.
+ *  목록이 갈리면 온보딩에서 고른 직군을 설정 화면에서 못 찾는다 — 고른 값이 그대로 조회
+ *  파라미터가 되므로 조용히 어긋난다. 그래서 한 생성기가 둘을 같이 만들고 --check 가 둘을 본다.
+ *  마크업이 다른 것은 화면 디자인이 다르기 때문이고, **데이터·순서·문구는 같은 자리에서 나온다.** */
+const PAGE_MYPAGE = join(ROOT, 'mypage', 'jobs', 'index.html');
 
 /** 노출 기준 (2026-08-04 사용자 확정 → 같은 날 10 → 5 로 완화)
  *  대분류: 주당 신규 5건 미만이면 뺀다.
@@ -95,6 +101,27 @@ const build = () =>
     .join('') +
   '</div>';
 
+/** 마이페이지 쪽 마크업. 시작 상태는 온보딩과 같다 — 전부 접힘·아무것도 안 고름(피그마 908:589). */
+const buildMypage = () =>
+  '<div class="groups">' +
+  visible
+    .map((g) => {
+      const chips = g.children
+        .map((c) => `<button class="chip" type="button" aria-pressed="false" data-d2="${esc(c.code)}">${esc(c.label)}</button>`)
+        .join('');
+      return (
+        `<div class="group" data-d1="${esc(g.code)}">` +
+        `<button class="acc" type="button" aria-expanded="false">` +
+        `<span class="nm"><span class="t-h4">${esc(g.label)}</span>` +
+        `<span class="t-micro cnt">주 ${Math.round(perWeek(g.code))}건</span></span>` +
+        `<span class="ac" aria-hidden="true">▼</span></button>` +
+        `<div class="chips" hidden>${chips}</div>` +
+        `</div>`
+      );
+    })
+    .join('') +
+  '</div>';
+
 const html = readFileSync(PAGE, 'utf8');
 const start = html.indexOf('<div class="scroll">');
 const end = html.indexOf('\n</div>', start); // .scroll 다음 줄의 .board 닫힘
@@ -104,16 +131,30 @@ if (start < 0 || end < 0) {
 }
 const next = html.slice(0, start) + build() + html.slice(end);
 
+const html2 = readFileSync(PAGE_MYPAGE, 'utf8');
+const start2 = html2.indexOf('<div class="groups">');
+// 끝 표식은 **부모의 닫힘 태그**다 (온보딩 쪽이 .board 의 닫힘을 쓰는 것과 같다).
+// 블록 자신의 </div> 를 표식으로 삼으면 생성물이 그 태그를 또 남긴다.
+const end2 = html2.indexOf('\n</main>', start2);
+if (start2 < 0 || end2 < 0) {
+  console.error('❌ mypage/jobs/index.html 에서 .groups 블록을 찾지 못했습니다.');
+  process.exit(2);
+}
+const next2 = html2.slice(0, start2) + buildMypage() + html2.slice(end2);
+
 if (process.argv.includes('--check')) {
-  if (next === html) { console.log('✅ 온보딩 1단계 직군 목록이 taxonomy.json + volume.json 과 일치합니다.'); process.exit(0); }
-  console.error('❌ 온보딩 1단계 직군 목록이 기준과 다릅니다 — node tools/roles/build.mjs 를 돌리세요.');
+  const ok1 = next === html, ok2 = next2 === html2;
+  if (ok1 && ok2) { console.log('✅ 직군 목록이 taxonomy.json + volume.json 과 일치합니다 (온보딩 1단계 · 마이페이지).'); process.exit(0); }
+  if (!ok1) console.error('❌ 온보딩 1단계 직군 목록이 기준과 다릅니다 — node tools/roles/build.mjs 를 돌리세요.');
+  if (!ok2) console.error('❌ 마이페이지 직군 목록이 기준과 다릅니다 — node tools/roles/build.mjs 를 돌리세요.');
   process.exit(1);
 }
 
 writeFileSync(PAGE, next);
+writeFileSync(PAGE_MYPAGE, next2);
 const shown = visible.reduce((a, g) => a + g.children.length, 0);
 const all = TAX.groups.reduce((a, g) => a + g.children.length, 0);
-console.log(`✅ 온보딩 1단계 갱신 — 대분류 ${visible.length}/${TAX.groups.length} · 중분류 ${shown}/${all}`);
+console.log(`✅ 온보딩 1단계 · 마이페이지 직군 갱신 — 대분류 ${visible.length}/${TAX.groups.length} · 중분류 ${shown}/${all}`);
 // 잘라낸 건 반드시 알린다. 조용히 줄이면 "다 넣었다" 로 읽힌다.
 console.log(`   숨긴 대분류(주 ${MIN_D1_PER_WEEK}건 미만) ${hiddenGroups.length}개: ` +
   hiddenGroups.map((g) => `${g.label} 주${Math.round(perWeek(g.code))}`).join(' · '));

@@ -97,7 +97,7 @@
       "node": "908:589",
       "name": "02 · 채용공고 받을 직군",
       "textAudit": "docs-audit",
-      "비고": "CTA 는 선택 수를 JS 로 그린다 — 스냅샷의 jsRenderedText 참조."
+      "비고": "직군 목록은 온보딩 1단계와 **같은 생성물**이다 — tools/roles/build.mjs 가 taxonomy.json + volume.json 에서 두 화면을 함께 만들고 --check 가 둘을 본다. 손으로 고치면 훅 1.5겹이 막는다. 중분류 칩은 그 검사가 대신 물므로 ignoreWebText 로 뺐다(온보딩과 같은 처리). CTA 는 선택 수를 JS 로 그린다. 상한 7은 selectionCap 으로 선언했다."
     },
     "mypage/billing/index.html": {
       "node": "908:606",
