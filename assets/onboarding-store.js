@@ -34,8 +34,12 @@ const MAX_REGIONS = 3;
 
 /** 상태 모양 — jobs: taxonomy code(중분류) · years: 정수 · regions: 지역 코드 ·
  *  topic: 완료 화면에서 **직접 바꾼** 인사이트 주제. 안 바꿨으면 null 이고,
- *  그때 주제는 고른 직군에서 푼다(대응표는 tools/roles/tracks.json). */
-const EMPTY = { jobs: [], years: null, yearsMax: null, regions: [], topic: null, pending: false };
+ *  그때 주제는 고른 직군에서 푼다(대응표는 tools/roles/tracks.json).
+ *  topicClear: 「직군에 맞춰 자동」을 골라 **저장된 주제를 지우려는** 상태.
+ *    ⚠️ topic:null 과 다르다 — null 은 「한 번도 안 골랐다」이고, 서버는 그때 기존 값을
+ *    유지한다(재온보딩이 주제를 지우면 안 되므로). 「지운다」를 말하려면 인자가 따로
+ *    필요하고 그게 p_topic_clear 다. 두 상태를 한 값으로 접으면 서버가 못 가른다. */
+const EMPTY = { jobs: [], years: null, yearsMax: null, regions: [], topic: null, topicClear: false, pending: false };
 
 const strings = (v) => (Array.isArray(v) ? v.filter((s) => typeof s === 'string' && s) : []);
 const intOrNull = (v) => (Number.isInteger(v) ? v : null);
@@ -55,6 +59,7 @@ export function readState() {
       yearsMax: intOrNull(s.yearsMax),
       regions: strings(s.regions),
       topic: typeof s.topic === 'string' && s.topic ? s.topic : null,
+      topicClear: s.topicClear === true,
       pending: s.pending === true,
     };
   } catch {
@@ -134,10 +139,15 @@ async function commit(state, supabase, session, retry) {
     p_years_max: hi,                                             // number lo..60
     p_regions: state.regions,                                    // string[] 지역 코드
   };
-  // 주제를 **직접 바꾼 사람만** 실어 보낸다. 안 실으면 서버가 기본값(null)을 쓰고,
-  // 그러면 발송 시점에 직군에서 푼다 — 화면이 보여준 것과 같은 규칙이다.
-  // 인자를 늘 실으면 RPC 가 5인자 판으로 올라가기 전까지 온보딩 저장이 전원 실패한다.
-  if (state.topic) args.p_topic = state.topic;
+  // 주제를 **직접 건드린 사람만** 실어 보낸다. 안 실으면 서버가 기존 값을 유지한다 —
+  // 재온보딩이 주제를 지우면 안 되기 때문이다.
+  //   · 바꿨다  → p_topic
+  //   · 「자동」 → p_topic_clear (비우기). 빈 문자열을 그 뜻으로 재활용하지 않는다.
+  // 인자를 늘 실으면 RPC 가 그 인자를 갖기 전까지 온보딩 저장이 전원 실패하므로,
+  // **보낼 것이 있을 때만** 싣는다.
+  const 비우기를_실었다 = state.topicClear === true;
+  if (비우기를_실었다) args.p_topic_clear = true;
+  else if (state.topic) args.p_topic = state.topic;
   const { error } = await supabase.rpc('save_onboarding', args);
   if (error) {
     writeState({ pending: true });
@@ -147,7 +157,13 @@ async function commit(state, supabase, session, retry) {
     track('onboarding_step', { step: 3, save: 'failed' }, session.access_token);
     return { status: 'error' };
   }
-  writeState({ pending: false });
+  // 비우기는 **한 번만** 보낸다. 표시를 안 내리면 그 뒤의 모든 저장이 계속 비우기가 되어,
+  // 나중에 고른 주제를 자기 저장이 도로 지운다.
+  // 🔴 **내가 실어 보낸 경우에만 내린다.** state 는 이 호출이 시작될 때의 사본이라,
+  //    먼저 날아간 재시도가 늦게 성공하면 그 사이 사용자가 세운 비우기 표시를 지운다 —
+  //    그러면 이어지는 저장이 p_topic_clear 도 p_topic 도 안 실어, 서버는 옛 주제를
+  //    그대로 두고 화면만 「자동」이 된다.
+  writeState(비우기를_실었다 ? { pending: false, topicClear: false } : { pending: false });
   // 저장까지 끝난 것만 완료로 센다. 재시도로 늦게 성공한 건은 retry 로 구분한다.
   track('onboarding_done', retry ? { saved: true, retry: true } : { saved: true }, session.access_token);
   return { status: 'ok' };

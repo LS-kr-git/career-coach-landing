@@ -117,12 +117,14 @@ const topicsHtml = () =>
   '</div>';
 
 const jobMapHtml = () => {
+  // 🔴 **대분류 코드를 같이 싣는다.** 주제를 푸는 규칙이 발송 경로와 같아야 하는데
+  //    (`ops/send.py` 의 `트랙과_직군`), 그쪽은 **대분류를 정렬해** 트랙이 있는 첫 번째를
+  //    쓴다. 중분류만 실으면 화면이 다른 순서로 고르게 되고, 같은 사람이 화면에서 본
+  //    주제와 실제로 받는 주제가 갈린다.
+  const groups = visible.map((g) => [g.code, TRK.tracks.indexOf(TRK.byGroup[g.code] ?? '')]);
   const jobs = {};
-  for (const g of visible) {
-    const idx = TRK.tracks.indexOf(TRK.byGroup[g.code] ?? '');   // 트랙 없는 대분류는 -1
-    for (const c of g.children) jobs[c.code] = [c.label, idx];
-  }
-  const json = JSON.stringify({ tracks: TRK.tracks, jobs });
+  visible.forEach((g, gi) => { for (const c of g.children) jobs[c.code] = [c.label, gi]; });
+  const json = JSON.stringify({ tracks: TRK.tracks, groups, jobs });
   return `<script id="cc-topic-map" type="application/json">${json}<\/script>`;
 };
 
@@ -165,4 +167,4 @@ console.log(`✅ 온보딩 1단계 갱신 — 대분류 ${visible.length}/${TAX.
 console.log(`   숨긴 대분류(주 ${MIN_D1_PER_WEEK}건 미만) ${hiddenGroups.length}개: ` +
   hiddenGroups.map((g) => `${g.label} 주${Math.round(perWeek(g.code))}`).join(' · '));
 console.log(`   숨긴 중분류(30일 신규 0건) ${hiddenChips.length}개: ` + hiddenChips.join(' · '));
-console.log(`✅ 완료 화면 갱신 — 주제 ${TRK.tracks.length}개 · 직군→주제 ${shown}건`);
+console.log(`✅ 완료 화면 갱신 — 주제 ${TRK.tracks.length}개 · 대분류 ${visible.length}개 · 중분류 ${shown}건`);
