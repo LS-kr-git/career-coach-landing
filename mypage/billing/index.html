@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="only light">
+<meta name="format-detection" content="telephone=no">
+<title>멤버십·결제 — 커리어코치</title>
+<meta name="description" content="커리어코치 멤버십 상태와 결제 수단을 확인합니다.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root{
+    color-scheme: only light;
+    --amber-50:#FFFBEB; --amber-100:#FEF3C7; --amber-500:#F59E0B; --amber-600:#D97706;
+    --amber-700:#B45309; --amber-800:#92400E; --amber-950:#451A03;
+    --emerald-500:#10B981;
+    --gray-50:#F8FAFC; --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-300:#CBD5E1;
+    --gray-400:#94A3B8; --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155;
+    --gray-800:#1E293B; --gray-900:#0F172A; --stone-50:#FAFAF9;
+    /* CTA 토큰 — CLAUDE.md 「CTA 규칙」 공통값 */
+    --cta-h:54px; --cta-radius:14px; --cta-fs:15px; --cta-fw:700;
+    /* 랜딩과 동일한 폭 시스템 */
+    --pad-x:24px; --card-max:450px; --content-max:402px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{background:var(--gray-100)}
+  body{font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;
+    background:#fff;color:var(--gray-800);-webkit-font-smoothing:antialiased}
+  /* CLAUDE.md 규칙 — 화면 채우기 높이는 svh */
+  .page{width:100%;max-width:var(--card-max);margin:0 auto;background:#fff;
+    min-height:100vh;min-height:100svh;display:flex;flex-direction:column}
+  /* 헤더·뒤로가기 — CLAUDE.md 「헤더와 뒤로가기 표준값」 (피그마 376:2507) */
+  .hd{position:sticky;top:0;z-index:20;display:flex;align-items:center;
+    height:calc(48px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 12px 0;background:#fff}
+  .back{width:48px;height:48px;display:flex;align-items:center;justify-content:center;position:relative}
+  .back svg{position:relative;z-index:1}
+  .back::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:36px;height:36px;border-radius:10px;background:transparent;transition:background .12s}
+  .back:active::before{background:var(--gray-100)}
+  main{flex:1;display:flex;flex-direction:column;width:100%;max-width:var(--card-max);margin:0 auto}
+  /* 피그마 텍스트 스타일 대응 (careercoach 컬렉션 text/*) */
+  .t-display{font-size:28px;line-height:36px;font-weight:800;letter-spacing:-.02em;color:var(--gray-900)}
+  .t-h3{font-size:17px;line-height:24px;font-weight:600}
+  .t-h4{font-size:15px;line-height:22px;font-weight:600}
+  .t-body-l{font-size:16px;line-height:23px;font-weight:400}
+  .t-body-s{font-size:14px;line-height:20px;font-weight:400}
+  .t-caption{font-size:13px;line-height:18px;font-weight:400}
+  .t-micro{font-size:11px;line-height:14px;font-weight:500}
+  .t-label{font-size:14px;line-height:20px;font-weight:700}
+  .t-number-xl{font-size:32px;line-height:36px;font-weight:800;letter-spacing:-.02em}
+  .caret{font-size:20px;line-height:1;color:var(--gray-400);flex:none}
+  /* 하단 플로팅 CTA — 320×54, 좌우 20 (피그마와 같은 값) */
+  .cta-dock{position:sticky;bottom:0;padding:12px 20px 20px;background:#fff;
+    display:flex;justify-content:center}
+  .cta{width:100%;max-width:320px;height:var(--cta-h);border:0;border-radius:var(--cta-radius);
+    background:var(--amber-500);color:#fff;font:inherit;font-size:var(--cta-fs);font-weight:var(--cta-fw);
+    line-height:20px;cursor:pointer;box-shadow:0 4px 12px rgba(217,120,5,.22);
+    display:flex;align-items:center;justify-content:center;gap:0}
+  .cta[disabled]{background:var(--gray-100);color:var(--gray-400);box-shadow:none;cursor:default}
+  [hidden]{display:none!important}
+
+  .title{padding:20px var(--pad-x) 9px}
+  .desc{padding:10px var(--pad-x);color:var(--gray-500);word-break:keep-all}
+
+  .bill{padding:30px var(--pad-x) 32px;display:flex;flex-direction:column;gap:44px;flex:1}
+  .sec{display:flex;flex-direction:column;gap:14px}
+  .mcard{position:relative;overflow:hidden;border:1px solid var(--gray-200);border-radius:16px;
+    background:#fff;padding:22px 20px 22px 24px;display:flex;flex-direction:column;gap:10px}
+  .mcard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--amber-500)}
+  .mtop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .kicker{color:var(--amber-600);letter-spacing:.16em}
+  .live{display:flex;align-items:center;gap:5px;color:var(--gray-600);flex:none}
+  .live i{width:6px;height:6px;border-radius:9999px;background:var(--emerald-500);flex:none}
+  .pcard{border:1px solid var(--gray-200);border-radius:14px;padding:18px;
+    display:flex;flex-direction:column;gap:16px}
+  .prow{display:flex;align-items:center;gap:14px}
+  .art{width:56px;height:36px;border-radius:6px;background:var(--amber-600);flex:none;position:relative;overflow:hidden}
+  .art::before{content:'';position:absolute;left:0;right:0;top:9px;height:7px;background:rgba(120,53,15,.55)}
+  .art::after{content:'';position:absolute;left:7px;bottom:7px;width:11px;height:8px;border-radius:2px;background:#FED7AA}
+  .pcol{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+  .masked{color:var(--gray-500);letter-spacing:.06em}
+  .link{color:var(--gray-600);text-decoration:underline;text-underline-offset:3px;
+    background:none;border:0;font:inherit;font-size:14px;line-height:20px;cursor:pointer;flex:none;white-space:nowrap}
+  .nrow{border-top:1px solid var(--gray-100);padding-top:14px;display:flex;
+    align-items:center;justify-content:space-between;gap:10px;color:var(--gray-600)}
+  .cancel{align-self:flex-end;color:var(--gray-400);background:none;border:0;
+    font:inherit;font-size:14px;line-height:20px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="page">
+<header class="hd"><a class="back" href="/mypage/" aria-label="뒤로"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15.75 4.5L8.25 12l7.5 7.5" stroke="#475569" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a></header>
+<main>
+  <div class="title"><h1 class="t-display">멤버십·결제</h1></div>
+  <div class="bill">
+    <section class="sec">
+      <h2 class="t-h4">멤버십</h2>
+      <div class="mcard">
+        <div class="mtop">
+          <span class="t-micro kicker">MEMBERSHIP</span>
+          <span class="t-micro live"><i aria-hidden="true"></i>구독 중</span>
+        </div>
+        <span class="t-h3">커리어코치 멤버십</span>
+        <span class="t-caption" style="color:var(--gray-500)">김서연 님 · 2026년 3월부터</span>
+      </div>
+    </section>
+
+    <section class="sec">
+      <h2 class="t-h4">결제</h2>
+      <div class="pcard">
+        <div class="prow">
+          <span class="art" aria-hidden="true"></span>
+          <span class="pcol">
+            <span class="t-body-l">신한카드</span>
+            <span class="t-caption masked">•••• •••• •••• 4821</span>
+          </span>
+          <button class="link" type="button">변경</button>
+        </div>
+        <div class="nrow t-body-s">
+          <span>다음 결제 6월 30일</span>
+          <!-- 금액은 계정별 값이라 스크립트가 채운다 — CLAUDE.md 「가격은 어디에도 박지 않는다」 -->
+          <span id="amount"></span>
+        </div>
+      </div>
+      <button class="cancel" type="button">구독 해지하기</button>
+    </section>
+  </div>
+</main>
+<script>
+  /* 금액은 결제 화면에서만 말한다. 지금은 배선 전이라 목업 값을 넣는다 —
+     실제로는 구독 정보를 받아 그리는 자리다. */
+  (function () {
+    var plan = { period: '월', priceKrw: 3900 };
+    document.getElementById('amount').textContent =
+      plan.period + ' ' + plan.priceKrw.toLocaleString('ko-KR') + '원';
+  })();
+</script>
+</div>
+</body>
+</html>

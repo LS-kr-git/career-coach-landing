@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="only light">
+<meta name="format-detection" content="telephone=no">
+<title>마이페이지 — 커리어코치</title>
+<meta name="description" content="커리어코치 마이페이지 — 구독 정보와 소장한 아티클을 확인합니다.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root{
+    color-scheme: only light;
+    --amber-50:#FFFBEB; --amber-100:#FEF3C7; --amber-500:#F59E0B; --amber-600:#D97706;
+    --amber-700:#B45309; --amber-800:#92400E; --amber-950:#451A03;
+    --emerald-500:#10B981;
+    --gray-50:#F8FAFC; --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-300:#CBD5E1;
+    --gray-400:#94A3B8; --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155;
+    --gray-800:#1E293B; --gray-900:#0F172A; --stone-50:#FAFAF9;
+    /* CTA 토큰 — CLAUDE.md 「CTA 규칙」 공통값 */
+    --cta-h:54px; --cta-radius:14px; --cta-fs:15px; --cta-fw:700;
+    /* 랜딩과 동일한 폭 시스템 */
+    --pad-x:24px; --card-max:450px; --content-max:402px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{background:var(--gray-100)}
+  body{font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;
+    background:#fff;color:var(--gray-800);-webkit-font-smoothing:antialiased}
+  /* CLAUDE.md 규칙 — 화면 채우기 높이는 svh */
+  .page{width:100%;max-width:var(--card-max);margin:0 auto;background:#fff;
+    min-height:100vh;min-height:100svh;display:flex;flex-direction:column}
+  /* 헤더·뒤로가기 — CLAUDE.md 「헤더와 뒤로가기 표준값」 (피그마 376:2507) */
+  .hd{position:sticky;top:0;z-index:20;display:flex;align-items:center;
+    height:calc(48px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 12px 0;background:#fff}
+  .back{width:48px;height:48px;display:flex;align-items:center;justify-content:center;position:relative}
+  .back svg{position:relative;z-index:1}
+  .back::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:36px;height:36px;border-radius:10px;background:transparent;transition:background .12s}
+  .back:active::before{background:var(--gray-100)}
+  main{flex:1;display:flex;flex-direction:column;width:100%;max-width:var(--card-max);margin:0 auto}
+  /* 피그마 텍스트 스타일 대응 (careercoach 컬렉션 text/*) */
+  .t-display{font-size:28px;line-height:36px;font-weight:800;letter-spacing:-.02em;color:var(--gray-900)}
+  .t-h3{font-size:17px;line-height:24px;font-weight:600}
+  .t-h4{font-size:15px;line-height:22px;font-weight:600}
+  .t-body-l{font-size:16px;line-height:23px;font-weight:400}
+  .t-body-s{font-size:14px;line-height:20px;font-weight:400}
+  .t-caption{font-size:13px;line-height:18px;font-weight:400}
+  .t-micro{font-size:11px;line-height:14px;font-weight:500}
+  .t-label{font-size:14px;line-height:20px;font-weight:700}
+  .t-number-xl{font-size:32px;line-height:36px;font-weight:800;letter-spacing:-.02em}
+  .caret{font-size:20px;line-height:1;color:var(--gray-400);flex:none}
+  /* 하단 플로팅 CTA — 320×54, 좌우 20 (피그마와 같은 값) */
+  .cta-dock{position:sticky;bottom:0;padding:12px 20px 20px;background:#fff;
+    display:flex;justify-content:center}
+  .cta{width:100%;max-width:320px;height:var(--cta-h);border:0;border-radius:var(--cta-radius);
+    background:var(--amber-500);color:#fff;font:inherit;font-size:var(--cta-fs);font-weight:var(--cta-fw);
+    line-height:20px;cursor:pointer;box-shadow:0 4px 12px rgba(217,120,5,.22);
+    display:flex;align-items:center;justify-content:center;gap:0}
+  .cta[disabled]{background:var(--gray-100);color:var(--gray-400);box-shadow:none;cursor:default}
+  [hidden]{display:none!important}
+
+  .page{background:var(--gray-50)}
+  .mp-main{padding:20px 16px 28px;gap:14px;background:var(--gray-50)}
+  .hero{padding:6px 4px 14px;display:flex;flex-direction:column;gap:10px}
+  .hero-sub{color:var(--gray-500);display:flex;align-items:baseline;flex-wrap:wrap}
+  .hero-sub .num{color:var(--amber-600);margin:0 6px 0 4px}
+  .card{background:#fff;border:1px solid var(--gray-200);border-radius:16px;
+    display:flex;flex-direction:column;overflow:hidden}
+  .row{display:flex;align-items:center;gap:14px;padding:17px 18px;
+    background:none;border:0;width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer;
+    text-decoration:none}
+  .row + .row,.card .row:not(:first-child){border-top:1px solid var(--gray-100)}
+  .col{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+  .prof{display:flex;align-items:center;gap:14px;padding:20px 18px 18px;border-bottom:1px solid var(--gray-100)}
+  .avatar{width:52px;height:52px;border-radius:9999px;background:var(--gray-800);color:#fff;flex:none;
+    display:flex;align-items:center;justify-content:center}
+  .sub{color:var(--gray-400)}
+  .card-archive{padding:0 12px 12px}
+  .card-archive .row{padding-left:6px;padding-right:6px;border-top:0}
+  .banner{border-radius:12px;background:var(--amber-50);padding:14px 16px;
+    display:flex;align-items:center;gap:12px}
+  .banner .col{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;word-break:keep-all}
+  .banner .b-title{color:var(--amber-700)}
+  .pick-btn{height:32px;padding:0 14px;border:0;border-radius:9999px;background:var(--gray-800);
+    color:#fff;font:inherit;font-size:13px;line-height:18px;font-weight:600;cursor:pointer;
+    white-space:nowrap;flex:none;text-decoration:none;display:flex;align-items:center}
+  .state-done{color:var(--amber-700);white-space:nowrap;flex:none}
+  .state-locked{display:flex;align-items:center;gap:9px;flex:none;white-space:nowrap;color:var(--amber-800)}
+  .state-locked i{width:5px;height:5px;border-radius:9999px;background:var(--amber-500);
+    box-shadow:0 0 0 3.5px rgba(245,158,11,.20);flex:none}
+  .logout{align-self:flex-end;padding:4px 18px 0;color:var(--gray-400);
+    background:none;border:0;font:inherit;font-size:14px;line-height:20px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="page">
+<header class="hd"><a class="back" href="/" aria-label="뒤로"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15.75 4.5L8.25 12l7.5 7.5" stroke="#475569" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a></header>
+<main class="mp-main">
+  <section class="hero">
+    <h1 class="t-display">남들보다 앞서가는<br>커리어 경쟁력 쌓이는 중</h1>
+    <p class="t-body-l hero-sub">지금까지<span class="t-number-xl num">128</span>개의 인사이트를 쌓았어요</p>
+  </section>
+
+  <section class="card">
+    <div class="prof">
+      <div class="avatar t-h3">서</div>
+      <div class="col">
+        <span class="t-h3">김서연 님</span>
+        <span class="t-caption sub">카카오 계정 · seoyeon@kakao.com</span>
+      </div>
+    </div>
+    <a class="row" href="/mypage/jobs/"><span class="col t-body-l">채용공고 받을 직군</span><span class="caret" aria-hidden="true">›</span></a>
+    <a class="row" href="/mypage/topics/"><span class="col t-body-l">인사이트 받을 주제</span><span class="caret" aria-hidden="true">›</span></a>
+    <a class="row" href="/mypage/billing/"><span class="col t-body-l">멤버십·결제</span><span class="caret" aria-hidden="true">›</span></a>
+  </section>
+
+  <section class="card card-archive">
+    <a class="row" href="/mypage/archive/">
+      <span class="col"><span class="t-body-l">내 아티클 저장소</span><span class="t-caption sub">지금까지 읽은 42편 소장 중</span></span>
+      <span class="caret" aria-hidden="true">›</span>
+    </a>
+
+    <div class="banner" data-state="open" hidden>
+      <span class="col"><span class="t-label b-title">놓친 아티클 전문, 지금 열 수 있어요</span><span class="t-caption sub">일요일마다 1편씩 다시 열 수 있어요</span></span>
+      <a class="pick-btn" href="/mypage/sunday/">고르기</a>
+    </div>
+
+    <div class="banner" data-state="done" hidden>
+      <span class="col"><span class="t-label b-title">이번 주 전문 1편 추가 소장 완료</span><span class="t-caption sub">다음주 일요일에 1편이 또 열려요</span></span>
+      <span class="t-caption state-done">✓ 완료됨</span>
+    </div>
+
+    <div class="banner" data-state="locked">
+      <span class="col"><span class="t-label b-title">일요일에 놓친 전문을 1편 열 수 있어요</span><span class="t-caption sub">일요일마다 1편씩 다시 열 수 있어요</span></span>
+      <span class="t-caption state-locked"><i aria-hidden="true"></i>일요일 오픈</span>
+    </div>
+  </section>
+
+  <button class="logout" type="button">로그아웃</button>
+</main>
+<script>
+  /* 일요일 배너의 세 상태 — 기본은 평일(잠김).
+     ?state=open|done|locked 로 세 상태를 그대로 볼 수 있다 (피그마 01-A/01-B/01-C). */
+  (function () {
+    var q = new URLSearchParams(location.search).get('state');
+    var state = (q === 'open' || q === 'done' || q === 'locked') ? q : 'locked';
+    document.querySelectorAll('.banner').forEach(function (el) {
+      el.hidden = el.dataset.state !== state;
+    });
+  })();
+</script>
+</div>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="only light">
+<meta name="format-detection" content="telephone=no">
+<title>인사이트 받을 주제 — 커리어코치</title>
+<meta name="description" content="커리어코치에서 받아볼 인사이트 주제를 고릅니다.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root{
+    color-scheme: only light;
+    --amber-50:#FFFBEB; --amber-100:#FEF3C7; --amber-500:#F59E0B; --amber-600:#D97706;
+    --amber-700:#B45309; --amber-800:#92400E; --amber-950:#451A03;
+    --emerald-500:#10B981;
+    --gray-50:#F8FAFC; --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-300:#CBD5E1;
+    --gray-400:#94A3B8; --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155;
+    --gray-800:#1E293B; --gray-900:#0F172A; --stone-50:#FAFAF9;
+    /* CTA 토큰 — CLAUDE.md 「CTA 규칙」 공통값 */
+    --cta-h:54px; --cta-radius:14px; --cta-fs:15px; --cta-fw:700;
+    /* 랜딩과 동일한 폭 시스템 */
+    --pad-x:24px; --card-max:450px; --content-max:402px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{background:var(--gray-100)}
+  body{font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;
+    background:#fff;color:var(--gray-800);-webkit-font-smoothing:antialiased}
+  /* CLAUDE.md 규칙 — 화면 채우기 높이는 svh */
+  .page{width:100%;max-width:var(--card-max);margin:0 auto;background:#fff;
+    min-height:100vh;min-height:100svh;display:flex;flex-direction:column}
+  /* 헤더·뒤로가기 — CLAUDE.md 「헤더와 뒤로가기 표준값」 (피그마 376:2507) */
+  .hd{position:sticky;top:0;z-index:20;display:flex;align-items:center;
+    height:calc(48px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 12px 0;background:#fff}
+  .back{width:48px;height:48px;display:flex;align-items:center;justify-content:center;position:relative}
+  .back svg{position:relative;z-index:1}
+  .back::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:36px;height:36px;border-radius:10px;background:transparent;transition:background .12s}
+  .back:active::before{background:var(--gray-100)}
+  main{flex:1;display:flex;flex-direction:column;width:100%;max-width:var(--card-max);margin:0 auto}
+  /* 피그마 텍스트 스타일 대응 (careercoach 컬렉션 text/*) */
+  .t-display{font-size:28px;line-height:36px;font-weight:800;letter-spacing:-.02em;color:var(--gray-900)}
+  .t-h3{font-size:17px;line-height:24px;font-weight:600}
+  .t-h4{font-size:15px;line-height:22px;font-weight:600}
+  .t-body-l{font-size:16px;line-height:23px;font-weight:400}
+  .t-body-s{font-size:14px;line-height:20px;font-weight:400}
+  .t-caption{font-size:13px;line-height:18px;font-weight:400}
+  .t-micro{font-size:11px;line-height:14px;font-weight:500}
+  .t-label{font-size:14px;line-height:20px;font-weight:700}
+  .t-number-xl{font-size:32px;line-height:36px;font-weight:800;letter-spacing:-.02em}
+  .caret{font-size:20px;line-height:1;color:var(--gray-400);flex:none}
+  /* 하단 플로팅 CTA — 320×54, 좌우 20 (피그마와 같은 값) */
+  .cta-dock{position:sticky;bottom:0;padding:12px 20px 20px;background:#fff;
+    display:flex;justify-content:center}
+  .cta{width:100%;max-width:320px;height:var(--cta-h);border:0;border-radius:var(--cta-radius);
+    background:var(--amber-500);color:#fff;font:inherit;font-size:var(--cta-fs);font-weight:var(--cta-fw);
+    line-height:20px;cursor:pointer;box-shadow:0 4px 12px rgba(217,120,5,.22);
+    display:flex;align-items:center;justify-content:center;gap:0}
+  .cta[disabled]{background:var(--gray-100);color:var(--gray-400);box-shadow:none;cursor:default}
+  [hidden]{display:none!important}
+
+  .title{padding:20px var(--pad-x) 9px}
+  .desc{padding:10px var(--pad-x);color:var(--gray-500);word-break:keep-all}
+
+  .chip{border:0;background:#fff;box-shadow:inset 0 0 0 1px var(--gray-200);border-radius:10px;
+    padding:9px 12px;font:inherit;font-size:13px;line-height:18px;font-weight:400;color:var(--gray-600);
+    cursor:pointer;white-space:nowrap}
+  .chip[aria-pressed="true"]{background:var(--amber-50);box-shadow:inset 0 0 0 1px var(--amber-500);color:var(--amber-600)}
+
+  .week-wrap{padding:14px var(--pad-x) 0}
+  .week{background:var(--gray-50);border-radius:12px;padding:14px 12px;display:flex;gap:5px}
+  .day{flex:1;min-width:0;border-radius:9px;padding:9px 6px;display:flex;flex-direction:column;
+    align-items:center;gap:6px;background:#fff;text-align:center}
+  .day.own{background:var(--amber-100)}
+  .day .d{color:var(--gray-500)}
+  .day.own .d{color:var(--amber-700)}
+  .day .t{color:var(--gray-600);word-break:keep-all}
+  .day.own .t{color:var(--amber-800)}
+  .topics{padding:20px var(--pad-x) 24px;display:flex;flex-wrap:wrap;gap:7px;align-content:flex-start;flex:1}
+</style>
+</head>
+<body>
+<div class="page">
+<header class="hd"><a class="back" href="/mypage/" aria-label="뒤로"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15.75 4.5L8.25 12l7.5 7.5" stroke="#475569" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a></header>
+<main>
+  <div class="title"><h1 class="t-display">어떤 인사이트를<br>받아볼까요?</h1></div>
+  <div class="desc t-body-s">하나만 고를 수 있어요</div>
+  <div class="week-wrap">
+    <div class="week">
+      <div class="day own"><span class="t-micro d">월</span><span class="t-caption t">디자인</span></div>
+      <div class="day"><span class="t-micro d">화</span><span class="t-caption t">AI로 일하기</span></div>
+      <div class="day own"><span class="t-micro d">수</span><span class="t-caption t">디자인</span></div>
+      <div class="day"><span class="t-micro d">목</span><span class="t-caption t">커리어·이직</span></div>
+      <div class="day own"><span class="t-micro d">금</span><span class="t-caption t">디자인</span></div>
+    </div>
+  </div>
+  <div class="topics">
+    <button class="chip" type="button" aria-pressed="false">일하는 사람 공통</button>
+    <button class="chip" type="button" aria-pressed="true">디자인</button>
+    <button class="chip" type="button" aria-pressed="false">개발·AI</button>
+    <button class="chip" type="button" aria-pressed="false">마케팅·그로스</button>
+    <button class="chip" type="button" aria-pressed="false">프로덕트·전략</button>
+    <button class="chip" type="button" aria-pressed="false">세일즈·GTM</button>
+    <button class="chip" type="button" aria-pressed="false">제조·R&D</button>
+    <button class="chip" type="button" aria-pressed="false">재무·회계</button>
+    <button class="chip" type="button" aria-pressed="false">조직·피플</button>
+    <button class="chip" type="button" aria-pressed="false">커머스·리테일</button>
+    <button class="chip" type="button" aria-pressed="false">금융·마켓</button>
+    <button class="chip" type="button" aria-pressed="false">물류·공급망</button>
+    <button class="chip" type="button" aria-pressed="false">법률·규제</button>
+    <button class="chip" type="button" aria-pressed="false">미디어·콘텐츠</button>
+    <button class="chip" type="button" aria-pressed="false">고객경험·CX</button>
+    <button class="chip" type="button" aria-pressed="false">의료·헬스케어</button>
+    <button class="chip" type="button" aria-pressed="false">건설·공간</button>
+    <button class="chip" type="button" aria-pressed="false">게임</button>
+  </div>
+</main>
+<div class="cta-dock">
+  <button class="cta" type="button">저장</button>
+</div>
+<script>
+  (function () {
+    document.querySelector('.topics').addEventListener('click', function (e) {
+      var chip = e.target.closest('.chip');
+      if (!chip) return;
+      document.querySelectorAll('.topics .chip').forEach(function (c) {
+        c.setAttribute('aria-pressed', c === chip ? 'true' : 'false');
+      });
+    });
+  })();
+</script>
+</div>
+</body>
+</html>

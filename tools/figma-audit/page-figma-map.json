@@ -76,6 +76,57 @@
       ],
       "textAudit": "docs-audit",
       "비고": "CTA 는 JS 렌더라 정적 HTML 에 없다 — 스냅샷의 jsRenderedText 로 명시했다."
+    },
+    "mypage/index.html": {
+      "node": "908:572",
+      "name": "01-C · 마이페이지 · 평일(잠김)",
+      "stateNodes": [
+        {
+          "id": "908:538",
+          "name": "01-A · 마이페이지 · 열람 가능(일요일)"
+        },
+        {
+          "id": "908:555",
+          "name": "01-B · 마이페이지 · 열람 완료(일요일)"
+        }
+      ],
+      "textAudit": "docs-audit",
+      "비고": "섹션 908:537 「마이페이지」. 기준 프레임은 평일(잠김)이고 일요일 열람 가능·완료가 상태 프레임이다. 웹은 세 배너를 모두 마크업에 두고 ?state= 로 갈라 보여준다 — 숨긴 배너도 문구 대조 대상이라 한쪽만 고치면 막힌다."
+    },
+    "mypage/jobs/index.html": {
+      "node": "908:589",
+      "name": "02 · 채용공고 받을 직군",
+      "textAudit": "docs-audit",
+      "비고": "CTA 는 선택 수를 JS 로 그린다 — 스냅샷의 jsRenderedText 참조."
+    },
+    "mypage/billing/index.html": {
+      "node": "908:606",
+      "name": "03 · 멤버십·결제",
+      "textAudit": "docs-audit",
+      "비고": "금액은 계정별 값이라 JS 가 그린다 — page-audit 「가격 하드코딩」에 걸리지 않게 하려는 것이 아니라 실제로 사용자마다 다르기 때문이다. 스냅샷의 jsRenderedText 참조."
+    },
+    "mypage/topics/index.html": {
+      "node": "908:623",
+      "name": "04 · 인사이트 받을 주제",
+      "textAudit": "docs-audit"
+    },
+    "mypage/archive/index.html": {
+      "node": "908:640",
+      "name": "05 · 내 아티클 저장소",
+      "textAudit": "docs-audit",
+      "비고": "검색 placeholder 는 속성이라 문구 대조에 안 잡힌다 — 같은 문구를 sr-only label 로도 두어 대조에 들어오게 했다."
+    },
+    "mypage/sunday/index.html": {
+      "node": "908:657",
+      "name": "06-A · 일요일 추가 열람 · 선택 전",
+      "stateNodes": [
+        {
+          "id": "908:674",
+          "name": "06-B · 일요일 추가 열람 · 선택 후"
+        }
+      ],
+      "textAudit": "docs-audit",
+      "비고": "CTA 두 문구를 모두 마크업에 두고 하나를 hidden 으로 둔다 — 두 상태가 다 대조된다."
     }
   },
   "_exempt_설명": "피그마 화면이 없어도 되는 페이지. 사유를 반드시 적는다. 빈 사유는 page-audit 이 막는다.",

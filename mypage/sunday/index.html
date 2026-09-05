@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="only light">
+<meta name="format-detection" content="telephone=no">
+<title>일요일 추가 열람 — 커리어코치</title>
+<meta name="description" content="매주 일요일, 놓친 아티클 전문 1편을 추가로 열람합니다.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root{
+    color-scheme: only light;
+    --amber-50:#FFFBEB; --amber-100:#FEF3C7; --amber-500:#F59E0B; --amber-600:#D97706;
+    --amber-700:#B45309; --amber-800:#92400E; --amber-950:#451A03;
+    --emerald-500:#10B981;
+    --gray-50:#F8FAFC; --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-300:#CBD5E1;
+    --gray-400:#94A3B8; --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155;
+    --gray-800:#1E293B; --gray-900:#0F172A; --stone-50:#FAFAF9;
+    /* CTA 토큰 — CLAUDE.md 「CTA 규칙」 공통값 */
+    --cta-h:54px; --cta-radius:14px; --cta-fs:15px; --cta-fw:700;
+    /* 랜딩과 동일한 폭 시스템 */
+    --pad-x:24px; --card-max:450px; --content-max:402px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{background:var(--gray-100)}
+  body{font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;
+    background:#fff;color:var(--gray-800);-webkit-font-smoothing:antialiased}
+  /* CLAUDE.md 규칙 — 화면 채우기 높이는 svh */
+  .page{width:100%;max-width:var(--card-max);margin:0 auto;background:#fff;
+    min-height:100vh;min-height:100svh;display:flex;flex-direction:column}
+  /* 헤더·뒤로가기 — CLAUDE.md 「헤더와 뒤로가기 표준값」 (피그마 376:2507) */
+  .hd{position:sticky;top:0;z-index:20;display:flex;align-items:center;
+    height:calc(48px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 12px 0;background:#fff}
+  .back{width:48px;height:48px;display:flex;align-items:center;justify-content:center;position:relative}
+  .back svg{position:relative;z-index:1}
+  .back::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:36px;height:36px;border-radius:10px;background:transparent;transition:background .12s}
+  .back:active::before{background:var(--gray-100)}
+  main{flex:1;display:flex;flex-direction:column;width:100%;max-width:var(--card-max);margin:0 auto}
+  /* 피그마 텍스트 스타일 대응 (careercoach 컬렉션 text/*) */
+  .t-display{font-size:28px;line-height:36px;font-weight:800;letter-spacing:-.02em;color:var(--gray-900)}
+  .t-h3{font-size:17px;line-height:24px;font-weight:600}
+  .t-h4{font-size:15px;line-height:22px;font-weight:600}
+  .t-body-l{font-size:16px;line-height:23px;font-weight:400}
+  .t-body-s{font-size:14px;line-height:20px;font-weight:400}
+  .t-caption{font-size:13px;line-height:18px;font-weight:400}
+  .t-micro{font-size:11px;line-height:14px;font-weight:500}
+  .t-label{font-size:14px;line-height:20px;font-weight:700}
+  .t-number-xl{font-size:32px;line-height:36px;font-weight:800;letter-spacing:-.02em}
+  .caret{font-size:20px;line-height:1;color:var(--gray-400);flex:none}
+  /* 하단 플로팅 CTA — 320×54, 좌우 20 (피그마와 같은 값) */
+  .cta-dock{position:sticky;bottom:0;padding:12px 20px 20px;background:#fff;
+    display:flex;justify-content:center}
+  .cta{width:100%;max-width:320px;height:var(--cta-h);border:0;border-radius:var(--cta-radius);
+    background:var(--amber-500);color:#fff;font:inherit;font-size:var(--cta-fs);font-weight:var(--cta-fw);
+    line-height:20px;cursor:pointer;box-shadow:0 4px 12px rgba(217,120,5,.22);
+    display:flex;align-items:center;justify-content:center;gap:0}
+  .cta[disabled]{background:var(--gray-100);color:var(--gray-400);box-shadow:none;cursor:default}
+  [hidden]{display:none!important}
+
+  .title{padding:20px var(--pad-x) 9px}
+  .desc{padding:10px var(--pad-x);color:var(--gray-500);word-break:keep-all}
+  .quota-wrap{padding:16px var(--pad-x) 0}
+  .quota{border-radius:12px;background:var(--amber-50);padding:14px 16px;
+    display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .quota .k{color:var(--amber-700)}
+  .quota .v{color:var(--amber-600);white-space:nowrap}
+  .lists{padding:22px var(--pad-x) 24px;display:flex;flex-direction:column;gap:22px;flex:1}
+  .sec{display:flex;flex-direction:column;gap:10px}
+  .sec > .lab{color:var(--gray-500)}
+  .items{display:flex;flex-direction:column;gap:8px}
+  .item{border-radius:12px;padding:15px 16px;display:flex;align-items:center;gap:12px;
+    background:#fff;box-shadow:inset 0 0 0 1px var(--gray-100);
+    border:0;width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer}
+  .item .col{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+  .meta{display:flex;align-items:center;gap:7px}
+  .tag{padding:2px 8px;border-radius:9999px;background:var(--gray-50);color:var(--gray-400);white-space:nowrap}
+  .date{color:var(--gray-500)}
+  .item .ttl{color:var(--gray-800);word-break:keep-all}
+  .radio{width:22px;height:22px;border-radius:9999px;flex:none;background:#fff;
+    box-shadow:inset 0 0 0 1.5px var(--gray-300);display:flex;align-items:center;justify-content:center}
+  .radio i{width:8px;height:8px;border-radius:9999px;background:transparent;display:block}
+  .item[aria-pressed="true"]{background:var(--amber-50);box-shadow:inset 0 0 0 1.5px var(--amber-500)}
+  .item[aria-pressed="true"] .tag{background:var(--amber-100);color:var(--amber-700)}
+  .item[aria-pressed="true"] .ttl{color:var(--amber-950)}
+  .item[aria-pressed="true"] .radio{background:var(--amber-500);box-shadow:none}
+  .item[aria-pressed="true"] .radio i{background:#fff}
+  .done{background:var(--stone-50);box-shadow:none;cursor:default}
+  .done .tag{background:var(--gray-100);color:var(--gray-500)}
+  .done .ttl{color:var(--gray-600)}
+  .done .kept{color:var(--amber-700);opacity:.85;white-space:nowrap;flex:none}
+</style>
+</head>
+<body>
+<div class="page">
+<header class="hd"><a class="back" href="/mypage/" aria-label="뒤로"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15.75 4.5L8.25 12l7.5 7.5" stroke="#475569" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a></header>
+<main>
+  <div class="title"><h1 class="t-display">놓친 아티클 중<br>하나를 골라주세요</h1></div>
+  <div class="desc t-body-s">매주 일요일, 이번주에 놓친 아티클 전문<br>1개를 추가로 열람하고 영구소장 할 수 있어요.</div>
+  <div class="quota-wrap">
+    <div class="quota">
+      <span class="t-caption k">이번 주 추가 열람 기회</span>
+      <span class="t-h4 v">1개 남음</span>
+    </div>
+  </div>
+  <div class="lists">
+    <section class="sec">
+      <span class="t-caption lab">아직 안 읽은 아티클</span>
+      <div class="items">
+        <button class="item" type="button" aria-pressed="false" data-title="핸드오프 문서를 줄이는 다섯 가지 습관">
+          <span class="col">
+            <span class="meta"><span class="t-micro tag">디자인</span><span class="t-caption date">08. 08 금</span></span>
+            <span class="t-body-s ttl">핸드오프 문서를 줄이는 다섯 가지 습관</span>
+          </span>
+          <span class="radio" aria-hidden="true"><i></i></span>
+        </button>
+        <button class="item" type="button" aria-pressed="false" data-title="요약을 믿지 말고 근거를 남겨라">
+          <span class="col">
+            <span class="meta"><span class="t-micro tag">AI로 일하기</span><span class="t-caption date">08. 05 화</span></span>
+            <span class="t-body-s ttl">요약을 믿지 말고 근거를 남겨라</span>
+          </span>
+          <span class="radio" aria-hidden="true"><i></i></span>
+        </button>
+        <button class="item" type="button" aria-pressed="false" data-title="리서치 없이 만든 화면이 실패하는 이유">
+          <span class="col">
+            <span class="meta"><span class="t-micro tag">디자인</span><span class="t-caption date">08. 04 월</span></span>
+            <span class="t-body-s ttl">리서치 없이 만든 화면이 실패하는 이유</span>
+          </span>
+          <span class="radio" aria-hidden="true"><i></i></span>
+        </button>
+      </div>
+    </section>
+    <section class="sec">
+      <span class="t-caption lab">이미 읽은 아티클</span>
+      <div class="items">
+        <div class="item done">
+          <span class="col">
+            <span class="meta"><span class="t-micro tag">디자인</span><span class="t-caption date">08. 07 목</span></span>
+            <span class="t-body-s ttl">디자인 시스템을 팀에 정착시키는 6개월</span>
+          </span>
+          <span class="t-micro kept">✓ 소장 완료</span>
+        </div>
+        <div class="item done">
+          <span class="col">
+            <span class="meta"><span class="t-micro tag">커리어·이직</span><span class="t-caption date">08. 06 수</span></span>
+            <span class="t-body-s ttl">이직 오퍼를 비교하는 세 가지 기준</span>
+          </span>
+          <span class="t-micro kept">✓ 소장 완료</span>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+<div class="cta-dock">
+  <button class="cta" type="button" id="open" disabled>
+    <span id="lab-idle">아티클을 하나 골라주세요</span><span id="lab-pick" hidden>이 아티클 전문 열기</span>
+  </button>
+</div>
+<script>
+  (function () {
+    var btn = document.getElementById('open');
+    var idle = document.getElementById('lab-idle');
+    var pick = document.getElementById('lab-pick');
+    document.querySelector('.lists').addEventListener('click', function (e) {
+      var item = e.target.closest('.item[aria-pressed]');
+      if (!item) return;
+      document.querySelectorAll('.item[aria-pressed]').forEach(function (el) {
+        el.setAttribute('aria-pressed', el === item ? 'true' : 'false');
+      });
+      btn.disabled = false;
+      idle.hidden = true;
+      pick.hidden = false;
+    });
+  })();
+</script>
+</div>
+</body>
+</html>
