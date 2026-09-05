@@ -22,7 +22,7 @@
     /* CTA 토큰 — CLAUDE.md 「CTA 규칙」 공통값 */
     --cta-h:54px; --cta-radius:14px; --cta-fs:15px; --cta-fw:700;
     /* 랜딩과 동일한 폭 시스템 */
-    --pad-x:24px; --card-max:450px; --content-max:402px;
+    --pad-x:24px; --card-max:450px;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html{background:var(--gray-100)}
@@ -128,6 +128,18 @@
   <button class="cta" type="button" id="save"><span id="lab">저장</span></button>
 </div>
 <script>
+  /* 접힌 그룹의 칩은 마크업에 두지 않고 여기서 그린다.
+     피그마 기준 프레임(908:589)은 '디자인' 만 펼친 한 상태를 그린 것이라, 나머지 그룹의
+     칩 라벨은 피그마에 없다. 정적 HTML 에 적으면 docs-audit 이 '웹 전용' 으로 막는데,
+     그때 ignoreWebText 로 덮으면 검사만 꺼진다. 그래서 목록을 데이터로 두고 펼칠 때 그린다 —
+     디자인 그룹만 마크업에 있고 그쪽은 그대로 대조된다. (원본: 디자인 캔버스의 JOB_GROUPS) */
+  var JOB_CHIPS = {
+    '마케팅·광고·홍보': ['전체','마케팅기획·전략','퍼포먼스마케팅','콘텐츠마케팅','SNS마케팅','브랜드마케팅','CRM마케팅','글로벌마케팅','광고기획·AE','홍보·PR','전시·행사마케팅','기타'],
+    'IT·개발': ['전체','프론트엔드','백엔드','풀스택','안드로이드','iOS','DevOps','QA','기타'],
+    'AI·데이터': ['전체','데이터분석','데이터엔지니어','머신러닝','AI리서치','기타'],
+    '기획·전략': ['전체','서비스기획','사업기획','전략·컨설팅','PM·PO','기타'],
+    '영업·고객': ['전체','B2B영업','영업관리','CS·CX','기타']
+  };
   (function () {
     var lab = document.getElementById('lab');
     var save = document.getElementById('save');
@@ -136,6 +148,20 @@
       var n = chips().filter(function (c) { return c.getAttribute('aria-pressed') === 'true'; }).length;
       save.disabled = n === 0;
       lab.textContent = n ? '저장 · ' + n + '개 선택됨' : '직무를 1개 이상 골라주세요';
+    }
+    function build(acc) {
+      var name = acc.querySelector('.t-h4').textContent;
+      var list = document.createElement('div');
+      list.className = 'chips';
+      (JOB_CHIPS[name] || []).forEach(function (label) {
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'chip';
+        b.setAttribute('aria-pressed', 'false');
+        b.textContent = label;
+        list.appendChild(b);
+      });
+      acc.parentNode.appendChild(list);
+      return list;
     }
     document.addEventListener('click', function (e) {
       var chip = e.target.closest('.chip');
@@ -150,7 +176,9 @@
         acc.setAttribute('aria-expanded', open ? 'false' : 'true');
         acc.querySelector('.ac').textContent = open ? '▼' : '▲';
         var list = acc.parentNode.querySelector('.chips');
-        if (list) list.hidden = open;
+        if (!list) list = build(acc);
+        list.hidden = open;
+        refresh();
       }
     });
     refresh();

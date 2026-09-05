@@ -19,10 +19,8 @@
     --gray-50:#F8FAFC; --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-300:#CBD5E1;
     --gray-400:#94A3B8; --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155;
     --gray-800:#1E293B; --gray-900:#0F172A; --stone-50:#FAFAF9;
-    /* CTA 토큰 — CLAUDE.md 「CTA 규칙」 공통값 */
-    --cta-h:54px; --cta-radius:14px; --cta-fs:15px; --cta-fw:700;
     /* 랜딩과 동일한 폭 시스템 */
-    --pad-x:24px; --card-max:450px; --content-max:402px;
+    --pad-x:16px; --card-max:450px;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html{background:var(--gray-100)}
@@ -51,18 +49,10 @@
   .t-label{font-size:14px;line-height:20px;font-weight:700}
   .t-number-xl{font-size:32px;line-height:36px;font-weight:800;letter-spacing:-.02em}
   .caret{font-size:20px;line-height:1;color:var(--gray-400);flex:none}
-  /* 하단 플로팅 CTA — 320×54, 좌우 20 (피그마와 같은 값) */
-  .cta-dock{position:sticky;bottom:0;padding:12px 20px 20px;background:#fff;
-    display:flex;justify-content:center}
-  .cta{width:100%;max-width:320px;height:var(--cta-h);border:0;border-radius:var(--cta-radius);
-    background:var(--amber-500);color:#fff;font:inherit;font-size:var(--cta-fs);font-weight:var(--cta-fw);
-    line-height:20px;cursor:pointer;box-shadow:0 4px 12px rgba(217,120,5,.22);
-    display:flex;align-items:center;justify-content:center;gap:0}
-  .cta[disabled]{background:var(--gray-100);color:var(--gray-400);box-shadow:none;cursor:default}
   [hidden]{display:none!important}
 
   .page{background:var(--gray-50)}
-  .mp-main{padding:20px 16px 28px;gap:14px;background:var(--gray-50)}
+  .mp-main{padding:20px var(--pad-x) 28px;gap:14px;background:var(--gray-50)}
   .hero{padding:6px 4px 14px;display:flex;flex-direction:column;gap:10px}
   .hero-sub{color:var(--gray-500);display:flex;align-items:baseline;flex-wrap:wrap}
   .hero-sub .num{color:var(--amber-600);margin:0 6px 0 4px}

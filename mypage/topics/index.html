@@ -22,7 +22,7 @@
     /* CTA 토큰 — CLAUDE.md 「CTA 규칙」 공통값 */
     --cta-h:54px; --cta-radius:14px; --cta-fs:15px; --cta-fw:700;
     /* 랜딩과 동일한 폭 시스템 */
-    --pad-x:24px; --card-max:450px; --content-max:402px;
+    --pad-x:24px; --card-max:450px;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html{background:var(--gray-100)}
@@ -122,12 +122,29 @@
 </div>
 <script>
   (function () {
+    /* 주간 미리보기는 고른 주제에서 나온다 — 디자인 캔버스의 규칙 그대로다.
+       월·수·금이 고른 주제, 화는 'AI로 일하기', 목은 '커리어·이직'.
+       '일하는 사람 공통' 을 고르면 내 주제 칸이 없어져 다섯 칸이 모두 공통 편성이 된다. */
+    var COMMON = '일하는 사람 공통';
+    var cells = Array.prototype.slice.call(document.querySelectorAll('.day'));
+    function paint(topic) {
+      var common = topic === COMMON;
+      var labels = common
+        ? ['커리어·이직', 'AI로 일하기', '일하는 법', '커리어·이직', 'AI로 일하기']
+        : [topic, 'AI로 일하기', topic, '커리어·이직', topic];
+      cells.forEach(function (cell, i) {
+        var own = !common && (i === 0 || i === 2 || i === 4);
+        cell.classList.toggle('own', own);
+        cell.querySelector('.t').textContent = labels[i];
+      });
+    }
     document.querySelector('.topics').addEventListener('click', function (e) {
       var chip = e.target.closest('.chip');
       if (!chip) return;
       document.querySelectorAll('.topics .chip').forEach(function (c) {
         c.setAttribute('aria-pressed', c === chip ? 'true' : 'false');
       });
+      paint(chip.textContent);
     });
   })();
 </script>

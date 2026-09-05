@@ -19,10 +19,8 @@
     --gray-50:#F8FAFC; --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-300:#CBD5E1;
     --gray-400:#94A3B8; --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155;
     --gray-800:#1E293B; --gray-900:#0F172A; --stone-50:#FAFAF9;
-    /* CTA 토큰 — CLAUDE.md 「CTA 규칙」 공통값 */
-    --cta-h:54px; --cta-radius:14px; --cta-fs:15px; --cta-fw:700;
     /* 랜딩과 동일한 폭 시스템 */
-    --pad-x:24px; --card-max:450px; --content-max:402px;
+    --pad-x:24px; --card-max:450px;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html{background:var(--gray-100)}
@@ -51,14 +49,6 @@
   .t-label{font-size:14px;line-height:20px;font-weight:700}
   .t-number-xl{font-size:32px;line-height:36px;font-weight:800;letter-spacing:-.02em}
   .caret{font-size:20px;line-height:1;color:var(--gray-400);flex:none}
-  /* 하단 플로팅 CTA — 320×54, 좌우 20 (피그마와 같은 값) */
-  .cta-dock{position:sticky;bottom:0;padding:12px 20px 20px;background:#fff;
-    display:flex;justify-content:center}
-  .cta{width:100%;max-width:320px;height:var(--cta-h);border:0;border-radius:var(--cta-radius);
-    background:var(--amber-500);color:#fff;font:inherit;font-size:var(--cta-fs);font-weight:var(--cta-fw);
-    line-height:20px;cursor:pointer;box-shadow:0 4px 12px rgba(217,120,5,.22);
-    display:flex;align-items:center;justify-content:center;gap:0}
-  .cta[disabled]{background:var(--gray-100);color:var(--gray-400);box-shadow:none;cursor:default}
   [hidden]{display:none!important}
 
   .title{padding:20px var(--pad-x) 9px}
@@ -97,6 +87,9 @@
   .date{color:var(--gray-500)}
   .art .ttl{color:var(--gray-800);word-break:keep-all}
   .art .caret{font-size:14px;line-height:20px;color:var(--gray-300)}
+  .empty{padding:28px 0;display:flex;flex-direction:column;align-items:center;gap:6px}
+  .empty .t-body-s{color:var(--gray-500)}
+  .empty .t-caption{color:var(--gray-400)}
 </style>
 </head>
 <body>
@@ -112,7 +105,7 @@
         <path d="M12.5 12.5L16 16" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/>
       </svg>
       <label class="sr-only" for="q">제목·내용으로 검색</label>
-      <input type="search" id="q" placeholder="제목·내용으로 검색">
+      <input type="search" id="q">
     </div>
   </div>
   <div class="months-wrap">
@@ -166,7 +159,44 @@
   </div>
 </main>
 <script>
+  /* 목록 정본. 정적 HTML 에는 기준 프레임(908:640)과 같은 2026년 8월 4건만 두고,
+     달을 바꾸거나 검색하면 여기서 다시 그린다. 피그마는 한 상태를 그린 것이라
+     나머지 달의 제목은 피그마에 없다 — 그래서 마크업이 아니라 데이터로 둔다.
+     (원본: 디자인 캔버스의 ARCHIVE) */
+  var ARCHIVE = [
+    ['2026년 8월','08. 07','디자인','디자인 시스템을 팀에 정착시키는 6개월'],
+    ['2026년 8월','08. 06','커리어·이직','이직 오퍼를 비교하는 세 가지 기준'],
+    ['2026년 8월','08. 04','AI로 일하기','AI로 리서치를 정리하는 워크플로'],
+    ['2026년 8월','08. 03','디자인','리서치 없이 만든 화면이 실패하는 이유'],
+    ['2026년 7월','07. 31','커리어·이직','연봉 협상에서 먼저 말하지 않기'],
+    ['2026년 7월','07. 29','디자인','토큰 네이밍, 어디까지 정해야 할까'],
+    ['2026년 7월','07. 24','AI로 일하기','프롬프트보다 중요한 건 맥락 정리다'],
+    ['2026년 7월','07. 22','디자인','핸드오프를 없애는 팀의 일하는 방식'],
+    ['2026년 7월','07. 17','커리어·이직','경력기술서는 성과가 아니라 판단을 쓴다'],
+    ['2026년 6월','06. 30','디자인','접근성을 기본값으로 만드는 컴포넌트 설계'],
+    ['2026년 6월','06. 26','AI로 일하기','회의록을 자동화했더니 생긴 부작용'],
+    ['2026년 6월','06. 19','디자인','좋은 empty state가 리텐션을 바꾼다'],
+    ['2026년 5월','05. 28','커리어·이직','레퍼런스 체크는 이미 시작됐다'],
+    ['2026년 5월','05. 21','디자인','디자인 부채를 갚는 스프린트 만들기'],
+    ['2026년 4월','04. 30','AI로 일하기','자동화하면 안 되는 일 구분하기'],
+    ['2026년 4월','04. 15','디자인','컴포넌트는 언제 쪼개야 하는가'],
+    ['2026년 3월','03. 27','커리어·이직','연차보다 오래 남는 커리어 서사'],
+    ['2026년 3월','03. 12','디자인','모션은 장식이 아니라 안내다'],
+    ['2026년 2월','02. 26','디자인','첫 주에 만든 디자인 원칙 세 줄'],
+    ['2026년 1월','01. 15','커리어·이직','연초 목표를 분기로 쪼개는 법'],
+    ['2025년 12월','12. 18','AI로 일하기','프롬프트보다 중요한 건 데이터 정리'],
+    ['2025년 12월','12. 04','디자인','한 해 디자인 회고를 쓰는 다섯 질문'],
+    ['2025년 11월','11. 20','커리어·이직','이력서에서 성과를 숫자로 만드는 법'],
+    ['2025년 11월','11. 06','디자인','접근성은 마지막에 붙이는 게 아니다'],
+    ['2025년 10월','10. 23','AI로 일하기','반복 업무를 워크플로로 바꾸기'],
+    ['2025년 10월','10. 09','디자인','리뷰에서 방어하지 않고 설명하기']
+  ];
   (function () {
+    /* placeholder 는 속성이라 문구 대조(docs-audit)에 안 잡힌다. 그래서 문구의 정본은
+       화면에 있는 sr-only label 하나로 두고, placeholder 는 그걸 복사해 쓴다 —
+       두 곳에 같은 글자를 적어 두면 보이는 쪽만 고쳐도 검사가 초록이 된다. */
+    var q = document.getElementById('q');
+    q.placeholder = document.querySelector('label[for="q"]').textContent;
     var months = document.querySelector('.months');
     var btn = document.getElementById('mtoggle');
     btn.addEventListener('click', function () {
@@ -174,13 +204,47 @@
       btn.setAttribute('aria-expanded', open ? 'true' : 'false');
       btn.textContent = open ? '▴' : '▾';
     });
+
+    var listBox = document.querySelector('.list');
+    function selectedMonth() {
+      var on = months.querySelector('.chip[aria-pressed="true"]');
+      if (!on) return null;
+      var year = '2026', walk = on.previousElementSibling;
+      while (walk) {
+        if (walk.classList.contains('ybreak')) { year = walk.textContent.trim(); break; }
+        walk = walk.previousElementSibling;
+      }
+      return year + '년 ' + on.textContent.trim();
+    }
+    function esc(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+    function render() {
+      var term = q.value.trim().toLowerCase();
+      var rows = term
+        ? ARCHIVE.filter(function (a) { return (a[3] + ' ' + a[2]).toLowerCase().indexOf(term) >= 0; })
+        : ARCHIVE.filter(function (a) { return a[0] === selectedMonth(); });
+      if (!rows.length) {
+        listBox.innerHTML = '<div class="empty"><span class="t-body-s">검색 결과가 없어요</span>'
+          + '<span class="t-caption">다른 키워드로 찾아보세요</span></div>';
+        return;
+      }
+      listBox.innerHTML = '<div class="list-group">' + rows.map(function (a) {
+        return '<a class="art" href="#"><span class="col">'
+          + '<span class="meta"><span class="t-micro tag">' + esc(a[2]) + '</span>'
+          + '<span class="t-caption date">' + esc(a[1]) + '</span></span>'
+          + '<span class="t-body-s ttl">' + esc(a[3]) + '</span></span>'
+          + '<span class="caret" aria-hidden="true">›</span></a>';
+      }).join('') + '</div>';
+    }
     months.addEventListener('click', function (e) {
       var chip = e.target.closest('.chip');
       if (!chip) return;
       months.querySelectorAll('.chip').forEach(function (c) {
         c.setAttribute('aria-pressed', c === chip ? 'true' : 'false');
       });
+      q.value = '';
+      render();
     });
+    q.addEventListener('input', render);
   })();
 </script>
 </div>
