@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="only light">
+<meta name="format-detection" content="telephone=no">
+<meta name="robots" content="noindex,nofollow"><title>설정 완료 — 커리어코치</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root{
+    color-scheme: only light;   /* meta 와 같은 값 — CSS 로도 선언해 확실히 적용한다 */
+    --amber-50:#FFFBEB;--amber-100:#FEF3C7;--amber-200:#FDE68A;--amber-400:#FBBF24;--amber-500:#F59E0B;--amber-600:#D97706;--amber-700:#B45309;
+    --gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;--gray-300:#CBD5E1;--gray-400:#94A3B8;
+    --gray-500:#64748B;--gray-600:#475569;--gray-700:#334155;--gray-800:#1E293B;--gray-900:#0F172A;
+    /* CTA 규칙(2026-08-03) — 제품 공통. 값·근거는 CLAUDE.md "CTA 규칙" */
+    --cta-h:54px; --cta-radius:14px; --cta-fs:15px; --cta-fw:700;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{background:#fff}
+  body{font-family:'Pretendard Variable',Pretendard,'Noto Sans CJK KR',-apple-system,sans-serif;
+    background:#fff;color:var(--gray-800);-webkit-font-smoothing:antialiased}
+  /* 화면 채우기용 높이는 svh 로 고정한다 — 근거는 onboarding/3 의 같은 주석. */
+  .board{width:100%;max-width:450px;margin:0 auto;min-height:100vh;min-height:100svh;background:#fff;
+    padding-bottom:calc(100px + env(safe-area-inset-bottom))}
+  @media (min-width:451px){ body{background:var(--gray-100)}
+    .board{box-shadow:0 0 24px rgba(15,23,42,.06),0 0 64px rgba(15,23,42,.10)} }
+
+  .hd{position:sticky;top:0;z-index:20;display:flex;align-items:center;
+    height:calc(48px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 12px 0;
+    background:#fff}
+  .back{width:48px;height:48px;display:flex;align-items:center;justify-content:center;
+    border:0;background:none;padding:0;cursor:pointer;text-decoration:none;position:relative;
+    -webkit-tap-highlight-color:transparent}
+  .back svg{position:relative;z-index:1}
+  .back::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:36px;height:36px;border-radius:10px;background:transparent;transition:background .12s}
+  .back:active::before{background:var(--gray-100)}
+
+  .prog{display:flex;gap:5px;padding:22px 24px 0}
+  .prog i{height:3px;border-radius:99px;flex:1;
+    background-image:linear-gradient(90deg,var(--amber-400) 0%,var(--amber-600) 100%);
+    background-size:300% 100%;background-repeat:no-repeat}
+  .prog i:nth-child(1){background-position:0% 0}
+  .prog i:nth-child(2){background-position:50% 0}
+  .prog i:nth-child(3){background-position:100% 0}
+
+  .kick{padding:20px 24px 0;font-size:13px;line-height:18px;font-weight:600;color:var(--amber-600);
+    display:flex;align-items:center;gap:6px}
+  .title{padding:9px 24px 0;font-size:24px;line-height:32px;font-weight:700;color:var(--gray-900);letter-spacing:-0.01em}
+
+  /* 고른 값 요약 — 칩 한 줄. 값은 저장된 선택에서 채운다. */
+  .sum{display:flex;flex-wrap:wrap;gap:6px;padding:14px 24px 0}
+  .sum b{height:28px;display:flex;align-items:center;padding:0 10px;border:1px solid var(--gray-200);
+    border-radius:8px;font-size:13px;line-height:18px;font-weight:400;color:var(--gray-600)}
+  .sum a{height:28px;display:flex;align-items:center;padding:0 10px;border-radius:8px;
+    font-size:13px;line-height:18px;font-weight:600;color:var(--amber-600);text-decoration:none;
+    -webkit-tap-highlight-color:transparent}
+
+  /* 주간 표 — 이 화면의 본문 */
+  .week{margin:22px 24px 0;border:1px solid var(--gray-200);border-radius:16px;overflow:hidden}
+  .w{display:flex;align-items:center;gap:14px;padding:16px;box-shadow:inset 0 -1px 0 var(--gray-100)}
+  .w.on{background:var(--amber-50);box-shadow:inset 0 -1px 0 var(--amber-200)}
+  .w .d{flex:none;width:28px;font-size:15px;line-height:20px;font-weight:700;color:var(--gray-400)}
+  .w.on .d{color:var(--amber-700)}
+  .w .t{font-size:14px;line-height:20px;font-weight:400;color:var(--gray-700)}
+  .w.on .t{font-weight:700;color:var(--gray-900)}
+  .w .s{font-size:13px;line-height:18px;color:var(--gray-400);margin-top:2px}
+  .w.on .s{color:#92400E}
+  .w.off{padding:14px 16px;background:var(--gray-50);box-shadow:none}
+  .w.off .d{width:28px;font-size:13px;line-height:18px;font-weight:400;color:var(--gray-300)}
+  .w.off .t{font-size:13px;line-height:18px;font-weight:400;color:var(--gray-400)}
+
+  /* 관심 주제 확인 */
+  .topic{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    margin:16px 24px 0;padding:14px 16px;border:1px solid var(--amber-200);
+    background:var(--amber-50);border-radius:14px}
+  .topic .lb{font-size:13px;line-height:18px;font-weight:600;color:var(--amber-700)}
+  .topic .nm{font-size:17px;line-height:24px;font-weight:600;color:var(--gray-900);margin-top:2px}
+  .edit{display:flex;align-items:center;gap:4px;height:32px;padding:0 12px;flex:none;
+    border:1px solid var(--amber-200);border-radius:10px;background:#fff;
+    font-size:13px;line-height:18px;font-weight:600;color:var(--amber-700);cursor:pointer;
+    -webkit-tap-highlight-color:transparent}
+  .edit svg{transition:transform .15s}
+  .edit[aria-expanded="true"] svg{transform:rotate(180deg)}
+
+  /* 주제 고르기 — 기본은 접혀 있다. 고르는 화면이 아니라 확인하는 화면이다. */
+  .pick{margin:10px 24px 0;border:1px solid var(--gray-200);border-radius:14px;padding:16px}
+  .pick h2{font-size:14px;line-height:20px;font-weight:700;color:var(--gray-900)}
+  .pick p{margin-top:6px;font-size:13px;line-height:18px;color:var(--gray-500)}
+  .topics{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+  /* 「자동」은 트랙 하나가 아니라 **고른 주제를 지우는 자리**다. 목록과 같은 줄에 두면
+     18번째 트랙으로 읽히므로 위에 따로 세우고 아래를 선으로 가른다. */
+  .topics.auto{margin-top:12px;padding-bottom:12px;box-shadow:inset 0 -1px 0 var(--gray-100)}
+  .topics .c{border:1px solid var(--gray-200);background:#fff;color:var(--gray-600);border-radius:10px;
+    padding:8px 11px;font-size:13px;line-height:18px;font-weight:400;
+    cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;
+    transition:background .12s,border-color .12s,color .12s}
+  .topics .c:active{transform:scale(.97)}
+  .topics .c.on{background:var(--amber-50);border-color:var(--amber-500);color:var(--amber-600);font-weight:600}
+  .pick .note{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--gray-50);
+    font-size:13px;line-height:18px;color:var(--gray-500)}
+  .acts{display:flex;gap:8px;margin-top:16px}
+  .acts button{height:var(--cta-h);border-radius:var(--cta-radius);border:0;cursor:pointer;
+    font-family:inherit;font-size:var(--cta-fs);font-weight:var(--cta-fw);
+    -webkit-tap-highlight-color:transparent}
+  .acts button:active{transform:scale(.98)}
+  .acts .ghost{flex:1;border:1px solid var(--gray-200);background:#fff;color:var(--gray-600)}
+  .acts .fill{flex:1.4;background:var(--amber-500);color:#fff}
+
+  /* ④ 무료로 며칠 — 버튼이 아니라 본문이 알린다 (가격·결제는 이 화면에 없다) */
+  .free{display:flex;gap:10px;margin:20px 24px 0;padding:14px 16px;border-radius:14px;background:var(--gray-50)}
+  .free svg{flex:none;margin-top:2px}
+  .free h2{font-size:14px;line-height:20px;font-weight:700;color:var(--gray-700)}
+  .free p{margin-top:3px;font-size:13px;line-height:18px;color:var(--gray-500)}
+
+  .fade{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:450px;height:100px;
+    background:linear-gradient(180deg,rgba(255,255,255,0),#fff 55%);pointer-events:none;z-index:9}
+  .cta{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    width:calc(100% - 40px);max-width:410px;height:var(--cta-h);
+    display:block;text-align:center;line-height:var(--cta-h);text-decoration:none;
+    background:var(--amber-500);color:#fff;border-radius:var(--cta-radius);
+    font-size:var(--cta-fs);font-weight:var(--cta-fw);
+    box-shadow:0 12px 32px rgba(217,119,6,.28);cursor:pointer;z-index:10;
+    -webkit-tap-highlight-color:transparent}
+  .cta:active{transform:translateX(-50%) scale(.98)}
+</style></head><body>
+<div class="board">
+  <div class="hd"><a class="back" href="/onboarding/3/" aria-label="뒤로"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15.75 4.5L8.25 12l7.5 7.5" stroke="#475569" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
+  <div class="prog"><i></i><i></i><i></i></div>
+  <div class="kick"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6.5L9.5 17 4 11.5" stroke="#D97706" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>설정 완료</span></div>
+  <div class="title">한 주가 이렇게<br>도착할 거예요</div>
+
+  <div class="sum"><b id="s-job"></b><b id="s-year"></b><b id="s-region"></b><a href="/onboarding/1/">다시 고르기</a></div>
+
+  <div class="week">
+    <div class="w on"><div class="d">월</div><div><div class="t"><span class="tk"></span> 인사이트 1편</div><div class="s">내 직무 이야기</div></div></div>
+    <div class="w"><div class="d">화</div><div><div class="t">일 잘하는 법 · 커리어 1편</div><div class="s">직무를 가리지 않는 이야기</div></div></div>
+    <div class="w on"><div class="d">수</div><div><div class="t"><span class="tk"></span> 인사이트 1편</div></div></div>
+    <div class="w"><div class="d">목</div><div><div class="t">최신 공고 3건 + 채용시장 지표</div><div class="s">이날은 글 대신 공고예요</div></div></div>
+    <div class="w on"><div class="d">금</div><div><div class="t"><span class="tk"></span> 인사이트 1편</div></div></div>
+    <div class="w off"><div class="d">토·일</div><div class="t">쉬어요. 공휴일도요</div></div>
+  </div>
+
+  <div class="topic">
+    <div><div class="lb">내 주제</div><div class="nm tk"></div></div>
+    <button class="edit" type="button" aria-expanded="false" aria-controls="pick">바꾸기<svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9.5l6 6 6-6" stroke="#B45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </div>
+
+  <div class="pick" id="pick" hidden>
+    <h2>어떤 주제로 받을까요?</h2>
+    <p>하나만 고를 수 있어요. 화요일 「일 잘하는 법 · 커리어」는 모두에게 갑니다.</p>
+    <div class="topics auto"><div class="c" data-auto="1">직군에 맞춰 자동</div></div>
+<!--roles:topics--><div class="topics"><div class="c" data-track="개발·AI">개발·AI</div><div class="c" data-track="디자인">디자인</div><div class="c" data-track="마케팅·그로스">마케팅·그로스</div><div class="c" data-track="프로덕트·전략">프로덕트·전략</div><div class="c" data-track="세일즈·GTM">세일즈·GTM</div><div class="c" data-track="제조·R&amp;D">제조·R&amp;D</div><div class="c" data-track="재무·회계">재무·회계</div><div class="c" data-track="조직·피플">조직·피플</div><div class="c" data-track="커머스·리테일">커머스·리테일</div><div class="c" data-track="물류·공급망">물류·공급망</div><div class="c" data-track="법률·규제">법률·규제</div><div class="c" data-track="금융·마켓">금융·마켓</div><div class="c" data-track="미디어·콘텐츠">미디어·콘텐츠</div><div class="c" data-track="고객경험·CX">고객경험·CX</div><div class="c" data-track="의료·헬스케어">의료·헬스케어</div><div class="c" data-track="건설·공간">건설·공간</div><div class="c" data-track="게임">게임</div></div><!--/roles:topics-->
+    <div class="note">바꾸면 월·수·금에 오는 글이 그 주제로 바뀝니다. 공고는 고른 직군 그대로예요.</div>
+    <div class="acts"><button class="ghost" type="button">취소</button><button class="fill" type="button">이 주제로 할게요</button></div>
+  </div>
+
+  <div class="free">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s-7.5-4.6-7.5-9.8A4.2 4.2 0 0 1 12 8.4a4.2 4.2 0 0 1 7.5 2.8C19.5 16.4 12 21 12 21z" stroke="#94A3B8" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    <div>
+      <h2>먼저 며칠 무료로 받아 보세요</h2>
+      <p>지금은 아무것도 내지 않아요. 계속 받을지는 며칠 뒤에 정하면 됩니다.</p>
+    </div>
+  </div>
+</div>
+<div class="fade"></div>
+<a class="cta" href="/mypage/">완료</a>
+
+<!--roles:jobmap--><script id="cc-topic-map" type="application/json">{"tracks":["개발·AI","디자인","마케팅·그로스","프로덕트·전략","세일즈·GTM","제조·R&D","재무·회계","조직·피플","커머스·리테일","물류·공급망","법률·규제","금융·마켓","미디어·콘텐츠","고객경험·CX","의료·헬스케어","건설·공간","게임"],"groups":[["마케팅_광고_홍보",2],["IT_개발",0],["기획_전략_경영",3],["영업",4],["엔지니어링_연구_RND",5],["회계_세무_재무",6],["인사_노무_HRD_총무",7],["AI_데이터",0],["디자인",1],["상품기획_MD",8],["생산_기능",5],["무역_물류_유통",9],["법률_법무_컴플라이언스",10],["증권_운용",11],["미디어_엔터_방송",12],["고객상담_TM",13],["은행_보험_카드_캐피탈",11],["서비스",-1],["의료_보건",14],["건설_건축",15],["교육",-1],["게임",16],["공공_복지",-1],["식음료",-1]],"jobs":{"퍼포먼스마케팅":["퍼포먼스마케팅",0],"콘텐츠마케팅":["콘텐츠마케팅",0],"마케팅기획_전략":["마케팅기획·전략",0],"SNS마케팅":["SNS마케팅",0],"글로벌마케팅":["글로벌마케팅",0],"브랜드마케팅":["브랜드마케팅",0],"CRM마케팅":["CRM마케팅",0],"광고기획_AE":["광고기획·AE",0],"홍보_PR":["홍보·PR",0],"전시_행사마케팅":["전시·행사마케팅",0],"기타마케팅":["기타",0],"서버_백엔드":["서버·백엔드",1],"DevOps_SRE":["DevOps·SRE",1],"정보보호_보안":["정보보호·보안",1],"웹풀스택":["웹풀스택",1],"프론트엔드":["프론트엔드",1],"QA_테스트":["QA·테스트",1],"개발PM":["개발PM",1],"소프트웨어엔지니어":["소프트웨어",1],"시스템_네트워크":["시스템·네트워크",1],"임베디드소프트웨어":["임베디드SW",1],"응용프로그램":["응용프로그램",1],"ERP_SAP":["ERP·SAP",1],"DBA":["DBA",1],"크로스플랫폼":["크로스플랫폼",1],"기타IT_개발":["기타",1],"로봇SW":["로봇SW",1],"시스템소프트웨어":["시스템SW",1],"안드로이드":["안드로이드",1],"하드웨어엔지니어":["하드웨어",1],"그래픽스":["그래픽스",1],"블록체인":["블록체인",1],"iOS":["iOS",1],"사물인터넷_IoT":["IoT",1],"웹퍼블리싱":["웹퍼블리싱",1],"VR_AR_3D":["VR·AR·3D",1],"PM_PO":["PM·PO",2],"사업개발_분석":["사업개발·분석",2],"프로젝트매니저":["프로젝트매니저",2],"서비스_상품기획":["서비스·상품기획",2],"사업_전략기획":["사업·전략기획",2],"운영관리_OM":["운영관리·OM",2],"경영지원":["경영지원",2],"기타기획_전략_경영":["기타",2],"컨설팅":["컨설팅",2],"기술기획":["기술기획",2],"B2B영업":["B2B영업",3],"해외영업":["해외영업",3],"영업관리_지원":["영업관리",3],"기술_IT영업":["기술·IT영업",3],"B2C영업":["B2C영업",3],"제약_의료영업":["제약·의료영업",3],"금융_보험영업":["금융·보험영업",3],"일반영업":["일반영업",3],"기타영업":["기타",3],"전기_전자_제어":["전기·전자·제어",4],"기타엔지니어링_RND":["기타",4],"기계설계_CAD":["기계설계·CAD",4],"기계":["기계",4],"반도체_디스플레이":["반도체·디스플레이",4],"화학":["화학",4],"자동차":["자동차",4],"에너지":["에너지",4],"바이오_제약":["바이오·제약",4],"통신기술_네트워크구축":["통신기술·네트워크",4],"조선_항공_우주":["조선·항공·우주",4],"식품":["식품",4],"환경":["환경",4],"화장품":["화장품",4],"금속_철강":["금속·철강",4],"회계":["회계",5],"재무":["재무",5],"세무":["세무",5],"경리_회계보조":["경리·회계",5],"IR_공시":["IR·공시",5],"기타회계_재무_세무":["기타",5],"리크루터_헤드헌터":["리크루터",6],"총무_비서":["총무·비서",6],"HRD_조직문화":["HRD·조직문화",6],"인사기획":["인사기획",6],"기타HR_총무":["기타",6],"노무관리":["노무관리",6],"평가_보상":["평가·보상",6],"데이터엔지니어":["데이터엔지니어",7],"머신러닝엔지니어":["머신러닝",7],"데이터분석가":["데이터분석",7],"LLM":["LLM",7],"데이터사이언티스트":["데이터사이언스",7],"컴퓨터비전":["컴퓨터비전",7],"MLOps":["MLOps",7],"RAG":["RAG",7],"멀티모달엔지니어":["멀티모달",7],"AI서비스기획":["AI서비스기획",7],"생성형AI":["생성형AI",7],"AI리서치":["AI리서치",7],"NLP":["NLP",7],"AI비즈니스":["AI비즈니스",7],"자율주행":["자율주행",7],"기타AI_데이터":["기타",7],"영상_음성AI":["영상·음성AI",7],"UXUI_프로덕트":["UX·UI·프로덕트",8],"광고_콘텐츠":["광고·콘텐츠",8],"브랜딩_BI_BX":["브랜딩·BI·BX",8],"그래픽_시각":["그래픽·시각",8],"패션_텍스타일":["패션·텍스타일",8],"웹디자인":["웹디자인",8],"영상_모션":["영상·모션",8],"공간_실내_VMD":["공간·실내·VMD",8],"패키지":["패키지",8],"3D_VFX":["3D·VFX",8],"일러스트레이터":["일러스트",8],"산업_제품":["산업·제품",8],"출판_편집":["출판·편집",8],"기타디자인":["기타",8],"건축_공공_조경디자인":["건축·공공·조경",8],"온라인MD":["온라인MD",9],"상품기획":["상품기획",9],"뷰티MD":["뷰티MD",9],"패션MD":["패션MD",9],"리테일MD":["리테일MD",9],"식품MD":["식품MD",9],"영업MD":["영업MD",9],"기타상품기획_MD":["기타",9],"생산":["생산",10],"품질":["품질",10],"설비":["설비",10],"환경안전":["환경안전",10],"기타생산_기능직":["기타",10],"물류":["물류",10],"시설관리":["시설관리",10],"건설_공사_프로젝트":["건설·공사",10],"설계_CAD_CAM":["CAD·CAM",10],"공무":["공무",10],"구매_조달":["구매·조달",11],"물류_SCM":["물류·SCM",11],"자재_재고관리":["자재·재고",11],"수출입관리_사무":["수출입관리",11],"입출고_포장":["입출고·포장",11],"관세사":["관세사",11],"운송":["운송",11],"해외_상사영업":["상사영업",11],"설비_시설관리":["설비·시설",11],"기타무역_물류_유통":["기타",11],"포워딩":["포워딩",11],"유통관리":["유통관리",11],"컴플라이언스":["컴플라이언스",12],"법무":["법무",12],"변호사":["변호사",12],"내부감사":["내부감사",12],"특허_IP":["특허·IP",12],"기타법률":["기타",12],"ESG_윤리":["ESG·윤리",12],"변리사":["변리사",12],"운용_트레이딩":["운용·트레이딩",13],"VC_PE":["VC·PE",13],"부동산_인프라금융":["부동산금융",13],"기타증권_운용":["기타",13],"금융상품개발_영업":["금융상품개발",13],"리스크_준법_심사":["리스크·준법",13],"경영지원_관리":["경영지원",13],"증권IB":["증권IB",13],"PB_WM":["PB·WM",13],"PD_감독":["PD·감독",14],"콘텐츠기획_에디터":["콘텐츠기획·에디터",14],"영상편집":["영상편집",14],"통_번역":["통역·번역",14],"CG_모션그래픽":["CG·모션그래픽",14],"아티스트매니지먼트":["아티스트매니지먼트",14],"방송기술_중계":["방송기술·중계",14],"사운드디자이너":["사운드디자이너",14],"배급_제작사":["배급·제작사",14],"방송작가":["방송작가",14],"음원_음반":["음원·음반",14],"기자_리포터":["기자·리포터",14],"기타미디어_엔터":["기타",14],"촬영감독_카메라":["촬영감독·카메라",14],"크리에이터_인플루언서":["크리에이터",14],"사진작가":["사진작가",14],"송출_편성":["송출·편성",14],"출판":["출판",14],"전시기획_큐레이터":["전시기획",14],"CS":["CS",15],"CX매니저":["CX매니저",15],"인바운드":["인바운드",15],"아웃바운드":["아웃바운드",15],"기타고객상담":["기타",15],"계리":["계리",16],"보험상품개발":["보험상품개발",16],"언더라이팅_심사":["언더라이팅",16],"기타은행_보험":["기타",16],"은행":["은행",16],"청구_보상":["청구·보상",16],"보험설계":["보험설계",16],"카드사":["카드사",16],"캐피탈":["캐피탈",16],"손해사정":["손해사정",16],"매장관리":["매장관리",17],"기타서비스":["기타",17],"호텔서비스":["호텔서비스",17],"경호_경비":["경호·경비",17],"설치_수리기사":["설치·수리",17],"안내_리셉션":["리셉션",17],"환경미화원":["환경미화원",17],"주차_주유":["주차·주유",17],"항공서비스":["항공서비스",17],"피부관리":["피부관리",17],"간호사":["간호사",18],"기타의료_보건":["기타",18],"간호조무사":["간호조무사",18],"영상의학_임상병리_검사":["영상의학·임상병리",18],"병원행정_접수_수납":["병원행정",18],"약사_약무보조":["약사",18],"물리치료_작업치료":["물리·작업치료",18],"영양사_임상영양사":["영양사",18],"요양보호사":["요양보호사",18],"의사":["의사",18],"수의사":["수의사",18],"응급구조사":["응급구조사",18],"의료미용_에스테틱":["의료미용",18],"설계_감리_시공_공무":["설계·감리·시공",19],"기계_전기_소방_설비":["기계·전기·소방",19],"안전_품질_재료":["안전·품질·재료",19],"사무_관리_전산":["사무·관리",19],"토목_측량_조경_환경":["토목·측량·조경",19],"건축설계_시공":["건축설계·시공",19],"기타건설_건축":["기타",19],"학원상담_운영":["학원상담·운영",20],"교재개발_교수설계":["교재개발",20],"기술_전문강사":["전문강사",20],"기타교육":["기타",20],"유치원_보육교사":["유치원·보육",20],"국어_외국어강사":["어학강사",20],"교직원_조교":["교직원·조교",20],"학습지_방문교사":["학습지·방문",20],"게임기획_PM":["게임기획·PM",21],"게임개발_클라이언트":["게임개발·클라이언트",21],"게임아트":["게임아트",21],"게임애니메이션":["게임애니메이션",21],"게임운영":["게임운영",21],"게임이펙트_FX":["게임이펙트·FX",21],"게임개발_서버":["게임개발·서버",21],"게임개발_모바일":["게임개발·모바일",21],"게임3D모델링":["게임3D모델링",21],"게임인터페이스":["게임인터페이스",21],"게임연출_영상":["게임연출·영상",21],"게임사운드":["게임사운드",21],"행정_사무_운영":["행정·사무",22],"교육_연구":["교육·연구",22],"기술_전산_시설":["기술·전산",22],"복지_사회서비스":["복지·사회",22],"기타공공_복지":["기타",22],"공공안전":["공공안전",22],"상담_심리":["상담·심리",22],"아동_청소년복지":["아동·청소년",22],"노인_여성복지":["노인·여성",22],"주방조리":["주방조리",23],"서비스_홀스태프":["홀스태프",23],"매장운영":["매장운영",23],"제과_제빵":["제과·제빵",23],"음료_주류":["음료·주류",23],"기타식음료":["기타",23]}}</script><!--/roles:jobmap-->
+
+<script type="module">
+  import { pageView } from '/assets/track.js';
+  pageView('onboarding_step', { step: 'done' });
+</script>
+<script type="module">
+  // 앞 세 화면이 모아 둔 선택값을 읽어 확인시킨다 — assets/onboarding-store.js
+  import { readState, writeState, retryPending, saveOnboarding } from '/assets/onboarding-store.js';
+  // track 은 이 모듈 블록 안에 따로 들여온다. 위 pageView 블록은 **다른 모듈**이라 스코프가 안 닿는다 —
+  // 안 들여오면 아래 track(...) 이 ReferenceError 로 터지고 그 뒤의 저장이 통째로 안 나간다.
+  import { track } from '/assets/track.js';
+
+  // 직군 → 주제. 표는 tools/roles/tracks.json 이 정본이고 build.mjs 가 위 blob 을 만든다.
+  // 정본의 정본은 career-coach insights/sources.py 의 TAXONOMY_MAP 이다.
+  const MAP = JSON.parse(document.getElementById('cc-topic-map').textContent);
+
+  /** 저장된 직군에서 주제를 푼다. **발송 경로와 같은 규칙이다** —
+   *  career-coach `ops/send.py` 의 `트랙과_직군` 이 `v_send_target.job_group_codes`
+   *  (= 고른 중분류의 **대분류**)를 정렬해 트랙이 잡히는 첫 번째를 쓴다. 여기도 같다.
+   *  대분류로 맞춘 이유: 트랙 대응표(`TAXONOMY_MAP`)가 대분류로 적혀 있어서 중분류로는
+   *  아무 트랙도 안 잡힌다. 정렬 기준이 갈리면 화면이 보여준 주제와 실제로 받는 주제가
+   *  달라지고, 그 갈림은 어디에서도 안 터진다. */
+  const trackFromJobs = (jobs) => {
+    const 대분류 = [...new Set(jobs.map((c) => (MAP.jobs[c] || [])[1]).filter((i) => i != null))]
+      .map((i) => MAP.groups[i])
+      .sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+    for (const [, t] of 대분류) if (t >= 0) return MAP.tracks[t];
+    return null;   // 아직 트랙이 없는 직군만 고른 사람 — 직접 고르게 한다
+  };
+
+  const state = readState();
+  const auto = trackFromJobs(state.jobs);
+  let topic = state.topic || auto;
+
+  // ① 고른 값 요약. 없는 값은 칸을 통째로 감춘다 — 빈 칩이 남으면 고장으로 보인다.
+  // 칩 하나에 다 담지 않는다 — 「첫 항목 외 N」. 피그마 목업(955:656)이 그린 모양과 같다.
+  const label = (list) => (list.length === 1 ? list[0] : `${list[0]} 외 ${list.length - 1}`);
+  const put = (id, text) => { const el = document.getElementById(id); if (text) el.textContent = text; else el.hidden = true; };
+  put('s-job', state.jobs.length ? label(state.jobs.map((c) => (MAP.jobs[c] || [c])[0])) : '');
+  put('s-year', state.years === null ? '' : (state.yearsMax === null || state.yearsMax === state.years
+    ? `${state.years}년` : `${state.years}~${state.yearsMax}년`));
+  put('s-region', state.regions.length ? label(state.regions) : '');
+
+  // ② 주제 — 화면 곳곳의 주제 이름을 한 번에 맞춘다.
+  let draft = topic;                 // 펼친 목록에서 고르는 중인 값. 확정 전까지 topic 은 안 바뀐다.
+  const chips = [...document.querySelectorAll('.topics .c')];
+  const paint = () => {
+    for (const el of document.querySelectorAll('.tk')) el.textContent = topic || '아직 못 정했어요';
+    // 「자동」 칩은 트랙 이름이 없다(draft === null 이 그 상태다). data-track 만 보면
+    // 자동을 골랐을 때 아무 칩도 안 켜져, 고른 것이 화면에 안 나타난다.
+    for (const c of chips) c.classList.toggle('on', c.dataset.auto === '1' ? draft === null : c.dataset.track === draft);
+  };
+  paint();
+
+  const pick = document.getElementById('pick');
+  const edit = document.querySelector('.edit');
+  // 주제를 못 정한 사람에게는 처음부터 펼쳐 준다(트랙이 아직 없는 직군만 고른 경우).
+  // 나머지에게는 접어 둔다 — 고르는 화면이 아니라 확인하는 화면이다.
+  const open = (on) => { pick.hidden = !on; edit.setAttribute('aria-expanded', String(on)); };
+  if (!topic) open(true);
+  const 되돌린다 = () => { draft = state.topic || null; paint(); };
+  edit.addEventListener('click', () => { 되돌린다(); open(pick.hidden); });
+
+  // 칩은 **초안**만 바꾼다. 확정은 아래 버튼이 한다 — 잘못 눌러도 취소로 되돌아온다.
+  //   · 「직군에 맞춰 자동」 = null. 트랙 하나가 아니라 **고른 주제를 지우는** 값이다.
+  for (const c of chips) c.addEventListener('click', () => {
+    draft = c.dataset.auto === '1' ? null : c.dataset.track;
+    paint();
+  });
+
+  pick.querySelector('.ghost').addEventListener('click', () => { 되돌린다(); open(false); });
+  // 지난 저장이 실패한 채 남아 있으면 여기서 다시 보낸다.
+  // 🔴 **그 호출을 기다린 뒤에 주제를 보낸다.** onboarding-store 는 저장을 하나씩만
+  //    보내고(`inflight`) 겹치면 `busy` 로 튕기는데, 그 판은 주제를 안 싣고 있다 —
+  //    기다리지 않으면 화면은 바뀐 주제를 그렸는데 서버에는 안 간 상태가 되고,
+  //    먼저 날아간 저장이 성공하며 pending 표시까지 지워 재시도 사다리도 끊긴다.
+  const 재시도 = retryPending();
+
+  pick.querySelector('.fill').addEventListener('click', async () => {
+    open(false);
+    if (draft === (state.topic || null)) return;   // 안 바꿨으면 보낼 것이 없다
+    state.topic = draft;
+    topic = draft || auto;                         // 「자동」이면 직군이 정해 주는 값이 보인다
+    paint();
+    // 「자동」은 **비우기**다. 빈 문자열을 그 뜻으로 쓰지 않는다 — 서버가 별도 인자로 받는다
+    // (career-coach 0082 의 `p_topic_clear`). 빈 문자열을 재활용하면 「안 고름」과
+    // 「비우기」가 한 값이 되어 어느 쪽인지 서버가 못 가른다.
+    writeState({ topic: draft, topicClear: draft === null, pending: true });
+    // 주제를 실제로 몇 명이 바꾸는지 지금은 못 본다. 이름은 허용 목록에 있는 것만 통과한다.
+    track('onboarding_step', { step: 'done', topic: draft === null ? 'auto' : 'changed' });
+    await 재시도;
+    await saveOnboarding();
+    // 실패해도 사용자를 막지 않는다 — pending 이 남아 다음 진입에서 다시 나간다.
+    // (이 화면의 CTA 는 마이페이지로 나가므로 그 재시도는 온보딩에 다시 들어올 때다.)
+  });
+</script>
+</body></html>
