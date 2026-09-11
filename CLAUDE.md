@@ -123,8 +123,8 @@ git fetch --unshallow          # 얕게 클론됐다면. 이미 깊으면 아무
 증상으로 알아보는 법 — `docs-audit` 이 **개별 문구 차이가 아니라 「판정 불가」만** 줄줄이
 뱉으면 스냅샷이 아니라 클론 깊이를 먼저 본다. `git rev-list --count HEAD` 가 한 자릿수면
 얕은 것이다.
-훅은 **여섯 겹**이다. (2026-08-13 정정 — 표에 넷만 있었고 머리말은 "세 겹" 이라고 적었는데
-코드에는 여섯 개가 있었다. 1.2겹·1.5겹이 빠져 있었다.)
+훅은 **일곱 겹**이다. (2026-08-13 정정 — 표에 넷만 있었고 머리말은 "세 겹" 이라고 적었는데
+코드에는 여섯 개가 있었다. 1.2겹·1.5겹이 빠져 있었다. 2026-09-11 에 1.6겹이 늘었다.)
 
 | 겹 | 무엇 | 언제 도나 | 본다 |
 |---|---|---|---|
@@ -132,6 +132,7 @@ git fetch --unshallow          # 얕게 클론됐다면. 이미 깊으면 아무
 | 1 | `tools/figma-audit/page-audit.mjs` | 모든 푸시 (node 있을 때) | 저장소의 모든 `*.html` + `CNAME` + `assets` |
 | 1.2 | `tools/figma-audit/tree-audit.mjs` | 모든 푸시 (node 있을 때) | 섹션 밖으로 나간 고아 노드 |
 | 1.5 | `tools/roles/build.mjs --check` | 모든 푸시 (node 있을 때) | 온보딩 직군 목록 ↔ `taxonomy.json` |
+| 1.6 | `tools/mypage-data-check.mjs` | 모든 푸시 (node 있을 때) | 마이페이지 데이터 층(`assets/mypage-data.js`) ↔ 정적 마크업 (docs-audit 이 못 보는 JS 렌더 값) |
 | 2a | `tools/figma-audit/docs-audit.mjs` | **`*.html` 이 하나라도 바뀐 푸시** | 약관·개인정보·브리핑·가입·로그인·온보딩 (커밋된 스냅샷 대조, 라이브 덤프 불필요) |
 | 2b | `tools/figma-audit/audit.mjs` | `index.html`/`assets` 가 바뀐 푸시 | 랜딩 (피그마 프레임 6:148 대조) |
 
@@ -145,7 +146,7 @@ git fetch --unshallow          # 얕게 클론됐다면. 이미 깊으면 아무
 **"깨진 링크·빠진 head·자리표시자" 라는 엉뚱한 진단**으로 푸시를 막았다. 아무것도 안 깨졌는데.
 그리고 이 저장소 훅에는 career-coach 의 `CC_SKIP_HOOK` 같은 **부분 우회가 없어서**
 (career-coach 훅에는 10곳, 여기는 0곳) 빠져나갈 길이 `git push --no-verify`
-= **여섯 겹 전부 끄기** 하나뿐이었다.
+= **일곱 겹 전부 끄기** 하나뿐이었다.
 
 지금은 node 가 없으면(또는 있는데 `--version` 이 안 돌면 — 윈도우 Store 별칭 스텁)
 **막지 않고 무엇을 못 봤는지 말한다.** 통과 문구도 `✅ 검수 통과(부분 …)` 로 갈린다.
@@ -195,7 +196,7 @@ CC_PUSH_COOLDOWN=0    git push origin main   # 쿨다운만 끄기 — 검수 1�
 **같은 커밋이 환경에 따라 다르게 판정되는 유일한 자리다.** (`FIGMA_TREE` 도 같은 방식으로 쓰인다 — 문서에 없던 환경변수다.)
 
 급할 때만 `git push --no-verify`. 🔴 **이 저장소에는 부분 우회(`CC_SKIP_HOOK`)가 없다** —
-career-coach 훅에는 10곳 있지만 여기는 0곳이라 `--no-verify` 는 **여섯 겹을 통째로** 끈다.
+career-coach 훅에는 10곳 있지만 여기는 0곳이라 `--no-verify` 는 **일곱 겹을 통째로** 끈다.
 두 저장소를 오가며 일할 때 이 비대칭을 잊지 마라. (반대로 career-coach 에는 배포 쿨다운이 없다.)
 
 혼자 돌려볼 때: `node tools/figma-audit/page-audit.mjs`
@@ -528,7 +529,6 @@ cta.y = Math.round(f.height - 80);
 관련 규칙: **`overflow:hidden` 으로 스크롤을 막지 않는다.** 큰 글꼴 설정·가로 모드·작은 화면에서 내용이
 잘려 CTA 를 못 누르게 된다. 짧은 화면은 "막는" 게 아니라 "넘치지 않게" 만든다.
 내용이 화면보다 **64px 이하로 넘칠 때만 여백을 조여 흡수**하고, 그 이상이면 그냥 스크롤을 허용한다.
-
 적용 완료: 온보딩 3개 · `signup` · `letter` · `privacy` · `terms` · `index.html`(2026-08-02, 피그마 대조 통과).
 
 > 참고: `index.html` 의 `.page` 는 `box-sizing:border-box` 인데 `padding-top:100vh` 가 이미 border-box 높이를
