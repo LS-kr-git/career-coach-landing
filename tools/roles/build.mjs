@@ -147,9 +147,17 @@ const jobMapHtml = () => {
   //    (`ops/send.py` 의 `트랙과_직군`), 그쪽은 **대분류를 정렬해** 트랙이 있는 첫 번째를
   //    쓴다. 중분류만 실으면 화면이 다른 순서로 고르게 되고, 같은 사람이 화면에서 본
   //    주제와 실제로 받는 주제가 갈린다.
-  const groups = visible.map((g) => [g.code, TRK.tracks.indexOf(TRK.byGroup[g.code] ?? '')]);
+  //
+  // 🔴 **여기만 `visible` 이 아니라 `TAX.groups` 전부다** (2026-09-11 검사관 ①).
+  //    `visible` 은 「지금 고를 수 있는 것」이고 이 표는 「전에 고른 것을 읽는 것」이라,
+  //    둘은 같은 목록이 아니다. 공고가 줄어 대분류가 목록에서 빠지면(지금 `운송·배송`)
+  //    그 직군을 이미 고른 사람은 화면에서 트랙이 조용히 탈락하고 라벨도 원시 코드로
+  //    새는데, 서버는 `TAXONOMY_MAP` 전부를 보므로 **정상으로 트랙을 잡는다.** 그러면
+  //    화면이 보여준 주제와 실제로 받는 주제가 갈리고 어디에서도 안 터진다.
+  //    칩 목록(`topicsHtml`·직군 칩)은 그대로 `visible` 이다 — 못 고르게 하는 것은 맞다.
+  const groups = TAX.groups.map((g) => [g.code, TRK.tracks.indexOf(TRK.byGroup[g.code] ?? '')]);
   const jobs = {};
-  visible.forEach((g, gi) => { for (const c of g.children) jobs[c.code] = [c.label, gi]; });
+  TAX.groups.forEach((g, gi) => { for (const c of g.children) jobs[c.code] = [c.label, gi]; });
   const json = JSON.stringify({ tracks: TRK.tracks, groups, jobs });
   return `<script id="cc-topic-map" type="application/json">${json}<\/script>`;
 };
