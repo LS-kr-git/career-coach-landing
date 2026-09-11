@@ -48,7 +48,6 @@
   .t-caption-strong{font-size:13px;line-height:18px;font-weight:600}
 
   .brief{padding:8px var(--pad-x) 0}
-  .kicker{color:var(--amber-600);margin-bottom:6px}
   h1{color:var(--navy-900)}
   .summary{color:var(--gray-600);margin-top:10px}
 
@@ -70,6 +69,23 @@
   /* [hidden] 의 display:none 은 브라우저 기본값이라 위 display:flex 에 진다.
      없으면 JS 가 hidden 을 걸어도 버튼이 그대로 보인다 (playwright 로 확인). */
   .cta[hidden]{display:none}
+
+  /* 소장한 글 — 전문 아래에 최근 3편을 번호 목차로 보여준다 (2026-09-11 컨펌본 V3).
+     행 세 줄과 개수는 JS 가 채운다. 목록을 못 받으면 이 절 전체가 hidden 으로 남는다. */
+  .saved{margin-top:34px;border-top:1px solid var(--gray-200);padding-top:26px}
+  .saved-head{display:flex;align-items:baseline;gap:10px}
+  .saved-head h2{color:var(--navy-900);font-size:19px;line-height:26px;font-weight:700;letter-spacing:-0.01em}
+  .saved-cnt{margin-left:auto;color:var(--gray-400);font-size:13px;font-weight:600}
+  .idx{margin-top:10px}
+  .idx-row{display:flex;gap:14px;align-items:flex-start;text-decoration:none;
+    padding:16px 0;border-top:1px solid var(--gray-200)}
+  .idx-row:last-child{border-bottom:1px solid var(--gray-200)}
+  .idx-n{flex:0 0 20px;color:var(--amber-500);font-size:13px;line-height:20px;font-weight:800;letter-spacing:0.04em}
+  .idx-t{flex-grow:1;color:var(--gray-800);font-size:16px;line-height:23px;font-weight:600;letter-spacing:-0.01em}
+  .idx-d{color:var(--gray-400);font-size:12px;line-height:20px;white-space:nowrap}
+  .saved-all{display:flex;align-items:center;justify-content:center;margin-top:16px;height:46px;
+    border-radius:12px;border:1px solid var(--gray-200);color:var(--gray-700);
+    font-size:14px;font-weight:600;text-decoration:none}
 
   /* 안내(로딩·오류) — 본문이 없을 때만 보인다 */
   .notice{padding:56px var(--pad-x);text-align:center;color:var(--gray-500)}
@@ -96,7 +112,6 @@
     <p class="notice" id="notice" role="status">불러오는 중이에요…</p>
 
     <article id="letter" hidden>
-      <div class="kicker t-caption-strong">면접을 위한 업계 인사이트</div>
       <h1 class="t-display" id="title"></h1>
       <p class="t-body summary" id="summary"></p>
 
@@ -108,6 +123,16 @@
 
       <div class="body" id="body" hidden></div>
     </article>
+
+    <!-- 전문이 열렸든 잠겼든 같은 자리에 선다. 목록을 못 받으면 hidden 인 채로 남는다. -->
+    <section class="saved" id="saved" hidden>
+      <div class="saved-head">
+        <h2>소장한 글</h2>
+        <span class="saved-cnt" id="savedCnt"></span>
+      </div>
+      <div class="idx" id="savedList"></div>
+      <a class="saved-all" href="/mypage/archive/">전체 보기</a>
+    </section>
   </main>
 
   <footer>
@@ -160,8 +185,10 @@
 
   const notice = (text) => { $('notice').textContent = text; $('notice').hidden = false; $('letter').hidden = true; };
 
-  /** RPC 한 번. 토큰은 본문(POST)으로만 나간다 — 쿼리스트링·로그·이벤트에 싣지 않는다. */
-  async function call(fn) {
+  /** RPC 한 번. 토큰은 본문(POST)으로만 나간다 — 쿼리스트링·로그·이벤트에 싣지 않는다.
+      args 는 함수마다 다르다. PostgREST 는 **모르는 인자를 404 로 거절**하므로
+      편 하나를 묻지 않는 함수에 p_insight_id 를 딸려 보내면 안 된다. */
+  async function callRows(fn, args) {
     const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
       method: 'POST',
       headers: {
@@ -169,15 +196,22 @@
         apikey: SUPABASE_ANON_KEY,
         Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
       },
-      body: JSON.stringify({ p_token: token, p_insight_id: Number(id) }),
+      body: JSON.stringify(args || { p_token: token, p_insight_id: Number(id) }),
     });
     const data = await res.json().catch(() => null);
     // 없는 글·만료 링크는 RPC 가 예외로 올린다. 그 메시지를 그대로 보여준다
     // (사람이 읽으라고 쓴 한국어이고, 우리가 옮겨 적으면 두 곳이 갈린다).
     if (!res.ok) throw new Error((data && data.message) || '지금은 열 수 없어요');
-    // returns table(...) 은 행 배열로 온다. 편 하나이므로 첫 행이 전부다.
-    if (!Array.isArray(data) || !data.length) throw new Error('없는 글이에요');
-    return data[0];
+    // returns table(...) 은 행 배열로 온다.
+    if (!Array.isArray(data)) throw new Error('없는 글이에요');
+    return data;
+  }
+
+  /** 편 하나를 묻는 호출. 행이 없으면 없는 글이다. */
+  async function call(fn, args) {
+    const rows = await callRows(fn, args);
+    if (!rows.length) throw new Error('없는 글이에요');
+    return rows[0];
   }
 
   function render(row) {
@@ -231,11 +265,59 @@
   // 목적지가 빌 때는 버튼이 disabled 라 이 핸들러가 돌 일이 없다(클릭 이벤트 자체가 안 난다).
   $('subscribe').addEventListener('click', () => { location.href = CHECKOUT_URL; });
 
+  /* 소장한 글 최근 3편. **전문과 별개의 호출이고, 실패해도 전문을 막지 않는다** —
+     이 절은 전문에 덧붙는 것이라, 목록을 못 받았다고 편지를 못 읽게 만들 이유가 없다.
+     그래서 실패는 삼키는 것이 아니라 **hidden 을 유지하는 것**이 정해진 동작이다:
+     RPC 가 아직 없는 동안(404)도, 소장한 편이 0 편일 때도 같은 모양으로 안 보인다.
+     ⚠️ 그래서 이 절이 안 보이는 것은 「소장한 편이 없다」의 증거가 아니다 —
+     RPC 배포 여부는 화면이 아니라 `schema_migrations` 에서 본다.
+     날짜는 서버가 준 publish_date 를 그대로 쓴다 — 기기 시간대로 다시 계산하지 않는다
+     (전문-열람-규칙 2절: 판정 기준 시각은 전부 KST 고정). */
+  async function loadSaved() {
+    let rows;
+    try {
+      rows = await callRows('insight_saved_recent', { p_token: token });
+    } catch { return; }
+    if (!rows.length) return;
+
+    const list = $('savedList');
+    list.replaceChildren();
+    rows.forEach((row, i) => {
+      const a = document.createElement('a');
+      a.className = 'idx-row';
+      a.href = '/insight/?t=' + encodeURIComponent(token) + '&id=' + encodeURIComponent(row.insight_id);
+
+      const n = document.createElement('span');
+      n.className = 'idx-n';
+      n.textContent = String(i + 1).padStart(2, '0');
+
+      const t = document.createElement('span');
+      t.className = 'idx-t';
+      t.textContent = row.title || '';
+
+      const d = document.createElement('span');
+      d.className = 'idx-d';
+      // '2026-09-11' → '9월 11일'. Date 로 파싱하면 기기 시간대에서 하루가 밀린다.
+      const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(row.publish_date || ''));
+      d.textContent = m ? `${Number(m[2])}월 ${Number(m[3])}일` : '';
+
+      a.append(n, t, d);
+      list.appendChild(a);
+    });
+
+    // total 은 모든 행에 같은 값으로 온다. 행이 있으면 반드시 있다.
+    $('savedCnt').textContent = `${rows[0].total}편`;
+    $('saved').hidden = false;
+  }
+
   if (!wellFormed) {
     notice('링크가 올바르지 않아요. 알림톡에서 받은 링크로 다시 열어 주세요.');
   } else {
     try {
       render(await call('insight_letter'));
+      // ★ 전문이 선 뒤에만 부른다. `notice()` 는 #letter 만 감추므로, 실패한 화면에서
+      //   이것을 부르면 「없는 글이에요」 안내문 아래에 소장 목록이 따라 서게 된다.
+      await loadSaved();
     } catch (err) {
       notice(err.message);
     }
