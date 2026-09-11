@@ -117,33 +117,51 @@
 <div class="cta-dock">
   <button class="cta" type="button">저장</button>
 </div>
-<script>
-  (function () {
-    /* 주간 미리보기는 고른 주제에서 나온다 — 디자인 캔버스의 규칙 그대로다.
-       월·수·금이 고른 주제, 화는 'AI로 일하기', 목은 '커리어·이직'.
-       '일하는 사람 공통' 을 고르면 내 주제 칸이 없어져 다섯 칸이 모두 공통 편성이 된다. */
-    var COMMON = '일하는 사람 공통';
-    var cells = Array.prototype.slice.call(document.querySelectorAll('.day'));
-    function paint(topic) {
-      var common = topic === COMMON;
-      var labels = common
-        ? ['커리어·이직', 'AI로 일하기', '일하는 법', '커리어·이직', 'AI로 일하기']
-        : [topic, 'AI로 일하기', topic, '커리어·이직', topic];
-      cells.forEach(function (cell, i) {
-        var own = !common && (i === 0 || i === 2 || i === 4);
-        cell.classList.toggle('own', own);
-        cell.querySelector('.t').textContent = labels[i];
-      });
-    }
-    document.querySelector('.topics').addEventListener('click', function (e) {
-      var chip = e.target.closest('.chip');
-      if (!chip) return;
-      document.querySelectorAll('.topics .chip').forEach(function (c) {
-        c.setAttribute('aria-pressed', c === chip ? 'true' : 'false');
-      });
-      paint(chip.textContent);
+<script type="module">
+  /* 주제 목록·고른 주제는 assets/mypage-data.js 에서 온다. 마크업의 칩은 피그마 기준 프레임
+     상태(대조용)이고, 자료를 받으면 같은 순서로 다시 그린다. */
+  import { COMMON_TOPIC, getTopics, readPrefs, saveTopic } from '/assets/mypage-data.js';
+
+  /* 주간 미리보기는 고른 주제에서 나온다 — 디자인 캔버스의 규칙 그대로다.
+     월·수·금이 고른 주제, 화는 'AI로 일하기', 목은 '커리어·이직'.
+     '일하는 사람 공통' 을 고르면 내 주제 칸이 없어져 다섯 칸이 모두 공통 편성이 된다. */
+  var cells = Array.prototype.slice.call(document.querySelectorAll('.day'));
+  var box = document.querySelector('.topics');
+  function paint(topic) {
+    var common = topic === COMMON_TOPIC;
+    var labels = common
+      ? ['커리어·이직', 'AI로 일하기', '일하는 법', '커리어·이직', 'AI로 일하기']
+      : [topic, 'AI로 일하기', topic, '커리어·이직', topic];
+    cells.forEach(function (cell, i) {
+      var own = !common && (i === 0 || i === 2 || i === 4);
+      cell.classList.toggle('own', own);
+      cell.querySelector('.t').textContent = labels[i];
     });
-  })();
+  }
+  function esc(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+  function current() { return box.querySelector('.chip[aria-pressed="true"]').textContent; }
+
+  getTopics().then(function (topics) {
+    /* 저장된 주제가 없으면 마크업이 눌러 둔 칩(피그마 기준 상태)을 그대로 쓴다 */
+    var on = readPrefs().topic || current();
+    box.innerHTML = topics.map(function (t) {
+      return '<button class="chip" type="button" aria-pressed="' + (t === on) + '">' + esc(t) + '</button>';
+    }).join('');
+    paint(on);
+  });
+
+  box.addEventListener('click', function (e) {
+    var chip = e.target.closest('.chip');
+    if (!chip) return;
+    box.querySelectorAll('.chip').forEach(function (c) {
+      c.setAttribute('aria-pressed', c === chip ? 'true' : 'false');
+    });
+    paint(chip.textContent);
+  });
+
+  document.querySelector('.cta').addEventListener('click', function () {
+    saveTopic(current()).then(function () { location.href = '/mypage/'; });
+  });
 </script>
 </div>
 </body>

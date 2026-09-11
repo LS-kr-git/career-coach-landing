@@ -157,22 +157,51 @@
     <span id="lab-idle">아티클을 하나 골라주세요</span><span id="lab-pick" hidden>이 아티클 전문 열기</span>
   </button>
 </div>
-<script>
-  (function () {
-    var btn = document.getElementById('open');
-    var idle = document.getElementById('lab-idle');
-    var pick = document.getElementById('lab-pick');
-    document.querySelector('.lists').addEventListener('click', function (e) {
-      var item = e.target.closest('.item[aria-pressed]');
-      if (!item) return;
-      document.querySelectorAll('.item[aria-pressed]').forEach(function (el) {
-        el.setAttribute('aria-pressed', el === item ? 'true' : 'false');
-      });
-      btn.disabled = false;
-      idle.hidden = true;
-      pick.hidden = false;
+<script type="module">
+  /* 목록은 assets/mypage-data.js 의 이번 주 5편에서 그린다. 마크업의 5편은 피그마 기준 프레임
+     상태(대조용)이고, 여기서 같은 자료로 다시 채운다. */
+  import { getThisWeek, markSundayUsed } from '/assets/mypage-data.js';
+
+  var btn = document.getElementById('open');
+  var idle = document.getElementById('lab-idle');
+  var pick = document.getElementById('lab-pick');
+  var secs = document.querySelectorAll('.sec .items');
+  function esc(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+  function meta(a) {
+    return '<span class="meta"><span class="t-micro tag">' + esc(a.topic) + '</span>'
+      + '<span class="t-caption date">' + esc(a.date) + '</span></span>'
+      + '<span class="t-body-s ttl">' + esc(a.title) + '</span>';
+  }
+  getThisWeek().then(function (week) {
+    secs[0].innerHTML = week.filter(function (a) { return !a.read; }).map(function (a) {
+      return '<button class="item" type="button" aria-pressed="false" data-title="' + esc(a.title) + '">'
+        + '<span class="col">' + meta(a) + '</span>'
+        + '<span class="radio" aria-hidden="true"><i></i></span></button>';
+    }).join('');
+    secs[1].innerHTML = week.filter(function (a) { return a.read; }).map(function (a) {
+      return '<div class="item done"><span class="col">' + meta(a) + '</span>'
+        + '<span class="t-micro kept">✓ 소장 완료</span></div>';
+    }).join('');
+  });
+
+  document.querySelector('.lists').addEventListener('click', function (e) {
+    var item = e.target.closest('.item[aria-pressed]');
+    if (!item) return;
+    document.querySelectorAll('.item[aria-pressed]').forEach(function (el) {
+      el.setAttribute('aria-pressed', el === item ? 'true' : 'false');
     });
-  })();
+    btn.disabled = false;
+    idle.hidden = true;
+    pick.hidden = false;
+  });
+
+  /* 전문 열기 = 이번 주 열람 기회를 쓴 것. 기록을 남기고 01 로 돌아가면 배너가 「완료」(01-B)가 된다.
+     아티클 본문 화면은 아직 없다 — 생기면 기록 뒤 그 주소로 간다. */
+  btn.addEventListener('click', function () {
+    /* 버튼은 하나를 고르기 전까지 disabled 라 여기 왔으면 눌린 항목이 있다 */
+    var on = document.querySelector('.item[aria-pressed="true"]');
+    markSundayUsed(on.dataset.title).then(function () { location.href = '/mypage/'; });
+  });
 </script>
 </div>
 </body>

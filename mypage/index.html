@@ -127,16 +127,25 @@
 
   <button class="logout" type="button">로그아웃</button>
 </main>
-<script>
-  /* 일요일 배너의 세 상태 — 기본은 평일(잠김).
-     ?state=open|done|locked 로 세 상태를 그대로 볼 수 있다 (피그마 01-A/01-B/01-C). */
-  (function () {
-    var q = new URLSearchParams(location.search).get('state');
-    var state = (q === 'open' || q === 'done' || q === 'locked') ? q : 'locked';
-    document.querySelectorAll('.banner').forEach(function (el) {
-      el.hidden = el.dataset.state !== state;
-    });
-  })();
+<script type="module">
+  /* 자료는 assets/mypage-data.js 한 곳에서 온다. 마크업의 값은 피그마 기준 프레임 상태(대조용)이고,
+     실제 화면은 여기서 받은 값으로 다시 채운다. */
+  import { getProfile, sundayState } from '/assets/mypage-data.js';
+
+  /* 일요일 배너 세 상태 — 서울 기준 오늘 요일 + 이번 주 열람 여부로 정한다 (피그마 01-A/01-B/01-C).
+     ?state=open|done|locked 는 디자인 검수용 미리보기다 — 요일과 무관하게 그 상태를 보여준다. */
+  var q = new URLSearchParams(location.search).get('state');
+  var state = (q === 'open' || q === 'done' || q === 'locked') ? q : sundayState();
+  document.querySelectorAll('.banner').forEach(function (el) {
+    el.hidden = el.dataset.state !== state;
+  });
+
+  getProfile().then(function (p) {
+    document.querySelector('.hero-sub .num').textContent = p.insightCount;
+    document.querySelector('.avatar').textContent = p.initial;
+    document.querySelector('.prof .col .t-h3').textContent = p.name + ' 님';
+    document.querySelector('.prof .sub').textContent = p.provider + ' · ' + p.email;
+  });
 </script>
 
 <script type="module">
