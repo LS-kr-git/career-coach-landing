@@ -142,6 +142,23 @@ if (start2 < 0 || end2 < 0) {
 }
 const next2 = html2.slice(0, start2) + buildMypage() + html2.slice(end2);
 
+/** 🔴 상한 7이 세 곳에 각각 박혀 있다 — 두 화면의 `const MAX` 와 저장소의 `MAX_JOBS`.
+ *  하나만 고치면 화면은 8개를 고르게 해 놓고 저장할 때 7개로 잘리거나 서버가 거절한다.
+ *  고르는 동안에는 아무 표시가 없으므로 사람이 못 본다. 그래서 여기서 셋을 맞댄다.
+ *  (서버의 0024_job_cap_7.sql 은 다른 저장소라 여기서 못 읽는다 — 그쪽은 값만 같게 두면 된다.) */
+const caps = [
+  ['mypage/jobs/index.html', html2, /const MAX\s*=\s*(\d+)/],
+  ['onboarding/1/index.html', html, /const MAX\s*=\s*(\d+)/],
+  ['assets/onboarding-store.js', readFileSync(join(ROOT, 'assets', 'onboarding-store.js'), 'utf8'), /const MAX_JOBS\s*=\s*(\d+)/],
+].map(([f, src, re]) => [f, src.match(re)?.[1]]);
+const missing = caps.filter(([, v]) => v === undefined).map(([f]) => f);
+const values = new Set(caps.map(([, v]) => v));
+if (missing.length || values.size > 1) {
+  console.error('❌ 직군 선택 상한이 세 곳에서 같지 않습니다');
+  caps.forEach(([f, v]) => console.error(`   ${f} → ${v ?? '상한 선언을 찾지 못함'}`));
+  process.exit(2);
+}
+
 if (process.argv.includes('--check')) {
   const ok1 = next === html, ok2 = next2 === html2;
   if (ok1 && ok2) { console.log('✅ 직군 목록이 taxonomy.json + volume.json 과 일치합니다 (온보딩 1단계 · 마이페이지).'); process.exit(0); }
