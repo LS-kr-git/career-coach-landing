@@ -993,7 +993,7 @@
       "html": "onboarding/done/index.html",
       "figmaNode": "955:656",
       "name": "온보딩 완료 · 선택 확인",
-      "dumpedAt": "2026-09-06",
+      "dumpedAt": "2026-09-11",
       "_jsRenderedText_사유": "요약 칩 셋과 월·수·금 줄의 주제명은 저장된 선택값에서 JS 가 그린다 — 정적 HTML 에는 없다. 목업은 그 결과 상태를 그린 것이라 드리프트가 아니라 검수 방식의 한계다.",
       "ignoreWebText": [],
       "jsRenderedText": [
@@ -1059,7 +1059,7 @@
       "html": "mypage/index.html",
       "figmaNode": "908:572",
       "name": "01-C · 마이페이지 · 평일(잠김)",
-      "dumpedAt": "2026-09-05",
+      "dumpedAt": "2026-09-11",
       "ignoreWebText": [],
       "texts": [
         "남들보다 앞서가는\n커리어 경쟁력 쌓이는 중",
@@ -1085,7 +1085,7 @@
         {
           "figmaNode": "908:538",
           "name": "01-A · 마이페이지 · 열람 가능(일요일)",
-          "dumpedAt": "2026-09-05",
+          "dumpedAt": "2026-09-11",
           "jsRenderedText": [],
           "texts": [
             "남들보다 앞서가는\n커리어 경쟁력 쌓이는 중",
@@ -1111,7 +1111,7 @@
         {
           "figmaNode": "908:555",
           "name": "01-B · 마이페이지 · 열람 완료(일요일)",
-          "dumpedAt": "2026-09-05",
+          "dumpedAt": "2026-09-11",
           "jsRenderedText": [],
           "texts": [
             "남들보다 앞서가는\n커리어 경쟁력 쌓이는 중",
