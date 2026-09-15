@@ -119,20 +119,19 @@ function webBlocks(html) {
  */
 
 /* `const NAME = <초기화식>` 을 훑어 문자열 리터럴을 모은다. 괄호 깊이 0 에서 ';' 을 만나면 끝.
- * 반환: { lits, sawBacktick } · 이름을 못 찾으면 null. */
+ * 반환: { lits, sawInterp } · 이름을 못 찾으면 null. */
 function scanConst(src, name) {
   const m = new RegExp(`(?:^|[^\\w$.])(?:const|let|var)\\s+${name}\\s*=`).exec(src);
   if (!m) return null;
   const ESC = { n: '\n', t: '\t', r: '\r' };
   const lits = [];
-  let i = m.index + m[0].length, depth = 0, prev = '', sawBacktick = false;
+  let i = m.index + m[0].length, depth = 0, prev = '', sawInterp = false;
   while (i < src.length) {
     const c = src[i], d = src[i + 1];
     if (c === '/' && d === '/') { while (i < src.length && src[i] !== '\n') i++; continue; }
     if (c === '/' && d === '*') { i += 2; while (i < src.length && !(src[i] === '*' && src[i + 1] === '/')) i++; i += 2; continue; }
     if (c === ' ' || c === '\t' || c === '\n' || c === '\r') { i++; continue; }
     if (c === '"' || c === "'" || c === '`') {
-      if (c === '`') sawBacktick = true;
       const q = c;
       let buf = '';
       for (i++; i < src.length; i++) {
@@ -145,7 +144,9 @@ function scanConst(src, name) {
       // 바로 뒤의 의미 있는 글자(공백·주석 건너뜀). '{'·',' 다음에 오고 뒤가 ':' 이면 객체 키다.
       const rest = src.slice(i).replace(/^(?:\s|\/\/[^\n]*(?:\n|$)|\/\*[\s\S]*?\*\/)*/, '');
       const isKey = rest[0] === ':' && (prev === '{' || prev === ',' || prev === '');
-      if (q !== '`' && !isKey) lits.push(buf);
+      // 백틱은 치환(${…})이 없을 때만 읽는다 — 치환이 섞인 것은 고정 문구가 아니다.
+      if (q === '`' && buf.includes('${')) sawInterp = true;
+      else if (!isKey) lits.push(buf);
       prev = 'S';
       continue;
     }
@@ -155,8 +156,12 @@ function scanConst(src, name) {
     prev = c;
     i++;
   }
-  return { lits, sawBacktick };
+  return { lits, sawInterp };
 }
+
+/* 선언 후보를 뽑는 정규식. 객체·배열뿐 아니라 **스칼라 선언**(const X = '문구')도 본다 —
+ * 좁게 잡으면 '선언을 빠뜨림' 이 조용히 0건이 된다(2026-09-16 검사관 ①). 아래 자가검사가 고정한다. */
+const CONST_DECL = /(?:^|\n)\s*(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*['"`{[]/g;
 
 /* 위 훑개의 자가검사. **조건 없이 매번 돈다** — 이 배선이 깨지면 검수가 초록으로 통과하는
  * 방식으로 죽기 때문이다. 고정하는 것은 검사관이 실제로 뚫었던 자리들이다. */
@@ -170,7 +175,9 @@ function scanSelfTest() {
     ['const A = { k: c ? \'앞\' : \'뒤\' };', ['앞', '뒤'], '삼항 두 갈래 모두'],
     ['const A = { k: [\'하나\', \'둘\'] };', ['하나', '둘'], '배열'],
     ['const A = { k: \'줄1\\n줄2\' };', ['줄1\n줄2'], '줄바꿈 이스케이프'],
-    ['const A = { k: `템플릿` };', [], '백틱은 안 읽는다'],
+    ['const A = { k: `템플릿` };', ['템플릿'], '치환 없는 백틱은 읽는다'],
+    ['const A = { k: `값 ${x} 뒤` };', [], '치환 섞인 백틱은 안 읽는다'],
+    ["const A = '한 줄짜리';", ['한 줄짜리'], '스칼라 선언도 읽는다'],
   ];
   const bad = [];
   for (const [src, want, label] of cases) {
@@ -179,7 +186,11 @@ function scanSelfTest() {
     if (JSON.stringify(g) !== JSON.stringify(want)) bad.push(`${label}: ${JSON.stringify(g)} ≠ ${JSON.stringify(want)}`);
   }
   if (scanConst('const B = 1;', 'A') !== null) bad.push('없는 이름은 null 이어야 한다');
-  if (!(scanConst('const A = { k: `t` };', 'A') || {}).sawBacktick) bad.push('백틱을 알려야 한다');
+  if (!(scanConst('const A = { k: `${x}` };', 'A') || {}).sawInterp) bad.push('치환 백틱을 알려야 한다');
+  // 후보 뽑는 정규식도 같이 고정한다 — 이것이 좁아지면 '선언을 빠뜨림' 이 조용히 0건이 된다.
+  const 후보 = [...`const A = { };\nlet B = [ ];\nvar C = '문구';\nconst D = "문구";\nconst E = 1;`
+    .matchAll(CONST_DECL)].map((m) => m[1]).join(',');
+  if (후보 !== 'A,B,C,D') bad.push('후보 정규식: ' + 후보 + ' ≠ A,B,C,D');
   return bad;
 }
 
@@ -317,9 +328,10 @@ for (const page of snap.pages) {
                 '이름을 바꿨으면 스냅샷도 바꾸세요. 못 돈 검사를 통과로 세지 않습니다' });
       continue;
     }
-    if (got.sawBacktick) {
-      findings.push({ level: 'DIFF', page: page.html, kind: '상수에 백틱 문자열',
-        detail: `${name} 안에 백틱 문자열이 있습니다 — 이 검사는 '…' 과 "…" 만 읽습니다. 문구는 따옴표로 쓰세요` });
+    if (got.sawInterp) {
+      findings.push({ level: 'DIFF', page: page.html, kind: '상수에 치환 문자열',
+        detail: `${name} 안에 \${…} 가 든 백틱 문자열이 있습니다 — 고정 문구가 아니라 읽을 수 없습니다. ` +
+                '그 한 줄만 상수 밖으로 빼세요(치환 없는 백틱은 그냥 읽습니다)' });
       continue;
     }
     const lits = got.lits.filter((x) => x.trim().length > 0);
@@ -329,6 +341,34 @@ for (const page of snap.pages) {
       continue;
     }
     blocks.push(...lits);
+  }
+
+  /* 선언을 **빠뜨리는** 경로도 막는다 (2026-09-15 신설 · selectionCap 의 '상한 선언 없음' 과 같은 모양).
+   * webScriptText 는 사람이 적는 값이라, 새 상수를 만들고 이름을 안 적으면 그 문구는 조용히
+   * 대조 밖에 남는다 — 검사가 늘어난 것처럼 보이지만 실제로는 안 는다.
+   *
+   * 다만 **자유로 고칠 수 있을 때만** 막는다: 그 상수의 한국어 문구가 **이미 전부 피그마에
+   * 있을 때**다. 그때 고치는 법은 이름 한 줄을 적는 것뿐이고 화면을 만들 일이 없다.
+   * 피그마에 없는 문구가 섞인 상수까지 막으면 「승인 안 된 화면을 그려라」가 되어,
+   * 남의 작업 중인 화면에서 푸시가 서 버린다. 그런 자리는 스냅샷에 사유를 적어 남긴다. */
+  const scriptSrc = [...html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/gi)].map((m) => m[1]).join('\n');
+  const declaredNames = new Set(page.webScriptText || []);
+  const candidates = new Set([...scriptSrc.matchAll(CONST_DECL)].map((m) => m[1]));
+  for (const name of candidates) {
+    if (declaredNames.has(name)) continue;
+    const got = scanConst(scriptSrc, name);
+    if (!got) continue;
+    // 네 글자 미만은 방아쇠로 쓰지 않는다. 대조가 부분 문자열 포함이라 '월'·'년' 같은 한 글자는
+    // 거의 늘 "피그마에 있다" 가 되고, 목업 데이터까지 선언 대상으로 끌어들인다(검사관 ⑩).
+    // 같은 4글자 문턱을 웹→피그마 대조도 쓴다.
+    const ko = got.lits.filter((x) => /[가-힣]/.test(x) && key(x).length >= 4);
+    if (!ko.length) continue;
+    const figmaNow = key(framesOf(page).flatMap((f) => f.texts || []).join(''));
+    if (!ko.every((x) => figmaNow.includes(key(x)))) continue;   // 피그마에 없는 문구가 섞였다 — 화면 일이라 여기서 막지 않는다
+    findings.push({ level: 'DIFF', page: page.html, kind: '선언을 빠뜨림',
+      detail: `${page.html} 의 ${name} 에 화면 문구 ${ko.length}개가 있고 그 문구가 이미 피그마에 있습니다 — ` +
+              `스냅샷의 webScriptText 에 "${name}" 을 적으면 대조가 켜집니다` +
+              (got.sawInterp ? ' (그 상수에 ${…} 백틱 줄도 있습니다 — 그 한 줄은 상수 밖으로 빼야 합니다)' : '') });
   }
 
   const lines = [];
