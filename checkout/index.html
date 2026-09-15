@@ -57,7 +57,7 @@
     border-radius:14px;padding:16px 18px;background:#fff;width:100%;cursor:pointer;font:inherit;text-align:left}
   .method-t{flex-grow:1;font-size:15px;line-height:23px;color:var(--gray-700)}
 
-  /* 유의사항 — 접기·펼치기. 기본은 접힘 */
+  /* 유의사항 — 접기·펼치기. 기본은 **펼침** (2026-09-15 사용자 확정) */
   .acc{margin-top:24px;padding-top:24px;display:flex;flex-direction:column;gap:24px}
   .acc-row{display:flex;align-items:center;justify-content:space-between;cursor:pointer;
     color:var(--gray-400);background:none;border:0;padding:0;width:100%;font:inherit}
@@ -66,9 +66,12 @@
   .acc.closed .acc-row svg{transform:rotate(180deg)}
   .acc.closed .acc-body{display:none}
   .acc-body{display:flex;flex-direction:column;gap:6px;list-style:none}
-  .acc-body li{font-size:16px;line-height:24px;color:var(--gray-900);
+  /* 글자 크기·색은 주문 내용의 라벨(.lbl 「상품명」)과 같은 값이다 — 13/20 · gray-400
+     (2026-09-15 사용자 확정). 두 곳이 갈리면 이 주석을 보고 같이 고친다. */
+  .acc-body li{font-size:13px;line-height:20px;color:var(--gray-400);
     margin-left:8px;padding-left:14px;position:relative}
-  .acc-body li::before{content:'';position:absolute;left:0;top:10px;
+  /* 불릿의 top 은 첫 줄 가운데 = (line-height 20 − 점 4) ÷ 2 = 8. 글자 크기를 바꾸면 같이 바뀐다 */
+  .acc-body li::before{content:'';position:absolute;left:0;top:8px;
     width:4px;height:4px;border-radius:2px;background:var(--gray-400)}
   .divider{height:1px;width:100%;background:var(--gray-200);margin-top:24px}
 
@@ -131,8 +134,8 @@
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="#94A3B8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
 
-    <section class="acc closed" id="acc">
-      <button class="acc-row" type="button" id="accBtn" aria-expanded="false" aria-controls="accBody">
+    <section class="acc" id="acc">
+      <button class="acc-row" type="button" id="accBtn" aria-expanded="true" aria-controls="accBody">
         <span class="acc-title">유의사항</span>
         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18" width="20" height="20" aria-hidden="true"><path d="M3.606 7.442c0-.201.082-.394.247-.532a.696.696 0 0 1 .973.092l3.725 4.532 3.725-4.532a.687.687 0 0 1 .972-.092c.294.239.34.68.092.973l-4.257 5.174a.68.68 0 0 1-.532.248.68.68 0 0 1-.532-.248L3.762 7.883a.68.68 0 0 1-.156-.441Z"/></svg>
       </button>
@@ -187,7 +190,6 @@
   var trialEnd = addBusinessDays(start, TRIAL_BUSINESS_DAYS - 1);
   var firstCharge = addBusinessDays(trialEnd, 1);
   var fmt = function (d) { return d.getFullYear() + '년 ' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일'; };
-  var shortFmt = function (d) { return (d.getMonth() + 1) + '월 ' + d.getDate() + '일'; };
   $('firstCharge').textContent = fmt(firstCharge);
 
   /* 금액은 **월 3,900원으로 확정됐다** (2026-09-05 사용자 확정).
@@ -200,11 +202,11 @@
   var won = function (n) { return n.toLocaleString('ko-KR') + '원'; };
   $('fee').textContent = '월 ' + won(PRICE_KRW) + ' (부가세 포함)';
 
-  /* 유료 전환 고지 — 전환 전후 금액을 한자리에서 말한다
-     (전자상거래법 제21조의2 「숨은 갱신」). */
+  /* 유료 전환 고지 — 전자상거래법 제21조의2 「숨은 갱신」.
+     ⚠️ 2026-09-15 사용자 지시로 「30일 후」 로 바꿨다. 위 주문 내용의 「체험 기간 영업일 5일」·
+        「첫 결제일」 과 말이 다르다 — 둘 중 어느 쪽을 정본으로 할지 정해지면 같이 맞춘다. */
   $('agreeText').innerHTML =
-    '<b>오늘 ' + won(0) + ' → ' + shortFmt(firstCharge) + '부터 매월 ' + won(PRICE_KRW) + '</b>' +
-    '으로 유료 전환되는 것에 동의합니다.';
+    '<b>30일 후 매월 ' + won(PRICE_KRW) + '</b>으로 유료 전환되는 것에 동의합니다.';
 
   $('accBtn').addEventListener('click', function () {
     var closed = $('acc').classList.toggle('closed');

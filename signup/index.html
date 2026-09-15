@@ -61,7 +61,8 @@
   .field .v{flex:1;min-width:0;height:38px;border:1px solid var(--gray-200);border-radius:8px;
     background:#fff;display:flex;align-items:center;padding:0 12px;
     font-size:13px;line-height:18px;color:var(--gray-700);
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    font-family:inherit;width:100%;-webkit-appearance:none;appearance:none}
   /* 문구가 비었어도 자리는 남긴다 — 54 = line-height 18 × 3줄, 피그마 875:13761 과 같은 값 */
   .note{font-size:13px;line-height:18px;color:var(--gray-500);min-height:54px}
 
@@ -120,13 +121,18 @@
 
       <section class="sec" aria-label="회원 정보">
         <div class="sec-head"><span>회원 정보</span></div>
+        <!-- 2026-09-15 — 여섯 칸을 실제로 입력되는 input 으로 바꿨다(사용자 확정).
+             ⚠️ 입력값은 어디로도 보내지 않는다 — 회원 정보의 정본은 카카오 로그인이 주는 값이고,
+             이 칸을 받는 저장소·API 가 없다. 그래서 type 은 키패드를 맞추는 용도로만 쓰고
+             autocomplete 은 끈다(버려질 칸에 브라우저가 개인정보를 채우지 않게).
+             배선하려면 저장할 곳을 먼저 만들어야 한다. -->
         <div class="fields">
-          <div class="field"><span class="k">이름</span><span class="v" id="fName"></span></div>
-          <div class="field"><span class="k">휴대전화번호</span><span class="v" id="fPhone"></span></div>
-          <div class="field"><span class="k">이메일</span><span class="v" id="fEmail"></span></div>
-          <div class="field"><span class="k">성별</span><span class="v" id="fGender"></span></div>
-          <div class="field"><span class="k">출생 연도</span><span class="v" id="fBirthyear"></span></div>
-          <div class="field"><span class="k">생일</span><span class="v" id="fBirthday"></span></div>
+          <div class="field"><label class="k" for="fName">이름</label><input class="v" id="fName" type="text" autocomplete="off"></div>
+          <div class="field"><label class="k" for="fPhone">휴대전화번호</label><input class="v" id="fPhone" type="tel" autocomplete="off"></div>
+          <div class="field"><label class="k" for="fEmail">이메일</label><input class="v" id="fEmail" type="email" autocomplete="off"></div>
+          <div class="field"><label class="k" for="fGender">성별</label><input class="v" id="fGender" type="text" autocomplete="off"></div>
+          <div class="field"><label class="k" for="fBirthyear">출생 연도</label><input class="v" id="fBirthyear" type="text" inputmode="numeric" autocomplete="off"></div>
+          <div class="field"><label class="k" for="fBirthday">생일</label><input class="v" id="fBirthday" type="text" autocomplete="off"></div>
         </div>
         <!-- 피그마 875:13761 의 안내 문구는 2026-08-13 에 비웠다 — 항목별 이용 목적은 개인정보처리방침 1항이 말한다.
              피그마의 빈 텍스트 노드가 54px(18×3) 자리를 그대로 차지하므로 웹도 여백만 남긴다. -->
