@@ -45,7 +45,9 @@ const TRACK = [
   { key: 'content', label: '콘텐츠', sel: 'section > .head-group' },
   { key: 'illust', label: '일러스트', sel: '.illust' },
   { key: 'chips', label: '칩', sel: '.chips' },
-  { key: 'cta', label: '플로팅 CTA', sel: '.floating-cta' },
+  // 2026-09-15 — 플로팅 CTA 를 심사 기간 동안 화면에서 뺐다. 요소가 없으면 이 줄은 값이 null 이라
+  // 아무것도 못 걸러내는 빈 항목이 된다(검사관 ②). 되돌릴 때 이 줄도 같이 되살린다:
+  // { key: 'cta', label: '플로팅 CTA', sel: '.floating-cta' },
   { key: 'padX', label: '섹션 좌우 패딩', sel: 'section', prop: 'paddingLeft' },
 ];
 

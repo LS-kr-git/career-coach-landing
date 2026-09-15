@@ -70,23 +70,6 @@
       ]
     },
     {
-      "id": "floating-cta",
-      "label": "플로팅 CTA",
-      "sels": [
-        {
-          "sel": ".floating-cta",
-          "label": "플로팅 CTA"
-        }
-      ],
-      "size": 17,
-      "weight": 600,
-      "lh": 24,
-      "ls": 0,
-      "figmaNodes": [
-        "I450:2608;440:2609"
-      ]
-    },
-    {
       "id": "step-text",
       "label": "스텝 문구",
       "sels": [

@@ -287,18 +287,10 @@ fbq('track', 'PageView');
   /* 개인정보처리방침 링크 — 피그마 6:365 는 이 구간만 SemiBold (크기는 13 유지, 2026-08-01 롤백) */
   footer .links a[href$="privacy.html"]{font-weight:600}
 
-  /* ===== 플로팅 CTA ===== */
-  .floating-cta{
-    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
-    /* 폭 = 화면 − 40, 카드 폭 − 40 인 410 에서 멈춘다 (연속) */
-    /* 2026-09-15 — 토스페이먼츠 심사 기간에만 카카오 옐로·말풍선을 뗀다. 심사 통과 후
-       「카카오로 1분만에 시작하기」로 되돌린다(피그마 440:2610 도 같이). */
-    width:calc(100% - 40px);max-width:410px;background:var(--amber-500);color:#fff;
-    border-radius:14px;padding:18px;text-align:center;text-decoration:none;
-    display:flex;align-items:center;justify-content:center;
-    box-shadow:0 12px 32px rgba(15,23,42,.25);z-index:10;
-  }
-  .floating-cta:active{transform:translateX(-50%) scale(.98)}
+  /* ===== 플로팅 CTA — 2026-09-15 토스페이먼츠 심사 기간 동안 화면에서 뺐다 =====
+     들어가는 길은 헤더 「로그인/회원가입」 → /login/ 하나로 모았고, 거기서 /signup/ 으로 간다.
+     심사 통과 후 이 블록과 푸터 아래 앵커, ctaBtn 전환 이벤트를 같이 되살린다
+     (피그마 6:148 의 인스턴스 450:2608 도 다시 보이게 한다). */
 
   /* ===== 넓은 화면 카드 어포던스 =====
      폭은 위에서 이미 연속으로 처리했다. 여기 남은 것은 "회색 바탕 위의 카드"라는 시각적 표현뿐이다.
@@ -516,8 +508,6 @@ fbq('track', 'PageView');
     </div>
   </footer>
 
-  <a class="floating-cta t-h3" href="/signup/" id="ctaBtn">시작하기</a>
-
   <script>
     // 헤더 '로그인/회원가입' → 로그인 화면. 예전에는 여기서 카카오 OAuth 를 직접 시작했는데,
     // /login/ 이 생기면서 카카오·이메일 두 길이 다 그 화면에 있다 (2026-09-15).
@@ -527,10 +517,6 @@ fbq('track', 'PageView');
   <script>
     const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); }),{threshold:0,rootMargin:'0px 0px 150px 0px'});
     document.querySelectorAll('section').forEach(s => io.observe(s));
-    document.getElementById('ctaBtn').addEventListener('click', () => {
-      if (window.fbq) fbq('track', 'InitiateCheckout'); // 전환 가치는 프라이싱 확정 전까지 비워둠
-    });
-
     // 오버스크롤(러버밴드) 캔버스색 스위칭 — iOS 웹킷은 오버스크롤 영역을 위아래 구분 없이
     // 단일 색(캔버스/body 배경색)으로만 칠하고 그라디언트·문서 밖 요소는 그리지 않는다.
     // 그래서 스크롤 위치로 그 한 색을 바꿔친다: 상단부=흰색(헤더와 이어짐), 하단부=회색(푸터와 이어짐).

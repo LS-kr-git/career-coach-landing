@@ -72,7 +72,11 @@
   .err{display:none;font-size:13px;line-height:18px;color:var(--error-600)}
   .err.on{display:block}
 
-  /* 이메일 로그인 CTA — 카카오와 위계를 가르려고 gray-800. 크기·라운드·글자는 공통 토큰 */
+  /* 회원가입 — 버튼이 아니라 글자+밑줄. CTA 바로 위에 놓는다 (2026-09-15 사용자 확정) */
+  .signup{align-self:center;font-size:13px;line-height:18px;color:var(--gray-600);
+    text-decoration:underline;text-underline-offset:2px}
+
+  /* 아이디 로그인 CTA — 카카오와 위계를 가르려고 gray-800. 크기·라운드·글자는 공통 토큰 */
   .cta{width:100%;height:var(--cta-h);border:0;border-radius:var(--cta-radius);
     background:var(--gray-800);color:#fff;margin-top:8px;
     font-size:var(--cta-fs);line-height:20px;font-weight:var(--cta-fw);font-family:inherit;
@@ -129,6 +133,7 @@
           <!-- 문구는 마크업에 둔다 — 피그마 「로그인 — 오류」 프레임과 docs-audit 이 대조한다. -->
           <p class="err" id="err" role="alert">아이디 또는 비밀번호가 맞지 않습니다.</p>
         </div>
+        <a class="signup" href="/signup/">회원가입</a>
         <button type="submit" class="cta" id="emailBtn" disabled>아이디로 로그인</button>
       </form>
     </div>

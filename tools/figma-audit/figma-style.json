@@ -229,22 +229,6 @@
       }
     },
     {
-      "id": "floating-cta",
-      "label": "플로팅 CTA",
-      "sel": ".floating-cta",
-      "node": "450:2608",
-      "figma": {
-        "fill": "#f59e0b",
-        "radius": 14,
-        "shadow": true
-      },
-      "css": {
-        "background-color": "#F59E0B",
-        "border-top-left-radius": "14px",
-        "shadow": "있음"
-      }
-    },
-    {
       "id": "footer",
       "label": "푸터",
       "sel": "footer",
