@@ -95,9 +95,102 @@ function webBlocks(html) {
   return decodeEntities(s).split(' ').map((x) => x.replace(/[ \t]+/g, ' ').trim()).filter((x) => x.length > 0);
 }
 
+/* ---------- <script> 안 상수를 웹 문구로 읽기 (2026-09-15 신설) ----------
+ * webBlocks 는 <script> 를 통째로 걷어낸다. 그래야 코드 토막이 문구로 새지 않는다.
+ * 그런데 화면에 뜨는 한국어를 상수에 담아 JS 로 그리는 페이지가 있다(insight 의
+ * LOCKED · SAVED_TOAST · MSG). 그 문구는 마크업에 없어 전부 jsRenderedText 로 면제됐고,
+ * **면제된 문구는 피그마→웹 대조를 받지 않는다** — 한쪽만 고쳐도 안 걸렸다(2026-09-15 변이 확인).
+ *
+ * 그래서 어느 상수인지 스냅샷의 webScriptText 에 **이름으로 선언**하게 하고, 그 상수의
+ * 초기화식 안에 있는 문자열만 골라 웹 문구 더미에 넣는다. selectionCap 과 같은 규칙이다:
+ *   · 냄새로 찾지 않는다 — 이름을 바꾸면 조용히 꺼지므로 선언을 강제한다
+ *   · 선언한 이름을 못 찾으면 통과가 아니라 막는다
+ *   · 문자열을 한 개도 못 뽑아도 막는다 (선언만 있고 대조는 안 되는 상태)
+ *
+ * 🔴 훑개는 **주석을 뗀다.** 안 떼면 두 가지로 틀린다 — 둘 다 검사관이 변이로 잡았다:
+ *   · 주석 속 아포스트로피 하나(`// don't touch`)가 따옴표 상태를 뒤집어 초기화식이
+ *     파일 끝까지 늘어나고, 쏟아지는 오탐 속에 진짜 드리프트가 묻힌다
+ *   · 화면 문구를 지워도 같은 문장이 주석에 남아 있으면 **주석 사본이 대신 채워** 초록이 된다
+ *     (CLAUDE.md 「테스트에 대한 규칙」 5번이 여섯 번 물렸다고 적은 그 모양이다)
+ * 🔴 삼항의 앞 갈래(`조건 ? '가' : '나'`)를 객체 키로 오인하지 않는다. 앞이 '{' 나 ',' 일 때만
+ *   키로 본다. 오인하면 '가' 가 아무 신호 없이 버려져 승인 안 된 문구가 대조를 빠져나간다.
+ * ⚠️ 정규식 리터럴은 못 읽는다 — 그 안의 따옴표가 상태를 뒤집는다. 문구 상수에 정규식을
+ *   넣지 마라(넣을 이유도 없다). 이 한계는 아래 자가검사가 대신 지켜 주지 못한다.
+ */
+
+/* `const NAME = <초기화식>` 을 훑어 문자열 리터럴을 모은다. 괄호 깊이 0 에서 ';' 을 만나면 끝.
+ * 반환: { lits, sawBacktick } · 이름을 못 찾으면 null. */
+function scanConst(src, name) {
+  const m = new RegExp(`(?:^|[^\\w$.])(?:const|let|var)\\s+${name}\\s*=`).exec(src);
+  if (!m) return null;
+  const ESC = { n: '\n', t: '\t', r: '\r' };
+  const lits = [];
+  let i = m.index + m[0].length, depth = 0, prev = '', sawBacktick = false;
+  while (i < src.length) {
+    const c = src[i], d = src[i + 1];
+    if (c === '/' && d === '/') { while (i < src.length && src[i] !== '\n') i++; continue; }
+    if (c === '/' && d === '*') { i += 2; while (i < src.length && !(src[i] === '*' && src[i + 1] === '/')) i++; i += 2; continue; }
+    if (c === ' ' || c === '\t' || c === '\n' || c === '\r') { i++; continue; }
+    if (c === '"' || c === "'" || c === '`') {
+      if (c === '`') sawBacktick = true;
+      const q = c;
+      let buf = '';
+      for (i++; i < src.length; i++) {
+        const ch = src[i];
+        if (ch === '\\') { const n = src[i + 1]; buf += (ESC[n] !== undefined ? ESC[n] : n); i++; continue; }
+        if (ch === q) break;
+        buf += ch;
+      }
+      i++;
+      // 바로 뒤의 의미 있는 글자(공백·주석 건너뜀). '{'·',' 다음에 오고 뒤가 ':' 이면 객체 키다.
+      const rest = src.slice(i).replace(/^(?:\s|\/\/[^\n]*(?:\n|$)|\/\*[\s\S]*?\*\/)*/, '');
+      const isKey = rest[0] === ':' && (prev === '{' || prev === ',' || prev === '');
+      if (q !== '`' && !isKey) lits.push(buf);
+      prev = 'S';
+      continue;
+    }
+    if (c === '{' || c === '[' || c === '(') depth++;
+    else if (c === '}' || c === ']' || c === ')') depth--;
+    else if (c === ';' && depth === 0) break;
+    prev = c;
+    i++;
+  }
+  return { lits, sawBacktick };
+}
+
+/* 위 훑개의 자가검사. **조건 없이 매번 돈다** — 이 배선이 깨지면 검수가 초록으로 통과하는
+ * 방식으로 죽기 때문이다. 고정하는 것은 검사관이 실제로 뚫었던 자리들이다. */
+function scanSelfTest() {
+  const cases = [
+    ['const A = { k: \'가\', j: \'나\' };', ['가', '나'], '객체 값 둘'],
+    ['const A = { k: \'가\' }; const B = { k: \'나\' };', ['가'], '다음 선언까지 안 넘어간다'],
+    ['const A = {\n  // don\'t touch: 주석 속 아포스트로피\n  k: \'가\',\n};', ['가'], '주석 속 따옴표'],
+    ['const A = {\n  // 옛 문구 \'지운 문구\' 는 뺐다\n  k: \'가\',\n};', ['가'], '주석 사본은 안 센다'],
+    ['const A = { \'k\': \'가\' };', ['가'], '따옴표 키는 건너뛴다'],
+    ['const A = { k: c ? \'앞\' : \'뒤\' };', ['앞', '뒤'], '삼항 두 갈래 모두'],
+    ['const A = { k: [\'하나\', \'둘\'] };', ['하나', '둘'], '배열'],
+    ['const A = { k: \'줄1\\n줄2\' };', ['줄1\n줄2'], '줄바꿈 이스케이프'],
+    ['const A = { k: `템플릿` };', [], '백틱은 안 읽는다'],
+  ];
+  const bad = [];
+  for (const [src, want, label] of cases) {
+    const got = scanConst(src, 'A');
+    const g = got ? got.lits : null;
+    if (JSON.stringify(g) !== JSON.stringify(want)) bad.push(`${label}: ${JSON.stringify(g)} ≠ ${JSON.stringify(want)}`);
+  }
+  if (scanConst('const B = 1;', 'A') !== null) bad.push('없는 이름은 null 이어야 한다');
+  if (!(scanConst('const A = { k: `t` };', 'A') || {}).sawBacktick) bad.push('백틱을 알려야 한다');
+  return bad;
+}
+
 /* ---------- 실행 ---------- */
 const findings = [];
 let figmaCount = 0, webCount = 0;
+
+// 훑개 자가검사 — 조건 없이 돈다. 깨지면 '초록으로 통과' 하는 방식으로 죽으므로 여기서 막는다.
+for (const bad of scanSelfTest()) {
+  findings.push({ level: 'DIFF', page: '-', kind: '훑개 자가검사 실패', detail: bad + ' — docs-audit.mjs 의 scanConst 가 깨졌습니다. 이 상태로는 <script> 상수 대조를 신뢰할 수 없습니다' });
+}
 
 if (pageMap) {
   for (const page of snap.pages) {
@@ -212,6 +305,32 @@ for (const page of snap.pages) {
   }
   const html = readFileSync(htmlPath, 'utf8');
   const blocks = webBlocks(html);
+
+  // 선언한 <script> 상수의 문구를 웹 더미에 넣는다 (위 scanConst 머리말 참고).
+  // 순서를 지켜 넣는다 — 피그마 한 노드가 줄바꿈으로 이어 붙인 두 줄(알림 설명문)이
+  // webAll 에서 연속으로 만나야 대조에 걸린다.
+  for (const name of page.webScriptText || []) {
+    const got = scanConst(html, name);
+    if (got === null) {
+      findings.push({ level: 'DIFF', page: page.html, kind: '선언한 상수 없음',
+        detail: `스냅샷 webScriptText 가 "${name}" 을 선언했는데 ${page.html} 에서 찾지 못했습니다 — ` +
+                '이름을 바꿨으면 스냅샷도 바꾸세요. 못 돈 검사를 통과로 세지 않습니다' });
+      continue;
+    }
+    if (got.sawBacktick) {
+      findings.push({ level: 'DIFF', page: page.html, kind: '상수에 백틱 문자열',
+        detail: `${name} 안에 백틱 문자열이 있습니다 — 이 검사는 '…' 과 "…" 만 읽습니다. 문구는 따옴표로 쓰세요` });
+      continue;
+    }
+    const lits = got.lits.filter((x) => x.trim().length > 0);
+    if (!lits.length) {
+      findings.push({ level: 'DIFF', page: page.html, kind: '상수에 문구 없음',
+        detail: `${name} 에서 문자열을 하나도 못 뽑았습니다 — 선언만 있고 대조는 안 되는 상태입니다` });
+      continue;
+    }
+    blocks.push(...lits);
+  }
+
   const lines = [];
   for (const b of blocks) for (const l of b.split('\n')) lines.push(l);
 
