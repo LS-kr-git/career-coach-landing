@@ -23,7 +23,7 @@
 |---|---|
 | id 기반 정밀 편집·대량 수정·스냅샷 덤프·지오메트리 확인 | `use_figma` 플러그인 |
 | **기존 노드의 문구 수정** | **크롬 피그마 + `execCommand('insertText')`** — 절차는 아래 |
-| Pretendard 가 걸린 것 — 굵기 변경·텍스트 스타일 생성 | 크롬 피그마 (플러그인은 `loadFontAsync` 가 막는다) |
+| Pretendard 가 걸린 것 — 굵기 변경·텍스트 스타일 생성 | ~~크롬 피그마~~ → **2026-09-15부터 플러그인도 된다** (계정에 폰트를 올렸다 · 「피그마에 글자를 쓸 때」 절 초록 상자) |
 | 노드 삭제·이동·색·폭 | `use_figma` 플러그인 (폰트가 필요 없는 조작이라 그냥 된다) |
 | 눈으로 보는 확인 | 크롬 피그마 |
 
@@ -536,7 +536,21 @@ cta.y = Math.round(f.height - 80);
 > 100vh 이상으로 만들기 때문에, 거기서는 `min-height` 가 **실제로는 한 번도 걸리지 않는 잉여값**이다(실측 확인).
 > 규칙 일관성과 나중에 오버스크롤 트릭을 걷어낼 때를 대비해 값만 맞춰 뒀다.
 
-## 피그마에 글자를 쓸 때 — Pretendard 규칙 (2026-08-02 확정)
+## 피그마에 글자를 쓸 때 — Pretendard 규칙 (2026-08-02 확정 · **2026-09-15 해소**)
+
+> 🟢 **2026-09-15 — 이 절의 전제가 사라졌다. 아래를 먼저 읽어라.**
+> Figma 계정에 폰트를 **올릴 수 있다**: `figma.com` → 아바타 → `Settings` → `Account` →
+> `Your uploaded fonts` → `Upload font` 로 `PretendardVariable.ttf` 를 올렸다(계정당 1회, 플랜 무관).
+> 그 뒤 `use_figma` 의 `listAvailableFontsAsync()` 에 **Pretendard Variable 9종**이 나오고
+> `loadFontAsync({ family: 'Pretendard Variable', style: 'Bold' })` 가 **통과한다**(실측).
+> 그러므로 이제는 **표준 순서**(폰트 로드 → await → `characters`/`fontSize`/`lineHeight` 지정)로
+> 플러그인에서 바로 만들고 고치면 되고, 폭도 처음부터 맞아 폰트 재계산이 필요 없다.
+> **아래 1·2번(Gothic A1 로 재고 스타일 입히기)은 폰트를 못 올리는 파일·계정에서만 쓰는 우회다.**
+> 3번(인스턴스 텍스트 오버라이드 금지)은 그대로 유효하다.
+> 자동화로 올리는 법·실측: 프로젝트 문서
+> `claude/정정-2026-09-15-피그마-Missing-font-의-원인은-폰트-헬퍼가-안-떠-있던-것이었다.md`.
+> ⚠️ 크롬에서 Figma **웹**을 직접 만질 때(재계산 등)는 여전히 `figma_agent.exe` 가 떠 있어야 한다 —
+> 데스크톱 Figma 를 한 번 켜면 뜨고, 앱을 닫아도 남는다.
 
 **플러그인 실행 환경(`use_figma`)에는 Pretendard 가 없다.** `listAvailableFontsAsync()` 가 1,938개 패밀리를
 돌려주는데 Pretendard 는 0개다. OS 로컬 폰트가 아예 안 보이는 환경이라 **사용자 컴퓨터에 Pretendard 를
