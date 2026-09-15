@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="only light">
+<meta name="format-detection" content="telephone=no">
+<title>로그인 — 커리어코치</title>
+<meta name="description" content="카카오 계정 또는 이메일 계정으로 커리어코치에 로그인합니다.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root{
+    color-scheme: only light;
+    --amber-500:#F59E0B; --amber-600:#D97706;
+    --navy-900:#1E3A8A;
+    --gray-50:#F8FAFC; --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-400:#94A3B8;
+    --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155; --gray-800:#1E293B;
+    --kakao:#FEE500; --kakao-text:#191919;
+    --error-600:#DC2626;
+    /* CTA 토큰 — CLAUDE.md "CTA 규칙" 공통값 */
+    --cta-h:54px; --cta-radius:14px; --cta-fs:15px; --cta-fw:700;
+    /* 랜딩과 동일한 폭 시스템 */
+    --pad-x: 24px;
+    --card-max: 450px;
+    --content-max: 402px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{background:var(--gray-100)}
+  body{
+    font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;
+    background:#fff; color:var(--gray-800); -webkit-font-smoothing:antialiased;
+  }
+  /* CLAUDE.md 규칙 — 화면 채우기 높이는 svh */
+  .page{width:100%;max-width:var(--card-max);margin:0 auto;background:#fff;
+    min-height:100vh;min-height:100svh;display:flex;flex-direction:column}
+
+  header{display:flex;align-items:center;gap:10px;padding:24px var(--pad-x)}
+  .app-icon{width:29px;height:29px;border-radius:25%;background:linear-gradient(135deg,#F59E0B,#D97706);display:flex;align-items:center;justify-content:center}
+  .app-icon img{width:21px;height:21px;display:block}
+  header .wordmark{height:21px;display:block}
+
+  main{flex:1;display:flex;flex-direction:column;padding:8px var(--pad-x) 32px}
+  .content{max-width:var(--content-max);width:100%;margin:0 auto;
+    display:flex;flex-direction:column;gap:28px;padding:24px 0 0}
+  h1{font-size:28px;line-height:36px;font-weight:800;letter-spacing:-0.01em;color:var(--navy-900)}
+  .sub{font-size:15px;line-height:23px;color:var(--gray-600);margin-top:10px}
+
+  /* 카카오 버튼 — 카카오 규격(노랑 · 말풍선). 높이·라운드는 공통 CTA 토큰 */
+  .kakao-block{display:flex;flex-direction:column;gap:12px}
+  .kakao{width:100%;height:var(--cta-h);border:0;border-radius:var(--cta-radius);
+    background:var(--kakao);color:var(--kakao-text);
+    font-size:var(--cta-fs);line-height:20px;font-weight:var(--cta-fw);font-family:inherit;
+    display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+  .kakao svg{flex:none}
+  .kakao:active{transform:scale(.98)}
+  .kakao[disabled]{opacity:.6;cursor:default;transform:none}
+  .help{font-size:13px;line-height:18px;color:var(--gray-500);text-align:center}
+
+  .divider{display:flex;align-items:center;gap:12px;font-size:13px;line-height:18px;color:var(--gray-400)}
+  .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--gray-200)}
+
+  .form{display:flex;flex-direction:column;gap:16px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-size:13px;line-height:18px;font-weight:600;color:var(--gray-600)}
+  .field input{height:48px;border:1px solid var(--gray-200);border-radius:12px;padding:0 14px;
+    font-size:15px;line-height:23px;font-family:inherit;color:var(--gray-800);background:#fff;
+    width:100%;outline:none;-webkit-appearance:none;appearance:none}
+  .field input:focus{border-color:var(--amber-500);box-shadow:0 0 0 3px #FEF3C7}
+  .form.bad .field input{border-color:var(--error-600)}
+  .err{display:none;font-size:13px;line-height:18px;color:var(--error-600)}
+  .err.on{display:block}
+
+  /* 이메일 로그인 CTA — 카카오와 위계를 가르려고 gray-800. 크기·라운드·글자는 공통 토큰 */
+  .cta{width:100%;height:var(--cta-h);border:0;border-radius:var(--cta-radius);
+    background:var(--gray-800);color:#fff;margin-top:8px;
+    font-size:var(--cta-fs);line-height:20px;font-weight:var(--cta-fw);font-family:inherit;
+    display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .cta:active{transform:scale(.98)}
+  .cta[disabled]{opacity:.4;cursor:default;transform:none}
+
+  .spacer{flex:1;min-height:24px}
+  footer{display:flex;justify-content:center;gap:6px;font-size:13px;line-height:18px;color:var(--gray-500)}
+  footer a{color:inherit;text-decoration:none}
+  footer .dot{color:var(--gray-400)}
+
+  @media (min-width:451px){
+    body{background:var(--gray-100)}
+    .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
+  }
+  :focus-visible{outline:2px solid var(--amber-500);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <a href="/" aria-label="커리어코치 홈" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+      <span class="app-icon"><img src="/assets/mark-white.svg" alt=""></span>
+      <img class="wordmark" src="/assets/wordmark.svg" alt="커리어코치">
+    </a>
+  </header>
+
+  <main>
+    <div class="content">
+      <div class="lead-group">
+        <h1>로그인</h1>
+        <p class="sub">매 영업일 아침, 나에게 맞는 채용공고를<br>카카오 알림톡으로 받아보세요.</p>
+      </div>
+
+      <div class="kakao-block">
+        <button type="button" class="kakao" id="kakaoBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3C6.5 3 2 6.6 2 11c0 2.8 1.9 5.3 4.7 6.7-.2.7-.7 2.6-.8 3-.1.5.2.5.4.4.2-.1 2.6-1.8 3.7-2.5.6.1 1.3.2 2 .2 5.5 0 10-3.6 10-8S17.5 3 12 3z"/></svg>
+          카카오로 시작하기
+        </button>
+        <p class="help">처음이신가요? 카카오로 시작하면 3초 만에 가입됩니다.</p>
+      </div>
+
+      <div class="divider" aria-hidden="true">또는 이메일 계정으로 로그인</div>
+
+      <form class="form" id="form" novalidate>
+        <div class="field">
+          <label for="email">이메일</label>
+          <input type="email" id="email" name="email" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false">
+        </div>
+        <div class="field">
+          <label for="password">비밀번호</label>
+          <input type="password" id="password" name="password" autocomplete="current-password">
+          <!-- 문구는 마크업에 둔다 — 피그마 「로그인 — 오류」 프레임과 docs-audit 이 대조한다. -->
+          <p class="err" id="err" role="alert">이메일 또는 비밀번호가 맞지 않습니다.</p>
+        </div>
+        <button type="submit" class="cta" id="emailBtn" disabled>이메일로 로그인</button>
+      </form>
+    </div>
+
+    <div class="spacer"></div>
+
+    <footer>
+      <a href="/terms.html">이용약관</a><span class="dot">·</span><a href="/privacy.html">개인정보처리방침</a>
+    </footer>
+  </main>
+</div>
+
+<script type="module">
+  // ★ supabase-js 를 부르는 아래 블록과 **일부러 분리**했다 — signup/index.html 과 같은 이유.
+  //   같은 모듈에 두면 CDN 이 느리거나 막힌 순간 추적도 같이 죽는다.
+  // 이름은 analytics.event_name 허용 목록(visit·signup_view·signup_start·login·onboarding_step·
+  //   onboarding_done·client_error)에 있는 것만 통과한다 — 목록은 career-coach 저장소에 있다.
+  //   로그인 화면 전용 이름이 없어 카카오 버튼은 signup_start + props 로 적는다(같은 버튼이다).
+  import { track } from '/assets/track.js';
+  document.getElementById('kakaoBtn')?.addEventListener('click', () => track('signup_start', { from: 'login' }), { once: true });
+</script>
+
+<script type="module">
+  // 입력 게이트 — 두 칸이 다 차야 이메일 로그인 버튼이 살아난다. supabase CDN 블록과 **분리**한다
+  // (CDN 이 막혀도 이 게이트는 돌아야 버튼이 영영 잠기지 않는다 — signup 의 동의 게이트와 같은 이유).
+  const email = document.getElementById('email');
+  const pw = document.getElementById('password');
+  const btn = document.getElementById('emailBtn');
+  const form = document.getElementById('form');
+  const err = document.getElementById('err');
+  const sync = () => { btn.disabled = !(email.value.trim() && pw.value); };
+  email.addEventListener('input', sync); pw.addEventListener('input', sync);
+  sync();   // 뒤로가기로 돌아왔을 때 브라우저가 복원한 값을 반영한다
+  // 다시 입력하기 시작하면 오류 표시를 거둔다
+  const clear = () => { form.classList.remove('bad'); err.classList.remove('on'); };
+  email.addEventListener('input', clear); pw.addEventListener('input', clear);
+  // 아래 모듈이 아직 안 왔거나 영영 안 오는 경우 — 제출을 삼키지 않고 같은 실패 문구를 띄운다.
+  window.ccLoginReady = false;
+  form.addEventListener('submit', (e) => {
+    if (window.ccLoginReady) return;
+    e.preventDefault();
+    window.ccPendingLogin = true;   // 준비되면 아래 모듈이 이 제출을 이어받는다
+    setTimeout(() => {
+      if (window.ccLoginReady) return;
+      window.ccPendingLogin = false;
+      err.textContent = '로그인을 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.';
+      err.classList.add('on');
+    }, 10000);
+  });
+</script>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+  // 접속 정보는 /assets/supabase-config.js 한 곳에만 둔다.
+  import { SUPABASE_URL, SUPABASE_ANON_KEY } from '/assets/supabase-config.js';
+  import { track } from '/assets/track.js';
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const form = document.getElementById('form');
+  const email = document.getElementById('email');
+  const pw = document.getElementById('password');
+  const btn = document.getElementById('emailBtn');
+  const kakaoBtn = document.getElementById('kakaoBtn');
+  const err = document.getElementById('err');
+  const WRONG = '이메일 또는 비밀번호가 맞지 않습니다.';
+  const showError = (msg) => { err.textContent = msg; err.classList.add('on'); form.classList.add('bad'); };
+
+  // 이미 로그인돼 있으면 온보딩으로 — /auth/callback/ 이 세션을 받으면 가는 곳과 같다.
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) location.replace('/onboarding/1/');
+
+  // 카카오 — /signup/ · 랜딩 헤더와 **같은 문자열**이어야 한다 (세 곳이 같은 로그인이다).
+  kakaoBtn.addEventListener('click', async () => {
+    kakaoBtn.disabled = true;
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'kakao',
+      options: {
+        redirectTo: 'https://careercoach.my/auth/callback/',
+        scopes: 'profile_nickname profile_image account_email name phone_number gender birthday birthyear'
+      }
+    });
+    if (error) {
+      kakaoBtn.disabled = false;
+      err.textContent = '카카오 로그인을 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.';
+      err.classList.add('on');
+    }
+  });
+
+  // 이메일 · 비밀번호 — 운영자가 발급한 계정만 있다(가입 경로는 없다). 어떤 실패든 같은 문구로
+  // 답한다 — 어느 주소가 등록돼 있는지 화면이 새어 나가지 않게.
+  const login = async () => {
+    btn.disabled = true;
+    const { data, error } = await supabase.auth.signInWithPassword({ email: email.value.trim(), password: pw.value });
+    if (error || !data?.session) {
+      btn.disabled = false;
+      showError(WRONG);
+      return;
+    }
+    track('login', { method: 'email' }, data.session.access_token);
+    // /auth/callback/ 이 세션을 받았을 때와 같은 목적지. 온보딩을 마쳤는지의 판정은 아직 없다 —
+    // 결제 화면이 배선되면 여기와 /auth/callback/ 이 같은 판정을 갖는다.
+    location.replace('/onboarding/1/');
+  };
+  form.addEventListener('submit', (e) => { e.preventDefault(); if (!btn.disabled) login(); });
+  window.ccLoginReady = true;   // 여기까지 와야 제출이 실제로 동작한다 — 위 게이트가 이 표시를 본다
+  if (window.ccPendingLogin) { window.ccPendingLogin = false; login(); }
+</script>
+</body>
+</html>
