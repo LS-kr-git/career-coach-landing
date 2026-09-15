@@ -44,6 +44,18 @@
       "textAudit": "docs-audit",
       "비고": "2026-08-08 — 프레임을 한 번 지웠다가 되살렸다(구 536:2612 → 595:2646, 섹션 595:2645). 웹 파일은 Supabase OAuth 의 redirectTo 목적지라 지우면 안 된다"
     },
+    "login/index.html": {
+      "node": "2049:697",
+      "name": "로그인",
+      "stateNodes": [
+        {
+          "id": "2049:2896",
+          "name": "로그인 — 오류"
+        }
+      ],
+      "textAudit": "docs-audit",
+      "비고": "2026-09-15 신설. 섹션 595:2645 「가입 / 로그인」 안. 카카오 버튼(/signup/·랜딩과 같은 scopes)과 이메일·비밀번호 로그인을 한 화면에 둔다. 이메일 계정은 운영자가 Supabase 에서 발급하는 것만 있고 가입 경로는 없다 — 토스페이먼츠 심사관 계정이 첫 사용처다. 오류 문구는 마크업에 hidden 으로 두어 상태 프레임과 대조된다. 로그인 성공 뒤 목적지는 /auth/callback/ 과 같은 /onboarding/1/ 이다."
+    },
     "onboarding/2/index.html": {
       "node": "592:2623",
       "name": "STEP 2 · 연차 — 미선택",
