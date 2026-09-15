@@ -235,6 +235,15 @@
   const CHECKOUT_URL = '';
   const NEEDS_SUB = new Set(['need_subscription', 'saved_need_subscription']);
 
+  /* 구독 버튼의 두 갈래 문구. 삼항 안에 그대로 두면 docs-audit 이 못 본다(<script> 를
+     걷어내고 웹을 훑는다). 상수로 묶고 webScriptText 에 이름을 적어 두 갈래 다 피그마
+     프레임과 맞대 본다 — 2088:846(구독가능) 과 2058:775·2058:800(구독 준비 중).
+     ※ 위 주석이 말한 「미승인 임시 문구 2개」가 이 둘이다. 결제 화면이 확정되면 함께 고친다. */
+  const SUB_CTA = {
+    ready:   '구독 시작하기',
+    pending: '구독 준비 중이에요',
+  };
+
   const params = new URLSearchParams(location.search);
   const token = params.get('t') || '';
   const id = params.get('id') || '';
@@ -316,7 +325,7 @@
     const sub = $('subscribe');
     sub.hidden = !NEEDS_SUB.has(row.state);
     sub.disabled = !CHECKOUT_URL;
-    sub.textContent = CHECKOUT_URL ? '구독 시작하기' : '구독 준비 중이에요';
+    sub.textContent = CHECKOUT_URL ? SUB_CTA.ready : SUB_CTA.pending;
   }
 
   /** 소장 알림 — **처음 담기는 그 순간에만** 뜬다. 이미 담긴 편을 다시 열면 안 뜬다
