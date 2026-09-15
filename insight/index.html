@@ -195,8 +195,11 @@
   /* 소장 알림·흔적의 문구. **마크업이 아니라 여기에 둔다** — docs-audit 은 <script> 를
      걷어내고 웹을 훑으므로, 마크업에 두면 피그마에 없는 낱말이 EXTRA 로 잡히고 그걸
      끄려면 「있어요.」 같은 흔한 낱말까지 영구 면제해야 한다(검사관 2026-09-13 ①).
-     대신 이 문구들은 어느 검수도 안 본다 — 그 사실은 figma-docs-text.json 의
-     _남은_사각지대 에 적어 두었다. 피그마 프레임이 생기면 jsRenderedText 로 옮긴다.
+     🔴 2026-09-15 갱신 — 이제 이 상수는 **검수가 본다.** figma-docs-text.json 의
+     webScriptText 에 이름(LOCKED · SAVED_TOAST · MSG)이 적혀 있고, docs-audit 이 그
+     초기화식의 문자열을 웹 문구로 읽어 피그마 프레임과 양방향으로 맞댄다.
+     그러니 **이 문구들을 jsRenderedText 로 옮기지 마라** — 옮기는 순간 대조가 꺼진다.
+     이름을 바꾸려면 webScriptText 도 같이 바꿔라(안 바꾸면 푸시가 막힌다).
      문구 근거: 2026-09-13 사용자가 고른 T2 시안. */
   const SAVED_TOAST = {
     title: '소장했어요',
@@ -211,6 +214,16 @@
     need_subscription:       '구독하면 지난 편도 이어서 볼 수 있어요',
     saved_need_subscription: '소장한 글이에요. 구독을 다시 시작하면 바로 열려요',
     locked_past:             '지난 편이에요. 같은 주에 놓친 글은 일요일에 1편 다시 열려요',
+  };
+
+  /* 안내문(#notice)에 뜨는 문구. **여기 한 곳에 모아 둔다** — 「없는 글이에요」는 두 자리에서
+     같은 말을 던지고 있었고, 「지금은 열 수 없어요」도 마찬가지였다. 더 중요한 이유는 검수다:
+     docs-audit 은 <script> 를 걷어내고 웹을 훑으므로 흩어진 리터럴은 어느 대조도 못 받는다.
+     상수로 모으고 스냅샷의 webScriptText 에 이름을 적으면 피그마 프레임과 맞대 본다. */
+  const MSG = {
+    badLink:  '링크가 올바르지 않아요. 알림톡에서 받은 링크로 다시 열어 주세요.',
+    notFound: '없는 글이에요',
+    blocked:  '지금은 열 수 없어요',
   };
 
   /* 구독 CTA 의 목적지. **결제 화면이 아직 없어서 비어 있다** — 비어 있으면 버튼이
@@ -248,16 +261,16 @@
     const data = await res.json().catch(() => null);
     // 없는 글·만료 링크는 RPC 가 예외로 올린다. 그 메시지를 그대로 보여준다
     // (사람이 읽으라고 쓴 한국어이고, 우리가 옮겨 적으면 두 곳이 갈린다).
-    if (!res.ok) throw new Error((data && data.message) || '지금은 열 수 없어요');
+    if (!res.ok) throw new Error((data && data.message) || MSG.blocked);
     // returns table(...) 은 행 배열로 온다.
-    if (!Array.isArray(data)) throw new Error('없는 글이에요');
+    if (!Array.isArray(data)) throw new Error(MSG.notFound);
     return data;
   }
 
   /** 편 하나를 묻는 호출. 행이 없으면 없는 글이다. */
   async function call(fn, args) {
     const rows = await callRows(fn, args);
-    if (!rows.length) throw new Error('없는 글이에요');
+    if (!rows.length) throw new Error(MSG.notFound);
     return rows[0];
   }
 
@@ -297,7 +310,7 @@
     // 잠김 — 제목·요약은 그대로 두고 전문만 막는다 (전문-열람-규칙 2절).
     bodyEl.hidden = true;
     $('lock').hidden = false;
-    $('lockMsg').textContent = LOCKED[row.state] || '지금은 열 수 없어요';
+    $('lockMsg').textContent = LOCKED[row.state] || MSG.blocked;
     $('makeup').hidden = row.state !== 'makeup_offer';
 
     const sub = $('subscribe');
@@ -392,7 +405,7 @@
   }
 
   if (!wellFormed) {
-    notice('링크가 올바르지 않아요. 알림톡에서 받은 링크로 다시 열어 주세요.');
+    notice(MSG.badLink);
   } else {
     try {
       render(await call('insight_letter'));
