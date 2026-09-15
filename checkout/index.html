@@ -119,12 +119,11 @@
         <div class="lbl">제공 방식</div><div class="val">카카오 알림톡 발송 (배송 없음)</div>
         <div class="lbl">제공 주기</div><div class="val">영업일 매일 아침 8시</div>
         <div class="lbl">이용 기간</div><div class="val">결제일부터 1개월, 매월 자동 갱신</div>
-        <div class="lbl">체험 기간</div><div class="val">영업일 5일 무료 (기간 중 미청구)</div>
         <div class="lbl">첫 결제일</div><div class="val" id="firstCharge"></div>
       </div>
       <div class="total">
         <div class="total-l">오늘 결제 금액</div>
-        <div class="total-v">0원</div>
+        <div class="total-v" id="todayTotal"></div>
       </div>
     </section>
 
@@ -134,21 +133,32 @@
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="#94A3B8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
 
+    <section class="acc" id="accRefund">
+      <button class="acc-row" type="button" aria-expanded="true" aria-controls="accRefundBody">
+        <span class="acc-title">교환 및 반품 안내</span>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18" width="20" height="20" aria-hidden="true"><path d="M3.606 7.442c0-.201.082-.394.247-.532a.696.696 0 0 1 .973.092l3.725 4.532 3.725-4.532a.687.687 0 0 1 .972-.092c.294.239.34.68.092.973l-4.257 5.174a.68.68 0 0 1-.532.248.68.68 0 0 1-.532-.248L3.762 7.883a.68.68 0 0 1-.156-.441Z"/></svg>
+      </button>
+      <ul class="acc-body" id="accRefundBody">
+        <li>카카오 알림톡으로 제공되는 디지털 콘텐츠로, 실물 배송이 없어 교환·반품 대상이 아닙니다. 발송 중단과 환불로 처리합니다.</li>
+        <li>결제일 또는 서비스 제공 개시일부터 7일 이내에 청약철회할 수 있습니다.</li>
+        <li>이미 발송이 완료된 브리핑에 해당하는 부분은 전자상거래법 제17조 제2항에 따라 청약철회가 제한됩니다.</li>
+        <li>아직 발송되지 않은 잔여 기간은 청약철회가 제한되지 않으며, 잔여 기간에 해당하는 금액을 일할 계산하여 환불합니다.</li>
+        <li>첫 브리핑 수신 후 불만족 시 요청하시면 해당 결제분을 전액 환불해 드립니다. 이용자당 최초 1회에 한합니다.</li>
+        <li>회사 귀책 사유로 서비스가 7일 이상 제공되지 못한 경우, 미제공 기간에 해당하는 금액을 환불하거나 구독 기간을 연장합니다.</li>
+        <li>환불은 사유를 확인한 날부터 3영업일 이내에 결제하신 수단과 동일한 방법으로 처리합니다.</li>
+        <li>청약철회·환불은 구독 관리 화면에서 신청하거나 careercoach.my@gmail.com 으로 요청할 수 있습니다.</li>
+      </ul>
+    </section>
+
     <section class="acc" id="acc">
-      <button class="acc-row" type="button" id="accBtn" aria-expanded="true" aria-controls="accBody">
+      <button class="acc-row" type="button" aria-expanded="true" aria-controls="accBody">
         <span class="acc-title">유의사항</span>
         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18" width="20" height="20" aria-hidden="true"><path d="M3.606 7.442c0-.201.082-.394.247-.532a.696.696 0 0 1 .973.092l3.725 4.532 3.725-4.532a.687.687 0 0 1 .972-.092c.294.239.34.68.092.973l-4.257 5.174a.68.68 0 0 1-.532.248.68.68 0 0 1-.532-.248L3.762 7.883a.68.68 0 0 1-.156-.441Z"/></svg>
       </button>
       <ul class="acc-body" id="accBody">
-        <li>결제일 또는 서비스 제공 개시일부터 7일 이내에 청약철회할 수 있습니다.</li>
-        <li>이미 발송이 완료된 브리핑에 해당하는 부분은 전자상거래법 제17조 제2항에 따라 청약철회가 제한됩니다.</li>
-        <li>아직 발송되지 않은 잔여 기간은 청약철회가 제한되지 않으며, 잔여 기간에 해당하는 금액을 일할 계산하여 환불합니다.</li>
-        <li>체험 기간에는 요금이 청구되지 않으며, 체험 종료 하루 전 카카오 알림톡으로 안내해 드립니다.</li>
-        <li>구독 관리 화면에서 언제든 해지할 수 있으며, 체험 기간 중 해지하면 청구되지 않습니다.</li>
+        <li>신청 즉시 첫 달 요금이 결제되고, 이후 매월 같은 날에 자동으로 결제됩니다.</li>
+        <li>구독 관리 화면에서 언제든 해지할 수 있습니다.</li>
         <li>해지 시 다음 결제 주기부터 발송과 청구가 중단됩니다.</li>
-        <li>첫 브리핑 수신 후 불만족 시 요청하시면 해당 결제분을 전액 환불해 드립니다. 이용자당 최초 1회에 한합니다.</li>
-        <li>회사 귀책 사유로 서비스가 7일 이상 제공되지 못한 경우, 미제공 기간에 해당하는 금액을 환불하거나 구독 기간을 연장합니다.</li>
-        <li>환불은 사유를 확인한 날부터 3영업일 이내에 결제하신 수단과 동일한 방법으로 처리합니다.</li>
         <li>만 14세 미만은 서비스에 가입할 수 없습니다.</li>
       </ul>
     </section>
@@ -169,28 +179,13 @@
 <script>
   var $ = function (id) { return document.getElementById(id); };
 
-  /* 첫 결제일 — 체험 영업일 5일이 끝난 다음 영업일.
-     날짜를 화면에 박아 두면 하루 만에 틀린 값이 되므로 그릴 때 센다.
-     ⚠️ 지금은 주말만 뺀다. 공휴일 원장은 career-coach 쪽에 있고, 빌링키 함수가
-     붙을 때 서버가 확정한 값으로 이 칸을 채우게 바꾼다. */
-  var TRIAL_BUSINESS_DAYS = 5;
-  function addBusinessDays(from, n) {
-    var d = new Date(from.getFullYear(), from.getMonth(), from.getDate());
-    var left = n;
-    while (left > 0) {
-      d.setDate(d.getDate() + 1);
-      var w = d.getDay();
-      if (w !== 0 && w !== 6) left -= 1;
-    }
-    return d;
-  }
+  /* 체험 기간은 없다 — 신청 즉시 첫 달이 결제되고 매월 같은 날 갱신된다
+     (2026-09-15 사용자 확정). 날짜를 화면에 박아 두면 하루 만에 틀린 값이 되므로 그릴 때 센다.
+     🔴 배선할 때는 이 계산을 지우고 plan 응답이 확정한 날짜로 두 칸을 채운다 —
+        서버가 결제 시각의 기준이고, 이 값은 사용자 기기 시계를 믿는 어림값이다. */
   var today = new Date();
-  // 오늘이 영업일이면 오늘이 체험 1일차다. 주말에 신청하면 다음 영업일부터 센다.
-  var start = (today.getDay() === 0 || today.getDay() === 6) ? addBusinessDays(today, 1) : today;
-  var trialEnd = addBusinessDays(start, TRIAL_BUSINESS_DAYS - 1);
-  var firstCharge = addBusinessDays(trialEnd, 1);
   var fmt = function (d) { return d.getFullYear() + '년 ' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일'; };
-  $('firstCharge').textContent = fmt(firstCharge);
+  $('firstCharge').textContent = fmt(today);
 
   /* 금액은 **월 3,900원으로 확정됐다** (2026-09-05 사용자 확정).
      이 상수가 서비스 전체에서 금액을 말하는 한 곳이다 — 마크업에는 숫자를 두지 않는다.
@@ -201,16 +196,23 @@
   var PRICE_KRW = 3900;
   var won = function (n) { return n.toLocaleString('ko-KR') + '원'; };
   $('fee').textContent = '월 ' + won(PRICE_KRW) + ' (부가세 포함)';
+  $('todayTotal').textContent = won(PRICE_KRW);
 
-  /* 유료 전환 고지 — 전자상거래법 제21조의2 「숨은 갱신」.
-     ⚠️ 2026-09-15 사용자 지시로 「30일 후」 로 바꿨다. 위 주문 내용의 「체험 기간 영업일 5일」·
-        「첫 결제일」 과 말이 다르다 — 둘 중 어느 쪽을 정본으로 할지 정해지면 같이 맞춘다. */
+  /* 정기결제 고지 — 체험이 없어졌으므로 전자상거래법 제21조의2 「숨은 갱신」(무료·할인에서
+     유료로 넘어갈 때의 사전 고지)은 해당이 없다. 대신 자동결제라는 사실·금액·주기를
+     결제 버튼 옆에서 말한다. 국내 구독 서비스가 공통으로 쓰는 형태다.
+     한 줄에 들어가야 하므로 「해지할 때까지 계속」 은 유의사항 첫 두 줄이 맡는다. */
   $('agreeText').innerHTML =
-    '<b>30일 후 매월 ' + won(PRICE_KRW) + '</b>으로 유료 전환되는 것에 동의합니다.';
+    '<b>매월 ' + won(PRICE_KRW) + ' 자동 결제</b>되는 정기결제에 동의합니다.';
 
-  $('accBtn').addEventListener('click', function () {
-    var closed = $('acc').classList.toggle('closed');
-    this.setAttribute('aria-expanded', String(!closed));
+  // 토글이 둘이다 — 각 버튼이 자기 section 만 접는다.
+  // 절을 id 로 집는다: 하나라도 없으면 여기서 터진다. 셀렉터로 훑으면 0개를 맞혀도
+  // 아무 신호 없이 두 토글이 다 죽는다.
+  ['accRefund', 'acc'].forEach(function (id) {
+    var sec = $(id), btn = sec.querySelector('.acc-row');
+    btn.addEventListener('click', function () {
+      btn.setAttribute('aria-expanded', String(!sec.classList.toggle('closed')));
+    });
   });
 
   $('back').addEventListener('click', function () {

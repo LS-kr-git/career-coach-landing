@@ -106,12 +106,6 @@
   .acts .ghost{flex:1;border:1px solid var(--gray-200);background:#fff;color:var(--gray-600)}
   .acts .fill{flex:1.4;background:var(--amber-500);color:#fff}
 
-  /* ④ 무료로 며칠 — 버튼이 아니라 본문이 알린다 (가격·결제는 이 화면에 없다) */
-  .free{display:flex;gap:10px;margin:20px 24px 0;padding:14px 16px;border-radius:14px;background:var(--gray-50)}
-  .free svg{flex:none;margin-top:2px}
-  .free h2{font-size:14px;line-height:20px;font-weight:700;color:var(--gray-700)}
-  .free p{margin-top:3px;font-size:13px;line-height:18px;color:var(--gray-500)}
-
   .fade{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:450px;height:100px;
     background:linear-gradient(180deg,rgba(255,255,255,0),#fff 55%);pointer-events:none;z-index:9}
   .cta{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
@@ -154,13 +148,6 @@
     <div class="acts"><button class="ghost" type="button">취소</button><button class="fill" type="button">이 주제로 할게요</button></div>
   </div>
 
-  <div class="free">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s-7.5-4.6-7.5-9.8A4.2 4.2 0 0 1 12 8.4a4.2 4.2 0 0 1 7.5 2.8C19.5 16.4 12 21 12 21z" stroke="#94A3B8" stroke-width="1.6" stroke-linejoin="round"/></svg>
-    <div>
-      <h2>먼저 며칠 무료로 받아 보세요</h2>
-      <p>지금은 아무것도 내지 않아요. 계속 받을지는 며칠 뒤에 정하면 됩니다.</p>
-    </div>
-  </div>
 </div>
 <div class="fade"></div>
 <a class="cta" href="/checkout/">완료</a>
