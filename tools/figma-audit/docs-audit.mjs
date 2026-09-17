@@ -446,13 +446,41 @@ for (const page of snap.pages) {
   //   "왜 빠지는지" 가 파일에 남게 한다 — 조용히 사라지지 않는다.
   // 프레임마다 따로 본다 — 어느 프레임이 어긋났는지 나와야 고칠 수 있고, 공통 문구를
   // 한쪽 프레임에서만 바꾼 경우가 여기서 걸린다.
+  // 🔴 **한 문구가 다른 문구의 부분 문자열이면 이어붙인 `webAll` 로는 못 가린다**
+  //    (2026-09-17 검사관 ②). 로그인 화면의 「로그인을 시작하지 못했습니다. …」 는 같은
+  //    화면의 「**카카오** 로그인을 시작하지 못했습니다. …」 안에 통째로 들어 있다. 그래서
+  //    웹에서 앞엣것을 **지워도** 뒤엣것이 남아 있는 한 이 대조가 계속 초록이었다 —
+  //    그 프레임은 구조적으로 실패할 수 없는 검사였다(변이로 확인: 그 줄을 지워도 0건).
+  //    그런 짝에서는 이어붙인 문자열을 안 믿고 **자기 자리가 따로 있는지**를 센다.
+  //    ⚠️ 이어붙이기 자체는 없애지 않는다 — 한 문단이 `<strong>`·`<a>` 로 쪼개진 산문을
+  //       위한 완화책이고, 삼켜지는 짝에서만 그 완화가 검사를 통째로 삼킨다.
+  //    ⚠️ **「웹 블록과 통째로 같아야 한다」로 물으면 안 된다** — 같은 화면의 「아이디로
+  //       로그인」(버튼)은 「또는 아이디로 로그인」(구분선)에 삼켜지지만 웹에서는 둘 다
+  //       멀쩡히 있고, 그런데 버튼 글자는 `lines` 에 안 들어와 통째 대조로는 거짓 빨강이 된다.
+  //       그래서 **자기를 품은 블록 수**로 센다: 짧은 쪽이 긴 쪽보다 **더 많은 블록**에
+  //       나타나야 한다. 그 차이가 곧 「자기 자리가 따로 있다」는 뜻이고, 웹에서 짧은 쪽을
+  //       지우면 그 수가 같아져 바로 운다.
+  // ⚠️ **중복을 지운다** — 같은 문구가 프레임마다 있으므로, 안 지우면 품는 쪽을
+  //    프레임 수만큼 더해 어떤 짧은 문구도 못 넘는 문턱이 된다.
+  const figmaKeys = [...new Set(allFigma.map(key))];
+  const 나온횟수 = (k) => (k ? webAll.split(k).length - 1 : 0);
+  const 자기자리가있나 = (k) => {
+    const 품는것 = figmaKeys.filter((b) => b !== k && b.includes(k));
+    if (품는것.length === 0) return true;                       // 삼켜지지 않는다 — 종전대로
+    // 긴 쪽이 웹에 나온 만큼은 짧은 쪽도 「덤으로」 세어진다. 그 몫을 뺀 뒤에도 남아야 한다.
+    return 나온횟수(k) > 품는것.reduce((s, b) => s + 나온횟수(b), 0);
+  };
+
   for (const f of frames) {
     const jsRendered = new Set((f.jsRenderedText || []).map(key));
     for (const t of f.texts.filter((x) => x && x.trim().length > 0)) {
       const k = key(t);
       if (jsRendered.has(k)) continue;
-      if (webLineKeys.has(k) || webAll.includes(k)) continue;
-      if (webAllSoft.includes(softKey(t))) {
+      if (webLineKeys.has(k)) continue;
+      if (webAll.includes(k) && 자기자리가있나(k)) continue;
+      // 삼켜지는 짝은 여기서도 이어붙인 문자열을 안 믿는다 — 안 그러면 위에서 막은 것이
+      // **PUNCT(경고)** 로 내려앉아 종료코드가 0 이 된다. 같은 구멍의 뒷문이다.
+      if (자기자리가있나(k) && webAllSoft.includes(softKey(t))) {
         findings.push({ level: 'PUNCT', page: page.html, frame: f.node, kind: '문장부호', figma: t, note: '글자·구성은 같고 따옴표/말줄임표만 다름' });
         continue;
       }
