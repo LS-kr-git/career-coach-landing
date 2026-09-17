@@ -13,6 +13,7 @@
     --navy-900:#1E3A8A;
     --gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;--gray-400:#94A3B8;
     --gray-500:#64748B;--gray-600:#475569;--gray-700:#334155;--gray-800:#1E293B;--gray-900:#0F172A;
+    --error-600:#DC2626;
     --pad-x:24px; --card-max:450px;
     /* CTA 규칙(2026-08-03) — 제품 공통. 값·근거는 CLAUDE.md "CTA 규칙" */
     --cta-h:54px; --cta-radius:14px; --cta-fs:15px; --cta-fw:700; --cta-max:410px;
@@ -52,10 +53,11 @@
   .total-l{font-size:14px;font-weight:600;color:var(--gray-800)}
   .total-v{font-size:20px;line-height:28px;font-weight:800;color:var(--navy-900)}
 
-  /* 결제수단 */
-  .method{margin-top:20px;display:flex;align-items:center;gap:12px;border:1px solid var(--gray-200);
-    border-radius:14px;padding:16px 18px;background:#fff;width:100%;cursor:pointer;font:inherit;text-align:left}
-  .method-t{flex-grow:1;font-size:15px;line-height:23px;color:var(--gray-700)}
+  /* 결제 결과 한 줄 — 보임/숨김·색은 login/index.html 의 .err 와 같은 패턴이다 */
+  .note{display:none;width:100%;max-width:var(--cta-max);margin:0 auto 10px;
+    font-size:13px;line-height:18px;color:var(--gray-600)}
+  .note.on{display:block}
+  .note.bad{color:var(--error-600)}
 
   /* 유의사항 — 접기·펼치기. 기본은 **펼침** (2026-09-15 사용자 확정) */
   .acc{margin-top:24px;padding-top:24px;display:flex;flex-direction:column;gap:24px}
@@ -63,7 +65,10 @@
     color:var(--gray-400);background:none;border:0;padding:0;width:100%;font:inherit}
   .acc-title{font-size:14px;line-height:20px;font-weight:700;color:var(--gray-400)}
   .acc-row svg{transition:transform .18s}
-  .acc.closed .acc-row svg{transform:rotate(180deg)}
+  /* 셰브론은 **펼쳤을 때 위**를 본다 — 접힘이 ▼(펼치기) 펼침이 ▲(접기) 라는 관례다.
+     2026-09-17 까지 웹만 거꾸로여서 펼친 절이 ▼ 를 달고 있었다. 피그마가 기준이다
+     (CLAUDE.md 「어긋나면 웹을 고친다」) — 피그마 2010:674(펼침) 180° · 2014:2900(접힘) 0°. */
+  .acc:not(.closed) .acc-row svg{transform:rotate(180deg)}
   .acc.closed .acc-body{display:none}
   .acc-body{display:flex;flex-direction:column;gap:6px;list-style:none}
   /* 글자 크기·색은 주문 내용의 라벨(.lbl 「상품명」)과 같은 값이다 — 13/20 · gray-400
@@ -127,12 +132,6 @@
       </div>
     </section>
 
-    <button class="method" id="method" type="button">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2.75" y="5.25" width="18.5" height="13.5" rx="2.5" stroke="#475569" stroke-width="1.6"/><path d="M2.75 9.75h18.5" stroke="#475569" stroke-width="1.6"/><path d="M6.5 14.75h3.5" stroke="#475569" stroke-width="1.6" stroke-linecap="round"/></svg>
-      <span class="method-t">결제수단 등록하기</span>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="#94A3B8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </button>
-
     <section class="acc" id="accRefund">
       <button class="acc-row" type="button" aria-expanded="true" aria-controls="accRefundBody">
         <span class="acc-title">교환 및 반품 안내</span>
@@ -172,7 +171,8 @@
       </div>
       <div class="agree-t" id="agreeText"></div>
     </div>
-    <button class="cta" id="submit" type="button">구독 신청</button>
+    <p class="note" id="note" role="status"></p>
+    <button class="cta" id="submit" type="button">결제수단 등록하고 결제하기</button>
   </div>
 </div>
 
@@ -219,11 +219,73 @@
     if (history.length > 1) history.back(); else location.href = '/';
   });
 
-  /* 결제수단 등록과 구독 신청에는 아직 배선이 없다 — 빌링키 발급 엣지 함수가 없다.
-     그래서 이 페이지는 어디에서도 링크되지 않는다: 인사이트 잠김 화면의 목적지 상수가
-     비어 있어 그쪽 버튼이 비활성으로 서고, robots 와 noindex 로 색인도 막혀 있다.
-     함수가 배포되면 payments/client.js 의 startBillingKeyIssue() 를 여기서 부르고,
-     그때 그 목적지 상수를 채운다. 화면 자체는 그때도 바뀌지 않는다. */
+  /* ── 빌링 결제창 ───────────────────────────────────────────────────────────
+     PG사 입점심사는 "결제페이지와 결제모듈 호출"이 구현돼 있어야 진행된다
+     (포트원 2026-08-07 「PG 계약에 필요한 테스트모드 설정 안내」). 실연동 승인 전에도
+     테스트 채널로 그 둘을 보여줄 수 있어서, 아래는 포트원 테스트 채널에 물려 있다
+     — 토스페이먼츠 결제창 정기결제 · 공용 MID iamporttest_4 (2026-09-17 생성).
+
+     두 값은 **공개 값이다** — 브라우저에 그대로 내려가도 되는 것만 둔다
+     (assets/supabase-config.js 와 같은 판단). 시크릿 키는 여기에 절대 두지 않는다.
+     실연동 채널이 열리면 바꾸는 것은 이 두 줄뿐이다.
+
+     career-coach 의 payments/client.js 에 같은 일을 하는 startBillingKeyIssue() 가 있지만
+     **여기서 부를 수 없다** — 그 저장소는 careercoach.my 로 배포되지 않는 비공개 저장소이고,
+     이 사이트에는 번들러가 없어 import 할 경로가 없다. 그래서 그 파일의 포트원 갈래만 여기에
+     옮겨 적었다. 둘 중 한쪽을 고치면 다른 쪽도 고친다 (지금은 이 파일이 유일한 실사용처다).
+
+     🔴 아직 없는 것: 발급된 빌링키를 서버가 조회해 진짜인지 확인하고 보관하는 엣지 함수.
+        그래서 지금은 결제창이 뜨고 등록까지 되지만 **구독이 실제로 개시되지는 않는다.**
+        함수가 배포되면 아래 res.billingKey 를 career-coach payments 의
+        issueBillingKey() 로 넘기고, customerId 도 임시값이 아니라 app_user.id 로 바꾼다. */
+  var PORTONE_STORE_ID = 'store-a4b087e3-89d3-4369-8558-02d158bf6564';
+  var PORTONE_CHANNEL_KEY = 'channel-key-07bc635a-da47-4202-90d1-e69c076bce4e';
+
+  var note = function (text, bad) {
+    var el = $('note');
+    el.textContent = text;
+    el.className = 'note' + (text ? ' on' : '') + (bad ? ' bad' : '');
+  };
+
+  var sdk = null;
+  function loadPortOne() {
+    if (!sdk) {
+      sdk = new Promise(function (ok, fail) {
+        var el = document.createElement('script');
+        el.src = 'https://cdn.portone.io/v2/browser-sdk.js';
+        el.onload = function () { ok(window.PortOne); };
+        el.onerror = function () { sdk = null; fail(new Error('')); };
+        document.head.appendChild(el);
+      });
+    }
+    return sdk;
+  }
+
+  $('submit').addEventListener('click', function () {
+    var btn = this;
+    btn.disabled = true;
+    note('');
+    // 발급 건 식별자. 같은 값으로 두 번 부르면 포트원이 중복으로 본다.
+    var issueId = 'cc-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+    loadPortOne().then(function (PortOne) {
+      return PortOne.requestIssueBillingKey({
+        storeId: PORTONE_STORE_ID,
+        channelKey: PORTONE_CHANNEL_KEY,
+        billingKeyMethod: 'CARD',
+        issueId: issueId,
+        issueName: '커리어코치 직군 브리핑 월 구독',
+        customer: { customerId: issueId },
+      });
+    }).then(function (res) {
+      // 포트원은 실패를 throw 하지 않고 code 를 채워 돌려준다 (사용자가 창을 닫은 경우 포함).
+      if (res && res.code != null) throw new Error(res.message);
+      // billingKey 가 없으면 등록된 것이 아니다 — code 만 비어 있는 응답을 성공으로 읽지 않는다.
+      if (!res || !res.billingKey) throw new Error('');
+      note('결제수단이 등록되었습니다.');
+    }).catch(function (e) {
+      note(e.message || '결제수단 등록에 실패했습니다. 다시 시도해 주세요.', true);
+    }).then(function () { btn.disabled = false; });
+  });
 </script>
 </body>
 </html>
