@@ -308,6 +308,18 @@ fbq('track', 'PageView');
     section.in{opacity:1;transform:none}
   }
   :focus-visible{outline:2px solid var(--amber-500);outline-offset:2px}
+
+  /* ===== 요금과 해지 (피그마 2113:936) =====
+     비로그인 화면에 요금·청약철회·환불·해지를 두는 이유: PG·카드사 심사는 「로그인 없이
+     요금제와 해지 방법이 보이는지」 를 본다. 로그인 뒤에만 보이거나 요금이 어디에도 없으면
+     심사가 보류되거나 반려된다(포트원 SaaS 정기결제 안내). 2026-09-17 사용자 지시.
+     카드 글자는 이미 있는 텍스트 스타일 두 개(.t-body-strong · .t-body-s)를 그대로 쓴다 —
+     새 타이포 조합을 만들면 타이포 검수에 선택자를 또 등록해야 한다. */
+  .fee-cards{display:flex;flex-direction:column;gap:12px;width:100%;margin-top:12px}
+  .fee-card{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:18px;
+    padding:18px 20px;display:flex;flex-direction:column;gap:6px}
+  .fee-card .fee-k{color:var(--navy-900)}
+  .fee-card p{color:var(--gray-600)}
 </style>
 </head>
 <body>
@@ -493,6 +505,21 @@ fbq('track', 'PageView');
         <div class="step"><div class="num t-body-strong">2</div><div class="t-h3">매일 아침 8시 카카오 알림톡</div></div>
         <div class="step"><div class="num t-body-strong">3</div><div class="t-h3">지원자가 많아지기 전에 지원</div></div>
         <div class="step"><div class="num t-body-strong">4</div><div class="t-h3">더 많은 업계 동향·인사이트로 면접</div></div>
+      </div>
+    </section>
+
+    <!-- 10. 요금과 해지 (피그마 2113:936 · 배경 없음) -->
+    <section>
+      <div class="head-group">
+        <div class="t-label eyebrow">요금과 해지</div>
+        <h2 class="t-display headline">월 3,900원으로
+매일 아침 받아보세요</h2>
+      </div>
+      <p class="t-body-l lead">부가세 포함 · 평일 매일 아침 8시 · 매월 자동 갱신</p>
+      <div class="fee-cards">
+        <div class="fee-card"><div class="t-body-strong fee-k">청약철회</div><p class="t-body-s">결제일 또는 서비스 제공 개시일부터 7일 이내에 청약철회할 수 있습니다. 이미 발송된 브리핑은 전자상거래법 제17조 제2항에 따라 철회가 제한됩니다.</p></div>
+        <div class="fee-card"><div class="t-body-strong fee-k">환불</div><p class="t-body-s">아직 발송되지 않은 잔여 기간에 해당하는 금액은 일할 계산하여 환불합니다. 환불은 사유 확인일부터 3영업일 이내에 결제한 수단으로 처리합니다.</p></div>
+        <div class="fee-card"><div class="t-body-strong fee-k">해지</div><p class="t-body-s">구독 관리 화면에서 언제든 스스로 해지할 수 있습니다. 해지하면 다음 결제 주기부터 발송과 청구가 멈춥니다.</p></div>
       </div>
     </section>
 

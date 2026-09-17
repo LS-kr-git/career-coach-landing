@@ -74,6 +74,22 @@
     align-items:center;justify-content:space-between;gap:10px;color:var(--gray-600)}
   .cancel{align-self:flex-end;color:var(--gray-400);background:none;border:0;
     font:inherit;font-size:14px;line-height:20px;cursor:pointer}
+
+  /* ===== 푸터 — 전자상거래법 제10조 신원정보 =====
+     이 화면에도 두는 이유: PG·카드사 심사는 사업자 정보가 메인뿐 아니라 이용자가 지나는
+     화면들에 상시 노출돼 있는지를 본다(포트원 「서비스 필수 구축요건」). 2026-09-17 사용자 지시.
+
+     랜딩(index.html)·결제(checkout/index.html)의 footer 와 **문구·줄 순서·색·글자 크기·굵기·
+     링크가 한 글자도 다르지 않다** — 한 곳을 고치면 나머지도 같이 고친다.
+     여백(32/40)과 좌우 24px 는 결제 화면과 같은 값이다. 랜딩만 80/120 을 쓰는 예외다.
+     피그마 기준: 이 화면 프레임 안의 「footer (사업자정보)」 (랜딩 6:361 을 복제한 것).
+     ⚠️ main 바깥에 둔다 — main 은 좌우 패딩이 있어 안에 넣으면 회색 배경이 꽉 차지 않는다. */
+  footer{background:var(--gray-100);margin-top:32px;padding:32px 24px 40px}
+  footer .biz{display:flex;flex-direction:column;gap:8px;color:var(--gray-500)}
+  footer .biz-name{font-size:13px;line-height:18px;font-weight:600}
+  footer .biz-lines{font-size:13px;line-height:18px}
+  footer .links a{color:var(--gray-500);text-decoration:none;font-size:13px;line-height:18px}
+  footer .links a[href$="privacy.html"]{font-weight:600}
 </style>
 </head>
 <body>
@@ -90,7 +106,7 @@
           <span class="t-micro live"><i aria-hidden="true"></i>구독 중</span>
         </div>
         <span class="t-h3">커리어코치 멤버십</span>
-        <span class="t-caption" style="color:var(--gray-500)">김서연 님 · 2026년 3월부터</span>
+        <span class="t-caption" style="color:var(--gray-500)">구독 정보는 결제 후 여기에 표시돼요</span>
       </div>
     </section>
 
@@ -100,13 +116,13 @@
         <div class="prow">
           <span class="art" aria-hidden="true"></span>
           <span class="pcol">
-            <span class="t-body-l">신한카드</span>
-            <span class="t-caption masked">•••• •••• •••• 4821</span>
+            <span class="t-body-l">등록된 결제수단 없음</span>
+            <span class="t-caption masked">등록 후 여기에 표시돼요</span>
           </span>
           <button class="link" type="button">변경</button>
         </div>
         <div class="nrow t-body-s">
-          <span>다음 결제 6월 30일</span>
+          <span>다음 결제일 · 결제 후 표시</span>
           <!-- 금액은 계정별 값이라 스크립트가 채운다 — CLAUDE.md 「가격은 어디에도 박지 않는다」 -->
           <span id="amount"></span>
         </div>
@@ -115,9 +131,20 @@
     </section>
   </div>
 </main>
+<footer>
+  <div class="biz">
+    <div class="biz-name">주식회사 오늘의논문</div>
+    <!-- 랜딩 index.html·결제 checkout/index.html 의 같은 블록과 줄 순서까지 같게 유지한다. 피그마 6:364 가 기준이다. -->
+    <div class="biz-lines">대표 : 이채빈<br>사업자등록번호 : 450-86-03846<br>통신판매업신고 : 2026-서울서대문-0831<br>주소 : 서울특별시 서대문구 이화여대7길 37, 3층 J15호<br>문의 : careercoach.my@gmail.com<br>전화번호 : 070-8018-9238</div>
+    <div class="links"><a href="/terms.html">이용약관</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="/privacy.html">개인정보처리방침</a></div>
+  </div>
+</footer>
 <script>
   /* 금액은 **월 3,900원으로 확정됐다** (2026-09-05 사용자 확정. 근거는 수익모델 민감도의
      LTV÷CAC 4.1배 — career-coach `docs/기획/가격-표기-원칙.md` 「얼마인가」 절, PR #160 대기).
+     🔴 카드 브랜드·뒤 4자리·지난 결제일은 **2026-09-17 에 지웠다**. 심사관이 심사용 계정으로
+        들어와 「신한카드 4821 · 다음 결제 6월 30일」 을 보면 자기 것이 아닌 값을 보는 것이고,
+        오늘 날짜와도 맞지 않아 만들다 만 화면으로 읽힌다. 금액만 남긴다 — 확정 가격이라 참이다.
      🔴 그래도 이 상수는 **목업**이다. 계정마다 요금제·다음 결제일이 다르므로 배선할 때는
      구독 응답에서 받아 그린다. 지금 값은 확정 가격을 그대로 적어 둔 것이다.
      ⚠️ page-audit 의 「가격 하드코딩」 검사는 <script> 를 떼고 보므로 이 자리를 못 본다.

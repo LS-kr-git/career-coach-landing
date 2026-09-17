@@ -287,8 +287,46 @@ const PRICE_ALLOW = {
   'index.html': {
     '4,000만원': '히어로 일러스트 alt — 이직 전후 연봉 그래프 설명이지 우리 가격이 아니다',
     '5,000만원': '히어로 일러스트 alt — 이직 전후 연봉 그래프 설명이지 우리 가격이 아니다',
+    '3,900원': '2026-09-17 사용자 지시로 랜딩 「요금과 해지」 절에 요금을 명시했다. '
+      + 'PG·카드사 심사는 「로그인 없이 요금제가 보이는지」 를 보고, 로그인 뒤에만 있거나 '
+      + '어디에도 없으면 심사가 보류·반려된다(포트원 SaaS 정기결제 안내). '
+      + '그래서 2026-08-03 의 「금액은 결제 화면 한 곳에서만」 을 이 한 자리에서만 깬다. '
+      + '대신 아래 「랜딩 요금 ↔ 결제 화면 금액」 대조가 두 곳이 어긋나는 것을 막는다.',
   },
 };
+
+/* ---------- 랜딩 요금 ↔ 결제 화면 금액 (2026-09-17 신설) ----------
+ * 금액을 말하는 곳이 두 곳(랜딩 마크업 · 결제 화면의 PRICE_KRW)이 되었으므로,
+ * 한 곳만 고치면 표시가격과 실제 청구액이 달라진다 — 위 면제를 안전하게 만드는 짝이다. */
+{
+  const landing = readFileSync(join(ROOT, 'index.html'), 'utf8')
+    .replace(/<!--[\s\S]*?-->/g, '').replace(/<script[\s\S]*?<\/script>/gi, '');
+  // strip · billing 은 아래에서 쓴다 (선언 순서 때문에 landing 뒤에 둔다)
+  // 🔴 주석을 떼고 본다. 안 떼면 `// var PRICE_KRW = 3900` 처럼 주석에 남은 옛 금액과
+  //    대조해 초록이 된다 — CLAUDE.md 「테스트에 대한 규칙」 5번의 그 모양이다
+  //    (2026-09-17 검사관 ②). <script> 는 떼지 않는다 — 상수가 그 안에 있다.
+  const strip = (src) => src
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+  const checkout = strip(readFileSync(join(ROOT, 'checkout', 'index.html'), 'utf8'));
+  // 🔴 금액을 말하는 곳은 **세 곳**이다 (2026-09-17 검사관 ⑧). 랜딩 마크업 · 결제 화면의
+  //    PRICE_KRW · 마이페이지 결제 관리의 MOCK_PLAN.priceKrw. 앞 둘만 맞대 보면 세 번째가
+  //    옛 금액을 계속 보여 준다 — 가격 하드코딩 검사는 <script> 를 떼므로 그 자리를 못 본다.
+  const billing = strip(readFileSync(join(ROOT, 'mypage', 'billing', 'index.html'), 'utf8'));
+  const krw = checkout.match(/var PRICE_KRW\s*=\s*(\d+)/);
+  const mock = billing.match(/priceKrw:\s*(\d+)/);
+  const shown = landing.match(/월\s*([0-9][0-9,]*)원/);
+  if (!krw) add('BLOCK', '요금 대조', 'checkout/index.html', 'PRICE_KRW 선언을 찾지 못함',
+      '결제 화면의 금액 상수 이름이 바뀌면 이 대조가 조용히 꺼진다 — 이름을 되돌리거나 이 검사를 같이 고치세요.');
+  else if (!mock) add('BLOCK', '요금 대조', 'mypage/billing/index.html', 'priceKrw 선언을 찾지 못함',
+      '결제 관리 화면의 금액 상수 이름이 바뀌면 이 대조가 조용히 꺼집니다 — 이름을 되돌리거나 이 검사를 같이 고치세요.');
+  else if (!shown) add('BLOCK', '요금 대조', 'index.html', '「월 N원」 표기를 찾지 못함',
+      '랜딩 「요금과 해지」 절의 요금 표기가 사라졌습니다 — 심사가 보는 자리입니다.');
+  else if (new Set([shown[1].replace(/,/g, ''), krw[1], mock[1]]).size > 1) add('BLOCK', '요금 대조', 'index.html',
+      `랜딩 ${shown[1]}원 · 결제 ${krw[1]}원 · 결제관리 ${mock[1]}원`,
+      '세 곳의 금액이 같지 않습니다. 표시가격과 실제 청구액이 어긋나면 심사에서 바로 반려됩니다.');
+}
 
 for (const page of pages) {
   if (PRICE_OK.has(page)) continue;

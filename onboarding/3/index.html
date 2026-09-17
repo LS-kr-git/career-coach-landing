@@ -91,6 +91,27 @@
   .cta:active{transform:translateX(-50%) scale(.98)}
   .cta .s2{opacity:.85}
   .cta.off{background:var(--gray-100);color:var(--gray-400);box-shadow:none}
+
+  /* ===== 푸터 — 전자상거래법 제10조 신원정보 =====
+     이 화면에도 두는 이유: PG·카드사 심사는 사업자 정보가 메인뿐 아니라 이용자가 지나는
+     화면들에 상시 노출돼 있는지를 본다(포트원 「서비스 필수 구축요건」). 2026-09-17 사용자 지시.
+
+     랜딩(index.html)·결제(checkout/index.html)의 footer 와 **문구·줄 순서·색·글자 크기·굵기·
+     링크가 한 글자도 다르지 않다** — 한 곳을 고치면 나머지도 같이 고친다.
+     ⚠️ 이 네 화면만 값이 다르다 (2026-09-17 검사관 ⑨). 위 32px·좌우 24px 는 결제 화면과
+        같지만, **아래 여백은 40 이 아니라 140** 이고 max-width:450px 을 준다. 이유는 둘 다
+        구조다 — ① 푸터가 .board 바깥에 있어(그래야 tools/roles/build.mjs 의 생성 구간에
+        안 끌려 들어간다) .board 의 최대폭을 물려받지 못한다 ② 아래에 고정 CTA(20+54)와
+        흰 그라데이션 .fade(100px)가 떠 있어 40 이면 링크 줄이 그 밑에 깔린다.
+     피그마 기준: 이 화면 프레임 안의 「footer (사업자정보)」 (랜딩 6:361 을 복제한 것).
+     ⚠️ main 바깥에 둔다 — main 은 좌우 패딩이 있어 안에 넣으면 회색 배경이 꽉 차지 않는다. */
+  footer{background:var(--gray-100);max-width:450px;margin:0 auto;
+    padding:32px 24px calc(140px + env(safe-area-inset-bottom))}
+  footer .biz{display:flex;flex-direction:column;gap:8px;color:var(--gray-500)}
+  footer .biz-name{font-size:13px;line-height:18px;font-weight:600}
+  footer .biz-lines{font-size:13px;line-height:18px}
+  footer .links a{color:var(--gray-500);text-decoration:none;font-size:13px;line-height:18px}
+  footer .links a[href$="privacy.html"]{font-weight:600}
 </style></head><body>
 <div class="board"><div class="hd"><a class="back" href="/onboarding/2/" aria-label="뒤로"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15.75 4.5L8.25 12l7.5 7.5" stroke="#475569" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
   <div class="prog"><i class="on"></i><i class="on"></i><i class="on"></i></div>
@@ -99,6 +120,14 @@
   <div class="desc">최대 3개 지역까지 함께 고를 수 있어요</div>
   <div class="scroll"><div class="grp"><div class="ghead"><h3>수도권</h3></div><div class="chips"><div class="c">서울</div><div class="c">경기</div><div class="c">인천</div></div></div><div class="grp"><div class="ghead"><h3>충청·강원</h3></div><div class="chips"><div class="c">대전</div><div class="c">세종</div><div class="c">충북</div><div class="c">충남</div><div class="c">강원</div></div></div><div class="grp"><div class="ghead"><h3>영남</h3></div><div class="chips"><div class="c">부산</div><div class="c">대구</div><div class="c">울산</div><div class="c">경북</div><div class="c">경남</div></div></div><div class="grp"><div class="ghead"><h3>호남·제주</h3></div><div class="chips"><div class="c">광주</div><div class="c">전북</div><div class="c">전남</div><div class="c">제주</div></div></div><div class="grp"><div class="ghead"><h3>기타</h3></div><div class="chips"><div class="c">재택·원격</div></div></div></div>
 </div>
+<footer>
+  <div class="biz">
+    <div class="biz-name">주식회사 오늘의논문</div>
+    <!-- 랜딩 index.html·결제 checkout/index.html 의 같은 블록과 줄 순서까지 같게 유지한다. 피그마 6:364 가 기준이다. -->
+    <div class="biz-lines">대표 : 이채빈<br>사업자등록번호 : 450-86-03846<br>통신판매업신고 : 2026-서울서대문-0831<br>주소 : 서울특별시 서대문구 이화여대7길 37, 3층 J15호<br>문의 : careercoach.my@gmail.com<br>전화번호 : 070-8018-9238</div>
+    <div class="links"><a href="/terms.html">이용약관</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="/privacy.html">개인정보처리방침</a></div>
+  </div>
+</footer>
 <div class="fade"></div>
 <div class="cta">다음</div>
 <script>

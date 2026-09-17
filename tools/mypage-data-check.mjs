@@ -34,9 +34,17 @@ function expectInOrder(rel, html, texts) {
   }
 }
 
+/* 프로필은 목값을 두지 않는다 (2026-09-17). 값이 없으면 화면은 EMPTY 문구를 그리므로
+ * 대조 대상도 그 문구다 — 배선 뒤 값이 생기면 아래 갈래가 다시 값끼리 대조한다.
+ * 갈래를 안 두면 값이 생긴 날 조용히 검사 밖으로 나간다. */
 const profile = await data.getProfile();
 expectInOrder('mypage/index.html', staticHtml('mypage/index.html'),
-  [String(profile.insightCount), profile.initial, `${profile.name} 님`, `${profile.provider} · ${profile.email}`]);
+  profile.name == null
+    ? [data.EMPTY.insight, data.EMPTY.name, data.EMPTY.account, data.EMPTY.archive]
+    : [String(profile.insightCount), profile.initial, `${profile.name} 님`,
+       `${profile.provider} · ${profile.email}`, data.EMPTY.archive]);
+/* 아카이브 부제는 프로필 값에서 오지 않는다 — 배선될 때까지 양쪽 갈래 모두 EMPTY.archive 다.
+ * 값이 생긴 갈래에서 이 줄을 빼면 그날 조용히 대조 밖으로 나간다 (2026-09-17 검사관 ②). */
 
 expectInOrder('mypage/topics/index.html', staticHtml('mypage/topics/index.html'), await data.getTopics());
 

@@ -101,6 +101,22 @@
     .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
   }
   :focus-visible{outline:2px solid var(--amber-500);outline-offset:2px}
+
+  /* ===== 푸터 — 전자상거래법 제10조 신원정보 =====
+     이 화면에도 두는 이유: PG·카드사 심사는 사업자 정보가 메인뿐 아니라 이용자가 지나는
+     화면들에 상시 노출돼 있는지를 본다(포트원 「서비스 필수 구축요건」). 2026-09-17 사용자 지시.
+
+     랜딩(index.html)·결제(checkout/index.html)의 footer 와 **문구·줄 순서·색·글자 크기·굵기·
+     링크가 한 글자도 다르지 않다** — 한 곳을 고치면 나머지도 같이 고친다.
+     여백(32/40)과 좌우 24px 는 결제 화면과 같은 값이다. 랜딩만 80/120 을 쓰는 예외다.
+     피그마 기준: 이 화면 프레임 안의 「footer (사업자정보)」 (랜딩 6:361 을 복제한 것).
+     ⚠️ main 바깥에 둔다 — main 은 좌우 패딩이 있어 안에 넣으면 회색 배경이 꽉 차지 않는다. */
+  footer{background:var(--gray-100);margin-top:32px;padding:32px 24px 40px}
+  footer .biz{display:flex;flex-direction:column;gap:8px;color:var(--gray-500)}
+  footer .biz-name{font-size:13px;line-height:18px;font-weight:600}
+  footer .biz-lines{font-size:13px;line-height:18px}
+  footer .links a{color:var(--gray-500);text-decoration:none;font-size:13px;line-height:18px}
+  footer .links a[href$="privacy.html"]{font-weight:600}
 </style>
 </head>
 <body>
@@ -168,6 +184,14 @@
       <p class="err" id="err" role="alert"></p>
     </div>
   </main>
+<footer>
+  <div class="biz">
+    <div class="biz-name">주식회사 오늘의논문</div>
+    <!-- 랜딩 index.html·결제 checkout/index.html 의 같은 블록과 줄 순서까지 같게 유지한다. 피그마 6:364 가 기준이다. -->
+    <div class="biz-lines">대표 : 이채빈<br>사업자등록번호 : 450-86-03846<br>통신판매업신고 : 2026-서울서대문-0831<br>주소 : 서울특별시 서대문구 이화여대7길 37, 3층 J15호<br>문의 : careercoach.my@gmail.com<br>전화번호 : 070-8018-9238</div>
+    <div class="links"><a href="/terms.html">이용약관</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="/privacy.html">개인정보처리방침</a></div>
+  </div>
+</footer>
 </div>
 
 <script type="module">
