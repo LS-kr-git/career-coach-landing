@@ -163,6 +163,20 @@ function scanConst(src, name) {
  * 좁게 잡으면 '선언을 빠뜨림' 이 조용히 0건이 된다(2026-09-16 검사관 ①). 아래 자가검사가 고정한다. */
 const CONST_DECL = /(?:^|\n)\s*(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*['"`{[]/g;
 
+/* 상수 문구를 **피그마 문구와 맞댈 때** 쓰는 키. `key` 와 달리 HTML 표시를 뗀다.
+ * 🔴 **안 떼면 피그마에 있는 문구가 「어디에도 없다」로 찍힌다** (2026-09-18 검사관 ②).
+ *    상수 안 문구에는 `<strong>` 같은 마크업이 섞여 있는데 피그마 텍스트에는 없다.
+ *    떼는 규칙은 `webBlocks` 와 **같은 것을 쓴다** — 두 벌로 갈리면 한쪽만 낡는다. */
+const 문구키 = (s) => key(decodeEntities(String(s).replace(BLOCK, ' ').replace(/<[^>]+>/g, ' ')));
+
+/* 상수의 한국어 문구 중 **피그마 어느 프레임에도 없는 것.** 순수 함수 — 아래 자가검사가 고정한다.
+ * 네 글자 문턱은 **표시를 뗀 뒤**에 잰다. 마크업이 길이를 부풀리면 `<b>가나</b>` 같은 두 글자가
+ * 문턱을 넘어 들어와, 대조가 부분 문자열 포함이라 거의 늘 참·거짓이 뒤집힌다. */
+function 피그마에_없는것(lits, figmaText) {
+  const f = 문구키(figmaText);
+  return lits.filter((x) => /[가-힣]/.test(x) && 문구키(x).length >= 4 && !f.includes(문구키(x)));
+}
+
 /* 위 훑개의 자가검사. **조건 없이 매번 돈다** — 이 배선이 깨지면 검수가 초록으로 통과하는
  * 방식으로 죽기 때문이다. 고정하는 것은 검사관이 실제로 뚫었던 자리들이다. */
 function scanSelfTest() {
@@ -191,6 +205,22 @@ function scanSelfTest() {
   const 후보 = [...`const A = { };\nlet B = [ ];\nvar C = '문구';\nconst D = "문구";\nconst E = 1;`
     .matchAll(CONST_DECL)].map((m) => m[1]).join(',');
   if (후보 !== 'A,B,C,D') bad.push('후보 정규식: ' + 후보 + ' ≠ A,B,C,D');
+  // 「피그마에 없는 문구」 판정도 같이 고정한다 — 이 분기는 지금 저장소에서 0건이라
+  // 라이브로는 맞는지 틀린지 알 길이 없다(2026-09-18 검사관 ②).
+  const 없음 = [
+    [['가나다라'], '앞 가나다라 뒤', [], '그냥 있는 문구'],
+    [['<strong>가나다라</strong>'], '가나다라', [], '마크업이 섞여도 있는 것으로 본다'],
+    [['가나다라'], '마바사아', ['가나다라'], '정말 없으면 집는다'],
+    [['가 나 다 라'], '가나다라', [], '공백은 무시한다'],
+    [['<b>가나</b>'], '마바사아', [], '표시를 떼면 네 글자 미만 — 방아쇠가 아니다'],
+    [['abcdefg'], '마바사아', [], '한글이 없으면 안 본다'],
+  ];
+  for (const [lits, figma, want, label] of 없음) {
+    const got = 피그마에_없는것(lits, figma);
+    if (JSON.stringify(got) !== JSON.stringify(want)) {
+      bad.push(`피그마에_없는것 ${label}: ${JSON.stringify(got)} ≠ ${JSON.stringify(want)}`);
+    }
+  }
   return bad;
 }
 
@@ -350,7 +380,15 @@ for (const page of snap.pages) {
    * 다만 **자유로 고칠 수 있을 때만** 막는다: 그 상수의 한국어 문구가 **이미 전부 피그마에
    * 있을 때**다. 그때 고치는 법은 이름 한 줄을 적는 것뿐이고 화면을 만들 일이 없다.
    * 피그마에 없는 문구가 섞인 상수까지 막으면 「승인 안 된 화면을 그려라」가 되어,
-   * 남의 작업 중인 화면에서 푸시가 서 버린다. 그런 자리는 스냅샷에 사유를 적어 남긴다. */
+   * 남의 작업 중인 화면에서 푸시가 서 버린다.
+   *
+   * 🔴 **다만 그 자리를 조용히 지나가지는 않는다** (2026-09-17). 앞 판은 `continue` 하나로
+   *    넘어갔고, 그래서 「피그마에 없는 화면 문구」는 이 검사에도 docs-audit 의 두 방향
+   *    대조에도 **어디에도 안 잡혔다.** 실제로 `mypage/archive` 의 빈 상태 문구 둘이
+   *    그렇게 몇 달을 지났고(09-17 에 메움), 찾아낸 것은 검사가 아니라 손으로 돌린
+   *    일회용 스크립트였다 — 그 스크립트는 HTML 표시가 섞인 문구를 오탐하기까지 했다.
+   *    이제 `BLIND` 로 **적기만** 한다: 막지 않으므로(`hard` 에 안 들어간다) 남의 작업 중인
+   *    화면이 서지 않고, 그래도 푸시마다 화면에 한 줄이 남아 잊히지 않는다. */
   const scriptSrc = [...html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/gi)].map((m) => m[1]).join('\n');
   const declaredNames = new Set(page.webScriptText || []);
   const candidates = new Set([...scriptSrc.matchAll(CONST_DECL)].map((m) => m[1]));
@@ -363,8 +401,16 @@ for (const page of snap.pages) {
     // 같은 4글자 문턱을 웹→피그마 대조도 쓴다.
     const ko = got.lits.filter((x) => /[가-힣]/.test(x) && key(x).length >= 4);
     if (!ko.length) continue;
-    const figmaNow = key(framesOf(page).flatMap((f) => f.texts || []).join(''));
-    if (!ko.every((x) => figmaNow.includes(key(x)))) continue;   // 피그마에 없는 문구가 섞였다 — 화면 일이라 여기서 막지 않는다
+    const figmaNow = framesOf(page).flatMap((f) => f.texts || []).join('');
+    const 없는것 = 피그마에_없는것(ko, figmaNow);
+    if (없는것.length) {
+      // 피그마에 없는 문구가 섞였다 — 화면 일이라 막지 않는다. 적어만 둔다(위 머리말).
+      findings.push({ level: 'BLIND', page: page.html, kind: '피그마에 없는 화면 문구',
+        detail: `${page.html} 의 ${name} 에 피그마 어느 프레임에도 없는 문구 ${없는것.length}개가 있습니다 — ` +
+                `그 화면을 피그마에 세우면 대조가 켜집니다`,
+        web: 없는것.slice(0, 3).join(' · ') + (없는것.length > 3 ? ` … 외 ${없는것.length - 3}개` : '') });
+      continue;
+    }
     findings.push({ level: 'DIFF', page: page.html, kind: '선언을 빠뜨림',
       detail: `${page.html} 의 ${name} 에 화면 문구 ${ko.length}개가 있고 그 문구가 이미 피그마에 있습니다 — ` +
               `스냅샷의 webScriptText 에 "${name}" 을 적으면 대조가 켜집니다` +
@@ -514,10 +560,13 @@ if (asJson) {
   if (findings.length === 0) {
     console.log('✅ 차이 없음 — 약관·개인정보 화면이 피그마와 웹에서 일치합니다.\n');
   } else {
-    const order = { STALE: 0, DIFF: 1, EXTRA: 2, PUNCT: 3 };
+    // BLIND 는 **막지 않는다**(위 `hard` 참조) — 남의 작업 중인 화면을 세우지 않으려는 것이고,
+    // 그래도 매 푸시에 한 줄이 남아 「아무 검사도 안 보는 문구」가 조용해지지 않는다.
+    const order = { STALE: 0, DIFF: 1, EXTRA: 2, PUNCT: 3, BLIND: 4 };
     findings.sort((a, b) => order[a.level] - order[b.level]);
     for (const f of findings) {
-      const tag = { STALE: '🕗 낡음', DIFF: '❌ 차이', EXTRA: 'ℹ️ 웹전용', PUNCT: '⚠️ 부호' }[f.level];
+      const tag = { STALE: '🕗 낡음', DIFF: '❌ 차이', EXTRA: 'ℹ️ 웹전용', PUNCT: '⚠️ 부호',
+                    BLIND: '🕳️ 사각지대' }[f.level];
       console.log(`${tag}  ${f.kind} [${f.page}${f.frame ? ` · ${f.frame}` : ''}]`);
       if (f.figma) console.log(`   피그마: ${f.figma}`);
       if (f.web) console.log(`   웹    : ${f.web}`);
