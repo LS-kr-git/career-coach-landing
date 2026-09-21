@@ -148,15 +148,19 @@
   <button class="cta" type="button">저장</button>
 </div>
 <script type="module">
-  /* 주제 목록·고른 주제는 assets/mypage-data.js 에서 온다. 마크업의 칩은 피그마 기준 프레임
-     상태(대조용)이고, 자료를 받으면 같은 순서로 다시 그린다. */
-  import { COMMON_TOPIC, getTopics, readPrefs, saveTopic } from '/assets/mypage-data.js';
+  /* 주제 목록은 assets/mypage-data.js, **고른 주제는 온보딩과 같은 값**이라
+     assets/onboarding-store.js 가 정본이다 (온보딩 완료 화면과 같은 칸 user_preference.insight_track).
+     따로 두면 한 사람의 주제가 두 곳으로 갈린다. 마크업의 칩은 피그마 기준 프레임 상태다. */
+  import { requireLogin, COMMON_TOPIC, getTopics, FAIL } from '/assets/mypage-data.js';
+  import { readState, writeState, saveOnboarding, pullFromServer, retryPending } from '/assets/onboarding-store.js';
+  retryPending();     // 지난 저장이 실패한 채 남아 있으면 온보딩·직군 화면과 같이 여기서도 다시 보낸다
 
   /* 주간 미리보기는 고른 주제에서 나온다 — 디자인 캔버스의 규칙 그대로다.
      월·수·금이 고른 주제, 화는 'AI로 일하기', 목은 '커리어·이직'.
      '일하는 사람 공통' 을 고르면 내 주제 칸이 없어져 다섯 칸이 모두 공통 편성이 된다. */
   var cells = Array.prototype.slice.call(document.querySelectorAll('.day'));
   var box = document.querySelector('.topics');
+  var cta = document.querySelector('.cta');
   function paint(topic) {
     var common = topic === COMMON_TOPIC;
     var labels = common
@@ -171,13 +175,23 @@
   function esc(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
   function current() { return box.querySelector('.chip[aria-pressed="true"]').textContent; }
 
-  getTopics().then(function (topics) {
+  /* 서버에 저장된 주제를 이 브라우저로 받아 온다 — 기기를 바꿔도 고른 것이 보여야 한다.
+     실패 처리기는 **조회 실패만** 받는다(`.then(성공, 실패)`) — 그리다 난 오류까지 받으면
+     「못 읽었다」와 「그리다 터졌다」가 같은 화면이 된다. */
+  requireLogin().then(function (ok) {
+    return ok ? pullFromServer().then(getTopics) : null;
+  }).then(function (topics) {
+    if (!topics) return;
     /* 저장된 주제가 없으면 마크업이 눌러 둔 칩(피그마 기준 상태)을 그대로 쓴다 */
-    var on = readPrefs().topic || current();
+    var on = readState().topic || current();
     box.innerHTML = topics.map(function (t) {
       return '<button class="chip" type="button" aria-pressed="' + (t === on) + '">' + esc(t) + '</button>';
     }).join('');
     paint(on);
+  }, function () {
+    /* 🔴 못 읽었으면 남의 값일 수도 있는 것을 저장하게 두지 않는다 — 고르기를 막고 실패를 말한다. */
+    cta.disabled = true;
+    cta.textContent = FAIL.line;
   });
 
   box.addEventListener('click', function (e) {
@@ -189,8 +203,26 @@
     paint(chip.textContent);
   });
 
+  /* 저장은 온보딩과 같은 통로(save_onboarding)다 — 직군·연차·근무지는 건드리지 않고 주제만 실린다.
+     통신 실패는 store 가 pending 으로 남겨 다음 진입에서 다시 보낸다(온보딩 세 화면·직군 화면과 같다). */
   document.querySelector('.cta').addEventListener('click', function () {
-    saveTopic(current()).then(function () { location.href = '/mypage/'; });
+    cta.disabled = true;
+    /* 진입할 때 띄운 retryPending() 이 아직 돌고 있으면 store 가 'busy' 를 준다 — 실패가 아니라
+       「지금은 못 보낸다」다. 한 번 기다렸다 다시 보낸다(그 재시도가 끝나면 자리가 빈다). */
+    var 이전주제 = readState().topic;
+    writeState({ topic: current(), topicClear: false });
+    (function 보낸다(남은기회) {
+      saveOnboarding().then(function (r) {
+        if (r.status === 'busy' && 남은기회 > 0) { setTimeout(function () { 보낸다(남은기회 - 1); }, 400); return; }
+        if (r.status === 'no-session') return;   // store 가 이미 /signup/ 으로 보냈다
+        /* 🔴 저장된 것만 저장됐다고 말한다. 'incomplete'(직군·연차·근무지가 이 브라우저에 없다)면
+           보낼 것이 없어 재시도 대상도 아니다 — 고른 값을 **되돌려** 둔다. 안 되돌리면 다음 진입에서
+           pullFromServer 가 서버에 행이 없어 아무것도 안 덮고, 안 나간 주제가 눌린 채로 보인다. */
+        if (r.status === 'incomplete') writeState({ topic: 이전주제, topicClear: false });
+        if (r.status !== 'ok') { cta.textContent = FAIL.line; return; }
+        location.href = '/mypage/';
+      });
+    })(5);
   });
 </script>
 </div>

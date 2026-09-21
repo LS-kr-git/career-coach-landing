@@ -121,7 +121,8 @@
 <script type="module">
   /* 고른 직군은 온보딩 1단계와 **같은 값**이다 — 저장·복원·서버 전송(RPC·재시도) 전부
      assets/onboarding-store.js 를 그대로 쓴다. 따로 두면 한 사람의 직군이 두 곳으로 갈린다. */
-  import { readState, writeState, saveOnboarding, retryPending } from '/assets/onboarding-store.js';
+  import { readState, writeState, saveOnboarding, retryPending, pullFromServer } from '/assets/onboarding-store.js';
+  import { requireLogin, FAIL } from '/assets/mypage-data.js';
   retryPending();     // 지난 저장이 실패한 채 남아 있으면 온보딩 화면과 같이 여기서도 다시 보낸다
   (function () {
     /* 🔴 상한 7. 온보딩(assets/onboarding-store.js 의 MAX_JOBS)·서버(0024_job_cap_7.sql)와 같은 수다.
@@ -130,14 +131,18 @@
     var lab = document.getElementById('lab');
     var save = document.getElementById('save');
     var groups = document.querySelector('.groups');
+    /* 서버에서 지금 값을 못 읽었으면 저장을 막는다 — 안 막으면 여기서 고른 것만 올라가
+       서버에 있던 직군이 빈 목록으로 덮인다. 칩을 눌러도 안 풀려야 하므로 refresh 가 본다. */
+    var 읽기실패 = false;
 
     function picked() {
       return Array.prototype.slice.call(groups.querySelectorAll('.chip[aria-pressed="true"]'));
     }
     function refresh() {
       var n = picked().length;
-      save.disabled = n === 0;
-      lab.textContent = n ? '저장 · ' + n + '개 선택됨' : '직무를 1개 이상 골라주세요';
+      save.disabled = 읽기실패 || n === 0;
+      lab.textContent = 읽기실패 ? FAIL.line
+        : (n ? '저장 · ' + n + '개 선택됨' : '직무를 1개 이상 골라주세요');
       /* 상한이 차면 안 고른 칩을 잠근다. 잠금이 곧 상한의 존재 증거다 —
          docs-audit 이 이 표식을 보고 selectionCap 선언 여부를 묻는다. */
       var full = n >= MAX;
@@ -174,11 +179,23 @@
     });
     /* 저장된 직군이 있으면 그 칩을 눌러 둔다. 없으면 마크업 상태(피그마 기준 · 0개) 그대로다.
        목록에서 사라진 옛 코드는 건너뛴다 — 그 코드는 서버에서도 더는 유효하지 않다 */
-    readState().jobs.forEach(function (code) {
-      var chip = groups.querySelector('.chip[data-d2="' + code + '"]');
-      if (chip) chip.setAttribute('aria-pressed', 'true');
+    function hydrate() {
+      readState().jobs.forEach(function (code) {
+        var chip = groups.querySelector('.chip[data-d2="' + code + '"]');
+        if (chip) chip.setAttribute('aria-pressed', 'true');
+      });
+      refresh();
+    }
+    /* 🔴 서버에 저장된 값을 먼저 받아 온다 (2026-09-21 배선 5). 안 받으면 기기를 바꾼 사람에게
+       0개로 보이고, 여기서 고른 직군을 저장할 때 연차·근무지가 없어 서버로 아무것도 안 나갔다. */
+    requireLogin().then(function (ok) {
+      if (!ok) return;
+      return pullFromServer().then(hydrate);
+    }).catch(function () {
+      /* 못 읽은 채로 저장하면 서버에 있는 직군을 빈 목록으로 덮는다 — 저장을 막고 실패를 말한다. */
+      읽기실패 = true;
+      hydrate();
     });
-    refresh();
   })();
 </script>
 </div>

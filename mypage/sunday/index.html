@@ -190,10 +190,13 @@
 <script type="module">
   /* 목록은 assets/mypage-data.js 의 이번 주 5편에서 그린다. 마크업의 5편은 피그마 기준 프레임
      상태(대조용)이고, 여기서 같은 자료로 다시 채운다. */
-  import { getThisWeek, markSundayUsed } from '/assets/mypage-data.js';
+  import { requireLogin, getThisWeek, markSundayUsed, FAIL } from '/assets/mypage-data.js';
 
   var btn = document.getElementById('open');
   var idle = document.getElementById('lab-idle');
+  /* 로그인한 사람만 보는 화면이다. 목록 자체는 아직 목값이다(데이터 층 머리말).
+     세션을 **못 물어본** 것과 로그인 안 한 것은 다르다 — 삼키지 않고 버튼 라벨로 드러낸다. */
+  requireLogin().catch(function () { btn.disabled = true; idle.textContent = FAIL.line; });
   var pick = document.getElementById('lab-pick');
   var secs = document.querySelectorAll('.sec .items');
   function esc(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }

@@ -162,9 +162,9 @@
   </div>
 </footer>
 <script type="module">
-  /* 자료는 assets/mypage-data.js 한 곳에서 온다. 마크업의 값은 피그마 기준 프레임 상태(대조용)이고,
-     실제 화면은 여기서 받은 값으로 다시 채운다. */
-  import { getProfile, sundayState } from '/assets/mypage-data.js';
+  /* 자료는 assets/mypage-data.js 한 곳에서 온다. 마크업의 값은 피그마 기준 프레임 상태(= 빈 상태,
+     대조용)이고, 실제 화면은 여기서 받은 값으로 다시 채운다. */
+  import { requireLogin, getProfile, profileView, profileFail, sundayState } from '/assets/mypage-data.js';
 
   /* 일요일 배너 세 상태 — 서울 기준 오늘 요일 + 이번 주 열람 여부로 정한다 (피그마 01-A/01-B/01-C).
      ?state=open|done|locked 는 디자인 검수용 미리보기다 — 요일과 무관하게 그 상태를 보여준다. */
@@ -174,16 +174,30 @@
     el.hidden = el.dataset.state !== state;
   });
 
-  /* 마크업은 **빈 상태**다(= 피그마 기준 상태). 값이 온 것만 덮어쓴다 —
-     값이 없을 때 'null 님' 같은 것을 그리지 않고, 목 사람을 만들지도 않는다. */
-  getProfile().then(function (p) {
-    if (p.insightCount != null) {
-      document.querySelector('.hero-sub').innerHTML =
-        '지금까지<span class="t-number-xl num">' + p.insightCount + '</span>개의 인사이트를 쌓았어요';
-    }
-    if (p.initial) document.querySelector('.avatar').textContent = p.initial;
-    if (p.name) document.querySelector('.prof .col .t-h3').textContent = p.name + ' 님';
-    if (p.provider && p.email) document.querySelector('.prof .sub').textContent = p.provider + ' · ' + p.email;
+  /* 네 자리를 한 함수로 그린다 — 값·빈 상태·실패가 **같은 자리**에 들어가야 한 갈래만 고쳐지는
+     일이 안 생긴다. 문구는 전부 데이터 층(profileView·profileFail)이 정한다. */
+  function paint(v) {
+    document.querySelector('.hero-sub').innerHTML = v.count == null
+      ? escapeHtml(v.insight)
+      : '지금까지<span class="t-number-xl num">' + v.count + '</span>개의 인사이트를 쌓았어요';
+    document.querySelector('.avatar').textContent = v.initial;
+    document.querySelector('.prof .col .t-h3').textContent = v.name;
+    document.querySelector('.prof .sub').textContent = v.account;
+  }
+  function escapeHtml(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+  /* 🔴 실패 처리기는 **조회 실패만** 받는다 (`.then(성공, 실패)`). `.catch` 로 뒤에 달면
+     paint() 안에서 난 오류까지 받아서, 실패 갈래가 같은 paint 를 다시 불러 또 터지고
+     화면에는 마크업의 빈 상태가 남는다 — 실패를 빈 상태로 그리는 그 결과다. */
+  requireLogin().then(function (ok) {
+    /* 로그인 전이면 /login/ 으로 가는 중이다 — 남의 것처럼 보이는 화면을 그리지 않는다. */
+    return ok ? getProfile() : null;
+  }).then(function (p) {
+    if (p) paint(profileView(p));
+  }, function () {
+    /* 마크업의 빈 상태 문구가 그대로 남으면 「아직 아무것도 안 쌓였다」로 읽히는데,
+       실제로는 물어보지 못한 것이다. */
+    paint(profileFail());
   });
 </script>
 

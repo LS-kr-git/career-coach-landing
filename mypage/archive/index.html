@@ -187,10 +187,10 @@
   </div>
 </footer>
 <script type="module">
-  /* 목록 정본은 assets/mypage-data.js 의 ARCHIVE 다. 정적 HTML 에는 기준 프레임(908:640)과 같은
-     2026년 8월 4건만 두고(피그마 대조용), 자료를 받으면 여기서 다시 그린다. 피그마는 한 상태를
-     그린 것이라 나머지 달의 제목은 피그마에 없다 — 그래서 마크업이 아니라 데이터로 둔다. */
-  import { getArchive } from '/assets/mypage-data.js';
+  /* 목록은 서버에서 온다 (career-coach 0086 `mypage_archive`). 정적 HTML 의 달 칩·목록은
+     피그마 기준 프레임(908:640) 상태이고, 자료를 받으면 여기서 전부 다시 그린다 —
+     칩도 같이 그린다. 소장한 달만 칩으로 서야 고른 달에 글이 있다. */
+  import { requireLogin, getArchive, archiveView, monthChips, EMPTY, FAIL } from '/assets/mypage-data.js';
   /* placeholder 는 속성이라 문구 대조(docs-audit)에 안 잡힌다. 그래서 문구의 정본은
      화면에 있는 sr-only label 하나로 두고, placeholder 는 그걸 복사해 쓴다 —
      두 곳에 같은 글자를 적어 두면 보이는 쪽만 고쳐도 검사가 초록이 된다. */
@@ -208,28 +208,39 @@
   var listBox = document.querySelector('.list');
   /* 빈 상태 문구는 마크업에 없고 여기서만 그린다. 상수로 선언해 두면 docs-audit 이
      `webScriptText` 로 읽어 피그마 2105:922 와 대조한다 — 안 그러면 한쪽만 고쳐도 초록이다. */
-  const EMPTY = { title: '검색 결과가 없어요', hint: '다른 키워드로 찾아보세요' };
+  const EMPTY_SEARCH = { title: '검색 결과가 없어요', hint: '다른 키워드로 찾아보세요' };
   var ARCHIVE = [];
   function selectedMonth() {
     /* 달은 언제나 하나가 눌려 있다. 그래도 못 찾으면 첫 칩으로 떨어뜨린다 —
        null 을 돌려주면 0건이 되어, 검색하지도 않았는데 「검색 결과가 없어요」가 뜬다. */
     var on = months.querySelector('.chip[aria-pressed="true"]') || months.querySelector('.chip');
-    var year = '2026', walk = on.previousElementSibling;
-    while (walk) {
-      if (walk.classList.contains('ybreak')) { year = walk.textContent.trim(); break; }
-      walk = walk.previousElementSibling;
-    }
-    return year + '년 ' + on.textContent.trim();
+    return on ? on.dataset.month : null;
   }
   function esc(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+  function note(title, hint) {
+    listBox.innerHTML = '<div class="empty"><span class="t-body-s">' + esc(title) + '</span>'
+      + '<span class="t-caption">' + esc(hint) + '</span></div>';
+  }
+  function paintMonths() {
+    var chips = monthChips(ARCHIVE);
+    months.innerHTML = chips.map(function (c, i) {
+      /* 해가 바뀌는 자리에만 연도 구분을 넣는다 (피그마 기준 상태와 같은 모양). */
+      var br = i > 0 && chips[i - 1].year !== c.year
+        ? '<span class="ybreak"><i aria-hidden="true"></i><span class="t-micro">' + esc(c.year) + '</span></span>'
+        : '';
+      return br + '<button class="chip" type="button" aria-pressed="' + (i === 0)
+        + '" data-month="' + esc(c.month) + '">' + esc(c.label) + '</button>';
+    }).join('');
+  }
   function render() {
     var term = q.value.trim().toLowerCase();
     var rows = term
       ? ARCHIVE.filter(function (a) { return (a.title + ' ' + a.topic).toLowerCase().indexOf(term) >= 0; })
       : ARCHIVE.filter(function (a) { return a.month === selectedMonth(); });
     if (!rows.length) {
-      listBox.innerHTML = '<div class="empty"><span class="t-body-s">' + EMPTY.title + '</span>'
-        + '<span class="t-caption">' + EMPTY.hint + '</span></div>';
+      /* 아직 한 편도 소장하지 않은 것과 검색해서 못 찾은 것은 다른 말이다. */
+      if (!ARCHIVE.length) note(EMPTY.archive, EMPTY.archiveHint);
+      else note(EMPTY_SEARCH.title, EMPTY_SEARCH.hint);
       return;
     }
     listBox.innerHTML = '<div class="list-group">' + rows.map(function (a) {
@@ -253,7 +264,21 @@
   var clearq = document.getElementById('clearq');
   clearq.addEventListener('click', function () { q.value = ''; clearq.hidden = true; render(); });
   q.addEventListener('input', function () { clearq.hidden = q.value.length === 0; render(); });
-  getArchive().then(function (rows) { ARCHIVE = rows; render(); });
+
+  /* 🔴 실패 처리기는 **조회 실패만** 받는다 (`.then(성공, 실패)`). `.catch` 로 뒤에 달면
+     그리다 난 오류까지 받아 실패 갈래가 또 터지고, 마크업의 기준 상태가 그대로 남는다. */
+  requireLogin().then(function (ok) {
+    return ok ? getArchive() : null;
+  }).then(function (rows) {
+    if (!rows) return;
+    ARCHIVE = archiveView(rows);
+    paintMonths();
+    render();
+  }, function () {
+    /* 실패는 「아직 없음」과 다른 글자로 그린다. 칩은 지운다 — 못 읽은 목록의 달을 고를 수 없다. */
+    months.innerHTML = '';
+    note(FAIL.list, FAIL.hint);
+  });
 </script>
 </div>
 </body>

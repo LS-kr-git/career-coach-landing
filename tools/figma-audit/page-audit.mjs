@@ -21,7 +21,7 @@
  */
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { dirname, resolve, join, posix } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..', '..');
@@ -314,9 +314,18 @@ const PRICE_ALLOW = {
   },
 };
 
-/* ---------- 랜딩 요금 ↔ 결제 화면 금액 (2026-09-17 신설) ----------
- * 금액을 말하는 곳이 두 곳(랜딩 마크업 · 결제 화면의 PRICE_KRW)이 되었으므로,
- * 한 곳만 고치면 표시가격과 실제 청구액이 달라진다 — 위 면제를 안전하게 만드는 짝이다. */
+/* ---------- 랜딩 요금 ↔ **서버 요금제** (2026-09-21 개정) ----------
+ * 2026-09-17 판은 세 곳(랜딩 마크업 · checkout 의 PRICE_KRW · mypage/billing 의 priceKrw)을
+ * 서로 맞대 봤다. 배선하면서 **결제 화면과 마이페이지가 plan 표를 읽게 됐으므로**
+ * (2026-09-21 사용자 결정 「세 곳 다 서버 값으로」) 맞댈 상수가 사라졌다.
+ * 남은 위험은 하나다 — **랜딩에 적힌 요금과 실제로 청구될 금액이 다른 것.**
+ * 그래서 여기서 plan 표를 직접 읽어 랜딩 표기와 맞댄다.
+ *
+ * 🔴 못 읽었으면 **통과시키지 않고 경고로 올린다.** 조용히 넘어가면 「검사가 안 돈 것」이
+ *    「이상 없음」으로 보인다 — 이 저장소가 반복해서 물린 모양이다.
+ *    (막지는 않는다: 네트워크 없는 PC 에서 푸시가 통째로 막히면 --no-verify 로 7겹이 다 꺼진다.)
+ * ⚠️ 화면 안에 금액 상수가 되살아나는 것은 tools/mypage-data-check.mjs(1.6겹)가 본다.
+ *    이 검사는 <script> 를 떼고 보므로 그 자리를 못 본다. */
 {
   // 2026-09-24 심사 기간: 금액을 보이는 마크업이 두 곳(랜딩 briefing/index.html · 상품 목록 index.html)이다.
   //   표기는 「월 N원」 이거나 「N원 / 월」(상품 요약) — 둘 다 받는다. 두 파일 모두 결제 화면과 맞댄다.
@@ -324,32 +333,46 @@ const PRICE_ALLOW = {
     .replace(/<!--[\s\S]*?-->/g, '').replace(/<script[\s\S]*?<\/script>/gi, '');
   const priceOf = (h) => h.match(/월\s*([0-9][0-9,]*)원/) || h.match(/([0-9][0-9,]*)원\s*(?:<[^>]+>\s*)*\/\s*월/);
   const SHOWN_AT = ['briefing/index.html', 'index.html'];
-  // strip · billing 은 아래에서 쓴다 (선언 순서 때문에 landing 뒤에 둔다)
-  // 🔴 주석을 떼고 본다. 안 떼면 `// var PRICE_KRW = 3900` 처럼 주석에 남은 옛 금액과
-  //    대조해 초록이 된다 — CLAUDE.md 「테스트에 대한 규칙」 5번의 그 모양이다
-  //    (2026-09-17 검사관 ②). <script> 는 떼지 않는다 — 상수가 그 안에 있다.
-  const strip = (src) => src
-    .replace(/<!--[\s\S]*?-->/g, ' ')
-    .replace(/\/\*[\s\S]*?\*\//g, ' ')
-    .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
-  const checkout = strip(readFileSync(join(ROOT, 'checkout', 'index.html'), 'utf8'));
-  // 🔴 금액을 말하는 곳은 **세 곳**이다 (2026-09-17 검사관 ⑧). 랜딩 마크업 · 결제 화면의
-  //    PRICE_KRW · 마이페이지 결제 관리의 MOCK_PLAN.priceKrw. 앞 둘만 맞대 보면 세 번째가
-  //    옛 금액을 계속 보여 준다 — 가격 하드코딩 검사는 <script> 를 떼므로 그 자리를 못 본다.
-  const billing = strip(readFileSync(join(ROOT, 'mypage', 'billing', 'index.html'), 'utf8'));
-  const krw = checkout.match(/var PRICE_KRW\s*=\s*(\d+)/);
-  const mock = billing.match(/priceKrw:\s*(\d+)/);
-  if (!krw) add('BLOCK', '요금 대조', 'checkout/index.html', 'PRICE_KRW 선언을 찾지 못함',
-      '결제 화면의 금액 상수 이름이 바뀌면 이 대조가 조용히 꺼진다 — 이름을 되돌리거나 이 검사를 같이 고치세요.');
-  else if (!mock) add('BLOCK', '요금 대조', 'mypage/billing/index.html', 'priceKrw 선언을 찾지 못함',
-      '결제 관리 화면의 금액 상수 이름이 바뀌면 이 대조가 조용히 꺼집니다 — 이름을 되돌리거나 이 검사를 같이 고치세요.');
-  else for (const f of SHOWN_AT) {
+  /* 🔴 **맞대는 상대가 상수에서 서버로 바뀌었다** (2026-09-21 사용자 결정 「세 곳 다 서버
+     값으로」). 앞 판은 `checkout` 의 `PRICE_KRW` 와 `mypage/billing` 의 `priceKrw` 를 읽어
+     마크업과 셋을 맞댔는데, 그 두 상수는 **이제 없다** — 두 화면이 plan 표를 읽는다.
+     그 판을 그대로 두면 「PRICE_KRW 선언을 찾지 못함」으로 항상 막힌다.
+     화면 안에 금액 상수가 되살아나는 것은 tools/mypage-data-check.mjs(1.6겹)가 본다. */
+  // 접속 정보는 assets/supabase-config.js 한 곳에서 읽는다 (복구 훈련 결과 — 값을 복사하지 않는다).
+  const cfg = await import(pathToFileURL(join(ROOT, 'assets', 'supabase-config.js')).href);
+  const 서버요금 = await (async () => {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), 8000);
+    try {
+      const r = await fetch(`${cfg.SUPABASE_URL}/rest/v1/plan?select=code,price_krw&is_active=eq.true`,
+        { headers: { apikey: cfg.SUPABASE_ANON_KEY, Authorization: `Bearer ${cfg.SUPABASE_ANON_KEY}` },
+          signal: ctl.signal });
+      if (!r.ok) return { 못읽음: `HTTP ${r.status}` };
+      return { rows: await r.json() };
+    } catch (e) {
+      return { 못읽음: e.name === 'AbortError' ? '응답 없음(8초)' : e.message };
+    } finally { clearTimeout(timer); }
+  })();
+
+  if (서버요금.못읽음) {
+    /* 🔴 **CI 에서는 막는다.** PC 는 네트워크가 없을 수 있어 경고로 두지만(막으면 --no-verify 로
+       일곱 겹이 통째로 꺼진다), CI 리눅스에서는 못 읽을 이유가 없다 — 거기서도 넘기면
+       이 대조는 어디서도 안 도는 검사가 된다. 종전 판은 상수 셋을 맞대는 결정적 관문이었다. */
+    add(process.env.CI ? 'BLOCK' : 'WARN', '요금 대조', SHOWN_AT[0],
+        `서버 요금제를 못 읽었습니다 (${서버요금.못읽음})`,
+        '화면 표기와 실제 청구액이 같은지 이번에는 확인하지 못했습니다 — 통과가 아니라 미확인입니다.');
+  } else if (서버요금.rows.length !== 1) {
+    add('BLOCK', '요금 대조', SHOWN_AT[0], `살아 있는 요금제가 ${서버요금.rows.length}개`,
+        'plan 표에서 is_active 를 하나만 남기세요. 0개로 보이는데 요금제가 있다면 '
+        + 'anon 이 그 표를 못 읽는 것입니다(RLS `plan_read` 정책) — 권한 없음과 요금제 없음은 '
+        + 'PostgREST 응답이 둘 다 `200 []` 라 여기서 갈리지 않습니다.');
+  } else for (const f of SHOWN_AT) {
     const shown = priceOf(markup(f));
     if (!shown) add('BLOCK', '요금 대조', f, '「월 N원」·「N원 / 월」 표기를 찾지 못함',
         '요금 표기가 사라졌습니다 — 심사가 보는 자리입니다.');
-    else if (new Set([shown[1].replace(/,/g, ''), krw[1], mock[1]]).size > 1) add('BLOCK', '요금 대조', f,
-        `화면 ${shown[1]}원 · 결제 ${krw[1]}원 · 결제관리 ${mock[1]}원`,
-        '세 곳의 금액이 같지 않습니다. 표시가격과 실제 청구액이 어긋나면 심사에서 바로 반려됩니다.');
+    else if (String(서버요금.rows[0].price_krw) !== shown[1].replace(/,/g, '')) add('BLOCK', '요금 대조', f,
+        `화면 ${shown[1]}원 · 서버 ${서버요금.rows[0].price_krw}원`,
+        '표시가격과 실제 청구액이 어긋나면 심사에서 바로 반려됩니다.');
   }
 }
 

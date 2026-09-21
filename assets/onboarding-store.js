@@ -111,7 +111,9 @@ function complete(s) {
 }
 
 let clientPromise = null;
-function client() {
+/** supabase-js 클라이언트. 마이페이지 데이터 층(assets/mypage-data.js)도 이것을 쓴다 —
+ *  클라이언트가 둘이면 로그인 세션을 두 벌 들고 서로 모르게 갱신한다. */
+export function client() {
   if (!clientPromise) {
     clientPromise = (async () => {
       const [{ createClient }, cfg] = await Promise.all([
@@ -224,4 +226,37 @@ export async function retryPending() {
   } finally {
     inflight = false;
   }
+}
+
+/**
+ * 서버에 저장된 선택값을 이 브라우저로 받아 온다 (2026-09-21 · 마이페이지 배선 5).
+ *
+ * 왜: 마이페이지 직군·주제 화면은 이 파일의 상태를 그리고 고친다. 그런데 그 상태는 이 브라우저의
+ * localStorage 에만 있어서, 기기를 바꾸거나 저장소가 비면 서버에 저장된 값이 안 보이고,
+ * 직군 하나만 고쳐도 연차·근무지가 없어 saveOnboarding() 이 'incomplete' 로 아무것도 안 보냈다.
+ *
+ * 🔴 **아직 못 보낸 변경(pending)이 있으면 덮지 않는다.** 그것이 사용자가 마지막으로 고른 값이고,
+ *    서버 것으로 덮으면 retryPending() 이 보낼 것을 잃는다.
+ * 실패는 삼키지 않는다 — 던져서 부른 화면이 실패를 그리게 한다(빈 상태와 가른다).
+ */
+export async function pullFromServer() {
+  // 아직 못 보낸 변경이 사용자가 마지막으로 고른 값이다. 덮지 않고 그대로 둔다.
+  if (readState().pending) return;
+  const supabase = await client();
+  const [pref, jobs, regions] = await Promise.all([
+    supabase.from('user_preference').select('years_min, years_max, insight_track').maybeSingle(),
+    supabase.from('user_preference_job').select('job_code'),
+    supabase.from('user_preference_region').select('region_code'),
+  ]);
+  for (const r of [pref, jobs, regions]) if (r.error) throw r.error;
+  if (!pref.data) return;      // 서버에 아직 저장된 적 없는 사람
+  writeState({
+    jobs: jobs.data.map((r) => r.job_code),
+    years: pref.data.years_min,
+    yearsMax: pref.data.years_max,
+    regions: regions.data.map((r) => r.region_code),
+    topic: pref.data.insight_track,
+    topicClear: false,
+    pending: false,
+  });
 }

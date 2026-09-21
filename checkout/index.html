@@ -202,7 +202,9 @@
   </div>
 </div>
 
-<script>
+<script type="module">
+  import { getPlan, priceText, wonText, FAIL } from '/assets/mypage-data.js';
+
   var $ = function (id) { return document.getElementById(id); };
 
   /* 체험 기간은 없다 — 신청 즉시 첫 달이 결제되고 매월 같은 날 갱신된다
@@ -213,23 +215,23 @@
   var fmt = function (d) { return d.getFullYear() + '년 ' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일'; };
   $('firstCharge').textContent = fmt(today);
 
-  /* 금액은 **월 3,900원으로 확정됐다** (2026-09-05 사용자 확정).
-     이 상수가 서비스 전체에서 금액을 말하는 한 곳이다 — 마크업에는 숫자를 두지 않는다.
-     page-audit 의 「가격 하드코딩」 검사는 <script> 를 떼고 보므로 이 자리를 못 본다.
-     그래서 이 파일을 PRICE_OK 에 넣지 않는다 — 마크업 쪽 방어는 살려 둔다
-     (같은 판단이 mypage/billing 에 먼저 적혀 있다).
-     🔴 배선할 때는 이 상수를 지우고 plan 응답의 price_krw 로 그린다. */
-  var PRICE_KRW = 3900;
-  var won = function (n) { return n.toLocaleString('ko-KR') + '원'; };
-  $('fee').textContent = '월 ' + won(PRICE_KRW) + ' (부가세 포함)';
-  $('todayTotal').textContent = won(PRICE_KRW);
-
-  /* 정기결제 고지 — 체험이 없어졌으므로 전자상거래법 제21조의2 「숨은 갱신」(무료·할인에서
+  /* 🔴 금액은 **서버(plan 표)에서 읽는다** (2026-09-21 사용자 결정 「세 곳 다 서버 값으로」).
+     상수를 두면 화면에 적힌 금액과 실제 청구액이 갈릴 수 있고, 그 자리가 심사에서 먼저 보인다.
+     정기결제 고지 — 체험이 없어졌으므로 전자상거래법 제21조의2 「숨은 갱신」(무료·할인에서
      유료로 넘어갈 때의 사전 고지)은 해당이 없다. 대신 자동결제라는 사실·금액·주기를
      결제 버튼 옆에서 말한다. 국내 구독 서비스가 공통으로 쓰는 형태다.
-     한 줄에 들어가야 하므로 「해지할 때까지 계속」 은 유의사항 첫 두 줄이 맡는다. */
-  $('agreeText').innerHTML =
-    '<b>매월 ' + won(PRICE_KRW) + ' 자동 결제</b>되는 정기결제에 동의합니다.';
+     한 줄에 들어가야 하므로 「해지할 때까지 계속」 은 유의사항 첫 두 줄이 맡는다.
+     ⚠️ 금액을 못 읽으면 **신청 버튼을 막는다** — 얼마가 빠져나가는지 모르는 채로 동의시키지 않는다. */
+  $('submit').disabled = true;
+  getPlan().then(function (plan) {
+    var 요금 = priceText(plan);                       // 「월 3,900원」
+    $('fee').textContent = 요금 + ' (부가세 포함)';
+    $('todayTotal').textContent = wonText(plan.price_krw);
+    $('agreeText').innerHTML = '<b>매' + 요금 + ' 자동 결제</b>되는 정기결제에 동의합니다.';
+    $('submit').disabled = false;
+  }).catch(function () {
+    note(FAIL.line + ' ' + FAIL.hint, true);
+  });
 
   // 토글이 둘이다 — 각 버튼이 자기 section 만 접는다.
   // 절을 id 로 집는다: 하나라도 없으면 여기서 터진다. 셀렉터로 훑으면 0개를 맞혀도
