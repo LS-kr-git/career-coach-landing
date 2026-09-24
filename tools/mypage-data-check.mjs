@@ -62,10 +62,36 @@ expectInOrder('mypage/billing/index.html', staticHtml('mypage/billing/index.html
 
 expectInOrder('mypage/topics/index.html', staticHtml('mypage/topics/index.html'), await data.getTopics());
 
-const week = await data.getThisWeek();
+/* 일요일 화면은 2026-09-24 부터 **서버**(mypage_received)에서 그린다. 그래서 여기서
+   `getThisWeek()` 를 부르지 않는다 — 부르면 이 검사가 네트워크를 타고, 서버가 안 뜬 자리에서
+   조용히 건너뛰게 된다. 대신 둘을 따로 문다.
+     ① 정적 마크업(피그마 기준 상태) ↔ `SUNDAY_STATIC` — 한쪽만 고치면 막힌다
+     ② 서버 행을 화면 모양으로 옮기는 순수 함수(`weekRows`)가 그 마크업과 **같은 표기**를 내는가
+   ② 가 없으면 날짜 모양이 '2026-09-21' 로 바뀌어도 아무도 모른다. */
+const week = data.SUNDAY_STATIC;
 const row = (a) => [a.topic, a.date, a.title];
 expectInOrder('mypage/sunday/index.html', staticHtml('mypage/sunday/index.html'),
   [...week.filter((a) => !a.read).flatMap(row), ...week.filter((a) => a.read).flatMap(row)]);
+
+{
+  /* 2026-08-08 은 토요일이고 그 주는 08-03(월)~08-09(일)이다. 경계 양쪽을 하나씩 둔다 —
+     한쪽만 두면 `<=`/`<` 를 뒤집어도 통과한다. */
+  const 옮긴것 = data.weekRows(
+    [{ publish_date: '2026-08-10', track: '디자인', title: '다음주 월', read: false },
+     { publish_date: '2026-08-09', track: '디자인', title: '이번주 일', read: false },
+     { publish_date: '2026-08-03', track: '디자인', title: '이번주 월', read: true },
+     { publish_date: '2026-08-02', track: '디자인', title: '지난주 일', read: false }],
+    '2026-08-08');
+  const 기대 = [{ date: '08. 09 일', topic: '디자인', title: '이번주 일', read: false },
+               { date: '08. 03 월', topic: '디자인', title: '이번주 월', read: true }];
+  if (JSON.stringify(옮긴것) !== JSON.stringify(기대)) {
+    problems.push(`mypage/sunday/index.html: weekRows 가 주 경계(월~일)나 날짜 표기를 바꿨다 — ${JSON.stringify(옮긴것)}`);
+  }
+  // 마크업의 표기와 같은 자로 찍히는가 — 위 기대값의 모양이 SUNDAY_STATIC 과 같아야 한다.
+  if (!/^\d{2}\. \d{2} [일월화수목금토]$/.test(data.SUNDAY_STATIC[0].date)) {
+    problems.push(`mypage/sunday/index.html: SUNDAY_STATIC 의 날짜 표기가 weekRows 와 다르다 — ${data.SUNDAY_STATIC[0].date}`);
+  }
+}
 
 /* ── ② 실패 문구는 빈 상태 문구와 달라야 한다 ────────────────── */
 /* 결제한 사람에게 「등록된 결제수단 없음」을 보여 주지 않기 위한 불변식이다.
@@ -144,8 +170,12 @@ if (칩.length !== 2) problems.push(`05 저장소: 두 달치인데 월 칩이 $
 /* 랜딩 마크업이 말하는 요금. 심사가 로그인 없이 보는 자리라 거기만 글자로 남는다
    (page-audit 이 그 값과 서버 plan 을 맞댄다). 여기서는 **그 값이 다른 화면 스크립트에
    되살아났는지**를 본다 — 상수 이름만 보면 `var 요금 = 3900` 으로 이름을 바꿔 빠져나간다. */
-const 랜딩요금 = (read('index.html').match(/월\s*([0-9][0-9,]*)원/) || [])[1];
-if (!랜딩요금) problems.push('index.html: 「월 N원」 표기를 찾지 못했습니다 — page-audit 의 요금 대조도 같이 멈춥니다');
+/* 🔴 자리와 표기가 둘 다 있다 (2026-09-24 심사 기간). 랜딩은 `briefing/index.html` 로
+   옮겨 갔고 루트는 상품 목록이며, 상품 요약은 「N원 / 월」로 적는다. **page-audit 의
+   `priceOf` 와 같은 자를 쓴다** — 한쪽만 고치면 이 검사가 조용히 빈손이 된다. */
+const 요금표기 = (h) => (h.match(/월\s*([0-9][0-9,]*)원/) || h.match(/([0-9][0-9,]*)원\s*(?:<[^>]+>\s*)*\/\s*월/) || [])[1];
+const 랜딩요금 = ['briefing/index.html', 'index.html'].map((f) => 요금표기(read(f))).find(Boolean);
+if (!랜딩요금) problems.push('briefing/index.html·index.html: 「월 N원」·「N원 / 월」 표기를 찾지 못했습니다 — page-audit 의 요금 대조도 같이 멈춥니다');
 for (const rel of ['checkout/index.html', 'mypage/billing/index.html']) {
   const src = scriptOnly(rel);
   const 이름으로 = src.match(/(?:PRICE_KRW|priceKrw|price_krw)\s*[=:]\s*\d/);

@@ -98,7 +98,13 @@ const TOPICS = [
 
 /* 이번 주 발행 5편 — read 가 true 면 발행 당일에 읽어 이미 소장한 것이다.
    🔴 목값이다. 머리말 「무엇이 서버에서 오나」 참조 — 서버에 누가 어느 편을 받았는지가 없다. */
-const THIS_WEEK = [
+/* 일요일 화면(06)의 **정적 마크업 사본** — 검사 전용이다.
+   화면은 2026-09-24 부터 서버(`mypage_received`)에서 그린다. 그런데 마크업에는 여전히
+   피그마 기준 상태의 5줄이 있어야 한다(docs-audit 대조용). 두 벌이 어긋나면
+   tools/mypage-data-check.mjs 가 막는다 — 이 목록이 그 대조의 한쪽이다.
+   🔴 **화면이 이 값을 그리지 않는다.** 여기 사람 이름·이메일을 넣지 않는 것과 같은 이유로
+      실제 데이터인 척하는 값을 여기 두지 않는다. 글 제목은 피그마 프레임의 그 글자다. */
+export const SUNDAY_STATIC = [
   { date: '08. 08 금', topic: '디자인', title: '핸드오프 문서를 줄이는 다섯 가지 습관', read: false },
   { date: '08. 07 목', topic: '디자인', title: '디자인 시스템을 팀에 정착시키는 6개월', read: true },
   { date: '08. 06 수', topic: '커리어·이직', title: '이직 오퍼를 비교하는 세 가지 기준', read: true },
@@ -165,8 +171,95 @@ export async function getPlan() {
   return data[0];
 }
 
+/* ── 결제수단 보관 ─────────────────────────────────────────── */
+
+// 배포된 엣지 함수 슬러그. 이름을 못 맞히게 길게 지은 값이라 주소가 곧 접근 통제의 일부다
+// (career-coach `supabase/functions/portone-6r2k9tvq`). 바뀌면 이 한 줄만 고친다.
+const BILLING_FN = 'portone-6r2k9tvq';
+
+/**
+ * 결제창이 발급한 빌링키를 **서버에 넘겨 확인·보관시킨다.** 브라우저가 쥔 채로 끝나면
+ * 구독이 안 열린다.
+ *
+ * 🔴 브라우저가 DB 에 직접 쓰지 않는다. `private.billing_key` 는 Data API 밖에 있고,
+ *    쓰기 전에 포트원에 되물어 **우리 상점의 살아 있는 키인지** 확인해야 한다 — 안 하면
+ *    아무 문자열이나 넣어 남의 구독을 열 수 있다. 그 판단은 엣지 함수 한 곳에 있다.
+ * 🔴 **200 이 아니면 던진다.** 보관 안 된 것을 「등록했다」로 그리면 사용자는 결제될 줄
+ *    알고 기다리다 아무것도 안 온다 — 이 파일이 지키는 「실패를 빈 상태로 그리지 않는다」와
+ *    같은 규칙이다.
+ * ⚠️ 신원은 몸통이 아니라 **토큰**으로 간다. 함수가 그 토큰을 되물어 회원을 알아낸다.
+ */
+export async function saveBillingKey(billingKey) {
+  const { SUPABASE_URL } = await import('/assets/supabase-config.js');
+  const supabase = await supa();
+  const { data, error } = await supabase.auth.getSession();
+  if (error) throw error;
+  if (!data.session) throw new Error('로그인 세션이 없습니다');
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/${BILLING_FN}/billing-key`, {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${data.session.access_token}`,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({ billingKey }),
+  });
+  if (!res.ok) {
+    // 🔴 상태코드는 **콘솔에만** 남기고 던지는 메시지는 비운다. 부르는 화면이 이 값을
+    //    그대로 그리면 사용자가 「빌링키 보관 실패 (502)」를 읽게 되고, 그건 아무도
+    //    지시하지 않은 화면 문구다. 화면은 자기 문구로 말한다.
+    console.error('빌링키 보관 실패', res.status, await res.text().catch(() => ''));
+    throw new Error('');
+  }
+  return res.json();
+}
+
 export async function getTopics() { return TOPICS; }
-export async function getThisWeek() { return THIS_WEEK; }
+/** 그 사람에게 **실제로 나간** 편 전부. 최신 발행일이 먼저다 (0089 `mypage_received`). */
+export async function getReceived() { return rpc('mypage_received', false); }
+
+/**
+ * 이번 주(월~일, KST) 받은 편을 일요일 화면이 쓰는 모양으로. **순수 함수**라 브라우저가 없어도 돈다.
+ *
+ * ⚠️ 주 경계는 **월요일 00:00 KST** 다 — 서버의 `insight_week_start`(0023)와 같은 규칙이다.
+ *    여기서 다르게 자르면 「보충 1편」의 대상이 화면과 서버에서 갈린다.
+ * `read` 는 서버의 열람 기록이다. 「소장 완료」로 그리는 쪽이 이것이고,
+ *    소장은 읽으면 자동으로 되므로(0084) 두 칸을 화면에서 다시 가르지 않는다.
+ */
+export function weekRows(rows, todayIso) {
+  const 월요일 = 주의_월요일(todayIso);
+  const 일요일 = 더한날(월요일, 6);
+  return (rows || [])
+    .filter((r) => r.publish_date >= 월요일 && r.publish_date <= 일요일)
+    .map((r) => ({ date: dayLabel(r.publish_date), topic: r.track, title: r.title, read: !!r.read }));
+}
+
+const 요일이름 = ['일', '월', '화', '수', '목', '금', '토'];
+
+/** 'YYYY-MM-DD' → '08. 08 금'. 정적 마크업(피그마 기준 상태)과 같은 모양이어야 한다.
+ *  ⚠️ 월·일은 `kstParts` 로 뽑는다 — 이 파일의 **날짜 자는 그것 하나**이고
+ *     `archiveView` 의 「08. 07」도 같은 자로 만든다. 여기서 따로 쪼개면 자가 둘이 된다. */
+function dayLabel(iso) {
+  const { m, d } = kstParts(iso);
+  return `${m}. ${d} ${요일이름[new Date(`${iso}T00:00:00Z`).getUTCDay()]}`;
+}
+
+/** 그 날짜가 속한 주의 월요일('YYYY-MM-DD').
+ *  ⚠️ 여기는 표기가 아니라 **날짜 산술**이라 `kstParts`(표기용)로는 못 한다. 시간대를
+ *     안 타게 UTC 자정으로만 세고, 그래서 기기 시간대와 무관하다. */
+function 주의_월요일(iso) {
+  const t = new Date(`${iso}T00:00:00Z`);
+  return 더한날(iso, -((t.getUTCDay() + 6) % 7));
+}
+
+function 더한날(iso, n) {
+  const t = new Date(`${iso}T00:00:00Z`);
+  t.setUTCDate(t.getUTCDate() + n);
+  return t.toISOString().slice(0, 10);
+}
+
+export async function getThisWeek() {
+  return weekRows(await getReceived(), kstToday().date);
+}
 
 /* ── 그리는 문구 (순수 함수 — 브라우저 없이도 돈다) ───────────── */
 

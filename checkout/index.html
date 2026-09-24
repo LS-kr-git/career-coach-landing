@@ -203,7 +203,7 @@
 </div>
 
 <script type="module">
-  import { getPlan, priceText, wonText, FAIL } from '/assets/mypage-data.js';
+  import { getPlan, priceText, wonText, saveBillingKey, FAIL } from '/assets/mypage-data.js';
 
   var $ = function (id) { return document.getElementById(id); };
 
@@ -262,10 +262,12 @@
      이 사이트에는 번들러가 없어 import 할 경로가 없다. 그래서 그 파일의 포트원 갈래만 여기에
      옮겨 적었다. 둘 중 한쪽을 고치면 다른 쪽도 고친다 (지금은 이 파일이 유일한 실사용처다).
 
-     🔴 아직 없는 것: 발급된 빌링키를 서버가 조회해 진짜인지 확인하고 보관하는 엣지 함수.
-        그래서 지금은 결제창이 뜨고 등록까지 되지만 **구독이 실제로 개시되지는 않는다.**
-        함수가 배포되면 아래 res.billingKey 를 career-coach payments 의
-        issueBillingKey() 로 넘기고, customerId 도 임시값이 아니라 app_user.id 로 바꾼다. */
+     ✅ 2026-09-24 — 발급된 빌링키를 서버가 조회해 진짜인지 확인하고 보관한다
+        (`saveBillingKey` → 엣지 함수 `portone-6r2k9tvq/billing-key`). 그 호출이 성공해야
+        「등록되었습니다」를 그린다.
+     🔴 아직 없는 것: **청구**다. 결제수단이 보관될 뿐 첫 달 요금이 빠져나가지는 않는다
+        (career-coach `docs/기획/정기결제-서버-배선.md` 의 ⑥⑧). customerId 도 아직
+        임시값이다 — 청구를 붙이는 회차에 app_user.id 로 바꾼다. */
   var PORTONE_STORE_ID = 'store-a4b087e3-89d3-4369-8558-02d158bf6564';
   var PORTONE_CHANNEL_KEY = 'channel-key-07bc635a-da47-4202-90d1-e69c076bce4e';
 
@@ -309,6 +311,10 @@
       if (res && res.code != null) throw new Error(res.message);
       // billingKey 가 없으면 등록된 것이 아니다 — code 만 비어 있는 응답을 성공으로 읽지 않는다.
       if (!res || !res.billingKey) throw new Error('');
+      // 🔴 여기서 끝내지 않는다. 서버가 포트원에 되물어 보관해야 구독이 열린다.
+      //    보관이 실패했는데 「등록되었습니다」를 그리면 사용자는 결제될 줄 알고 기다린다.
+      return saveBillingKey(res.billingKey);
+    }).then(function () {
       note('결제수단이 등록되었습니다.');
     }).catch(function (e) {
       note(e.message || '결제수단 등록에 실패했습니다. 다시 시도해 주세요.', true);
