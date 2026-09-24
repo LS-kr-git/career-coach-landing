@@ -19,6 +19,7 @@
     --gray-50:#F8FAFC; --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-300:#CBD5E1;
     --gray-400:#94A3B8; --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155;
     --gray-800:#1E293B; --gray-900:#0F172A; --stone-50:#FAFAF9;
+    --error-600:#DC2626;
     /* 랜딩과 동일한 폭 시스템 */
     --pad-x:24px; --card-max:450px;
   }
@@ -96,6 +97,8 @@
     body{background:var(--gray-100)}
     .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
   }
+  /* 조회 실패 — 값 자리의 글자를 빨갛게 (2026-09-24 사용자 확정 A안). */
+  .fail{color:var(--error-600)!important}
 </style>
 </head>
 <body>
@@ -165,7 +168,8 @@
 
   /* 다섯 자리를 한 함수로 그린다 — 값·빈 상태·실패가 같은 자리에 들어가야
      한 갈래만 고쳐지는 일이 안 생긴다. 문구는 데이터 층이 정한다. */
-  function paint(v) {
+  function paint(v, bad) {
+    ['plan', 'card', 'cardSub', 'next'].forEach(function (k) { slots[k].classList.toggle('fail', !!bad); });
     slots.plan.textContent = v.plan;
     slots.card.textContent = v.card;
     slots.cardSub.textContent = v.cardSub;
@@ -185,7 +189,7 @@
     if (r) paint(billingView(r[0], r[1]));
   }, function () {
     /* 실패를 빈 상태로 그리면 결제한 사람이 「등록된 결제수단 없음」을 본다. */
-    paint(billingFail());
+    paint(billingFail(), true);
   });
 
   /* 해지는 기간 끝 해지다 — 서버가 다음 결제일을 그대로 이용 종료일로 돌려준다.
@@ -194,7 +198,7 @@
     cancel.disabled = true;
     cancelSubscription().then(다시읽는다).then(
       function (r) { paint(billingView(r[0], r[1])); },
-      function () { paint(billingFail()); }
+      function () { paint(billingFail(), true); }
     ).then(function () { cancel.disabled = false; });
   });
 </script>

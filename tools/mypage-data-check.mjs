@@ -110,6 +110,22 @@ for (const [화면, a, b] of [['01 프로필', 빈것, 실패한것], ['03 결�
 }
 if (FAIL.list === EMPTY.archive) problems.push('05 저장소: 목록 실패 문구가 빈 상태 문구와 같습니다');
 
+/* 실패 문구는 데이터 층에만 있어 docs-audit 이 못 본다(스냅샷에서 jsRenderedText 로 뺐다).
+   그래서 피그마 실패 상태 프레임의 스냅샷과 여기서 맞댄다 — 한쪽만 고치면 걸린다. */
+const 스냅샷 = JSON.parse(read('tools/figma-audit/figma-docs-text.json'));
+for (const [html, 노드, 문구들] of [
+  ['mypage/index.html', '2157:941', [FAIL.line, FAIL.hint]],
+  ['mypage/billing/index.html', '2157:997', [FAIL.line, FAIL.hint]],
+  ['mypage/archive/index.html', '2157:1048', [FAIL.list, FAIL.hint]],
+  ['checkout/index.html', '2157:1098', [FAIL.line + ' ' + FAIL.hint]],
+]) {
+  const 프레임 = (스냅샷.pages.find((p) => p.html === html)?.stateFrames || []).find((f) => f.figmaNode === 노드);
+  if (!프레임) { problems.push(`${html}: 실패 상태 프레임 ${노드} 가 스냅샷에 없습니다`); continue; }
+  for (const t of 문구들) {
+    if (!프레임.texts.includes(t)) problems.push(`${html}: 실패 문구 「${t}」 가 피그마 ${노드} 에 없습니다`);
+  }
+}
+
 /* ── ③ 화면이 **값 갈래와 실패 갈래를 둘 다** 부르는가 ────────── */
 /* 실패 갈래만 보면 「서버를 아예 안 읽는」 화면이 초록으로 지나간다 — 배선을 지워도
    빈 상태가 그대로 그려져서 눈으로도 안 보인다. 두 갈래를 같이 문다

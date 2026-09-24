@@ -19,6 +19,7 @@
     --gray-50:#F8FAFC; --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-300:#CBD5E1;
     --gray-400:#94A3B8; --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155;
     --gray-800:#1E293B; --gray-900:#0F172A; --stone-50:#FAFAF9;
+    --error-600:#DC2626;
     /* 랜딩과 동일한 폭 시스템 */
     --pad-x:16px; --card-max:450px;
   }
@@ -102,6 +103,8 @@
     body{background:var(--gray-100)}
     .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
   }
+  /* 조회 실패 — 값 자리의 글자를 빨갛게 (2026-09-24 사용자 확정 A안). */
+  .fail{color:var(--error-600)!important}
 </style>
 </head>
 <body>
@@ -176,7 +179,10 @@
 
   /* 네 자리를 한 함수로 그린다 — 값·빈 상태·실패가 **같은 자리**에 들어가야 한 갈래만 고쳐지는
      일이 안 생긴다. 문구는 전부 데이터 층(profileView·profileFail)이 정한다. */
-  function paint(v) {
+  function paint(v, bad) {
+    ['.hero-sub', '.prof .col .t-h3', '.prof .sub'].forEach(function (s) {
+      document.querySelector(s).classList.toggle('fail', !!bad);
+    });
     document.querySelector('.hero-sub').innerHTML = v.count == null
       ? escapeHtml(v.insight)
       : '지금까지<span class="t-number-xl num">' + v.count + '</span>개의 인사이트를 쌓았어요';
@@ -197,7 +203,7 @@
   }, function () {
     /* 마크업의 빈 상태 문구가 그대로 남으면 「아직 아무것도 안 쌓였다」로 읽히는데,
        실제로는 물어보지 못한 것이다. */
-    paint(profileFail());
+    paint(profileFail(), true);
   });
 </script>
 

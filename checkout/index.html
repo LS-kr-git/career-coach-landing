@@ -114,6 +114,8 @@
     font-family:inherit;font-weight:var(--cta-fw);font-size:var(--cta-fs);border-radius:var(--cta-radius);
     box-shadow:0 12px 32px rgba(217,119,6,.28)}
   .cta:active{transform:scale(.98)}
+  /* 요금을 못 읽어 잠긴 버튼 — 회색 (2026-09-24 사용자 확정 A안) */
+  .cta.locked{background:var(--gray-200);color:var(--gray-400);box-shadow:none;cursor:default;transform:none}
 
   @media (min-width:451px){
     body{background:var(--gray-100)}
@@ -230,6 +232,12 @@
     $('agreeText').innerHTML = '<b>매' + 요금 + ' 자동 결제</b>되는 정기결제에 동의합니다.';
     $('submit').disabled = false;
   }).catch(function () {
+    // 못 읽은 금액 자리는 비우지 않고 「—」 로 둔다 (2026-09-24 사용자 확정 A안).
+    $('submit').classList.add('locked');
+    ['fee', 'todayTotal'].forEach(function (id) {
+      $(id).textContent = '—';
+      $(id).style.color = 'var(--gray-400)';
+    });
     note(FAIL.line + ' ' + FAIL.hint, true);
   });
 
@@ -315,8 +323,13 @@
       return saveBillingKey(res.billingKey);
     }).then(function (r) {
       // 「결제가 완료되었습니다」는 첫 달이 실제로 걷혔을 때(`개시`)만 쓴다 (2026-09-24 사용자 지시).
-      // 이미 구독 중이던 카드 변경·첫 청구 실패는 카드만 보관된 것이라 종전 문구를 둔다.
-      note(r && r.charged === '개시' ? '결제가 완료되었습니다.' : '결제수단이 등록되었습니다.');
+      // 카드사가 첫 청구를 거절했으면 카드만 보관된 것이다 — 결제된 줄 알고 기다리지 않게 그 자리에서 말한다.
+      // `청구실패`(우리 쪽 고장)는 카드 탓이 아니라 이 문구를 쓰지 않는다. 카드 변경(`이미구독`)은 등록 문구다.
+      var charged = r && r.charged;
+      if (charged === '개시') note('결제가 완료되었습니다.');
+      else if (charged === '첫결제실패')
+        note('카드는 등록됐지만 결제가 되지 않았어요. 카드 한도나 잔액을 확인해 주세요.', true);
+      else note('결제수단이 등록되었습니다.');
     }).catch(function (e) {
       note(e.message || '결제수단 등록에 실패했습니다. 다시 시도해 주세요.', true);
     }).then(function () { btn.disabled = false; });

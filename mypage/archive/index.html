@@ -19,6 +19,7 @@
     --gray-50:#F8FAFC; --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-300:#CBD5E1;
     --gray-400:#94A3B8; --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155;
     --gray-800:#1E293B; --gray-900:#0F172A; --stone-50:#FAFAF9;
+    --error-600:#DC2626;
     /* 랜딩과 동일한 폭 시스템 */
     --pad-x:24px; --card-max:450px;
   }
@@ -109,6 +110,8 @@
     body{background:var(--gray-100)}
     .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
   }
+  /* 조회 실패 — 값 자리의 글자를 빨갛게 (2026-09-24 사용자 확정 A안). */
+  .fail{color:var(--error-600)!important}
 </style>
 </head>
 <body>
@@ -217,9 +220,10 @@
     return on ? on.dataset.month : null;
   }
   function esc(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
-  function note(title, hint) {
-    listBox.innerHTML = '<div class="empty"><span class="t-body-s">' + esc(title) + '</span>'
-      + '<span class="t-caption">' + esc(hint) + '</span></div>';
+  function note(title, hint, bad) {
+    var c = bad ? ' fail' : '';
+    listBox.innerHTML = '<div class="empty"><span class="t-body-s' + c + '">' + esc(title) + '</span>'
+      + '<span class="t-caption' + c + '">' + esc(hint) + '</span></div>';
   }
   function paintMonths() {
     var chips = monthChips(ARCHIVE);
@@ -277,7 +281,7 @@
   }, function () {
     /* 실패는 「아직 없음」과 다른 글자로 그린다. 칩은 지운다 — 못 읽은 목록의 달을 고를 수 없다. */
     months.innerHTML = '';
-    note(FAIL.list, FAIL.hint);
+    note(FAIL.list, FAIL.hint, true);
   });
 </script>
 </div>
