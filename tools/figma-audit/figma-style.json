@@ -4,7 +4,7 @@
   "_갱신방법": "피그마 값이 바뀌면 items[].figma 와 items[].css 를 함께 고친다. 신선도 검사가 어떤 노드가 바뀌었는지 새 값과 함께 알려 준다.",
   "_필드": "sel=웹 선택자 / css=기대 computed style(색은 #hex 또는 rgb() 아무거나) / figma=피그마 원본 값(신선도 대조용) / node=figma 의 근거 노드",
   "figmaNode": "6:148",
-  "generatedAt": "2026-08-02",
+  "generatedAt": "2026-09-24",
   "items": [
     {
       "id": "hero-badge",
@@ -497,51 +497,127 @@
       "_근거": "2026-08-02 apply 섹션 아이브로우를 칩으로 변경 (Blue 50 / Blue 600)."
     },
     {
-      "id": "fee-card",
-      "label": "요금과 해지 카드",
-      "sel": ".fee-card",
-      "node": "2113:967",
+      "id": "product-top",
+      "label": "상품 요약 섹션",
+      "sel": ".product-top",
+      "node": "2143:936",
       "figma": {
-        "fill": "#f8fafc",
-        "stroke": "#e2e8f0",
-        "sw": 1,
-        "radius": 18,
-        "shadow": false
+        "pad": [
+          8,
+          24,
+          32,
+          24
+        ],
+        "gap": 16
       },
       "css": {
-        "background-color": "#F8FAFC",
-        "border-top-width": "1px",
-        "border-top-color": "#E2E8F0",
-        "border-top-left-radius": "18px",
-        "shadow": "없음"
+        "padding-top": "8px",
+        "padding-bottom": "32px",
+        "padding-left": "24px",
+        "row-gap": "16px",
+        "border-bottom-width": "8px",
+        "border-bottom-color": "#F1F5F9"
       },
-      "_근거": "2026-09-17 신설. 스텝 카드(.step)와 같은 값이지만 그림자가 없다 — 스텝은 있고 이쪽은 없는 것이 의도된 차이다. (2026-09-17 검사관 ⑨ 로 「결제」·「문의·접수」 카드를 지시 밖이라 뺐고, 대표 노드를 첫 카드인 「청약철회」 로 옮겼다.)"
+      "_근거": "2026-09-24 신설 — 토스페이먼츠 심사 기간 상품 요약·상품 고시 정보·구매하기."
     },
     {
-      "id": "fee-card-key",
-      "label": "요금 카드 제목",
-      "sel": ".fee-card .fee-k",
-      "node": "2113:968",
+      "id": "product-thumb",
+      "label": "상품 요약 썸네일",
+      "sel": ".product-top .p-thumb",
+      "node": "2143:937",
       "figma": {
-        "textFill": "#1e3a8a"
+        "radius": 14
       },
       "css": {
-        "color": "#1E3A8A"
+        "border-top-left-radius": "14px",
+        "aspect": "정상"
       },
-      "_근거": " (2026-09-17 검사관 ⑨ 로 「결제」·「문의·접수」 카드를 지시 밖이라 뺐고, 대표 노드를 첫 카드인 「청약철회」 로 옮겼다.)"
+      "_근거": "2026-09-24 신설 — 토스페이먼츠 심사 기간 상품 요약·상품 고시 정보·구매하기."
     },
     {
-      "id": "fee-card-body",
-      "label": "요금 카드 본문",
-      "sel": ".fee-card p",
-      "node": "2113:969",
+      "id": "product-tag",
+      "label": "상품 요약 태그",
+      "sel": ".product-top .p-tag",
+      "node": "2143:939",
+      "figma": {
+        "textFill": "#d97706"
+      },
+      "css": {
+        "color": "#D97706"
+      },
+      "_근거": "2026-09-24 신설 — 토스페이먼츠 심사 기간 상품 요약·상품 고시 정보·구매하기."
+    },
+    {
+      "id": "notice-title",
+      "label": "상품 고시 정보 제목",
+      "sel": ".notice-title",
+      "node": "2143:3085",
       "figma": {
         "textFill": "#475569"
       },
       "css": {
         "color": "#475569"
       },
-      "_근거": " (2026-09-17 검사관 ⑨ 로 「결제」·「문의·접수」 카드를 지시 밖이라 뺐고, 대표 노드를 첫 카드인 「청약철회」 로 옮겼다.)"
+      "_근거": "2026-09-24 신설 — 토스페이먼츠 심사 기간 상품 요약·상품 고시 정보·구매하기. 사용자 지시: 소제목과 같은 글꼴에 한 단계 크게, 회색 두 단계 진하게(400→600)."
+    },
+    {
+      "id": "notice-key",
+      "label": "상품 고시 정보 소제목",
+      "sel": ".notice-k",
+      "node": "2143:3088",
+      "figma": {
+        "textFill": "#94a3b8"
+      },
+      "css": {
+        "color": "#94A3B8"
+      },
+      "_근거": "2026-09-24 신설 — 토스페이먼츠 심사 기간 상품 요약·상품 고시 정보·구매하기. 피클플러스 「상품 고시 정보」 모양을 따랐다."
+    },
+    {
+      "id": "notice-body",
+      "label": "상품 고시 정보 본문",
+      "sel": ".notice-list p",
+      "node": "2143:3093",
+      "figma": {
+        "textFill": "#94a3b8"
+      },
+      "css": {
+        "color": "#94A3B8"
+      },
+      "_근거": "2026-09-24 신설 — 토스페이먼츠 심사 기간 상품 요약·상품 고시 정보·구매하기."
+    },
+    {
+      "id": "notice-dot",
+      "label": "상품 고시 정보 점",
+      "sel": ".notice-list .dot",
+      "node": "2143:3092",
+      "figma": {
+        "fill": "#94a3b8"
+      },
+      "css": {
+        "background-color": "#94A3B8",
+        "width": "3px"
+      },
+      "_근거": "2026-09-24 신설 — 토스페이먼츠 심사 기간 상품 요약·상품 고시 정보·구매하기."
+    },
+    {
+      "id": "buy-float",
+      "label": "떠 있는 구매하기",
+      "sel": ".buy",
+      "node": "2143:3142",
+      "figma": {
+        "fill": "#f59e0b",
+        "radius": 14,
+        "shadow": true
+      },
+      "css": {
+        "background-color": "#F59E0B",
+        "border-top-left-radius": "14px",
+        "shadow": "있음",
+        "color": "#FFFFFF",
+        "height": "54px"
+      },
+      "_근거": "2026-09-24 신설 — 토스페이먼츠 심사 기간 상품 요약·상품 고시 정보·구매하기. 누르면 헤더 로그인과 같은 /login/ 으로 간다."
     }
   ],
   "_여백설명": "여백·간격 항목(id 가 spacing- 으로 시작)은 2026-08-02 추가. lockedStyles 정규식이 소스 문자열만 보기 때문에 뒤에 붙은 규칙이 값을 덮어도 통과하던 구멍(.chips 의 50px 이 4px 보정에 덮인 사건)을 메운다. 이쪽은 브라우저 계산값을 보므로 무엇이 덮든 실제 결과가 잡힌다.",

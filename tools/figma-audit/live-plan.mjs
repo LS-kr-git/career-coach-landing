@@ -23,7 +23,7 @@ const git = (...a) => execFileSync('git', a, { encoding: 'utf8', maxBuffer: 64e6
 
 // robots.txt 가 Disallow 하지 않는 것만 WebFetch 로 본문을 받을 수 있다.
 // 나머지는 ROBOTS_DISALLOWED 가 정상이므로 배포 sha 로 간접 확인한다.
-const ALLOW = new Set(['index.html', 'terms.html', 'privacy.html']);
+const ALLOW = new Set(['index.html', 'briefing/index.html', 'terms.html', 'privacy.html']);
 
 const url = (p) => (p === 'index.html' ? '/' : p.endsWith('/index.html') ? '/' + p.slice(0, -10) : '/' + p);
 

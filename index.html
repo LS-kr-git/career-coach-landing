@@ -120,177 +120,12 @@ fbq('track', 'PageView');
   .app-icon img{width:21px;height:21px;display:block}
   header .wordmark{height:21px;display:block}
 
-  /* ===== 공통 레이아웃 =====
-     섹션마다 배경색이 다르고(피그마 6:148) 그 배경이 화면 끝까지 이어져야 하므로,
-     좌우 패딩을 .container 가 아니라 각 section 이 갖는다.
-     안쪽 콘텐츠는 --content-max(402px)로 묶인다. 좁은 화면에서는 화면폭 − --pad-x·2 가 먼저 걸린다. */
-  /* 피그마 6:148 의 모든 섹션은 위·아래 패딩이 각각 100px (2026-08-01 60→100 확장).
-     섹션 사이 간격은 100+100=200 으로 일정하고,
-     배경색 띠가 콘텐츠 위아래를 똑같이 100px씩 감싼다. */
-  .container{width:100%;padding:0 0 24px}
-  section{padding:100px var(--pad-x);width:100%;display:flex;flex-direction:column;gap:20px;align-items:center}
-  section > *{width:100%;max-width:var(--content-max)}
-  section > .chips{max-width:none}
-
-  /* 섹션 배경 — 피그마 6:148 (그라데이션은 위 진함 → 아래 옅음) */
-  .bg-blue{background:linear-gradient(var(--blue-100), var(--blue-50))}
-  .bg-amber{background:linear-gradient(var(--amber-100), var(--amber-50))}
-  .bg-gray{background:var(--gray-50)}
-  .head-group{display:flex;flex-direction:column;gap:8px;align-items:center;text-align:center}
-  .eyebrow{color:var(--amber-600)}
-  .headline{color:var(--navy-900);text-align:center;white-space:pre-line}
-  /* 피그마 리드 문단은 최대 폭 344 (고정폭 노드들 = 344, hug 노드들은 그 이하 + 명시 줄바꿈).
-     360px 에서 섹션 패딩(24)을 16px 씩 넘어 344 가 되고, 그보다 넓은 화면에서도 344 에서 멈춘다.
-     ⚠ 344 보다 넓히면 명시 줄바꿈 없는 리드(6:204 등)의 자동 줄바꿈 위치가 피그마와 달라진다
-       — 2026-08-02 "수백/개" 줄바꿈 드리프트로 실제 발생. figma-style.json 에 잠금. */
-  /* 피그마 6:189(폭 312 고정) — 본문 문단은 섹션 콘텐츠 폭(360px 기준 312)에 딱 맞고,
-     화면이 넓어져도 312 를 유지한 채 중앙 정렬된다 (2026-08-02 사용자 재확정: 330 → 312).
-     ⚠ 이 문단에는 명시 줄바꿈이 없다 — 폭이 곧 줄바꿈이므로 312 를 바꾸면 줄이 달라진다. */
-  .para-wide{width:100%;max-width:312px}
-  .lead{color:var(--gray-600);text-align:center;white-space:pre-line;
-    width:calc(100% + 32px);max-width:344px;margin-left:-16px;margin-right:-16px}
-  /* 일러스트는 배경이 투명한 PNG — 회색 박스를 씌우지 않는다 (2026-08-01, 신규 6종) */
-  /* height:auto 필수 — img 의 height="224" 속성이 살아 있으면 폭만 늘어나 가로로 눌린다.
-     352px 시절엔 원본 344 와 비슷해 티가 안 났지만, 데스크톱에서 넓히자 바로 드러났다. (2026-08-02) */
-  .illust{width:100%;height:auto;border-radius:12px;display:block}
-
-  /* ===== 히어로 ===== */
-  /* 히어로 칩 — 2026-08-02 최종: 보더 없는 amber-100 틴트 필 (피그마 247:4843, radius 999, 패딩 6.5/15, h 31).
-     플렉스 상하 중앙정렬로 글자가 위로 떠 보이던 문제 해결 (line-height 박스 대신 플렉스 센터링).
-     칩↔헤딩 간격은 섹션 기본 gap 20 그대로 (피그마 241:2404 gap 20). */
-  .hero-badge,.badge-blue{display:inline-flex;align-items:center;justify-content:center;
-    height:31px;padding:1px 15px 0;border-radius:999px;width:auto}
-    /* padding-top 1px = 광학 보정: 글꼴 잉크 박스가 행간 박스보다 0.5px 위에 앉아
-       플렉스 센터링만으로는 글자가 1px 떠 보인다 (피그마도 pad 7/6 으로 동일 보정) */
-  .hero-badge{background:var(--amber-100);color:var(--amber-600)}
-  /* 파랑 섹션용 칩 — 피그마 254:2404 (Blue 50 채움 / Blue 600 글자) */
-  .badge-blue{background:var(--blue-50);color:var(--blue-600)}
-  .hero-title{color:var(--gray-800);text-align:center}
-  .hl{background:linear-gradient(transparent 65%, var(--amber-200) 65%);padding:0 2px}
-
-  /* ===== 아이폰 셸 목업 ===== */
-  .mockup-wrapper{margin:28px 0 56px;display:flex;justify-content:center;width:100%}
-  /* 폰 셸 — 피그마 123:4349 스펙. 폭은 360px 기준 312에서 시작해 최대 344까지 늘어난다. */
-  .phone{
-    width:100%;max-width:344px;
-    border:2px solid transparent;border-radius:56px;position:relative;padding:0 16px;
-    background:linear-gradient(var(--shell),var(--shell)) padding-box,
-               linear-gradient(180deg,#7A808C 0%,#4A4E58 30%,#2C2F36 100%) border-box;
-    box-shadow:0 10px 14px -3px rgba(15,23,42,.18), 0 34px 32px -12px rgba(15,23,42,.38);
-  }
-  /* rim-light (피그마 123:4350) — 안쪽 3px에 걸리는 얇은 하이라이트 링 */
-  .phone::before{
-    content:'';position:absolute;inset:3px;border-radius:53px;border:1.2px solid transparent;
-    background:linear-gradient(180deg,rgba(255,255,255,.22) 0%,rgba(255,255,255,.05) 25%,rgba(255,255,255,.10) 100%) border-box;
-    -webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);
-    -webkit-mask-composite:xor;mask-composite:exclude;
-    pointer-events:none;z-index:4;
-  }
-  .phone .screen{
-    position:absolute;inset:12px;background:var(--gray-400);border-radius:44px;z-index:0;
-  }
-  .phone .notch{
-    position:absolute;top:12px;left:50%;transform:translateX(-50%);
-    width:110px;height:24px;background:var(--shell-notch);border-radius:0 0 14px 14px;z-index:3;
-  }
-  .phone .speaker{
-    position:absolute;top:22px;left:50%;transform:translateX(-50%);
-    width:42px;height:5px;border-radius:2.25px;background:#0B0C10;z-index:4;
-  }
-  .phone .home-bar{
-    position:absolute;bottom:21px;left:50%;transform:translateX(-50%);
-    width:110px;height:5px;background:rgba(15,23,42,.3);border-radius:2.5px;z-index:3;
-  }
-  /* 피그마 6:309 = 폭 276 / 패딩 0. 좌우 4px 패딩이 있으면 말풍선이 224 가 아니라 216 이 되어
-     목업 본문이 한 줄씩 더 밀린다("인사이 / 트]", "보세 / 요."). 좌우 패딩은 0 이어야 한다. (2026-08-02) */
-  .phone-content{position:relative;z-index:1;padding:55px 0 40px}
-  /* 첫 번째 목업만 폰을 32px 연장 (피그마 123:4349 = 631px). 콘텐츠 위치는 그대로,
-     바닥 여백만 늘어나고 홈 인디케이터가 바닥을 따라 내려간다 (2026-08-01) */
-  .phone:not(.tall) .phone-content{padding-bottom:72px}
-  /* 두 번째 목업도 말풍선 아래 여백을 첫 목업과 동일하게 72px 로 통일
-     (2026-08-01 사용자 확정 — 피그마 6:308 높이 700.2, 홈 인디케이터 바닥 21 정렬) */
-  .phone.tall .phone-content{padding-bottom:72px}
-
-  /* 피그마 6:309 — 아바타(42) + 간격(10). 말풍선은 그 오른쪽으로 들여쓴다 */
-  .alim-profile{display:flex;align-items:center;gap:10px;margin-bottom:6px;padding-left:2px}
-  .alim-bubble{margin-left:52px}
-  /* 피그마 6:310 / 123:4353 — 드롭섀도 0 2 4, 검정 10% */
-  .alim-profile img{width:42px;height:42px;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,.1)}
-  /* 피그마 6:314 / 123:4362 — 회색 화면 위라 밝은 회색(Gray 100) */
-  .alim-profile span{color:var(--gray-100)}
-  .alim-banner{
-    background:var(--kakao);color:var(--kakao-text);border-radius:12px 12px 0 0;
-    padding:12px 16px;display:flex;align-items:center;justify-content:space-between;
-  }
-  /* 피그마 6:315 / 123:4363 — 카드에 그림자 없음. 안쪽 패딩 16.8/16/18/16 (6:318) */
-  .alim-card{background:#fff;border-radius:0 0 12px 12px;padding:16.8px 16px 18px}
-  .alim-card h3{color:#111;margin-bottom:14px}
-  /* 피그마 6:321 / 123:4369 — 제목 아래 1px Gray 200 구분선 */
-  .alim-divider{height:1px;background:var(--gray-200);margin-bottom:13px}
-  /* 섹션 간 간격 24px 로 두 목업 통일 (2026-08-01 — 피그마 gap 8 + 섹션 pad-top 16 = 24 동기화.
-     이전: 위 13 / 아래 36 으로 달랐음) */
-  .alim-sec{margin-bottom:24px}
-  .alim-sec:last-of-type{margin-bottom:8px}
-  /* 피그마 6:323·6:329·123:4371·123:4374·123:4377 — 소제목 #333 으로 통일 (2026-08-01 사용자 확정) */
-  .alim-sec .sec-title{color:#333;margin-bottom:3px}
-  /* 목업 본문은 피그마 123:4372 기준 12px/20 (t-caption 13/18 아님) */
-  .alim-sec p{color:#333;white-space:pre-line;font-size:12px;line-height:20px}
-  /* 피그마 6:331 / 123:4379 — 실제 알림톡 버튼 컬러 #F5F5F5/#191919 (2026-08-01 사용자 확정,
-     이전 Gray 50/Gray 800 은 말풍선 흰 배경과 구분이 안 됐음). 보더 없음, 패딩 11 */
-  .alim-cta{
-    display:block;text-align:center;background:#F5F5F5;
-    border-radius:8px;padding:11px 0;color:#191919;text-decoration:none;
-  }
-
-  /* ===== 사이트 칩 =====
-     피그마 6:249 재현(2026-08-02 개편, 215:2788): 6·6·5개 3줄, 줄마다 좌우로 어긋나며
-     페이지 폭보다 넓게 흘러넘치고 페이지 가장자리에서 잘린다.
-     (1행 피플앤잡·2행 점핏은 360px 프레임 왼쪽 밖 — 점핏은 전부 잘려 안 보이는 게 의도)
-     오프셋(+34 / -2 / +3)은 피그마 프레임 중심 대비 각 줄 중심의 어긋난 양. */
-  .chips{
-    display:flex;flex-direction:column;gap:16px;align-items:center;
-    /* min() 으로 화면폭과 --card-max 를 연속으로 잇는다 — 미디어쿼리 없이 넘침·잘림이 같이 따라온다 */
-    width:min(100vw, var(--card-max));
-    margin-left:calc(50% - min(50vw, var(--card-max) / 2));
-    margin-right:calc(50% - min(50vw, var(--card-max) / 2));
-    /* 피그마 6:248 — 칩 블록 위아래 50px 여백 (이미지 영역 안쪽 패딩).
-       이 패딩은 overflow:hidden 의 클립 경계(=패딩 박스 끝) 안쪽이라,
-       마지막 줄 칩의 그림자(0 1px 3px)와 보더 아래 1px 도 함께 살아난다.
-       — 이전의 4px 패딩 + -4px 마진 보정은 이 50px 에 흡수돼 필요 없어졌다. */
-    padding:50px 0;
-    overflow:hidden;
-  }
-  .chip-row{display:flex;gap:13px;flex:none;white-space:nowrap}
-  .chip-row:nth-child(1){transform:translateX(34px)}
-  .chip-row:nth-child(2){transform:translateX(-2px)}
-  .chip-row:nth-child(3){transform:translateX(3px)}
-  .chip{flex:none;background:#fff;border:1px solid var(--gray-200);box-shadow:0 1px 3px rgba(15,23,42,.06);
-    border-radius:999px;padding:9px 18px;color:var(--gray-600)}
-
-  /* ===== how it works ===== */
-  /* 카드는 콘텐츠 폭을 따라 늘어난다 (2026-08-02 사용자 재확정: 고정폭 312 안 → 폴백) */
-  .steps{display:flex;flex-direction:column;gap:12px;width:100%;margin-top:12px}
-  /* 피그마 6:341 — 채움 Gray 50, 보더 Gray 200 1px, 그림자 0 1 3 / 5% */
-  .step{display:flex;align-items:center;gap:16px;background:var(--gray-50);border:1px solid var(--gray-200);
-    box-shadow:0 1px 3px rgba(15,23,42,.05);border-radius:18px;padding:20px}
-  /* 번호 원은 피그마 6:357 기준 36px (카드 높이 78px = 20+36+20+보더2) */
-  .step .num{flex:none;width:36px;height:36px;border-radius:50%;background:var(--amber-500);color:#fff;
-    display:flex;align-items:center;justify-content:center}
-  /* 스텝 문구는 피그마 6:345/6:350/6:355/6:360 기준 16px SemiBold (t-h3 의 17px 아님).
-     이 값이라야 카드 높이도 피그마와 같은 78px 이 되고, 360px 화면에서 4개 모두 한 줄로 들어간다. */
-  .step .t-h3{color:var(--navy-900);white-space:pre-line;font-size:16px;line-height:24px}
-
   /* ===== 푸터 ===== */
   footer{background:var(--gray-100);padding:80px var(--pad-x) 120px}
   footer .biz{display:flex;flex-direction:column;gap:8px;color:var(--gray-500)}
   footer .links a{color:var(--gray-500);text-decoration:none}
   /* 개인정보처리방침 링크 — 피그마 6:365 는 이 구간만 SemiBold (크기는 13 유지, 2026-08-01 롤백) */
   footer .links a[href$="privacy.html"]{font-weight:600}
-
-  /* ===== 플로팅 CTA — 2026-09-15 토스페이먼츠 심사 기간 동안 화면에서 뺐다 =====
-     들어가는 길은 헤더 「로그인/회원가입」 → /login/ 하나로 모았고, 거기서 /signup/ 으로 간다.
-     심사 통과 후 이 블록과 푸터 아래 앵커, ctaBtn 전환 이벤트를 같이 되살린다
-     (피그마 6:148 의 인스턴스 450:2608 도 다시 보이게 한다). */
 
   /* ===== 넓은 화면 카드 어포던스 =====
      폭은 위에서 이미 연속으로 처리했다. 여기 남은 것은 "회색 바탕 위의 카드"라는 시각적 표현뿐이다.
@@ -309,17 +144,23 @@ fbq('track', 'PageView');
   }
   :focus-visible{outline:2px solid var(--amber-500);outline-offset:2px}
 
-  /* ===== 요금과 해지 (피그마 2113:936) =====
-     비로그인 화면에 요금·청약철회·환불·해지를 두는 이유: PG·카드사 심사는 「로그인 없이
-     요금제와 해지 방법이 보이는지」 를 본다. 로그인 뒤에만 보이거나 요금이 어디에도 없으면
-     심사가 보류되거나 반려된다(포트원 SaaS 정기결제 안내). 2026-09-17 사용자 지시.
-     카드 글자는 이미 있는 텍스트 스타일 두 개(.t-body-strong · .t-body-s)를 그대로 쓴다 —
-     새 타이포 조합을 만들면 타이포 검수에 선택자를 또 등록해야 한다. */
-  .fee-cards{display:flex;flex-direction:column;gap:12px;width:100%;margin-top:12px}
-  .fee-card{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:18px;
-    padding:18px 20px;display:flex;flex-direction:column;gap:6px}
-  .fee-card .fee-k{color:var(--navy-900)}
-  .fee-card p{color:var(--gray-600)}
+  /* ===== 상품 목록 (피그마 2143:3144 · 토스페이먼츠 심사 기간 임시 첫 화면, 2026-09-24) =====
+     랜딩은 심사 기간 동안 /briefing/ 에 있다. 심사가 끝나면 이 파일을 지우고 랜딩을 루트로 되돌린다. */
+  .page{display:flex;flex-direction:column}
+  .page footer{margin-top:auto}
+  .shop{padding:8px var(--pad-x) 56px;display:flex;flex-direction:column;gap:16px;width:100%;
+    max-width:calc(var(--content-max) + var(--pad-x) * 2);margin:0 auto}
+  .shop-hd{display:flex;align-items:baseline;gap:6px}
+  .shop-hd h1{color:var(--gray-900)}
+  .shop-hd .count{color:var(--gray-500)}
+  .p-card{display:flex;flex-direction:column;gap:12px;text-decoration:none;color:inherit}
+  .p-thumb{width:100%;height:auto;aspect-ratio:1200/630;object-fit:cover;border-radius:14px;display:block;background:var(--gray-100)}
+  .p-meta{display:flex;flex-direction:column;gap:4px}
+  .p-tag{color:var(--amber-600)}
+  .p-name{color:var(--gray-900)}
+  .p-price{display:flex;align-items:baseline;gap:6px;margin-top:2px}
+  .p-price .won{color:var(--gray-900)}
+  .p-price .per{color:var(--gray-500)}
 </style>
 </head>
 <body>
@@ -333,197 +174,17 @@ fbq('track', 'PageView');
     <button type="button" class="login" id="loginBtn">로그인/회원가입</button>
   </header>
 
-  <div class="container">
-
-    <!-- 히어로 -->
-    <section class="hero in">
-      <div class="hero-badge t-caption-strong">연봉 올리기 프로젝트</div>
-      <h1 class="t-display-l hero-title">나도 <span class="hl">더 좋은 곳</span>으로<br>이직할 수 있을까?</h1>
-      <p class="t-body-l lead">차가운 이직시장에서
-매일 1분 투자로 연봉 앞자리를 바꿔보세요</p>
-      <img class="illust" src="assets/img-hero.png" alt="이직으로 연봉이 4,000만원에서 5,000만원으로 오르는 그래프" width="344" height="224">
-    </section>
-
-    <!-- 1. 일단 지원 (피그마 6:182 · Blue100→50) -->
-    <section class="bg-blue">
-      <div class="badge-blue t-caption-strong">붙으면 희소식, 안붙어도 손해 X</div>
-      <h2 class="t-display headline">관심 있는 회사 공고가 열리면
-일단 지원해 보세요</h2>
-      <img class="illust" src="assets/img-apply.png" alt="이력서 제출 일러스트" width="344" height="169">
-      <!-- 줄바꿈 4개 = 피그마 6:189 의 U+2028 위치. 셋째 줄만 폭 312 에서 자동으로 두 줄이 된다 -->
-      <p class="t-body para-wide" style="color:var(--gray-700)">지금 가지고 있는 포트폴리오·이력서로 일단 넣으세요.<br><strong>불합격 해도 다음 지원에 패널티가 전혀 없어요.</strong><br>오히려 여러 번 도전하면, ‘우리 회사를 이렇게 좋아하면 잘 적응하겠다’고 판단해 더 좋게 봐요.<br><strong>붙으면 희소식, 안붙어도 손해 X. 안 할 이유가 없어요.</strong><br>결국 결과를 얻은 건 실행하는 사람들이었어요.</p>
-    </section>
-
-    <!-- 2. 마감 FOMO (피그마 123:4387 · Amber100→50) -->
-    <section class="bg-amber">
-      <div class="head-group">
-        <div class="t-label eyebrow">내가 원하던 공고</div>
-        <h2 class="t-display headline">한정된 기회를 놓치지 마세요</h2>
+  <main class="shop">
+    <div class="shop-hd"><h1 class="t-h2">전체 상품</h1><span class="t-body-s count">1개</span></div>
+    <a class="p-card" href="/briefing/">
+      <img class="p-thumb" src="assets/og-logo-20260802.png" alt="커리어코치 직군 브리핑 썸네일" width="1200" height="630">
+      <div class="p-meta">
+        <div class="t-caption-strong p-tag">평일 아침 8시 · 카카오 알림톡</div>
+        <div class="t-body-strong p-name">커리어코치 직군 브리핑 월 구독</div>
+        <div class="p-price"><span class="t-h2 won">3,900원</span><span class="t-caption per">/ 월</span></div>
       </div>
-      <p class="t-body-l lead">관심 기업의 원하던 공고가
-내가 모르는 사이 닫히는 경우, 생각보다 많아요.</p>
-      <img class="illust" src="assets/img-fomo.png" alt="추적한 채용공고의 57%가 30일 안에 마감됐음을 보여주는 게이지 그래프" width="344" height="172">
-    </section>
-
-    <!-- 3. 초반 지원 우위 -->
-    <section>
-      <div class="head-group">
-        <div class="t-label eyebrow">합격 확률을 높이세요</div>
-        <h2 class="t-display headline">빨리 지원할수록
-이력서가 더 꼼꼼히 읽힙니다</h2>
-      </div>
-      <p class="t-body-l lead">인사 담당자도 사람이다보니, 현실적으로 이력서가 수백 개 쌓였을 때 들어오는 이력서는 꼼꼼히 보기 힘들어요.</p>
-      <img class="illust" src="assets/img-speed.png" alt="첫날 지원 우위 일러스트" width="344" height="257">
-    </section>
-
-    <!-- 4. 데일리 알림 (목업 1) (피그마 123:4341 · Amber100→50) -->
-    <section class="bg-amber">
-      <div class="head-group">
-        <div class="t-label eyebrow">경쟁자보다 앞서나가세요</div>
-        <h2 class="t-display headline">누구보다 빠르게
-최신 채용공고를 알려드려요</h2>
-      </div>
-      <p class="t-body-l lead" style="color:var(--gray-800)">공고가 뜨자마자 아는 것도 실력입니다. 매일 아침 8시,
-내 직군에서 나온 최신 공고를 받아보세요.</p>
-
-      <div class="mockup-wrapper">
-        <div class="phone">
-          <div class="screen"></div><div class="notch"></div><div class="speaker"></div><div class="home-bar"></div>
-          <div class="phone-content">
-            <div class="alim-profile"><img src="assets/logo-circle.svg" alt=""><span class="t-caption-strong">커리어코치</span></div>
-            <div class="alim-bubble">
-              <div class="alim-banner"><span class="t-body-strong">알림톡 도착</span></div>
-              <div class="alim-card">
-                <h3 class="t-h2">오늘의 새로운 공고</h3>
-                <div class="alim-divider"></div>
-                <div class="alim-sec">
-                  <div class="t-body-strong sec-title">[📋 최신 공고 16건]</div>
-                  <p class="t-caption">1. 쿠팡 - 시니어 디자이너 (7년+)
-  2. 김캐디 - 프로덕트 디자이너 (5년+)
-  3. 가제트 - UI Designer (5~7년)
-  …외 13건은 ‘브리핑 보기’로 확인하세요</p>
-                </div>
-                <div class="alim-sec">
-                  <div class="t-body-strong sec-title">[💡 면접을 위한 최신 인사이트]</div>
-                  <p class="t-caption">- Config 2026 이후, 디자이너 직무기술서가 바뀌고 있다. 이 시대에 우리...</p>
-                </div>
-                <span class="alim-cta t-caption-strong">오늘 브리핑 전체 보기</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 5. 빠짐없이 -->
-    <section>
-      <div class="head-group">
-        <div class="t-label eyebrow">빠짐없이</div>
-        <h2 class="t-display headline">모든 채용 사이트의
-공고를 종합해 드려요</h2>
-      </div>
-      <p class="t-body-l lead">같은 공고가 여러 사이트에 올라와도
-중복 없이 하나로 정리해 드려요.</p>
-      <!-- 피그마 6:249 — 3줄 고정, 화면보다 넓게 흘러넘치고 페이지 가장자리에서 잘림 -->
-      <div class="chips">
-        <div class="chip-row"><span class="chip t-caption-strong">피플앤잡</span><span class="chip t-caption-strong">원티드</span><span class="chip t-caption-strong">사람인</span><span class="chip t-caption-strong">잡코리아</span><span class="chip t-caption-strong">그리팅</span><span class="chip t-caption-strong">랠릿</span></div>
-        <div class="chip-row"><span class="chip t-caption-strong">점핏</span><span class="chip t-caption-strong">잡플래닛</span><span class="chip t-caption-strong">로켓펀치</span><span class="chip t-caption-strong">링크드인</span><span class="chip t-caption-strong">고용24</span><span class="chip t-caption-strong">잡다</span></div>
-        <div class="chip-row"><span class="chip t-caption-strong">그룹바이</span><span class="chip t-caption-strong">리멤버</span><span class="chip t-caption-strong">인크루트</span><span class="chip t-caption-strong">자소설닷컴</span><span class="chip t-caption-strong">캐치</span></div>
-      </div>
-    </section>
-
-    <!-- 6. 시간 절약 (피그마 6:283 · Gray50) -->
-    <section class="bg-gray">
-      <div class="head-group">
-        <div class="t-label eyebrow">귀중한 퇴근 후 시간</div>
-        <h2 class="t-display headline">하루에 1시간씩 아끼세요</h2>
-      </div>
-      <p class="t-body-l lead">17개 채용사이트 × 직군 키워드 평균 3개 = 매일 51회.
-저희가 대신 검색하고 카톡 1개로 압축해 드려요.</p>
-      <img class="illust" src="assets/img-save.png" alt="시간 절약 일러스트" width="344" height="236">
-    </section>
-
-    <!-- 7. 개인화 -->
-    <section>
-      <div class="head-group">
-        <div class="t-label eyebrow">나만을 위해</div>
-        <h2 class="t-display headline">나에게 개인화된
-알림을 받을수 있어요</h2>
-      </div>
-      <p class="t-body-l lead">원하는 직군·연차·근무지를 알려주시면,
-저희가 맞춤으로 알려드릴게요.</p>
-      <img class="illust" src="assets/img-personal.png" alt="개인화 설정 일러스트" width="344" height="248">
-    </section>
-
-    <!-- 8. 인사이트 (목업 2) (피그마 6:299 · Amber100→50) -->
-    <section class="bg-amber">
-      <div class="head-group">
-        <div class="t-label eyebrow">단순히 공고만 보내 드리지 않아요</div>
-        <h2 class="t-display headline">1분 투자로 면접에 도움되는<br>업계 동향·인사이트까지</h2>
-      </div>
-      <p class="t-body-l lead">"요즘 업계를 어떻게 보세요?"라는 질문에
-바로 쓸 수 있는 이야기까지 매일 하나씩 쌓아드려요.
-안 읽은 사람 대비 앞서나가세요.</p>
-
-      <div class="mockup-wrapper">
-        <div class="phone tall">
-          <div class="screen"></div><div class="notch"></div><div class="speaker"></div><div class="home-bar"></div>
-          <div class="phone-content">
-            <div class="alim-profile"><img src="assets/logo-circle.svg" alt=""><span class="t-caption-strong">커리어코치</span></div>
-            <div class="alim-bubble">
-              <div class="alim-banner"><span class="t-body-strong">알림톡 도착</span></div>
-              <div class="alim-card">
-                <h3 class="t-h2">오늘의 업계 소식</h3>
-                <div class="alim-divider"></div>
-                <div class="alim-sec">
-                  <div class="t-body-strong sec-title">[💡 면접을 위한 최신 인사이트]</div>
-                  <p class="t-caption">1. Config 2026 이후, 디자이너 직무기술서가 바뀌고 있다.
-  2. 핵심은 단순한 ‘UI Designer’에서 코드가 움직이는 환경을 설계하는 ‘Design Engineer’로의 진화이다.
-  3. AI·Figma Motion 등을 활용해 프로덕트 전체에 일관된 애니메이션·인터랙션을 구축할 수 있는 역량이 기업들의 공고에 등장하기 시작했다.</p>
-                </div>
-                <div class="alim-sec">
-                  <div class="t-body-strong sec-title">[🗣️ 면접에서 이렇게]</div>
-                  <p class="t-caption">- "최근 주목한 업계 변화"를 묻는다면, 디자인-개발 협업 경계가 바뀌는 흐름을 짚고 내 프로젝트 경험을 연결해 보세요.</p>
-                </div>
-                <span class="alim-cta t-caption-strong">오늘 브리핑 전체 보기</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 9. how it works -->
-    <section>
-      <div class="head-group">
-        <div class="t-label eyebrow">지금 바로 시작하세요</div>
-        <h2 class="t-display headline">매일 1분 투자로
-연봉 상승 확률 높이기</h2>
-      </div>
-      <div class="steps">
-        <div class="step"><div class="num t-body-strong">1</div><div class="t-h3">원하는 직군 · 연차 · 지역 설정</div></div>
-        <div class="step"><div class="num t-body-strong">2</div><div class="t-h3">매일 아침 8시 카카오 알림톡</div></div>
-        <div class="step"><div class="num t-body-strong">3</div><div class="t-h3">지원자가 많아지기 전에 지원</div></div>
-        <div class="step"><div class="num t-body-strong">4</div><div class="t-h3">더 많은 업계 동향·인사이트로 면접</div></div>
-      </div>
-    </section>
-
-    <!-- 10. 요금과 해지 (피그마 2113:936 · 배경 없음) -->
-    <section>
-      <div class="head-group">
-        <div class="t-label eyebrow">요금과 해지</div>
-        <h2 class="t-display headline">월 3,900원으로
-매일 아침 받아보세요</h2>
-      </div>
-      <p class="t-body-l lead">부가세 포함 · 평일 매일 아침 8시 · 매월 자동 갱신</p>
-      <div class="fee-cards">
-        <div class="fee-card"><div class="t-body-strong fee-k">청약철회</div><p class="t-body-s">결제일 또는 서비스 제공 개시일부터 7일 이내에 청약철회할 수 있습니다. 이미 발송된 브리핑은 전자상거래법 제17조 제2항에 따라 철회가 제한됩니다.</p></div>
-        <div class="fee-card"><div class="t-body-strong fee-k">환불</div><p class="t-body-s">아직 발송되지 않은 잔여 기간에 해당하는 금액은 일할 계산하여 환불합니다. 환불은 사유 확인일부터 3영업일 이내에 결제한 수단으로 처리합니다.</p></div>
-        <div class="fee-card"><div class="t-body-strong fee-k">해지</div><p class="t-body-s">구독 관리 화면에서 언제든 스스로 해지할 수 있습니다. 해지하면 다음 결제 주기부터 발송과 청구가 멈춥니다.</p></div>
-      </div>
-    </section>
-
-  </div>
+    </a>
+  </main>
 
   <footer>
     <div class="biz">
@@ -531,55 +192,20 @@ fbq('track', 'PageView');
       <!-- 전자상거래법 제10조 신원정보. 피그마 6:364 와 동일하게 유지할 것.
            줄 순서도 피그마와 같게 유지한다. -->
       <div class="t-caption">대표 : 이채빈<br>사업자등록번호 : 450-86-03846<br>통신판매업신고 : 2026-서울서대문-0831<br>주소 : 서울특별시 서대문구 이화여대7길 37, 3층 J15호<br>문의 : careercoach.my@gmail.com<br>전화번호 : 070-8018-9238</div>
-      <div class="t-caption links"><a href="./terms.html">이용약관</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="./privacy.html">개인정보처리방침</a></div>
+      <div class="t-caption links"><a href="/terms.html">이용약관</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="/privacy.html">개인정보처리방침</a></div>
     </div>
   </footer>
 
   <script>
-    // 헤더 '로그인/회원가입' → 로그인 화면. 예전에는 여기서 카카오 OAuth 를 직접 시작했는데,
-    // /login/ 이 생기면서 카카오·이메일 두 길이 다 그 화면에 있다 (2026-09-15).
     document.getElementById('loginBtn').addEventListener('click', () => { location.href = '/login/'; });
-  </script>
-
-  <script>
-    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); }),{threshold:0,rootMargin:'0px 0px 150px 0px'});
-    document.querySelectorAll('section').forEach(s => io.observe(s));
-    // 오버스크롤(러버밴드) 캔버스색 스위칭 — iOS 웹킷은 오버스크롤 영역을 위아래 구분 없이
-    // 단일 색(캔버스/body 배경색)으로만 칠하고 그라디언트·문서 밖 요소는 그리지 않는다.
-    // 그래서 스크롤 위치로 그 한 색을 바꿔친다: 상단부=흰색(헤더와 이어짐), 하단부=회색(푸터와 이어짐).
-    // 색 전환은 흰 카드(.page) 뒤에서 일어나 눈에 보이지 않는다. 카드보다 넓은 화면에서는
-    // body 회색이 카드 양옆에 실제로 보이므로 건드리지 않는다.
-    (() => {
-      // 임계값은 --card-max 에서 읽는다. 예전엔 519px 로 박아 뒀는데, 카드 상한이 400 → 450 으로
-      // 바뀌자 451~519 구간에서 카드가 화면을 못 채우면서 양옆에 흰색이 그대로 드러났다.
-      // (2026-08-02) 카드가 화면을 꽉 채우는 폭에서만 캔버스색을 바꿔친다.
-      const cardMax = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--card-max'), 10) || 450;
-      const mq = matchMedia(`(max-width: ${cardMax}px)`);
-      let cur = null;
-      const apply = () => {
-        if (!mq.matches) {
-          if (cur !== null) { cur = null;
-            document.documentElement.style.backgroundColor = '';
-            document.body.style.backgroundColor = ''; }
-          return;
-        }
-        const mid = (document.documentElement.scrollHeight - innerHeight) / 2;
-        const c = scrollY < mid ? '#ffffff' : '#F1F5F9';
-        if (cur !== c) { cur = c;
-          document.documentElement.style.backgroundColor = c;
-          document.body.style.backgroundColor = c; }
-      };
-      addEventListener('scroll', apply, { passive: true });
-      addEventListener('resize', apply, { passive: true });
-      apply();
-    })();
   </script>
 </div>
 
 <script type="module">
-  // 유입 경로 기록. 실패해도 화면에 영향이 없다 (track.js 가 예외를 삼킨다).
-  import { pageView } from '/assets/track.js';
-  pageView('visit', { p: 'landing' });
+  // 유입 경로만 저장한다. 광고·공유 링크는 이 첫 화면(/)으로 들어오므로 UTM 은 여기서 잡아야 한다.
+  // 방문(visit) 이벤트는 랜딩(/briefing/)에서만 센다 — 여기서도 세면 목록→랜딩 한 번에 두 건이 된다.
+  import { captureAttribution } from '/assets/track.js';
+  captureAttribution();
 </script>
 </body>
 </html>

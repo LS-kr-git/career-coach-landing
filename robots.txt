@@ -1,6 +1,7 @@
 # careercoach.my
 #
-# 색인 대상은 랜딩(/)과 법적 문서(/terms.html, /privacy.html)뿐이다.
+# 색인 대상은 첫 화면(/)·랜딩과 법적 문서(/terms.html, /privacy.html)뿐이다.
+# (2026-09-24 토스페이먼츠 심사 기간: / 는 상품 목록, 랜딩은 /briefing/ 에 있다)
 #
 # 나머지를 막는 이유
 #   /letter.html   실제 발행물이 아니라 **데모**다. 실존 인물 이름과 "표본 추적 예시"라고

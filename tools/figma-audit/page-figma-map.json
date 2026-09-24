@@ -5,9 +5,16 @@
   "_pages_설명": "node = 대응 피그마 프레임 id. textAudit = 문구 동기화를 강제하는 검수 이름. 'docs-audit' 이면 figma-docs-text.json 스냅샷과 대조해 한쪽만 고치면 푸시가 막힌다. 'audit' 이면 랜딩 전용 3종 덤프 검수가 본다.",
   "pages": {
     "index.html": {
+      "node": "2143:3144",
+      "name": "상품목록_커리어코치",
+      "textAudit": "docs-audit",
+      "비고": "2026-09-24 토스페이먼츠 심사 기간 임시 첫 화면(상품 목록). 랜딩은 그동안 briefing/index.html 에 있다. 심사가 끝나면 이 항목을 지우고 랜딩을 index.html 로 되돌린다."
+    },
+    "briefing/index.html": {
       "node": "6:148",
       "name": "랜딩페이지_커리어코치",
-      "textAudit": "audit"
+      "textAudit": "audit",
+      "비고": "2026-09-24 토스페이먼츠 심사 기간 동안 루트(index.html)에서 briefing/index.html 로 옮겼다. 심사 뒤 되돌린다."
     },
     "terms.html": {
       "node": "339:2474",

@@ -310,7 +310,7 @@ MSG
 fi
 
 # (b) 랜딩 대조 (index.html/assets 가 바뀐 푸시만)
-CHANGED_LANDING="$(diff_names index.html assets)"
+CHANGED_LANDING="$(diff_names briefing/index.html assets)"   # 2026-09-24 심사 기간: 랜딩은 briefing/ 에 있다
 if [ -z "$CHANGED_LANDING" ]; then
   echo "· 랜딩(index.html/assets)은 그대로 → 랜딩 피그마 대조 건너뜀"
   echo "${DONE_MSG}"
