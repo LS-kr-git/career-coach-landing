@@ -195,7 +195,7 @@
   /* 「변경」은 카드 등록 화면으로 보낸다 (2026-09-25 사용자 지시). 구독 중이면 서버가 새 카드만
      보관하고 걷지 않는다(`이미구독`) — 미납 중이면 다음 재시도가 그 카드로 걷는다. */
   document.querySelector('.pcard .link').addEventListener('click', function () {
-    location.href = '/checkout/';
+    location.href = '/checkout/?mode=change';
   });
 
   /* 해지는 기간 끝 해지다 — 서버가 다음 결제일을 그대로 이용 종료일로 돌려준다.

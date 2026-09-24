@@ -115,6 +115,7 @@
     box-shadow:0 12px 32px rgba(217,119,6,.28)}
   .cta:active{transform:scale(.98)}
   /* 요금을 못 읽어 잠긴 버튼 — 회색 (2026-09-24 사용자 확정 A안) */
+  [hidden]{display:none!important}
   .cta.locked{background:var(--gray-200);color:var(--gray-400);box-shadow:none;cursor:default;transform:none}
 
   @media (min-width:451px){
@@ -205,7 +206,7 @@
 </div>
 
 <script type="module">
-  import { getPlan, priceText, wonText, saveBillingKey, FAIL } from '/assets/mypage-data.js';
+  import { getPlan, getSubscription, billingView, priceText, wonText, saveBillingKey, FAIL } from '/assets/mypage-data.js';
 
   var $ = function (id) { return document.getElementById(id); };
 
@@ -224,12 +225,44 @@
      결제 버튼 옆에서 말한다. 국내 구독 서비스가 공통으로 쓰는 형태다.
      한 줄에 들어가야 하므로 「해지할 때까지 계속」 은 유의사항 첫 두 줄이 맡는다.
      ⚠️ 금액을 못 읽으면 **신청 버튼을 막는다** — 얼마가 빠져나가는지 모르는 채로 동의시키지 않는다. */
+  /* 카드 변경 모드 — 멤버십·결제의 「변경」으로 들어온 구독자 (2026-09-25 사용자 확정 시안).
+     구독 중이면 서버가 새 카드만 보관하고 걷지 않으므로(`이미구독`) 「오늘 결제 금액」과
+     「첫 달 즉시 결제」 안내를 숨긴다. 피그마 상태 프레임 「결제 신청 — 카드 변경」이 기준이다. */
+  const CHANGE = {
+    title: '결제수단 변경',
+    lead: '다음 결제부터 새 카드로 결제돼요.',
+    cta: '새 카드 등록하기',
+    done: '결제수단이 변경되었습니다.',
+  };
+  var 변경 = false;
+  /* 🔴 주소만 믿지 않는다 — 구독 중이 아닌 사람이 이 주소로 오면 서버는 첫 달을 **바로 걷는다**.
+     그 사람에게 「오늘 결제 금액」과 즉시 결제 안내를 숨기면 안내 없이 결제된다(검사관 ①).
+     구독 중인지는 멤버십·결제 화면과 같은 판정(billingView 의 live)으로 본다. 못 읽으면 평소 화면이다. */
+  function 변경모드() {
+    변경 = true;
+    document.querySelector('main h1').textContent = CHANGE.title;
+    document.querySelector('main .lead').textContent = CHANGE.lead;
+    $('firstCharge').hidden = true;
+    $('firstCharge').previousElementSibling.hidden = true;
+    document.querySelector('.total').hidden = true;
+    document.querySelector('#accBody li').hidden = true;      // 「신청 즉시 첫 달 요금이 결제되고…」
+    $('submit').textContent = CHANGE.cta;
+  }
+
   $('submit').disabled = true;
-  getPlan().then(function (plan) {
-    var 요금 = priceText(plan);                       // 「월 3,900원」
+  var 변경요청 = new URLSearchParams(location.search).get('mode') === 'change';
+  var 구독 = 변경요청 ? getSubscription().catch(function () { return null; }) : Promise.resolve(null);
+  Promise.all([getPlan(), 구독]).then(function (r) {
+    var plan = r[0];
+    var 내것 = r[1] && billingView(r[1], plan);
+    if (내것 && 내것.live) 변경모드();
+    // 카드 변경이면 그 사람 구독에 매달린 요금이다 — 지금 켜진 요금제가 아니다(mypage-data.js billingView).
+    var 요금 = 변경 ? 내것.amount : priceText(plan);   // 「월 3,900원」
     $('fee').textContent = 요금 + ' (부가세 포함)';
     $('todayTotal').textContent = wonText(plan.price_krw);
-    $('agreeText').innerHTML = '<b>매' + 요금 + ' 자동 결제</b>되는 정기결제에 동의합니다.';
+    $('agreeText').innerHTML = 변경
+      ? '새 카드로 <b>매' + 요금 + ' 자동 결제</b>에 동의합니다.'
+      : '<b>매' + 요금 + ' 자동 결제</b>되는 정기결제에 동의합니다.';
     $('submit').disabled = false;
   }).catch(function () {
     // 못 읽은 금액 자리는 비우지 않고 「—」 로 둔다 (2026-09-24 사용자 확정 A안).
@@ -332,7 +365,7 @@
         note('카드는 등록됐지만 결제가 되지 않았어요. 카드 한도나 잔액을 확인해 주세요.', true);
       else if (charged === '청구실패')
         note('카드는 등록됐지만 결제를 처리하지 못했어요. 잠시 후 다시 시도해 주세요.', true);
-      else note('결제수단이 등록되었습니다.');
+      else note(변경 && charged === '이미구독' ? CHANGE.done : '결제수단이 등록되었습니다.');
     }).catch(function (e) {
       note(e.message || '결제수단 등록에 실패했습니다. 다시 시도해 주세요.', true);
     }).then(function () { btn.disabled = false; });
