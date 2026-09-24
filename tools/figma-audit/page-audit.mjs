@@ -206,6 +206,18 @@ for (const page of pages) {
     add('BLOCK', 'color-scheme 값', page, `content="${cs[1]}"`,
         "'light' 만으로는 자동 다크가 그대로 적용됩니다 — 'only light' 로 쓰세요");
   }
+  /* 넓은 화면 바탕 — PC 에서 카드 좌우에 회색 바탕, 경계는 그림자. 랜딩 index.html 이 기준값이다.
+     2026-09-24 사용자 지시 「앞으로 모든 페이지에서 동일」. 그날 마이페이지 여섯 장만 빠져 흰 화면이었다.
+     어드민(ops/)은 제품 화면이 아니라 뺀다. */
+  if (!page.startsWith('ops/')) {
+    const css = live.replace(/\/\*[\s\S]*?\*\//g, '');   // CSS 주석으로 막아 둔 블록은 없는 것이다
+    const wide = [...css.matchAll(/@media\s*\(min-width:\s*451px\)\s*\{([\s\S]*?\})\s*\}/g)].map((m) => m[1]).join('');
+    if (!/body\s*\{\s*background:\s*var\(--gray-100\)/.test(wide) ||
+        !/box-shadow:\s*0 0 24px rgba\(15,23,42,\.06\),\s*0 0 64px rgba\(15,23,42,\.10\)/.test(wide)) {
+      add('BLOCK', '넓은 화면 바탕', page, '@media (min-width:451px) 의 회색 바탕·카드 그림자가 없습니다',
+          '랜딩 index.html 의 「넓은 화면 카드 어포던스」 블록을 그대로 옮기세요');
+    }
+  }
   const title = live.match(/<title>([\s\S]*?)<\/title>/i);
   if (!title || !title[1].trim()) add('BLOCK', '머리 누락', page, '<title> 이 비었습니다');
   else if (!title[1].includes('커리어코치')) add('WARN', '제목', page, `"${title[1].trim()}" — 서비스명이 없습니다`);

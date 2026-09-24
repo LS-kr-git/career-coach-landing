@@ -61,6 +61,7 @@
   .row + .row,.card .row:not(:first-child){border-top:1px solid var(--gray-100)}
   .col{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
   .prof{display:flex;align-items:center;gap:14px;padding:20px 18px 18px;border-bottom:1px solid var(--gray-100)}
+  .prof[hidden] + .row{border-top:0}
   .avatar{width:52px;height:52px;border-radius:9999px;background:var(--gray-800);color:#fff;flex:none;
     display:flex;align-items:center;justify-content:center}
   .sub{color:var(--gray-400)}
@@ -95,6 +96,12 @@
   footer .biz-lines{font-size:13px;line-height:18px}
   footer .links a{color:var(--gray-500);text-decoration:none;font-size:13px;line-height:18px}
   footer .links a[href$="privacy.html"]{font-weight:600}
+  /* 넓은 화면 카드 어포던스 — 랜딩(index.html)의 같은 블록과 값이 같다(2026-09-24 사용자 지시 · 모든 페이지).
+     page-audit.mjs 「넓은 화면 바탕」이 빠진 페이지를 막는다. */
+  @media (min-width:451px){
+    body{background:var(--gray-100)}
+    .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
+  }
 </style>
 </head>
 <body>
@@ -107,7 +114,9 @@
   </section>
 
   <section class="card">
-    <div class="prof">
+    <!-- 2026-09-24 토스페이먼츠 심사 기간 동안 숨긴다(사용자 지시). 심사 통과 후 hidden 을 지워 되살린다.
+         마크업을 남기는 이유: 피그마 01-A/B/C 와의 문구 대조(docs-audit)는 숨긴 요소도 본다. -->
+    <div class="prof" hidden>
       <div class="avatar t-h3"></div>
       <div class="col">
         <span class="t-h3">내 계정</span>
@@ -119,7 +128,8 @@
     <a class="row" href="/mypage/billing/"><span class="col t-body-l">멤버십·결제</span><span class="caret" aria-hidden="true">›</span></a>
   </section>
 
-  <section class="card card-archive">
+  <!-- 2026-09-24 토스페이먼츠 심사 기간 동안 숨긴다(사용자 지시) — 저장소 입구와 일요일 배너 셋. 되살릴 때 hidden 만 지운다. -->
+  <section class="card card-archive" hidden>
     <a class="row" href="/mypage/archive/">
       <span class="col"><span class="t-body-l">내 아티클 저장소</span><span class="t-caption sub">소장한 아티클이 여기에 모여요</span></span>
       <span class="caret" aria-hidden="true">›</span>
