@@ -62,8 +62,15 @@ for (const g of TAX.groups) {
 }
 const groupCodes = new Set(TAX.groups.map((g) => g.code));
 for (const code of Object.keys(TRK.byGroup)) if (!groupCodes.has(code)) bad.push(`byGroup 의 "${code}" 는 없는 대분류다`);
+// 대분류 하나가 트랙 둘로 갈리는 자리(2026-09-25 「디자인」) — 중분류가 실재하고 트랙이 목록 안이어야 한다.
+const SUB = TRK.bySubgroup ?? {};
+const childCodes = new Set(TAX.groups.flatMap((g) => g.children.map((c) => c.code)));
+for (const [code, t] of Object.entries(SUB)) {
+  if (!childCodes.has(code)) bad.push(`bySubgroup 의 "${code}" 는 없는 중분류다`);
+  if (!TRK.tracks.includes(t)) bad.push(`bySubgroup 의 "${code}" → "${t}" 는 tracks 목록에 없다`);
+}
 for (const t of TRK.tracks) {
-  if (!Object.values(TRK.byGroup).includes(t)) bad.push(`트랙 "${t}" 에 붙은 대분류가 하나도 없다`);
+  if (![...Object.values(TRK.byGroup), ...Object.values(SUB)].includes(t)) bad.push(`트랙 "${t}" 에 붙은 직군이 하나도 없다`);
 }
 if (bad.length) {
   console.error('❌ 직무 표기·실측 검증 실패\n   ' + bad.join('\n   '));
@@ -156,8 +163,11 @@ const jobMapHtml = () => {
   //    화면이 보여준 주제와 실제로 받는 주제가 갈리고 어디에서도 안 터진다.
   //    칩 목록(`topicsHtml`·직군 칩)은 그대로 `visible` 이다 — 못 고르게 하는 것은 맞다.
   const groups = TAX.groups.map((g) => [g.code, TRK.tracks.indexOf(TRK.byGroup[g.code] ?? '')]);
+  // 셋째 값은 그 중분류가 **따로 가는** 트랙의 번호다(`bySubgroup`). 없으면 -1 — 대분류를 따른다.
   const jobs = {};
-  TAX.groups.forEach((g, gi) => { for (const c of g.children) jobs[c.code] = [c.label, gi]; });
+  TAX.groups.forEach((g, gi) => {
+    for (const c of g.children) jobs[c.code] = [c.label, gi, TRK.tracks.indexOf(SUB[c.code] ?? '')];
+  });
   const json = JSON.stringify({ tracks: TRK.tracks, groups, jobs });
   return `<script id="cc-topic-map" type="application/json">${json}<\/script>`;
 };

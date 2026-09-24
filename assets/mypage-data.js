@@ -77,6 +77,7 @@ const PROVIDER_LABEL = { kakao: '카카오', email: '이메일' };
 /* 04 화면 칩 순서 그대로 — 「일하는 사람 공통」이 항상 첫 번째다. */
 const TOPICS = [
   COMMON_TOPIC,
+  'UI·UX 디자인',
   '디자인',
   '개발·AI',
   '마케팅·그로스',
