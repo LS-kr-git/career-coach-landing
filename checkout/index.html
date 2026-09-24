@@ -263,11 +263,10 @@
      옮겨 적었다. 둘 중 한쪽을 고치면 다른 쪽도 고친다 (지금은 이 파일이 유일한 실사용처다).
 
      ✅ 2026-09-24 — 발급된 빌링키를 서버가 조회해 진짜인지 확인하고 보관한다
-        (`saveBillingKey` → 엣지 함수 `portone-6r2k9tvq/billing-key`). 그 호출이 성공해야
-        「등록되었습니다」를 그린다.
-     🔴 아직 없는 것: **청구**다. 결제수단이 보관될 뿐 첫 달 요금이 빠져나가지는 않는다
-        (career-coach `docs/기획/정기결제-서버-배선.md` 의 ⑥⑧). customerId 도 아직
-        임시값이다 — 청구를 붙이는 회차에 app_user.id 로 바꾼다. */
+        (`saveBillingKey` → 엣지 함수 `portone-6r2k9tvq/billing-key`). 서버는 보관한 그 자리에서
+        첫 달을 걷고 `charged` 로 결과를 돌려준다(career-coach 0091). `개시` 일 때만
+        「결제가 완료되었습니다」를 그린다. 청구의 customerId 는 서버가 회원 id 로 넣는다 —
+        아래 issueId 는 발급용이다. */
   var PORTONE_STORE_ID = 'store-a4b087e3-89d3-4369-8558-02d158bf6564';
   var PORTONE_CHANNEL_KEY = 'channel-key-07bc635a-da47-4202-90d1-e69c076bce4e';
 
@@ -314,8 +313,10 @@
       // 🔴 여기서 끝내지 않는다. 서버가 포트원에 되물어 보관해야 구독이 열린다.
       //    보관이 실패했는데 「등록되었습니다」를 그리면 사용자는 결제될 줄 알고 기다린다.
       return saveBillingKey(res.billingKey);
-    }).then(function () {
-      note('결제수단이 등록되었습니다.');
+    }).then(function (r) {
+      // 「결제가 완료되었습니다」는 첫 달이 실제로 걷혔을 때(`개시`)만 쓴다 (2026-09-24 사용자 지시).
+      // 이미 구독 중이던 카드 변경·첫 청구 실패는 카드만 보관된 것이라 종전 문구를 둔다.
+      note(r && r.charged === '개시' ? '결제가 완료되었습니다.' : '결제수단이 등록되었습니다.');
     }).catch(function (e) {
       note(e.message || '결제수단 등록에 실패했습니다. 다시 시도해 주세요.', true);
     }).then(function () { btn.disabled = false; });
