@@ -131,7 +131,7 @@ const buildMypage = () =>
         `<div class="group" data-d1="${esc(g.code)}">` +
         `<button class="acc" type="button" aria-expanded="false">` +
         `<span class="nm"><span class="t-h4">${esc(g.label)}</span>` +
-        `<span class="t-micro cnt">주 ${Math.round(perWeek(g.code))}건</span></span>` +
+        `<span class="cnt">주 ${Math.round(perWeek(g.code))}건</span></span>` +
         `<span class="ac" aria-hidden="true">▼</span></button>` +
         `<div class="chips" hidden>${chips}</div>` +
         `</div>`
