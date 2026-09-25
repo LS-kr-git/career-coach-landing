@@ -60,9 +60,9 @@
   .sb{display:flex;align-items:center;gap:10px;padding:12px var(--pad-x) 0}
   /* 정렬 — 글자 두 개, 고른 쪽만 진하게 (2026-09-25 사용자 컨펌: C2). 가운데 점은 글자가 아니라 CSS 라 문구 대조에 안 걸린다 */
   .seg{margin-left:auto;display:flex;align-items:center}
-  .seg button{height:30px;padding:0;border:0;background:transparent;font:inherit;font-size:13px;font-weight:500;color:var(--gray-400);cursor:pointer}
+  .seg button{height:30px;padding:0;border:0;background:transparent;font:inherit;font-size:12px;font-weight:400;color:var(--gray-400);cursor:pointer}   /* S1 */
   .seg button+button::before{content:'|';margin:0 8px;color:var(--gray-200);font-weight:400}
-  .seg button[aria-pressed="true"]{color:var(--gray-500);font-weight:700}   /* 위계 두 단계 낮춤 — 글자색만 (2026-09-26 사용자 지시) */
+  .seg button[aria-pressed="true"]{color:var(--gray-600);font-weight:600}   /* S1 — 12px · 고른 쪽 600 (2026-09-26 사용자 컨펌) */
   .list{padding:2px var(--pad-x) 0}
   .row{display:flex;gap:12px;align-items:center;padding:14px 0;border-top:1px solid var(--gray-200);text-decoration:none;color:inherit}
   .row:first-child{border-top:0}
@@ -156,7 +156,7 @@
   <section id="closed" hidden>
     <div class="center"><div class="lock">
       <div class="a">구독 중에만 볼 수 있는 브리핑이에요</div>
-      <div class="b">다시 구독하면 매주 목요일 새 공고와 채용 시장 숫자를 받아볼 수 있어요.</div>
+      <div class="b">다시 구독하면 모든 화면을 볼 수 있어요.</div>
     </div></div>
     <div class="float"><a class="cta" href="/checkout/">다시 구독하기</a></div>
   </section>
