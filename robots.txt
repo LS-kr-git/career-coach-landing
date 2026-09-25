@@ -14,6 +14,7 @@
 #   /insight/      회원 한 사람의 열람 토큰이 주소에 실려 열리는 전문 페이지다. 색인되면
 #                  구독자만 보는 본문이 검색 결과로 새고, 토큰이 붙은 URL 자체가 남는다.
 #                  (career-coach `docs/기획/전문-열람-규칙.md` 4절의 필수 방어 3종 중 하나)
+#   /jobs/         목요일 알림톡의 전체 공고 보기. /insight/ 와 같은 이유 — 주소에 열람 토큰이 실린다.
 #
 # robots.txt 는 크롤링을 막을 뿐 색인을 확실히 막지는 못한다(다른 데서 링크되면 뜬다).
 # 그래서 각 페이지 <head> 에 noindex 도 함께 넣었고, page-audit.mjs 가 그걸 강제한다.
@@ -24,6 +25,7 @@ Disallow: /auth/
 Disallow: /onboarding/
 Disallow: /ops/
 Disallow: /insight/
+Disallow: /jobs/
 Disallow: /checkout/
 
 Sitemap: https://careercoach.my/sitemap.xml

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<!-- ★ 리퍼러 차단은 <head> 맨 앞이어야 한다 — 주소에 열람 토큰이 실린다(insight/index.html 과 같은 이유). -->
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="only light">
+<meta name="format-detection" content="telephone=no">
+<meta name="robots" content="noindex,nofollow">
+<title>내 조건의 새 공고 — 커리어코치</title>
+<link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  /* 목요일 알림톡 「전체 공고 확인」 버튼이 여는 화면 (2026-09-25 사용자 컨펌 — 캔버스 C-1 · N2 · S2 · Y5).
+     피그마: 섹션 「전체 공고 보기 (/jobs/)」 · 프레임 2167:1008(열림) · 2167:1176(구독필요).
+     토큰·폭·타이포는 insight/index.html 과 같다. 새로 만든 값은 없다. */
+  :root{
+    color-scheme: only light;
+    --amber-50:#FFFBEB; --amber-100:#FEF3C7; --amber-200:#FDE68A; --amber-500:#F59E0B; --amber-600:#D97706; --amber-700:#B45309;
+    --navy-900:#1E3A8A;
+    --gray-50:#F8FAFC; --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-300:#CBD5E1; --gray-400:#94A3B8;
+    --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155; --gray-800:#1E293B;
+    --pad-x: 24px;
+    --card-max: 450px;
+    --cta-h:54px; --cta-radius:14px; --cta-fs:15px; --cta-fw:700; --cta-max:410px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{background:var(--gray-100)}
+  body{font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;
+    background:#fff;color:var(--gray-800);line-height:1.6;-webkit-font-smoothing:antialiased}
+  .page{width:100%;max-width:var(--card-max);margin:0 auto;background:#fff;min-height:100vh;min-height:100svh;padding-bottom:56px}
+  header{padding:24px var(--pad-x)}
+  .home{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:inherit;border-radius:10px}
+  .app-icon{width:29px;height:29px;border-radius:25%;background:linear-gradient(135deg,#F59E0B,#D97706);display:flex;align-items:center;justify-content:center}
+  .app-icon img{width:21px;height:21px;display:block}
+  .home .wordmark{height:21px;display:block}
+  .head{padding:8px var(--pad-x) 0}
+  .t-display{font-size:28px;line-height:36px;font-weight:800;letter-spacing:-0.01em;color:var(--navy-900)}
+  .tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:20px var(--pad-x) 0}
+  .tile{border:1px solid var(--amber-200);background:var(--amber-50);border-radius:14px;padding:14px 10px}
+  .tile.calm{border-color:var(--gray-200);background:var(--gray-50)}
+  .tile .l{font-size:12px;line-height:16px;font-weight:600;color:var(--gray-500)}
+  .tile .v{font-size:22px;line-height:28px;font-weight:800;margin-top:4px}
+  .tile .d{font-size:12px;line-height:16px;font-weight:700;color:var(--amber-700);margin-top:4px}
+  .tile.calm .d{color:var(--gray-600)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:12px var(--pad-x) 0}
+  .chips span{font-size:12px;line-height:16px;font-weight:600;color:var(--amber-700);background:var(--amber-100);padding:4px 9px;border-radius:999px}
+  .chips .when{background:none;padding:0;color:var(--gray-400)}
+  .search{margin:28px var(--pad-x) 0;display:flex;align-items:center;gap:8px;height:46px;padding:0 14px;
+    border:1px solid var(--gray-200);border-radius:12px;background:var(--gray-50)}
+  .search input{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:15px;color:var(--gray-800);outline:none}
+  .search input::placeholder{color:var(--gray-400)}
+  .sb{display:flex;align-items:center;gap:10px;padding:12px var(--pad-x) 0}
+  .cnt{font-size:13px;line-height:18px;font-weight:400;color:var(--gray-500)}
+  .seg{margin-left:auto;display:flex;padding:3px;border-radius:10px;background:var(--gray-100)}
+  .seg button{height:30px;padding:0 10px;border:0;border-radius:8px;background:transparent;font:inherit;font-size:12px;font-weight:600;color:var(--gray-500);cursor:pointer}
+  .seg button[aria-pressed="true"]{background:#fff;color:var(--gray-800);box-shadow:0 1px 2px rgba(15,23,42,.1)}
+  .list{padding:2px var(--pad-x) 0}
+  .row{display:flex;gap:12px;align-items:center;padding:14px 0;border-top:1px solid var(--gray-200);text-decoration:none;color:inherit}
+  .row:first-child{border-top:0}
+  .row:last-child{border-bottom:1px solid var(--gray-200)}
+  .grow{flex:1;min-width:0}
+  .co-line{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .co{font-size:14px;line-height:20px;font-weight:700;color:var(--gray-800)}
+  .meta{font-size:11px;line-height:16px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--gray-100);color:var(--gray-600)}
+  .ttl{font-size:14px;line-height:20px;font-weight:400;color:var(--gray-600);margin-top:4px}
+  .dday{flex:0 0 auto;font-size:12px;line-height:16px;font-weight:700;padding:4px 8px;border-radius:8px;background:var(--gray-100);color:var(--gray-600)}
+  .dday.hot{background:var(--amber-600);color:#fff}
+  .empty{padding:40px 0;text-align:center;font-size:14px;color:var(--gray-500);border-bottom:1px solid var(--gray-200)}
+  .pg{padding:18px var(--pad-x) 0}
+  .pg nav{display:flex;align-items:center}
+  .pg .mid{flex:1;display:flex;justify-content:center}
+  .pg button{min-width:32px;height:40px;border:0;border-radius:10px;background:transparent;font:inherit;font-size:14px;font-weight:600;color:var(--gray-600);cursor:pointer}
+  .pg button[aria-current="page"]{background:var(--navy-900);color:#fff;font-weight:700}
+  .pg button:disabled{color:var(--gray-300);cursor:default}
+  .pos{text-align:center;font-size:12px;line-height:16px;color:var(--gray-400);margin-top:8px}
+  .notice{padding:56px var(--pad-x);text-align:center;color:var(--gray-500)}
+  .lock{margin:40px var(--pad-x) 0;border:1px solid var(--gray-200);border-radius:14px;padding:24px 20px;text-align:center}
+  .lock .a{font-size:17px;line-height:24px;font-weight:600;color:var(--gray-700)}
+  .lock .b{font-size:14px;line-height:21px;color:var(--gray-500);margin-top:8px}
+  .cta{display:flex;align-items:center;justify-content:center;width:100%;max-width:var(--cta-max);height:var(--cta-h);margin:16px auto 0;
+    border-radius:var(--cta-radius);background:var(--amber-500);color:#fff;font-size:var(--cta-fs);font-weight:var(--cta-fw);
+    text-decoration:none;box-shadow:0 6px 18px rgba(245,158,11,.25)}
+  [hidden]{display:none!important}
+  @media (min-width:451px){
+    body{background:var(--gray-100)}
+    .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
+  }
+  :focus-visible{outline:2px solid var(--amber-500);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <!-- 로고를 누르면 마이페이지로 간다 (2026-09-25 사용자 지시 — 맨 아래 마이페이지 버튼 대신). -->
+    <a class="home" href="/mypage/" aria-label="커리어코치 — 마이페이지로">
+      <span class="app-icon"><img src="/assets/mark-white.svg" alt=""></span>
+      <img class="wordmark" src="/assets/wordmark.svg" alt="커리어코치">
+    </a>
+  </header>
+
+  <p class="notice" id="notice" role="status">불러오는 중이에요…</p>
+
+  <main id="open" hidden>
+    <div class="head"><h1 class="t-display">내 조건의 새 공고</h1></div>
+    <div class="tiles" id="tiles">
+      <div class="tile"><div class="l">새 공고</div><div class="v" id="v1"></div><div class="d" id="d1"></div></div>
+      <div class="tile"><div class="l">채용 회사</div><div class="v" id="v2"></div><div class="d" id="d2"></div></div>
+      <div class="tile calm"><div class="l" id="l3"></div><div class="v" id="v3"></div><div class="d" id="d3"></div></div>
+    </div>
+    <div class="chips" id="chips"></div>
+    <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="회사·직무 이름으로 찾기" aria-label="공고 검색"></label>
+    <div class="sb">
+      <span class="cnt" id="cnt"></span>
+      <div class="seg" role="group" aria-label="정렬">
+        <button type="button" data-sort="기본" aria-pressed="true">기본 순</button>
+        <button type="button" data-sort="마감" aria-pressed="false">마감 임박 순</button>
+      </div>
+    </div>
+    <div class="list" id="list"></div>
+    <div class="pg" id="pg"></div>
+  </main>
+
+  <section id="closed" hidden>
+    <div class="lock">
+      <div class="a">구독 중에만 볼 수 있는 브리핑이에요</div>
+      <div class="b">다시 구독하면 매주 목요일 새 공고와 채용 시장 숫자를 받아볼 수 있어요.</div>
+      <a class="cta" href="/checkout/">다시 구독하기</a>
+    </div>
+  </section>
+</div>
+
+<script type="module">
+  import { SUPABASE_URL, SUPABASE_ANON_KEY } from '/assets/supabase-config.js';
+
+  const $ = (id) => document.getElementById(id);
+
+  /* 안내문 — 상수로 모아 둔다. 🔴 아직 webScriptText 에 안 넣었다 — 대응 피그마 프레임이 없어서다
+     (docs-audit 이 「사각지대」로 찍는다). 프레임을 세우면 figma-docs-text.json 의 webScriptText 에 MSG 를 적는다. */
+  const MSG = {
+    badLink: '링크가 올바르지 않아요. 알림톡에서 받은 링크로 다시 열어 주세요.',
+    blocked: '지금은 열 수 없어요',
+    none:    '이번 주에 보낸 공고가 없어요',
+    noHit:   '에 맞는 공고가 없어요',
+  };
+
+  // 숫자 칸 이름은 SQL(0063 market_trend)이 정본이다. 구간이 아닌 칸만 여기서 안다.
+  const 신규 = '신규 공고', 기업 = '채용 기업', 판별불가 = '연차 판별 불가';
+  const 같음_퍼센트 = 3, PER = 10, 묶음 = 5;
+
+  const params = new URLSearchParams(location.search);
+  const token = params.get('t') || '';
+  const day = params.get('d') || '';
+  const wellFormed = /^[A-Za-z0-9_-]{22}$/.test(token) && /^\d{4}-\d{2}-\d{2}$/.test(day);
+
+  let 공고 = [], q = '', page = 1, 정렬 = '기본';
+
+  const notice = (t) => { $('notice').textContent = t; $('notice').hidden = false; $('open').hidden = true; $('closed').hidden = true; };
+
+  async function load() {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/jobs_briefing', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY },
+      body: JSON.stringify({ p_token: token, p_send_date: day }),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data) throw new Error((data && data.message) || MSG.blocked);
+    return data;
+  }
+
+  const 변화 = (최근, 직전) => {
+    if (!직전) return '';
+    const 율 = (최근 - 직전) / 직전 * 100;
+    if (Math.abs(율) < 같음_퍼센트) return '비슷';
+    return (율 > 0 ? '▲ ' : '▼ ') + Math.round(Math.abs(율)) + '%';
+  };
+
+  // ⚠️ 문턱(3%·1%p)과 「가장 크게 움직인 연차 구간」 판정은 career-coach `crawler/market_trend.py`
+  //    (_변화·_연차변화)의 사본이다. 알림톡과 이 화면이 같은 말을 해야 하니 한쪽을 고치면 다른 쪽도 고친다.
+  function 숫자칸(지표) {
+    const 칸 = Object.fromEntries(지표.map(r => [r['지표'], [Number(r['최근']), Number(r['직전'])]]));
+    // 칸 이름이 SQL(0063)과 어긋나면 0 으로 꾸미지 않고 숫자 줄을 통째로 내린다.
+    if (!칸[신규] || !칸[기업]) { $('tiles').hidden = true; return; }
+    const [a1, b1] = 칸[신규], [a2, b2] = 칸[기업];
+    $('v1').textContent = a1.toLocaleString('ko-KR'); $('d1').textContent = 변화(a1, b1);
+    $('v2').textContent = a2.toLocaleString('ko-KR'); $('d2').textContent = 변화(a2, b2);
+    // 셋째 칸 — 연차 구간 중 비중이 가장 크게 움직인 하나(알림톡 연차 줄과 같은 판정).
+    const 구간 = Object.entries(칸).filter(([k]) => ![신규, 기업, 판별불가].includes(k));
+    const 합 = i => 구간.reduce((s, [, v]) => s + v[i], 0), 최근합 = 합(0), 직전합 = 합(1);
+    if (!최근합) { $('tiles').children[2].hidden = true; return; }
+    const 폭 = ([, [a, b]]) => 직전합 ? a / 최근합 * 100 - b / 직전합 * 100 : 0;
+    const 큰 = 구간.reduce((m, x) => Math.abs(폭(x)) > Math.abs(폭(m)) ? x : m);
+    const d = 폭(큰);
+    $('l3').textContent = 큰[0];
+    $('v3').textContent = Math.round(큰[1][0] / 최근합 * 100) + '%';
+    $('d3').textContent = !직전합 ? '' : Math.abs(d) < 1 ? '비슷' : (d > 0 ? '▲ ' : '▼ ') + Math.abs(d).toFixed(1) + '%p';
+  }
+
+  function 기간(지표) {
+    const 끝 = 지표.length ? new Date(지표[0]['기준일'] + 'T00:00:00') : null;
+    if (!끝) return '';
+    const f = (n) => { const x = new Date(끝); x.setDate(x.getDate() - n); return (x.getMonth() + 1) + '/' + x.getDate(); };
+    return f(7) + '~' + f(1);          // 기준일은 배타 — 알림톡 #{기간} 과 같은 계산
+  }
+
+  const 남은날 = (마감) => {
+    if (!마감) return null;
+    const 오늘 = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' })); 오늘.setHours(0, 0, 0, 0);
+    return Math.round((new Date(마감 + 'T00:00:00') - 오늘) / 86400000);
+  };
+
+  // 연차 칸 모양은 수집이 정한다: 최소 0·최대 0 = 신입, 최대 100(상한 없음) = 경력 무관.
+  const 연차 = (a, b) => a > 0 ? a + '년 이상' : (b == null || b >= 100) ? '경력 무관' : '신입';
+
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+
+  function 행(r) {
+    const a = el('a', 'row'); a.href = r['링크'] || '#'; a.target = '_blank'; a.rel = 'noopener noreferrer';
+    const g = el('div', 'grow'), top = el('div', 'co-line');
+    top.append(el('span', 'co', r['회사'] || ''));
+    const 지역 = (r['지역'] || [])[0];
+    top.append(el('span', 'meta', [연차(r['연차최소'], r['연차최대']), 지역].filter(Boolean).join(' · ')));
+    g.append(top, el('div', 'ttl', r['제목'] || ''));
+    a.append(g);
+    const n = 남은날(r['마감']);
+    if (n != null && n >= 0) a.append(el('span', 'dday' + (n <= 7 ? ' hot' : ''), n === 0 ? 'D-Day' : 'D-' + n));
+    return a;
+  }
+
+  function 쪽버튼(last) {
+    const 첫 = Math.floor((page - 1) / 묶음) * 묶음 + 1, 끝 = Math.min(첫 + 묶음 - 1, last);
+    const b = (go, 글, 이름, 끔, 현재) => { const x = el('button', null, 글); x.type = 'button'; x.dataset.go = go; x.disabled = !!끔; if (이름) x.setAttribute('aria-label', 이름); if (현재) x.setAttribute('aria-current', 'page'); return x; };
+    const nav = el('nav'); nav.setAttribute('aria-label', '페이지');
+    const L = el('div'), M = el('div', 'mid'), R = el('div');
+    L.append(b(1, '«', '맨 앞', page === 1), b(첫 - 묶음, '‹', '이전 다섯 쪽', 첫 === 1));
+    for (let i = 첫; i <= 끝; i++) M.append(b(i, String(i), null, false, i === page));
+    R.append(b(끝 + 1, '›', '다음 다섯 쪽', 끝 === last), b(last, '»', '맨 끝', page === last));
+    nav.append(L, M, R);
+    return [nav, el('div', 'pos', page + ' / ' + last + '쪽')];
+  }
+
+  function 그리기() {
+    const hit = 공고.filter(r => !q || ((r['제목'] || '') + (r['회사'] || '')).includes(q));
+    // 마감일이 없거나 이미 지난 공고는 맨 뒤로 보낸다(링크가 90일 살아 있어 지난 공고가 섞인다).
+    const 키 = r => { const n = 남은날(r['마감']); return n == null || n < 0 ? 1e9 : n; };
+    if (정렬 === '마감') hit.sort((x, y) => 키(x) - 키(y));
+    const last = Math.max(1, Math.ceil(hit.length / PER));
+    page = Math.min(page, last);
+    $('cnt').textContent = hit.length.toLocaleString('ko-KR') + (q ? '건 찾음' : '건');
+    const list = $('list'); list.replaceChildren();
+    if (!hit.length) list.append(el('div', 'empty', q ? '「' + q + '」' + MSG.noHit : MSG.none));
+    else hit.slice((page - 1) * PER, page * PER).forEach(r => list.append(행(r)));
+    $('pg').replaceChildren(...(hit.length > PER ? 쪽버튼(last) : []));
+    document.querySelectorAll('[data-sort]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.sort === 정렬)));
+  }
+
+  document.addEventListener('click', (e) => {
+    const s = e.target.closest('[data-sort]'); if (s) { 정렬 = s.dataset.sort; page = 1; 그리기(); return; }
+    const g = e.target.closest('[data-go]'); if (g && !g.disabled) { page = Number(g.dataset.go); 그리기(); $('q').scrollIntoView({ block: 'start' }); }
+  });
+  $('q').addEventListener('input', (e) => { q = e.target.value.trim(); page = 1; 그리기(); });
+
+  (async () => {
+    if (!wellFormed) return notice(MSG.badLink);
+    try {
+      const d = await load();
+      $('notice').hidden = true;
+      if (d['상태'] === '구독필요') { $('closed').hidden = false; return; }
+      if (d['상태'] !== '열림') return notice(MSG.blocked);   // 모르는 상태를 구독필요로 읽지 않는다
+      숫자칸(d['지표'] || []);
+      const chips = $('chips');
+      for (const c of d['칩'] || []) chips.append(el('span', null, c));
+      chips.append(el('span', 'when', 기간(d['지표'] || [])));
+      공고 = d['공고'] || [];
+      $('open').hidden = false;
+      그리기();
+    } catch (err) {
+      notice(err && err.message ? err.message : MSG.blocked);
+    }
+  })();
+</script>
+</body>
+</html>
