@@ -6,7 +6,7 @@
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="only light">
-<meta name="format-detection" content="telephone=no">
+<meta name="format-detection" content="telephone=no, email=no">
 <meta name="robots" content="noindex,nofollow">
 <title>내 조건의 새 공고 — 커리어코치</title>
 <link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
@@ -37,17 +37,23 @@
   .home .wordmark{height:21px;display:block}
   .head{padding:8px var(--pad-x) 0}
   .t-display{font-size:28px;line-height:36px;font-weight:800;letter-spacing:-0.01em;color:var(--navy-900)}
-  .tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:20px var(--pad-x) 0}
-  .tile{border:1px solid var(--amber-200);background:var(--amber-50);border-radius:14px;padding:14px 10px}
-  .tile.calm{border-color:var(--gray-200);background:var(--gray-50)}
-  .tile .l{font-size:12px;line-height:16px;font-weight:600;color:var(--gray-500)}
-  .tile .v{font-size:22px;line-height:28px;font-weight:800;margin-top:4px}
-  .tile .d{font-size:12px;line-height:16px;font-weight:700;color:var(--amber-700);margin-top:4px}
-  .tile.calm .d{color:var(--gray-600)}
-  .chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:12px var(--pad-x) 0}
-  .chips span{font-size:12px;line-height:16px;font-weight:600;color:var(--amber-700);background:var(--amber-100);padding:4px 9px;border-radius:999px}
-  .chips .when{background:none;padding:0;color:var(--gray-400)}
-  .search{margin:28px var(--pad-x) 0;display:flex;align-items:center;gap:8px;height:46px;padding:0 14px;
+  /* 요약 — 직군 머리글 · 날짜(숫자 줄 위 오른쪽) · 테두리 없는 숫자 줄 (2026-09-25 사용자 컨펌: 6 + 9 · ㉢) */
+  .eyebrow{padding:8px var(--pad-x) 0;font-size:12px;line-height:16px;font-weight:600;color:var(--amber-700)}
+  .eyebrow+.head{padding-top:4px}
+  .when{padding:16px var(--pad-x) 0;text-align:right;font-size:12px;line-height:16px;color:var(--gray-400)}
+  .nums{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:6px var(--pad-x) 0;padding:14px 0;
+    border-top:1px solid var(--gray-200);border-bottom:1px solid var(--gray-200)}
+  .nums>div{padding-left:12px;border-left:1px solid var(--gray-200)}
+  .nums>div:first-child{border-left:0;padding-left:0}
+  .nums .l{font-size:12px;line-height:16px;font-weight:600;color:var(--gray-500)}
+  .nums .v{font-size:22px;line-height:28px;font-weight:800;margin-top:4px}
+  .nums .d{font-size:12px;line-height:16px;font-weight:700;margin-top:2px;color:var(--gray-600)}
+  .nums .d.up{color:var(--amber-700)} .nums .d.flat{color:var(--gray-500)}
+  /* 요약과 목록 사이 회색 띠 (V2) */
+  .band{height:8px;background:var(--gray-100);margin-top:24px}
+  /* 내리면 검색·정렬이 화면 위에 붙는다 (2026-09-25 사용자 지시) */
+  .stick{position:sticky;top:0;z-index:5;background:#fff;padding:16px 0 10px;box-shadow:0 8px 8px -8px rgba(15,23,42,.08)}
+  .search{margin:0 var(--pad-x);display:flex;align-items:center;gap:8px;height:46px;padding:0 14px;
     border:1px solid var(--gray-200);border-radius:12px;background:var(--gray-50)}
   .search input{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:15px;color:var(--gray-800);outline:none}
   .search input::placeholder{color:var(--gray-400)}
@@ -65,9 +71,12 @@
   .co{font-size:14px;line-height:20px;font-weight:700;color:var(--gray-800)}
   .meta{font-size:11px;line-height:16px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--gray-100);color:var(--gray-600)}
   .ttl{font-size:14px;line-height:20px;font-weight:400;color:var(--gray-600);margin-top:4px}
-  .dday{flex:0 0 auto;font-size:12px;line-height:16px;font-weight:700;padding:4px 8px;border-radius:8px;background:var(--gray-100);color:var(--gray-600)}
-  .dday.hot{background:var(--amber-600);color:#fff}
+  /* 마감 — 칸 없이 글자로. 7일 안은 주황 굵게 (H3) */
+  .dday{flex:0 0 auto;font-size:12px;line-height:16px;font-weight:500;color:var(--gray-400)}
+  .dday.hot{font-weight:700;color:var(--amber-700)}
   .empty{padding:40px 0;text-align:center;font-size:14px;color:var(--gray-500);border-bottom:1px solid var(--gray-200)}
+  .empty.sm{font-size:13px;line-height:20px}
+  .ask{display:block}
   .pg{padding:18px var(--pad-x) 0}
   .pg nav{display:flex;align-items:center}
   .pg .mid{flex:1;display:flex;justify-content:center}
@@ -75,11 +84,24 @@
   .pg button[aria-current="page"]{background:var(--navy-900);color:#fff;font-weight:700}
   .pg button:disabled{color:var(--gray-300);cursor:default}
   .pos{text-align:center;font-size:12px;line-height:16px;color:var(--gray-400);margin-top:8px}
-  .notice{padding:56px var(--pad-x);text-align:center;color:var(--gray-500)}
-  .lock{margin:40px var(--pad-x) 0;border:1px solid var(--gray-200);border-radius:14px;padding:24px 20px;text-align:center}
+  /* 안내 — 화면 세로 가운데, 13px (360 폭에서 문의 줄이 한 줄) */
+  .center{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+  .center>*{pointer-events:auto}
+  .notice{padding:0 var(--pad-x);max-width:var(--card-max);text-align:center;color:var(--gray-500);font-size:13px;line-height:20px;word-break:keep-all}
+  /* 불러오는 중 — 어드민 「화면을 여는 동안」 고리와 같은 모양·크기·색 (ops/index.html .ld-art) */
+  .ld-art{width:40px;height:40px;animation:ld-spin 1.6s linear infinite}
+  .ld-art circle{fill:none;stroke:var(--amber-500);stroke-width:9;stroke-linecap:round;animation:ld-dash 1.4s ease-in-out infinite}
+  @keyframes ld-spin{to{transform:rotate(360deg)}}
+  @keyframes ld-dash{0%{stroke-dasharray:1 200;stroke-dashoffset:0}50%{stroke-dasharray:120 200;stroke-dashoffset:-30}100%{stroke-dasharray:120 200;stroke-dashoffset:-160}}
+  @media (prefers-reduced-motion:reduce){.ld-art,.ld-art circle{animation:none}.ld-art circle{stroke-dasharray:70 200;opacity:.6}}
+  .sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+  /* 구독이 끝난 사람 — 상자 없이 가운데, 버튼은 하단 플로팅 (B1) */
+  .lock{padding:0 var(--pad-x);max-width:var(--card-max);text-align:center}
   .lock .a{font-size:17px;line-height:24px;font-weight:600;color:var(--gray-700)}
-  .lock .b{font-size:14px;line-height:21px;color:var(--gray-500);margin-top:8px}
-  .cta{display:flex;align-items:center;justify-content:center;width:100%;max-width:var(--cta-max);height:var(--cta-h);margin:16px auto 0;
+  .lock .b{font-size:14px;line-height:21px;color:var(--gray-500);margin-top:8px;word-break:keep-all}
+  .float{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;padding:12px 20px calc(20px + env(safe-area-inset-bottom));
+    background:linear-gradient(rgba(255,255,255,0),#fff 35%)}
+  .cta{display:flex;align-items:center;justify-content:center;width:100%;max-width:var(--cta-max);height:var(--cta-h);margin:0;
     border-radius:var(--cta-radius);background:var(--amber-500);color:#fff;font-size:var(--cta-fs);font-weight:var(--cta-fw);
     text-decoration:none;box-shadow:0 6px 18px rgba(245,158,11,.25)}
   [hidden]{display:none!important}
@@ -100,16 +122,22 @@
     </a>
   </header>
 
-  <p class="notice" id="notice" role="status">불러오는 중이에요…</p>
+  <div class="center" id="loading"><svg class="ld-art" viewBox="0 0 50 50" aria-hidden="true"><circle cx="25" cy="25" r="20"/></svg><span class="sr" role="status">불러오는 중이에요…</span></div>
+  <div class="center" id="notice" hidden><p class="notice" role="status"><span id="notice-t"></span><span class="ask" id="notice-ask"></span></p></div>
 
   <main id="open" hidden>
+    <div class="eyebrow" id="eyebrow" hidden></div>
     <div class="head"><h1 class="t-display">내 조건의 새 공고</h1></div>
-    <div class="tiles" id="tiles">
-      <div class="tile"><div class="l">새 공고</div><div class="v" id="v1"></div><div class="d" id="d1"></div></div>
-      <div class="tile"><div class="l">채용 회사</div><div class="v" id="v2"></div><div class="d" id="d2"></div></div>
-      <div class="tile calm"><div class="l" id="l3"></div><div class="v" id="v3"></div><div class="d" id="d3"></div></div>
+    <div id="tiles">
+      <div class="when" id="when"></div>
+      <div class="nums">
+        <div><div class="l">새 공고</div><div class="v" id="v1"></div><div class="d" id="d1"></div></div>
+        <div><div class="l">채용 회사</div><div class="v" id="v2"></div><div class="d" id="d2"></div></div>
+        <div><div class="l" id="l3"></div><div class="v" id="v3"></div><div class="d" id="d3"></div></div>
+      </div>
     </div>
-    <div class="chips" id="chips"></div>
+    <div class="band" id="band"></div>
+    <div class="stick">
     <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       <input id="q" type="search" placeholder="회사·직무 이름으로 찾기" aria-label="공고 검색"></label>
     <div class="sb">
@@ -119,16 +147,17 @@
         <button type="button" data-sort="마감" aria-pressed="false">마감 임박 순</button>
       </div>
     </div>
+    </div>
     <div class="list" id="list"></div>
     <div class="pg" id="pg"></div>
   </main>
 
   <section id="closed" hidden>
-    <div class="lock">
+    <div class="center"><div class="lock">
       <div class="a">구독 중에만 볼 수 있는 브리핑이에요</div>
       <div class="b">다시 구독하면 매주 목요일 새 공고와 채용 시장 숫자를 받아볼 수 있어요.</div>
-      <a class="cta" href="/checkout/">다시 구독하기</a>
-    </div>
+    </div></div>
+    <div class="float"><a class="cta" href="/checkout/">다시 구독하기</a></div>
   </section>
 </div>
 
@@ -141,9 +170,10 @@
      피그마 상태 프레임(2170:1043·1050·1319·1477)과 대조한다. */
   const MSG = {
     badLink: '링크가 올바르지 않아요. 알림톡에서 받은 링크로 다시 열어 주세요.',
-    blocked: '지금은 열 수 없어요',
-    none:    '이번 주에 보낸 공고가 없어요',
+    blocked: '지금은 열 수 없어요.',
+    none:    '이번 주에 보낸 공고가 없어요.',
     noHit:   '에 맞는 공고가 없어요',
+    ask:     '오류는 careercoach.my@gmail.com로 문의해 주세요.',   // 링크로 만들지 않는다(2026-09-25 사용자 지시)
   };
 
   // 숫자 칸 이름은 SQL(0063 market_trend)이 정본이다. 구간이 아닌 칸만 여기서 안다.
@@ -157,7 +187,10 @@
 
   let 공고 = [], q = '', page = 1, 정렬 = '기본';
 
-  const notice = (t) => { $('notice').textContent = t; $('notice').hidden = false; $('open').hidden = true; $('closed').hidden = true; };
+  const notice = (t) => {
+    $('notice-t').textContent = t; $('notice-ask').textContent = MSG.ask;
+    $('loading').hidden = true; $('notice').hidden = false; $('open').hidden = true; $('closed').hidden = true;
+  };
 
   async function load() {
     const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/jobs_briefing', {
@@ -184,18 +217,20 @@
     // 칸 이름이 SQL(0063)과 어긋나면 0 으로 꾸미지 않고 숫자 줄을 통째로 내린다.
     if (!칸[신규] || !칸[기업]) { $('tiles').hidden = true; return; }
     const [a1, b1] = 칸[신규], [a2, b2] = 칸[기업];
-    $('v1').textContent = a1.toLocaleString('ko-KR'); $('d1').textContent = 변화(a1, b1);
-    $('v2').textContent = a2.toLocaleString('ko-KR'); $('d2').textContent = 변화(a2, b2);
+    const 칠 = (id, t) => { $(id).textContent = t; $(id).className = 'd' + (t.startsWith('▲') ? ' up' : t === '비슷' ? ' flat' : ''); };
+    $('v1').textContent = a1.toLocaleString('ko-KR'); 칠('d1', 변화(a1, b1));
+    $('v2').textContent = a2.toLocaleString('ko-KR'); 칠('d2', 변화(a2, b2));
     // 셋째 칸 — 연차 구간 중 비중이 가장 크게 움직인 하나(알림톡 연차 줄과 같은 판정).
     const 구간 = Object.entries(칸).filter(([k]) => ![신규, 기업, 판별불가].includes(k));
     const 합 = i => 구간.reduce((s, [, v]) => s + v[i], 0), 최근합 = 합(0), 직전합 = 합(1);
-    if (!최근합) { $('tiles').children[2].hidden = true; return; }
+    if (!최근합) { $('l3').parentNode.hidden = true; $('l3').closest('.nums').style.gridTemplateColumns = 'repeat(2,minmax(0,1fr))'; return; }
     const 폭 = ([, [a, b]]) => 직전합 ? a / 최근합 * 100 - b / 직전합 * 100 : 0;
     const 큰 = 구간.reduce((m, x) => Math.abs(폭(x)) > Math.abs(폭(m)) ? x : m);
     const d = 폭(큰);
     $('l3').textContent = 큰[0];
     $('v3').textContent = Math.round(큰[1][0] / 최근합 * 100) + '%';
-    $('d3').textContent = !직전합 ? '' : Math.abs(d) < 1 ? '비슷' : (d > 0 ? '▲ ' : '▼ ') + Math.abs(d).toFixed(1) + '%p';
+    // %p 는 일의 자리까지 (2026-09-25 사용자 확정 — 알림톡 연차 줄 market_trend.변수 와 같게)
+    칠('d3', !직전합 ? '' : Math.abs(d) < 1 ? '비슷' : (d > 0 ? '▲ ' : '▼ ') + Math.round(Math.abs(d)) + '%p');
   }
 
   function 기간(지표) {
@@ -250,7 +285,8 @@
     page = Math.min(page, last);
     $('cnt').textContent = hit.length.toLocaleString('ko-KR') + (q ? '건 찾음' : '건');
     const list = $('list'); list.replaceChildren();
-    if (!hit.length) list.append(el('div', 'empty', q ? '「' + q + '」' + MSG.noHit : MSG.none));
+    if (q && !hit.length) list.append(el('div', 'empty', '「' + q + '」' + MSG.noHit));
+    else if (!hit.length) { const e = el('div', 'empty sm', MSG.none); e.append(el('span', 'ask', MSG.ask)); list.append(e); }
     else hit.slice((page - 1) * PER, page * PER).forEach(r => list.append(행(r)));
     $('pg').replaceChildren(...(hit.length > PER ? 쪽버튼(last) : []));
     document.querySelectorAll('[data-sort]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.sort === 정렬)));
@@ -258,7 +294,7 @@
 
   document.addEventListener('click', (e) => {
     const s = e.target.closest('[data-sort]'); if (s) { 정렬 = s.dataset.sort; page = 1; 그리기(); return; }
-    const g = e.target.closest('[data-go]'); if (g && !g.disabled) { page = Number(g.dataset.go); 그리기(); $('q').scrollIntoView({ block: 'start' }); }
+    const g = e.target.closest('[data-go]'); if (g && !g.disabled) { page = Number(g.dataset.go); 그리기(); $('band').scrollIntoView({ block: 'start' }); }
   });
   $('q').addEventListener('input', (e) => { q = e.target.value.trim(); page = 1; 그리기(); });
 
@@ -266,13 +302,13 @@
     if (!wellFormed) return notice(MSG.badLink);
     try {
       const d = await load();
-      $('notice').hidden = true;
+      $('loading').hidden = true;
       if (d['상태'] === '구독필요') { $('closed').hidden = false; return; }
       if (d['상태'] !== '열림') return notice(MSG.blocked);   // 모르는 상태를 구독필요로 읽지 않는다
       숫자칸(d['지표'] || []);
-      const chips = $('chips');
-      for (const c of d['칩'] || []) chips.append(el('span', null, c));
-      chips.append(el('span', 'when', 기간(d['지표'] || [])));
+      $('when').textContent = 기간(d['지표'] || []);
+      const 칩 = d['칩'] || [];
+      if (칩.length) { $('eyebrow').textContent = 칩.join(' · '); $('eyebrow').hidden = false; }
       공고 = d['공고'] || [];
       $('open').hidden = false;
       그리기();
