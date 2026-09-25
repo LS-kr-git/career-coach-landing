@@ -41,18 +41,18 @@
   .eyebrow{padding:8px var(--pad-x) 0;font-size:12px;line-height:16px;font-weight:600;color:var(--amber-700)}
   .eyebrow+.head{padding-top:4px}
   .when{padding:16px var(--pad-x) 0;text-align:right;font-size:12px;line-height:16px;color:var(--gray-400)}
-  .nums{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:6px var(--pad-x) 0;padding:14px 0;
-    border-top:1px solid var(--gray-200);border-bottom:1px solid var(--gray-200)}
-  .nums>div{padding-left:12px;border-left:1px solid var(--gray-200)}
-  .nums>div:first-child{border-left:0;padding-left:0}
+  /* 숫자 칸 위 2px 막대 — 오른 칸만 주황, 나머지는 회색 (2026-09-25 사용자 컨펌: N11) */
+  .nums{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:6px var(--pad-x) 0}
+  .nums>div{border-top:2px solid var(--gray-300);padding-top:10px}
+  .nums>div.up{border-top-color:var(--amber-500)}
   .nums .l{font-size:12px;line-height:16px;font-weight:600;color:var(--gray-500)}
-  .nums .v{font-size:22px;line-height:28px;font-weight:800;margin-top:4px}
+  .nums .v{font-size:22px;line-height:28px;font-weight:800;margin-top:3px}
   .nums .d{font-size:12px;line-height:16px;font-weight:700;margin-top:2px;color:var(--gray-600)}
   .nums .d.up{color:var(--amber-700)} .nums .d.flat{color:var(--gray-500)}
   /* 요약과 목록 사이 회색 띠 (V2) */
   .band{height:8px;background:var(--gray-100);margin-top:24px}
   /* 내리면 검색·정렬이 화면 위에 붙는다 (2026-09-25 사용자 지시) */
-  .stick{position:sticky;top:0;z-index:5;background:#fff;padding:16px 0 10px;box-shadow:0 8px 8px -8px rgba(15,23,42,.08)}
+  .stick{position:sticky;top:0;z-index:5;background:#fff;padding:16px 0 10px}
   .search{margin:0 var(--pad-x);display:flex;align-items:center;gap:8px;height:46px;padding:0 14px;
     border:1px solid var(--gray-200);border-radius:12px;background:var(--gray-50)}
   .search input{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:15px;color:var(--gray-800);outline:none}
@@ -217,7 +217,10 @@
     // 칸 이름이 SQL(0063)과 어긋나면 0 으로 꾸미지 않고 숫자 줄을 통째로 내린다.
     if (!칸[신규] || !칸[기업]) { $('tiles').hidden = true; return; }
     const [a1, b1] = 칸[신규], [a2, b2] = 칸[기업];
-    const 칠 = (id, t) => { $(id).textContent = t; $(id).className = 'd' + (t.startsWith('▲') ? ' up' : t === '비슷' ? ' flat' : ''); };
+    const 칠 = (id, t) => {
+      $(id).textContent = t; $(id).className = 'd' + (t.startsWith('▲') ? ' up' : t === '비슷' ? ' flat' : '');
+      $(id).parentNode.classList.toggle('up', t.startsWith('▲'));
+    };
     $('v1').textContent = a1.toLocaleString('ko-KR'); 칠('d1', 변화(a1, b1));
     $('v2').textContent = a2.toLocaleString('ko-KR'); 칠('d2', 변화(a2, b2));
     // 셋째 칸 — 연차 구간 중 비중이 가장 크게 움직인 하나(알림톡 연차 줄과 같은 판정).
@@ -229,8 +232,8 @@
     const d = 폭(큰);
     $('l3').textContent = 큰[0];
     $('v3').textContent = Math.round(큰[1][0] / 최근합 * 100) + '%';
-    // %p 는 일의 자리까지 (2026-09-25 사용자 확정 — 알림톡 연차 줄 market_trend.변수 와 같게)
-    칠('d3', !직전합 ? '' : Math.abs(d) < 1 ? '비슷' : (d > 0 ? '▲ ' : '▼ ') + Math.round(Math.abs(d)) + '%p');
+    // 비중 폭은 일의 자리까지 (2026-09-25 사용자 확정)
+    칠('d3', !직전합 ? '' : Math.abs(d) < 1 ? '비슷' : (d > 0 ? '▲ ' : '▼ ') + Math.round(Math.abs(d)) + '%');   // 「%p」 대신 「%」 (2026-09-25 사용자 지시)
   }
 
   function 기간(지표) {
