@@ -58,10 +58,11 @@
   .search input{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:15px;color:var(--gray-800);outline:none}
   .search input::placeholder{color:var(--gray-400)}
   .sb{display:flex;align-items:center;gap:10px;padding:12px var(--pad-x) 0}
-  .cnt{font-size:13px;line-height:18px;font-weight:400;color:var(--gray-500)}
-  .seg{margin-left:auto;display:flex;padding:3px;border-radius:10px;background:var(--gray-100)}
-  .seg button{height:30px;padding:0 10px;border:0;border-radius:8px;background:transparent;font:inherit;font-size:12px;font-weight:600;color:var(--gray-500);cursor:pointer}
-  .seg button[aria-pressed="true"]{background:#fff;color:var(--gray-800);box-shadow:0 1px 2px rgba(15,23,42,.1)}
+  /* 정렬 — 글자 두 개, 고른 쪽만 진하게 (2026-09-25 사용자 컨펌: C2). 가운데 점은 글자가 아니라 CSS 라 문구 대조에 안 걸린다 */
+  .seg{margin-left:auto;display:flex;align-items:center}
+  .seg button{height:30px;padding:0;border:0;background:transparent;font:inherit;font-size:13px;font-weight:500;color:var(--gray-400);cursor:pointer}
+  .seg button+button::before{content:'·';margin:0 6px;color:var(--gray-300);font-weight:400}
+  .seg button[aria-pressed="true"]{color:var(--gray-800);font-weight:700}
   .list{padding:2px var(--pad-x) 0}
   .row{display:flex;gap:12px;align-items:center;padding:14px 0;border-top:1px solid var(--gray-200);text-decoration:none;color:inherit}
   .row:first-child{border-top:0}
@@ -141,7 +142,6 @@
     <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       <input id="q" type="search" placeholder="회사·직무 이름으로 찾기" aria-label="공고 검색"></label>
     <div class="sb">
-      <span class="cnt" id="cnt"></span>
       <div class="seg" role="group" aria-label="정렬">
         <button type="button" data-sort="기본" aria-pressed="true">기본 순</button>
         <button type="button" data-sort="마감" aria-pressed="false">마감 임박 순</button>
@@ -276,7 +276,7 @@
     for (let i = 첫; i <= 끝; i++) M.append(b(i, String(i), null, false, i === page));
     R.append(b(끝 + 1, '›', '다음 다섯 쪽', 끝 === last), b(last, '»', '맨 끝', page === last));
     nav.append(L, M, R);
-    return [nav, el('div', 'pos', page + ' / ' + last + '쪽')];
+    return nav;
   }
 
   function 그리기() {
@@ -286,12 +286,13 @@
     if (정렬 === '마감') hit.sort((x, y) => 키(x) - 키(y));
     const last = Math.max(1, Math.ceil(hit.length / PER));
     page = Math.min(page, last);
-    $('cnt').textContent = hit.length.toLocaleString('ko-KR') + (q ? '건 찾음' : '건');
     const list = $('list'); list.replaceChildren();
     if (q && !hit.length) list.append(el('div', 'empty', '「' + q + '」' + MSG.noHit));
     else if (!hit.length) { const e = el('div', 'empty sm', MSG.none); e.append(el('span', 'ask', MSG.ask)); list.append(e); }
     else hit.slice((page - 1) * PER, page * PER).forEach(r => list.append(행(r)));
-    $('pg').replaceChildren(...(hit.length > PER ? 쪽버튼(last) : []));
+    // 건수는 맨 아래 「총 73개 · 1 / 8쪽」 한 줄 (2026-09-25 사용자 지시). 한 쪽뿐이면 「총 N개」 만, 0건이면 안내가 대신한다.
+    const 줄 = hit.length ? el('div', 'pos', '총 ' + hit.length.toLocaleString('ko-KR') + '개' + (last > 1 ? ' · ' + page + ' / ' + last + '쪽' : '')) : null;
+    $('pg').replaceChildren(...[hit.length > PER ? 쪽버튼(last) : null, 줄].filter(Boolean));
     document.querySelectorAll('[data-sort]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.sort === 정렬)));
   }
 
