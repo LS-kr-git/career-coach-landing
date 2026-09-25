@@ -62,7 +62,7 @@
   .seg{margin-left:auto;display:flex;align-items:center}
   .seg button{height:30px;padding:0;border:0;background:transparent;font:inherit;font-size:13px;font-weight:500;color:var(--gray-400);cursor:pointer}
   .seg button+button::before{content:'|';margin:0 8px;color:var(--gray-200);font-weight:400}
-  .seg button[aria-pressed="true"]{color:var(--gray-600);font-weight:700}   /* 위계 한 단계 낮춤 (2026-09-25 사용자 지시) */
+  .seg button[aria-pressed="true"]{color:var(--gray-500);font-weight:700}   /* 위계 두 단계 낮춤 — 글자색만 (2026-09-26 사용자 지시) */
   .list{padding:2px var(--pad-x) 0}
   .row{display:flex;gap:12px;align-items:center;padding:14px 0;border-top:1px solid var(--gray-200);text-decoration:none;color:inherit}
   .row:first-child{border-top:0}
@@ -141,7 +141,7 @@
     <div class="band" id="band"></div>
     <div class="stick">
     <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input id="q" type="search" placeholder="회사·직무 이름으로 찾기" aria-label="공고 검색"></label>
+      <input id="q" type="search" placeholder="회사·직무명 검색" aria-label="공고 검색"></label>
     <div class="sb">
       <div class="seg" role="group" aria-label="정렬">
         <button type="button" data-sort="기본" aria-pressed="true">기본 순</button>
