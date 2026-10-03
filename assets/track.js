@@ -170,6 +170,11 @@ if (typeof window !== 'undefined') { try { loadPixel(); } catch { /* 픽셀 때�
 /** 대부분의 페이지가 쓰는 형태: 유입 저장 + 진입 이벤트 1건. */
 export function pageView(name, props = {}, accessToken = null) {
   captureAttribution();
+  // 온보딩 단계마다 어디서 그만두는지 메타에서도 보이게(2026-10-03 사용자 요청). 표준 이벤트에
+  // 맞는 이름이 없어 맞춤 이벤트이고, 광고 관리자에서 단계별로 바로 고를 수 있게 이름을 나눈다.
+  if (name === 'onboarding_step') {
+    try { if (window.fbq) window.fbq('trackCustom', props.step === 'done' ? 'OnboardingDone' : 'OnboardingStep' + props.step); } catch { /* 무시 */ }
+  }
   track(name, props, accessToken);
 }
 
