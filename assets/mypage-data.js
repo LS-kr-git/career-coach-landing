@@ -196,6 +196,13 @@ const BILLING_FN = 'portone-6r2k9tvq';
  *    같은 규칙이다.
  * ⚠️ 신원은 몸통이 아니라 **토큰**으로 간다. 함수가 그 토큰을 되물어 회원을 알아낸다.
  */
+// 메타 전환 API 가 서버에서 구매를 보낼 때 브라우저 픽셀의 같은 사람으로 이어 붙이는 쿠키(_fbp·_fbc).
+// 픽셀이 안 떴으면 빈 값이다 — 서버는 없으면 없는 대로 보낸다.
+function metaCookies() {
+  const 값 = (이름) => (document.cookie.match(new RegExp('(?:^|; )' + 이름 + '=([^;]*)')) || [])[1];
+  return { fbp: 값('_fbp'), fbc: 값('_fbc') };
+}
+
 export async function saveBillingKey(billingKey) {
   const { SUPABASE_URL } = await import('/assets/supabase-config.js');
   const supabase = await supa();
@@ -208,7 +215,7 @@ export async function saveBillingKey(billingKey) {
       authorization: `Bearer ${data.session.access_token}`,
       'content-type': 'application/json',
     },
-    body: JSON.stringify({ billingKey }),
+    body: JSON.stringify({ billingKey, meta: metaCookies() }),
   });
   if (!res.ok) {
     // 🔴 상태코드는 **콘솔에만** 남기고 던지는 메시지는 비운다. 부르는 화면이 이 값을
