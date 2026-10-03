@@ -62,7 +62,10 @@
   /* 없는 주소 — GitHub Pages 가 모든 없는 경로에 이 파일을 준다. 그래서 자산·링크는 전부 루트 절대경로다
      (2026-10-03 사용자 컨펌 「6번」) */
   .t-body-s{font-size:14px;line-height:20px;font-weight:400}
-  .done{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:110px var(--pad-x) 40px;gap:14px}
+  /* 로고·제목·문구 묶음을 「화면 맨 위 ~ 떠 있는 CTA 버튼 윗변」 사이의 정가운데에 — 09-C(mypage/leave #bye)와 같은 방식 (2026-10-04 사용자 지시).
+     CTA 윗변 = 화면높이 − 74(버튼 54 + 바닥 20). 이 화면은 헤더가 없어 아래 여백이 74 그대로다. 피그마 2222:2155 프레임 아래 여백 74 와 같은 값 */
+  main{padding-bottom:74px}
+  .done{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 var(--pad-x);gap:14px}
   .done img{margin-bottom:10px}
   .done h1{font-size:24px;line-height:32px;font-weight:700;letter-spacing:-.01em;color:var(--gray-900)}
   .done p{color:var(--gray-500);word-break:keep-all}
