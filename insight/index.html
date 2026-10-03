@@ -140,7 +140,9 @@
   .idx-row:first-child{border-top:0}
   .idx-n{flex:0 0 20px;color:var(--amber-500);letter-spacing:0.04em;padding-top:1px}
   .idx-t{flex-grow:1;color:var(--gray-800)}
-  .saved-all{display:flex;justify-content:center;margin-top:20px;color:var(--gray-500);text-decoration:none}
+  /* 밑줄은 2026-10-03 사용자 지시 — 피그마 2059:824 등 네 노드와 같은 값(밑줄 · 3px 띄움) */
+  .saved-all{display:flex;justify-content:center;margin-top:20px;color:var(--gray-500);
+    text-decoration:underline;text-underline-offset:3px}
 
   /* 안내(로딩·오류) — 본문이 없을 때만 보인다 */
   .notice{padding:56px var(--pad-x);text-align:center;color:var(--gray-500)}
