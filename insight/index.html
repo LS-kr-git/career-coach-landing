@@ -151,12 +151,25 @@
     .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
   }
   :focus-visible{outline:2px solid var(--amber-500);outline-offset:2px}
+
+  /* 마이페이지(저장소·일요일 열람)에서 열었을 때만 로고 대신 뒤로가기 헤더를 세운다
+     (2026-10-03 사용자 컨펌 「1번」). 값은 랜딩 CLAUDE.md 「헤더와 뒤로가기 — 표준값」 그대로다. */
+  .hd{position:sticky;top:0;z-index:20;display:flex;align-items:center;
+    height:calc(48px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 12px 0;background:#fff}
+  .hd[hidden]{display:none}
+  .back{width:48px;height:48px;display:flex;align-items:center;justify-content:center;position:relative}
+  .back svg{position:relative;z-index:1}
+  .back::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:36px;height:36px;border-radius:10px;background:transparent;transition:background .12s}
+  .back:active::before{background:var(--gray-100)}
+  header[hidden]{display:none}
 </style>
 </head>
 <body>
 <div class="page">
   <div class="prog" aria-hidden="true"><i id="prog"></i></div>
-  <header>
+  <header class="hd" id="backHd" hidden><a class="back" id="backLink" href="/mypage/" aria-label="뒤로"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15.75 4.5L8.25 12l7.5 7.5" stroke="#475569" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a></header>
+  <header id="logoHd">
     <div class="app-icon"><img src="/assets/mark-white.svg" alt=""></div>
     <img class="wordmark" src="/assets/wordmark.svg" alt="커리어코치">
   </header>
@@ -298,6 +311,15 @@
   // 토큰은 base64url 22자 고정이다(0023 의 length CHECK 와 같은 값).
   // 형식이 아니면 서버에 보내지 않는다 — 오타 링크로 RPC 를 두드릴 이유가 없다.
   const wellFormed = /^[A-Za-z0-9_-]{22}$/.test(token) && /^[0-9]{1,18}$/.test(id);
+
+  // 마이페이지에서 온 길이면 뒤로가기 헤더 — 어디로 돌아갈지만 갈린다. 모르는 값이면 알림톡 모양 그대로.
+  const BACK_TO = { archive: '/mypage/archive/', sunday: '/mypage/' };
+  const backTo = BACK_TO[params.get('from')];
+  if (backTo) {
+    $('backLink').href = backTo;
+    $('backHd').hidden = false;
+    $('logoHd').hidden = true;
+  }
 
   const notice = (text) => { $('notice').textContent = text; $('notice').hidden = false; $('letter').hidden = true; };
 

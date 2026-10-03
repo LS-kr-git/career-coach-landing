@@ -193,7 +193,7 @@
   /* 목록은 서버에서 온다 (career-coach 0086 `mypage_archive`). 정적 HTML 의 달 칩·목록은
      피그마 기준 프레임(908:640) 상태이고, 자료를 받으면 여기서 전부 다시 그린다 —
      칩도 같이 그린다. 소장한 달만 칩으로 서야 고른 달에 글이 있다. */
-  import { requireLogin, getArchive, archiveView, monthChips, EMPTY, FAIL } from '/assets/mypage-data.js';
+  import { requireLogin, getArchive, archiveView, monthChips, getInsightToken, insightHref, EMPTY, FAIL } from '/assets/mypage-data.js';
   /* placeholder 는 속성이라 문구 대조(docs-audit)에 안 잡힌다. 그래서 문구의 정본은
      화면에 있는 sr-only label 하나로 두고, placeholder 는 그걸 복사해 쓴다 —
      두 곳에 같은 글자를 적어 두면 보이는 쪽만 고쳐도 검사가 초록이 된다. */
@@ -248,7 +248,7 @@
       return;
     }
     listBox.innerHTML = '<div class="list-group">' + rows.map(function (a) {
-      return '<a class="art" href="#"><span class="col">'
+      return '<a class="art" href="#" data-id="' + esc(String(a.id)) + '"><span class="col">'
         + '<span class="meta"><span class="t-micro tag">' + esc(a.topic) + '</span>'
         + '<span class="t-caption date">' + esc(a.date) + '</span></span>'
         + '<span class="t-body-s ttl">' + esc(a.title) + '</span></span>'
@@ -264,6 +264,19 @@
     q.value = '';
     clearq.hidden = true;
     render();
+  });
+  /* 줄을 누르면 그 편 전문 페이지로 간다 (2026-10-03 사용자 컨펌 「1번」). 전문 페이지는 토큰으로만
+     열리므로 그 사람의 토큰을 받아 주소를 만든다(0114). 받는 것은 처음 한 번뿐이다.
+     토큰을 못 받으면 목록 자리에 실패를 말한다 — 눌렀는데 아무 일도 없는 것으로 두지 않는다. */
+  var 토큰 = null;
+  listBox.addEventListener('click', function (e) {
+    var row = e.target.closest('.art[data-id]');
+    if (!row) return;
+    e.preventDefault();
+    (토큰 ? Promise.resolve(토큰) : getInsightToken()).then(function (t) {
+      토큰 = t;
+      location.href = insightHref(t, row.dataset.id, 'archive');
+    }, function () { note(FAIL.line, FAIL.hint, true); });
   });
   var clearq = document.getElementById('clearq');
   clearq.addEventListener('click', function () { q.value = ''; clearq.hidden = true; render(); });

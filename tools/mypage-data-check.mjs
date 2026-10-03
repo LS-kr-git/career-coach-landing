@@ -94,6 +94,17 @@ expectInOrder('mypage/sunday/index.html', staticHtml('mypage/sunday/index.html')
   for (const [s, 기대상태] of 배너) {
     if (data.sundayStateOf(s) !== 기대상태) problems.push(`mypage/index.html: sundayStateOf(${JSON.stringify(s)}) 가 ${data.sundayStateOf(s)} 다 (${기대상태} 여야 한다)`);
   }
+  // 결제 완료 화면의 첫 발송일 — 영업일 08:00(KST) 전이면 그날, 아니면 다음 영업일. 주말·공휴일은 건너뛴다.
+  const 첫발송 = [['2026-10-05T22:59:00Z', '2026-10-06', '화 07:59 → 그날'], ['2026-10-05T23:00:00Z', '2026-10-07', '화 08:00 → 다음 날'],
+                ['2026-10-02T22:30:00Z', '2026-10-06', '토(개천절) → 대체공휴일 월 건너뜀'], ['2026-10-08T23:30:00Z', '2026-10-12', '목 08:30 → 금 한글날 건너뜀'],
+                ['2026-12-31T00:00:00Z', '2027-01-04', '해를 넘긴다']];
+  for (const [now, 기대일, 왜] of 첫발송) {
+    const got = data.firstSendDay(new Date(now));
+    if (got !== 기대일) problems.push(`checkout/done/index.html: firstSendDay(${now}) 가 ${got} 다 (${기대일} — ${왜})`);
+  }
+  for (const [lo, hi, 기대글] of [[1, 3, '1 ~ 3년'], [0, 0, '0년'], [7, 15, '7 ~ 15년+'], [15, 15, '15년+'], [2, null, '2년']]) {
+    if (data.yearsText(lo, hi) !== 기대글) problems.push(`mypage/years/index.html: yearsText(${lo}, ${hi}) 가 「${data.yearsText(lo, hi)}」 다 (「${기대글}」)`);
+  }
   // 마크업의 표기와 같은 자로 찍히는가 — 위 기대값의 모양이 SUNDAY_STATIC 과 같아야 한다.
   if (!/^\d{2}\. \d{2} [일월화수목금토]$/.test(data.SUNDAY_STATIC[0].date)) {
     problems.push(`mypage/sunday/index.html: SUNDAY_STATIC 의 날짜 표기가 weekRows 와 다르다 — ${data.SUNDAY_STATIC[0].date}`);
@@ -144,6 +155,10 @@ for (const [rel, 값갈래, 실패갈래] of [
   ['mypage/topics/index.html', 'pullFromServer', 'FAIL.line'],
   ['mypage/jobs/index.html', 'pullFromServer', 'FAIL.line'],
   ['checkout/index.html', 'getPlan', 'FAIL.line'],
+  ['mypage/years/index.html', 'pullFromServer', 'FAIL.line'],
+  ['mypage/regions/index.html', 'pullFromServer', 'FAIL.line'],
+  ['mypage/leave/index.html', 'getSubscription', 'FAIL.line'],
+  ['checkout/done/index.html', 'getSubscription', 'FAIL.line'],
 ]) {
   const src = scriptOnly(rel);
   if (!src.includes(값갈래)) {
@@ -155,7 +170,8 @@ for (const [rel, 값갈래, 실패갈래] of [
 }
 /* 로그인 확인도 같은 자리에서 본다 — 빠지면 비로그인이 남의 것처럼 보이는 빈 화면을 본다. */
 for (const rel of ['mypage/index.html', 'mypage/billing/index.html', 'mypage/archive/index.html',
-                   'mypage/topics/index.html', 'mypage/jobs/index.html', 'mypage/sunday/index.html']) {
+                   'mypage/topics/index.html', 'mypage/jobs/index.html', 'mypage/sunday/index.html',
+                   'mypage/years/index.html', 'mypage/regions/index.html', 'mypage/leave/index.html', 'checkout/done/index.html']) {
   if (!scriptOnly(rel).includes('requireLogin')) {
     problems.push(`${rel}: 로그인 확인(requireLogin)을 부르지 않습니다`);
   }
@@ -212,4 +228,4 @@ if (problems.length) {
   console.error('❌ 마이페이지 데이터 층 ↔ 마크업이 어긋납니다:\n' + problems.map((p) => '   · ' + p).join('\n'));
   process.exit(1);
 }
-console.log(`✅ 마이페이지 데이터 층 ↔ 마크업 일치 (주제 ${(await data.getTopics()).length} · 이번 주 ${week.length} · 배선·실패 갈래 6화면 · 로그인 확인 6화면)`);
+console.log(`✅ 마이페이지 데이터 층 ↔ 마크업 일치 (주제 ${(await data.getTopics()).length} · 이번 주 ${week.length} · 배선·실패 갈래 10화면 · 로그인 확인 10화면)`);

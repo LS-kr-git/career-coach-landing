@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="only light">
+<meta name="format-detection" content="telephone=no">
+<title>회원 탈퇴 — 커리어코치</title>
+<meta name="description" content="커리어코치 회원 탈퇴를 확인합니다.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root{
+    color-scheme: only light;
+    --amber-50:#FFFBEB; --amber-100:#FEF3C7; --amber-500:#F59E0B; --amber-600:#D97706;
+    --amber-700:#B45309; --amber-800:#92400E; --amber-950:#451A03;
+    --emerald-500:#10B981;
+    --gray-50:#F8FAFC; --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-300:#CBD5E1;
+    --gray-400:#94A3B8; --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155;
+    --gray-800:#1E293B; --gray-900:#0F172A; --stone-50:#FAFAF9;
+    --error-600:#DC2626;
+    /* CTA 토큰 — CLAUDE.md 「CTA 규칙」 공통값 */
+    --cta-h:54px; --cta-radius:14px; --cta-fs:15px; --cta-fw:700;
+    /* 랜딩과 동일한 폭 시스템 */
+    --pad-x:24px; --card-max:450px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{background:var(--gray-100)}
+  body{font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;
+    background:#fff;color:var(--gray-800);-webkit-font-smoothing:antialiased}
+  /* CLAUDE.md 규칙 — 화면 채우기 높이는 svh */
+  .page{width:100%;max-width:var(--card-max);margin:0 auto;background:#fff;
+    min-height:100vh;min-height:100svh;display:flex;flex-direction:column}
+  /* 헤더·뒤로가기 — CLAUDE.md 「헤더와 뒤로가기 표준값」 (피그마 376:2507) */
+  .hd{position:sticky;top:0;z-index:20;display:flex;align-items:center;
+    height:calc(48px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 12px 0;background:#fff}
+  .back{width:48px;height:48px;display:flex;align-items:center;justify-content:center;position:relative}
+  .back svg{position:relative;z-index:1}
+  .back::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:36px;height:36px;border-radius:10px;background:transparent;transition:background .12s}
+  .back:active::before{background:var(--gray-100)}
+  main{flex:1;display:flex;flex-direction:column;width:100%;max-width:var(--card-max);margin:0 auto}
+  /* 피그마 텍스트 스타일 대응 (careercoach 컬렉션 text/*) */
+  .t-h4{font-size:15px;line-height:22px;font-weight:600}
+  .t-body-s{font-size:14px;line-height:20px;font-weight:400}
+  /* 하단 플로팅 CTA — 온보딩 1단계(.fade + .cta)와 같은 모양: 흰 그라데이션 100px 위에 떠 있고 바닥에서 20 */
+  .cta-dock{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:var(--card-max);
+    padding:26px 0 20px;background:linear-gradient(180deg,rgba(255,255,255,0),#fff 55%);
+    display:flex;justify-content:center;pointer-events:none;z-index:10}
+  /* 폭은 저장소 정본을 따른다 — CLAUDE.md 「CTA 규칙」: 플로팅은 calc(100% - 40px) · max 410.
+     피그마 프레임이 320 인 것은 360 기준이라 그런 것이고, 웹 폭(카드 450)과 다른 것이 의도된 상태다
+     (career-coach docs/기획/피그마-웹-동기화.md 「폭에 관한 확정 사항」). */
+  .cta{width:calc(100% - 40px);max-width:410px;height:var(--cta-h);border:0;border-radius:var(--cta-radius);
+    background:var(--amber-500);color:#fff;font:inherit;font-size:var(--cta-fs);font-weight:var(--cta-fw);
+    line-height:20px;cursor:pointer;box-shadow:0 12px 32px rgba(217,119,6,.28);pointer-events:auto;
+    display:flex;align-items:center;justify-content:center;gap:0;-webkit-tap-highlight-color:transparent}
+  .cta:not([disabled]):active{transform:scale(.98)}
+  .cta .s2{opacity:.85}
+  .cta[disabled]{background:var(--gray-100);color:var(--gray-400);box-shadow:none;cursor:default}
+  [hidden]{display:none!important}
+
+  /* 제목·설명 — 온보딩 1단계와 같은 값(피그마 275:2404). 진행 바·단계 줄이 없는 자리라 위만 20 */
+  .title{padding:20px var(--pad-x) 0}
+  .title h1{font-size:24px;line-height:32px;font-weight:700;letter-spacing:-.01em;color:var(--gray-900)}
+  .desc{padding:10px var(--pad-x) 0;color:var(--gray-500);word-break:keep-all}
+
+  .chip{border:0;background:#fff;box-shadow:inset 0 0 0 1px var(--gray-200);border-radius:10px;
+    padding:9px 12px;font:inherit;font-size:13px;line-height:18px;font-weight:400;color:var(--gray-600);
+    cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent;
+    transition:background .12s,box-shadow .12s,color .12s}
+  .chip:active{transform:scale(.97)}
+  .chip[aria-pressed="true"]{background:var(--amber-50);box-shadow:inset 0 0 0 1px var(--amber-500);color:var(--amber-600)}
+  .chip.lock{background:var(--gray-100);color:var(--gray-400);cursor:default}
+  .chip.lock:active{transform:none}
+
+
+  /* 회원 탈퇴 — 2026-10-03 사용자 컨펌 「5번」. 멤버십이 남아 있으면 탈퇴를 막는다(서버 0115 도 막는다) */
+  .lv{padding:28px var(--pad-x) 40px;display:flex;flex-direction:column;gap:28px}
+  .lst{border:1px solid var(--gray-200);border-radius:14px;padding:6px 18px}
+  .lst li{list-style:none;display:flex;gap:10px;padding:14px 0;color:var(--gray-700);word-break:keep-all}
+  .lst li + li{border-top:1px solid var(--gray-100)}
+  .lst li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--amber-500);flex:none;margin-top:8px}
+  .t-caption{font-size:13px;line-height:18px;font-weight:400}
+  .why .lab{color:var(--gray-500);margin-bottom:10px;display:block}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .agree{display:flex;align-items:flex-start;gap:10px;background:none;border:0;padding:0;font:inherit;text-align:left;cursor:pointer}
+  .box{width:20px;height:20px;border-radius:6px;border:1.6px solid var(--gray-300);background:#fff;
+    display:flex;align-items:center;justify-content:center;margin-top:1px;flex-shrink:0}
+  .box svg{visibility:hidden}
+  .agree[aria-checked="true"] .box{border-color:var(--amber-500);background:var(--amber-500)}
+  .agree[aria-checked="true"] .box svg{visibility:visible}
+  .agree-t{font-size:14px;line-height:20px;color:var(--gray-700)}
+  /* 멤버십이 남아 있을 때 — 확인 목록 위에 뜬다 */
+  .block{border-radius:14px;background:var(--amber-50);padding:16px 18px;display:flex;flex-direction:column;gap:6px;word-break:keep-all}
+  .block .b-title{color:var(--amber-800)}
+  .block .b-body{color:var(--gray-600)}
+  .block a{align-self:flex-start;margin-top:6px;color:var(--gray-800);font-size:14px;line-height:20px;font-weight:700;text-underline-offset:3px}
+  /* 탈퇴 버튼은 앰버가 아니라 짙은 회색 — 권하는 행동이 아니다 */
+  .cta.danger{background:var(--gray-800);box-shadow:none}
+  .cta.danger[disabled]{background:var(--gray-100);color:var(--gray-400)}
+  .err{color:var(--error-600);font-size:13px;line-height:18px;text-align:center;margin-top:-16px}
+  .done{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:96px var(--pad-x) 40px;gap:14px}
+  .ok{width:64px;height:64px;border-radius:50%;background:var(--amber-100);display:flex;align-items:center;justify-content:center;margin-bottom:6px}
+  .done .t-display{font-size:24px;line-height:32px;font-weight:700;color:var(--gray-900)}
+  .done .desc{padding:0}
+  /* ===== 푸터 — 전자상거래법 제10조 신원정보 =====
+     이 화면에도 두는 이유: PG·카드사 심사는 사업자 정보가 메인뿐 아니라 이용자가 지나는
+     화면들에 상시 노출돼 있는지를 본다(포트원 「서비스 필수 구축요건」). 2026-09-17 사용자 지시.
+
+     랜딩(index.html)·결제(checkout/index.html)의 footer 와 **문구·줄 순서·색·글자 크기·굵기·
+     링크가 한 글자도 다르지 않다** — 한 곳을 고치면 나머지도 같이 고친다.
+     여백(32/40)과 좌우 24px 는 결제 화면과 같은 값이다. 랜딩만 80/120 을 쓰는 예외다.
+     피그마 기준: 이 화면 프레임 안의 「footer (사업자정보)」 (랜딩 6:361 을 복제한 것).
+     ⚠️ main 바깥에 둔다 — main 은 좌우 패딩이 있어 안에 넣으면 회색 배경이 꽉 차지 않는다. */
+  /* 위 100 은 온보딩 .board 의 아래 여백과 같다. 아래 140 은 떠 있는 CTA(20+54)와 그라데이션(100)에 안 깔리게 — 온보딩 footer 와 같은 값 */
+  footer{background:var(--gray-100);margin-top:100px;padding:32px 24px calc(140px + env(safe-area-inset-bottom))}
+  footer .biz{display:flex;flex-direction:column;gap:8px;color:var(--gray-500)}
+  footer .biz-name{font-size:13px;line-height:18px;font-weight:600}
+  footer .biz-lines{font-size:13px;line-height:18px}
+  footer .links a{color:var(--gray-500);text-decoration:none;font-size:13px;line-height:18px}
+  footer .links a[href$="privacy.html"]{font-weight:600}
+  /* 넓은 화면 카드 어포던스 — 랜딩(index.html)의 같은 블록과 값이 같다(2026-09-24 사용자 지시 · 모든 페이지).
+     page-audit.mjs 「넓은 화면 바탕」이 빠진 페이지를 막는다. */
+  @media (min-width:451px){
+    body{background:var(--gray-100)}
+    .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+<header class="hd"><a class="back" href="/mypage/" aria-label="뒤로"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15.75 4.5L8.25 12l7.5 7.5" stroke="#475569" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a></header>
+<main id="ask">
+  <div class="title"><h1>탈퇴하기 전에<br>확인해 주세요</h1></div>
+  <div class="lv">
+    <!-- 멤버십(구독 중 · 해지 예약 · 미납)이 남아 있으면 보인다. 날짜 줄은 JS 가 그 사람의 값으로 채운다 -->
+    <div class="block" id="block" hidden>
+      <span class="t-h4 b-title">멤버십이 남아 있어 지금은 탈퇴할 수 없어요</span>
+      <span class="t-body-s b-body">멤버십 이용 기간이 끝난 뒤에 탈퇴할 수 있어요. 아직 해지하지 않았다면 먼저 해지해 주세요.</span>
+      <span class="t-body-s b-body" id="blockDate"></span>
+      <a href="/mypage/billing/">멤버십·결제로 가기</a>
+    </div>
+    <ul class="lst">
+      <li class="t-body-s">소장한 아티클과 고른 직군·연차·근무지·주제가 모두 지워져요.</li>
+      <li class="t-body-s">알림톡이 더 이상 오지 않아요.</li>
+      <li class="t-body-s">결제·환불 기록은 전자상거래법에 따라 5년 동안 따로 보관돼요.</li>
+      <li class="t-body-s">같은 카카오 계정으로 언제든 다시 가입할 수 있어요.</li>
+    </ul>
+    <div class="why" id="why"><span class="t-caption lab">떠나시는 이유를 알려 주시면 고칠게요 (선택)</span>
+      <div class="chips"><button class="chip" type="button" aria-pressed="false">알림이 너무 자주 와요</button><button class="chip" type="button" aria-pressed="false">내용이 도움이 안 돼요</button><button class="chip" type="button" aria-pressed="false">가격이 부담돼요</button><button class="chip" type="button" aria-pressed="false">이직을 마쳤어요</button><button class="chip" type="button" aria-pressed="false">기타</button></div></div>
+    <button class="agree" id="agree" type="button" role="checkbox" aria-checked="false"><span class="box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="agree-t">위 내용을 확인했고, 탈퇴할게요</span></button>
+    <p class="err" id="err" role="status" hidden></p>
+  </div>
+</main>
+<main id="bye" hidden>
+  <div class="done">
+    <span class="ok"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg></span>
+    <h1 class="t-display">탈퇴가 끝났어요</h1>
+    <p class="t-body-s desc">그동안 커리어코치를 써 주셔서 고마워요.</p>
+  </div>
+</main>
+<footer>
+  <div class="biz">
+    <div class="biz-name">주식회사 오늘의논문</div>
+    <!-- 랜딩 index.html·결제 checkout/index.html 의 같은 블록과 줄 순서까지 같게 유지한다. 피그마 6:364 가 기준이다. -->
+    <div class="biz-lines">대표 : 이채빈<br>사업자등록번호 : 450-86-03846<br>통신판매업신고 : 2026-서울서대문-0831<br>주소 : 서울특별시 서대문구 이화여대7길 37, 3층 J15호<br>문의 : careercoach.my@gmail.com<br>전화번호 : 070-8018-9238</div>
+    <div class="links"><a href="/terms.html">이용약관</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="/privacy.html">개인정보처리방침</a></div>
+  </div>
+</footer>
+<div class="cta-dock">
+  <button class="cta danger" type="button" id="go" disabled><span id="lab">탈퇴하기</span></button>
+</div>
+<script type="module">
+  import { requireLogin, getSubscription, dayText, withdraw, FAIL } from '/assets/mypage-data.js';
+  import { client } from '/assets/onboarding-store.js';
+  const $ = (id) => document.getElementById(id);
+  const go = $('go'), lab = $('lab'), agree = $('agree');
+  let 막힘 = true;          // 구독 상태를 읽기 전에는 누를 수 없다
+  let 실패 = false;
+  function refresh() {
+    const ok = agree.getAttribute('aria-checked') === 'true';
+    go.disabled = 막힘 || 실패 || !ok;
+    lab.textContent = 실패 ? FAIL.line : '탈퇴하기';
+  }
+  /* 멤버십이 남아 있으면 — 이유·동의는 거두고 안내를 세운다. 날짜는 그 사람의 기간 끝이다 */
+  function block(s) {
+    막힘 = true;
+    $('block').hidden = false; $('why').hidden = true; agree.hidden = true;
+    if (s && s.current_period_end) {
+      $('blockDate').textContent = (s.cancel_at_period_end ? '이용 종료일 · ' : '다음 결제일 · ') + dayText(s.current_period_end);
+    }
+    refresh();
+  }
+  document.querySelector('.chips').addEventListener('click', (e) => {
+    const c = e.target.closest('.chip'); if (!c) return;
+    const on = c.getAttribute('aria-pressed') !== 'true';
+    document.querySelectorAll('.chips .chip').forEach((x) => x.setAttribute('aria-pressed', 'false'));
+    c.setAttribute('aria-pressed', on ? 'true' : 'false');    // 하나만 고른다 · 다시 누르면 풀린다
+  });
+  agree.addEventListener('click', () => {
+    agree.setAttribute('aria-checked', agree.getAttribute('aria-checked') === 'true' ? 'false' : 'true');
+    refresh();
+  });
+  go.addEventListener('click', async () => {
+    if (go.disabled) return;
+    go.disabled = true; $('err').hidden = true;
+    const pick = document.querySelector('.chips .chip[aria-pressed="true"]');
+    try {
+      const r = await withdraw(pick ? pick.textContent : null);
+      /* 서버가 멤버십을 다시 본다 — 화면을 연 뒤에 결제가 걸렸으면 여기서 막힌다 */
+      if (r === 'membership') { block(await getSubscription().catch(() => null)); return; }
+      // 'withdrawn' · 'not_found'(이미 탈퇴) 둘 다 끝난 것이다. 로그인 계정이 지워졌으니 이 기기의 세션도 버린다
+      (await client()).auth.signOut({ scope: 'local' }).catch(() => {});
+      $('ask').hidden = true; $('bye').hidden = false;
+      go.classList.remove('danger'); go.disabled = false; lab.textContent = '처음 화면으로';
+      go.onclick = () => { location.href = '/'; };
+    } catch (e) {
+      console.error('탈퇴 실패', e);
+      $('err').textContent = '탈퇴하지 못했어요. 잠시 뒤 다시 시도해 주세요.'; $('err').hidden = false;
+      refresh();
+    }
+  });
+  refresh();
+  requireLogin().then((ok) => ok ? getSubscription() : undefined).then((s) => {
+    if (s === undefined) return;
+    if (s && ['trialing', 'active', 'past_due'].includes(s.status)) block(s);
+    else { 막힘 = false; refresh(); }
+  }, () => { 실패 = true; refresh(); });
+</script>
+</div>
+</body>
+</html>

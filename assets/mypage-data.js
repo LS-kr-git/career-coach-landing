@@ -407,5 +407,77 @@ export function sundayStateOf(s) {
 export async function useSunday(insightId) {
   const r = await rpc('mypage_use_makeup', true, { p_insight_id: insightId });
   if (!r.token) throw new Error('mypage_use_makeup: 받은 편이 아닙니다');
-  return { state: r.state, href: `/insight/?t=${encodeURIComponent(r.token)}&id=${encodeURIComponent(insightId)}` };
+  return { state: r.state, href: insightHref(r.token, insightId, 'sunday') };
+}
+
+/**
+ * 전문 페이지 주소. `from` 은 마이페이지에서 열었다는 표시다 — 전문 페이지가 그때만 로고 대신
+ * 뒤로가기 헤더를 세운다(2026-10-03 사용자 컨펌 「1번」). 알림톡 링크에는 붙지 않는다.
+ */
+export function insightHref(token, insightId, from) {
+  return `/insight/?t=${encodeURIComponent(token)}&id=${encodeURIComponent(insightId)}&from=${encodeURIComponent(from)}`;
+}
+
+/** 저장소에서 소장한 편을 열 때 쓰는 그 사람의 토큰 (0114 `mypage_insight_token`). */
+export async function getInsightToken() {
+  const supabase = await supa();
+  const { data, error } = await supabase.rpc('mypage_insight_token');
+  if (error) throw error;
+  if (!data) throw new Error('mypage_insight_token: 값이 오지 않았습니다');
+  return data;
+}
+
+/**
+ * 탈퇴 (0115 `mypage_withdraw`). 'withdrawn' | 'membership'(멤버십이 남아 거절) | 'not_found'.
+ * 서버가 멤버십을 다시 본다 — 화면이 「탈퇴할 수 있다」고 그렸어도 그 사이 결제가 걸렸으면 거절한다.
+ */
+export async function withdraw(reason) {
+  const supabase = await supa();
+  const { data, error } = await supabase.rpc('mypage_withdraw', { p_reason: reason || null });
+  if (error) throw error;
+  return data;
+}
+
+/** 연차 구간 글자 — 「1 ~ 3년」·「0년」·「7 ~ 15년+」. 연차 고치기 화면과 마이페이지 줄이 같이 쓴다. */
+export function yearsText(lo, hi) {
+  const one = (v) => (v >= 15 ? '15년+' : v + '년');
+  const b = hi ?? lo;
+  return lo === b ? one(lo) : `${lo} ~ ${one(b)}`;
+}
+
+/* 🔴 공휴일 사본 — 정본은 career-coach `ops/holidays.json`(발송 회차가 공휴일을 건너뛰는 근거).
+   이 사이트에는 서버가 영업일을 알려 주는 통로가 없어 2026·2027 날짜만 옮겨 왔다(2026-10-03).
+   목록이 끝나는 해(2027) 뒤에는 주말만 거르므로 공휴일 하루가 틀릴 수 있다 — 정본이 그해를
+   받으면 이 줄도 같이 늘린다. */
+const HOLIDAYS = new Set([
+  '2026-01-01', '2026-02-16', '2026-02-17', '2026-02-18', '2026-03-01', '2026-03-02',
+  '2026-05-01', '2026-05-05', '2026-05-24', '2026-05-25', '2026-06-03', '2026-06-06',
+  '2026-07-17', '2026-08-15', '2026-08-17', '2026-09-24', '2026-09-25', '2026-09-26',
+  '2026-10-03', '2026-10-05', '2026-10-09', '2026-12-25', '2027-01-01', '2027-02-06',
+  '2027-02-07', '2027-02-08', '2027-02-09', '2027-03-01', '2027-05-01', '2027-05-03',
+  '2027-05-05', '2027-05-13', '2027-06-06', '2027-07-17', '2027-07-19', '2027-08-15',
+  '2027-08-16', '2027-09-14', '2027-09-15', '2027-09-16', '2027-10-03', '2027-10-04',
+  '2027-10-09', '2027-10-11', '2027-12-25', '2027-12-27',
+]);
+
+/**
+ * 첫 알림톡이 가는 날 — 'YYYY-MM-DD'. 발송은 영업일(월~금·공휴일 제외) 08:00 KST 한 번이고,
+ * 받는 사람 명단은 그 회차가 시작될 때 정해진다(career-coach ops/send.py SELECT_TARGET).
+ * 그래서 영업일 08:00 전에 결제했으면 그날, 아니면 다음 영업일이다. `now` 는 검사용 이음매다.
+ */
+export function firstSendDay(now = new Date()) {
+  const k = new Date(now.getTime() + 9 * 3600e3);          // 서울 시각을 UTC 칸에 놓는다
+  const iso = (t) => t.toISOString().slice(0, 10);
+  const 영업일 = (t) => t.getUTCDay() % 6 !== 0 && !HOLIDAYS.has(iso(t));
+  const t = new Date(Date.UTC(k.getUTCFullYear(), k.getUTCMonth(), k.getUTCDate()));
+  if (영업일(t) && k.getUTCHours() < 8) return iso(t);
+  do t.setUTCDate(t.getUTCDate() + 1); while (!영업일(t));
+  return iso(t);
+}
+
+/** 「10월 5일(월)」 */
+export function shortDayText(iso) {
+  const [, m, d] = iso.split('-').map(Number);
+  const w = '일월화수목금토'[new Date(iso + 'T00:00:00Z').getUTCDay()];
+  return `${m}월 ${d}일(${w})`;
 }

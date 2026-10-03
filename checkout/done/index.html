@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="only light">
+<meta name="format-detection" content="telephone=no">
+<meta name="robots" content="noindex,nofollow"><title>구독 시작 — 커리어코치</title>
+<link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root{
+    color-scheme: only light;   /* meta 와 같은 값 — CSS 로도 선언해 확실히 적용한다 */
+    --amber-50:#FFFBEB;--amber-200:#FDE68A;--amber-500:#F59E0B;--amber-600:#D97706;--amber-700:#B45309;
+    --navy-900:#1E3A8A;
+    --gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;--gray-400:#94A3B8;
+    --gray-500:#64748B;--gray-600:#475569;--gray-700:#334155;--gray-800:#1E293B;--gray-900:#0F172A;
+    --error-600:#DC2626;
+    --pad-x:24px; --card-max:450px;
+    /* CTA 규칙(2026-08-03) — 제품 공통. 값·근거는 CLAUDE.md "CTA 규칙" */
+    --cta-h:54px; --cta-radius:14px; --cta-fs:15px; --cta-fw:700; --cta-max:410px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{background:var(--gray-100)}
+  body{font-family:'Pretendard Variable',Pretendard,'Noto Sans CJK KR',-apple-system,'Apple SD Gothic Neo',sans-serif;
+    background:#fff;color:var(--gray-800);line-height:1.6;-webkit-font-smoothing:antialiased}
+  .page{width:100%;max-width:var(--card-max);margin:0 auto;background:#fff;
+    min-height:100vh;min-height:100svh;padding-bottom:108px;position:relative}
+
+  /* 헤더 — 뒤로가기 하나. 헤더 안에 글씨를 넣지 않는다 (CLAUDE.md 표준값) */
+  .hd{position:sticky;top:0;z-index:20;display:flex;align-items:center;
+    height:calc(48px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 12px 0;background:#fff}
+  .back{width:48px;height:48px;display:flex;align-items:center;justify-content:center;
+    position:relative;background:none;border:0;cursor:pointer;padding:0}
+  .back svg{position:relative;z-index:1}
+  .back::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:36px;height:36px;border-radius:10px;background:transparent;transition:background .12s}
+  .back:active::before{background:var(--gray-100)}
+
+  main{padding:44px var(--pad-x) 0}
+  h1{font-size:28px;line-height:36px;font-weight:800;letter-spacing:-0.01em;color:var(--navy-900)}
+  .lead{font-size:15px;line-height:23px;color:var(--gray-600);margin-top:8px}
+
+  /* 주문 내용 */
+  .card{margin-top:20px;border:1px solid var(--gray-200);border-radius:14px;overflow:hidden;
+    box-shadow:0 1px 3px rgba(15,23,42,.05)}
+  .card-hd{background:var(--gray-50);padding:12px 18px;font-size:14px;line-height:21px;
+    font-weight:600;color:var(--gray-800);border-bottom:1px solid var(--gray-200)}
+  .spec{padding:14px 18px;display:grid;grid-template-columns:84px 1fr;gap:9px 12px}
+  .lbl{color:var(--gray-400);font-size:13px;line-height:20px}
+  .val{color:var(--gray-700);font-size:13px;line-height:20px}
+  .val b{color:var(--gray-800);font-size:15px}
+  .total{border-top:1px solid var(--gray-200);padding:14px 18px;
+    display:flex;align-items:center;justify-content:space-between}
+  .total-l{font-size:14px;font-weight:600;color:var(--gray-800)}
+  .total-v{font-size:20px;line-height:28px;font-weight:800;color:var(--navy-900)}
+
+  /* 결제 완료 — 2026-10-03 사용자 컨펌 「3번」. 결제 화면(checkout)과 같은 부품(.card·.spec·.bar)을 쓴다 */
+  .ok{width:64px;height:64px;border-radius:50%;background:#FEF3C7;display:flex;align-items:center;justify-content:center}
+  .ok + h1{margin-top:18px}
+  .lead b{color:var(--gray-800);font-weight:700}
+  .tip{margin-top:20px;font-size:13px;line-height:18px;color:var(--gray-500);word-break:keep-all;
+    background:var(--gray-50);border-radius:12px;padding:12px 14px}
+  .divider{height:1px;width:100%;background:var(--gray-200);margin-top:24px}
+
+  /* ===== 푸터 — 전자상거래법 제10조 신원정보 =====
+     결제 페이지에 두는 이유: PG·카드사 심사는 사업자 정보가 메인뿐 아니라 **결제 화면까지**
+     상시 노출돼 있는지를 본다(포트원 「서비스 필수 구축요건」). 2026-09-17 사용자 지시.
+
+     랜딩(index.html)의 footer 와 같은 것: **문구·줄 순서·색·글자 크기·굵기·링크**.
+     한 글자도 다르지 않다 — 한쪽을 고치면 다른 쪽도 고친다.
+     ⚠️ 다른 것은 **위·아래 여백 하나뿐**이다 (랜딩 80/120 → 여기 32/40).
+        랜딩은 페이지 끝이라 여백이 넓지만, 이 화면은 아래에 고정 CTA 바가 서 있어서
+        같은 값을 쓰면 바 위에 200px 짜리 빈 칸이 생긴다. 피그마도 같은 값이다
+        (2104:922 · 2104:927 — 랜딩 푸터 6:361 을 복제해 이 두 칸만 줄였다). */
+  footer{background:var(--gray-100);margin-top:32px;padding:32px var(--pad-x) 40px}
+  footer .biz{display:flex;flex-direction:column;gap:8px;color:var(--gray-500)}
+  footer .biz-name{font-size:13px;line-height:18px;font-weight:600}
+  footer .biz-lines{font-size:13px;line-height:18px}
+  footer .links a{color:var(--gray-500);text-decoration:none;font-size:13px;line-height:18px}
+  footer .links a[href$="privacy.html"]{font-weight:600}
+
+  .bar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:var(--card-max);
+    padding:14px 20px calc(20px + env(safe-area-inset-bottom));background:#fff;
+    box-shadow:0 -8px 24px rgba(15,23,42,.06)}
+  .cta{display:flex;text-decoration:none;align-items:center;justify-content:center;width:100%;max-width:var(--cta-max);
+    margin:0 auto;height:var(--cta-h);border:0;cursor:pointer;background:var(--amber-500);color:#fff;
+    font-family:inherit;font-weight:var(--cta-fw);font-size:var(--cta-fs);border-radius:var(--cta-radius);
+    box-shadow:0 12px 32px rgba(217,119,6,.28)}
+  .cta:active{transform:scale(.98)}
+  [hidden]{display:none!important}
+
+  @media (min-width:451px){
+    body{background:var(--gray-100)}
+    .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
+  }
+  :focus-visible{outline:2px solid var(--amber-500);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="page">
+  <main>
+    <div class="ok"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg></div>
+    <h1>구독이<br>시작됐어요</h1>
+    <!-- 날짜는 JS 가 센다 — 영업일 08:00 전에 결제했으면 그날, 아니면 다음 영업일(assets/mypage-data.js firstSendDay) -->
+    <p class="lead">첫 인사이트는 <b id="firstDay"></b>에<br>카카오 알림톡으로 도착해요.</p>
+
+    <section class="card">
+      <div class="card-hd">받게 될 브리핑</div>
+      <div class="spec">
+        <div class="lbl">인사이트</div><div class="val">영업일 매일 아침 8시, 고르신 주제의 글 1편</div>
+        <div class="lbl">채용공고</div><div class="val">매주 목요일 알림톡에 함께</div>
+      </div>
+    </section>
+
+    <!-- 금액·카드·다음 결제일은 그 사람의 구독 값이다 — JS 가 그린다(가격을 박지 않는다) -->
+    <section class="card">
+      <div class="card-hd">결제 정보</div>
+      <div class="spec">
+        <div class="lbl">결제 금액</div><div class="val"><b id="amount"></b></div>
+        <div class="lbl">결제 수단</div><div class="val" id="card"></div>
+        <div class="lbl">다음 결제일</div><div class="val" id="next"></div>
+      </div>
+    </section>
+
+    <p class="tip">알림톡이 오지 않으면 카카오톡 설정에서 알림톡 수신이 켜져 있는지 확인해 주세요.</p>
+    <div class="divider"></div>
+  </main>
+
+  <footer>
+    <div class="biz">
+      <div class="biz-name">주식회사 오늘의논문</div>
+      <!-- 랜딩 index.html 의 같은 블록과 줄 순서까지 같게 유지한다. 피그마 6:364 가 기준이다. -->
+      <div class="biz-lines">대표 : 이채빈<br>사업자등록번호 : 450-86-03846<br>통신판매업신고 : 2026-서울서대문-0831<br>주소 : 서울특별시 서대문구 이화여대7길 37, 3층 J15호<br>문의 : careercoach.my@gmail.com<br>전화번호 : 070-8018-9238</div>
+      <div class="links"><a href="/terms.html">이용약관</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="/privacy.html">개인정보처리방침</a></div>
+    </div>
+  </footer>
+
+  <div class="bar"><a class="cta" href="/mypage/">마이페이지로</a></div>
+</div>
+
+<script type="module">
+  import { requireLogin, getSubscription, billingView, wonText, dayText, firstSendDay, shortDayText, FAIL } from '/assets/mypage-data.js';
+  var $ = function (id) { return document.getElementById(id); };
+  $('firstDay').textContent = shortDayText(firstSendDay()) + ' 아침 8시';
+
+  /* 결제 화면이 첫 달을 걷은 뒤(`개시`)에만 여기로 보낸다. 구독이 없는 사람이 주소로 바로 오면
+     「구독이 시작됐어요」를 보여 줄 근거가 없으므로 마이페이지로 돌려보낸다. */
+  requireLogin().then(function (ok) { return ok ? getSubscription() : undefined; }).then(function (s) {
+    if (s === undefined) return;
+    if (!s || ['trialing', 'active', 'past_due'].indexOf(s.status) < 0) { location.replace('/mypage/'); return; }
+    var v = billingView(s, null);    // 구독 중이면 plan 을 안 본다
+    $('amount').textContent = wonText(s.price_krw);
+    $('card').textContent = v.card + (s.card_last4 ? ' ' + v.cardSub : '');
+    $('next').textContent = dayText(s.current_period_end) + ' (매월 자동)';
+  }, function () {
+    ['amount', 'card', 'next'].forEach(function (id) { $(id).textContent = FAIL.line; $(id).style.color = 'var(--error-600)'; });
+  });
+</script>
+</body>
+</html>

@@ -79,8 +79,13 @@
   .state-locked{display:flex;align-items:center;gap:9px;flex:none;white-space:nowrap;color:var(--amber-800)}
   .state-locked i{width:5px;height:5px;border-radius:9999px;background:var(--amber-500);
     box-shadow:0 0 0 3.5px rgba(245,158,11,.20);flex:none}
-  .logout{align-self:flex-end;padding:4px 18px 0;color:var(--gray-400);
-    background:none;border:0;font:inherit;font-size:14px;line-height:20px;cursor:pointer}
+  .row .val{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:55%}
+  /* 로그아웃 · 회원 탈퇴 — 같은 크기·색의 글자 링크 둘 (2026-10-03 사용자 컨펌 「5번 첫 페이지」) */
+  .bottom{align-self:flex-end;display:flex;align-items:center;padding:4px 0 0}
+  .logout,.leave{padding:0 10px;color:var(--gray-400);background:none;border:0;font:inherit;font-size:14px;line-height:20px;
+    cursor:pointer;text-decoration:none}
+  .leave{padding-right:18px}
+  .sep{color:var(--gray-300);font-size:14px;line-height:20px}
 
   /* ===== 푸터 — 전자상거래법 제10조 신원정보 =====
      이 화면에도 두는 이유: PG·카드사 심사는 사업자 정보가 메인뿐 아니라 이용자가 지나는
@@ -127,6 +132,9 @@
       </div>
     </div>
     <a class="row" href="/mypage/jobs/"><span class="col t-body-l">채용공고 받을 직군</span><span class="caret" aria-hidden="true">›</span></a>
+    <!-- 현재 값(회색)은 JS 가 채운다 — 서버에서 못 읽었으면 빈 채로 둔다(지어낸 값을 그리지 않는다) -->
+    <a class="row" href="/mypage/years/"><span class="col t-body-l">채용공고 받을 연차</span><span class="t-caption sub val" id="valYears"></span><span class="caret" aria-hidden="true">›</span></a>
+    <a class="row" href="/mypage/regions/"><span class="col t-body-l">채용공고 받을 근무지</span><span class="t-caption sub val" id="valRegions"></span><span class="caret" aria-hidden="true">›</span></a>
     <a class="row" href="/mypage/topics/"><span class="col t-body-l">인사이트 받을 주제</span><span class="caret" aria-hidden="true">›</span></a>
     <a class="row" href="/mypage/billing/"><span class="col t-body-l">멤버십·결제</span><span class="caret" aria-hidden="true">›</span></a>
   </section>
@@ -154,7 +162,7 @@
     </div>
   </section>
 
-  <button class="logout" type="button">로그아웃</button>
+  <div class="bottom"><button class="logout" type="button">로그아웃</button><span class="sep" aria-hidden="true">·</span><a class="leave" href="/mypage/leave/">회원 탈퇴</a></div>
 </main>
 <footer>
   <div class="biz">
@@ -224,8 +232,22 @@
      그것을 다시 보내는 곳이 **온보딩 세 화면뿐**이었다. 온보딩은 단방향이라 다시 들어올
      일이 거의 없어서, 그 사람은 자기가 고른 주제를 영영 못 받는다 — 아무 표시도 없이.
      `retryPending()` 은 보낼 것이 없거나 로그인 전이면 조용히 아무것도 안 한다. */
-  import { retryPending } from '/assets/onboarding-store.js';
+  import { retryPending, pullFromServer, readState, client } from '/assets/onboarding-store.js';
+  import { requireLogin, yearsText } from '/assets/mypage-data.js';
   retryPending();
+
+  /* 연차·근무지 줄의 현재 값 — 고치는 화면(mypage/years·regions)이 읽는 것과 같은 서버 값이다 */
+  requireLogin().then(function (ok) { return ok ? pullFromServer() : null; }).then(function (r) {
+    if (r === null) return;
+    var s = readState();
+    if (s.years !== null) document.getElementById('valYears').textContent = yearsText(s.years, s.yearsMax);
+    document.getElementById('valRegions').textContent = s.regions.join(' · ');
+  }, function (e) { console.error('연차·근무지 조회 실패', e); });
+
+  /* 로그아웃 — 이 버튼은 2026-10-03 까지 아무 동작도 걸려 있지 않았다 */
+  document.querySelector('.logout').addEventListener('click', function () {
+    client().then(function (c) { return c.auth.signOut(); }).finally(function () { location.href = '/'; });
+  });
 </script>
 </div>
 </body>
