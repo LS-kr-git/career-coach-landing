@@ -80,11 +80,11 @@
   .src{margin-top:24px;color:var(--gray-500)}
   .src[hidden]{display:none}
 
-  /* 「이 글, 도움이 됐나요?」 — 위아래 8px 회색 막대가 화면 끝까지 닿는다 (시안 R3 · E3) */
-  .band{margin:0 calc(-1 * var(--pad-x));border-top:8px solid var(--gray-100)}
+  /* 「이 글, 도움이 됐나요?」 — 위아래 12px 회색 막대가 화면 끝까지 닿는다 (시안 R3 · E3 · 2026-10-04 8→12) */
+  .band{margin:0 calc(-1 * var(--pad-x));border-top:12px solid var(--gray-100)}
   /* 반응 칸 아래 막대는 반응 칸이 갖는다 — 소장 목록이 비어 감춰져도 막대가 남게.
      그 뒤에 소장 목록이 서면 그쪽 윗막대를 지워 막대가 두 겹이 되지 않게 한다. */
-  .fb{border-bottom:8px solid var(--gray-100)}
+  .fb{border-bottom:12px solid var(--gray-100)}
   #letter:has(#fb:not([hidden])) + .saved{border-top:0}
   .fb{margin-top:80px;padding:32px var(--pad-x) 40px}
   .fb[hidden]{display:none}
