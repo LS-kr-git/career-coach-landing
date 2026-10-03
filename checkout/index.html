@@ -206,9 +206,17 @@
 </div>
 
 <script type="module">
-  import { getPlan, getSubscription, billingView, priceText, wonText, saveBillingKey, FAIL } from '/assets/mypage-data.js';
+  import { getPlan, getSubscription, billingView, priceText, wonText, saveBillingKey, requireLogin, FAIL } from '/assets/mypage-data.js';
 
   var $ = function (id) { return document.getElementById(id); };
+
+  /* 로그인부터 본다 (2026-10-03 사용자 확정 「3번」). 전문 페이지의 구독 버튼처럼 로그인 없이
+     여기 닿는 길이 있다 — 그대로 두면 카드를 다 넣은 뒤 마지막 보관 단계에서야 막힌다.
+     로그인 화면에서 돌아오면 다시 이 화면이다. 세션을 못 물어봤으면 막지 않는다 —
+     보관 단계가 어차피 다시 본다. */
+  if (!(await requireLogin(location.pathname + location.search).catch(function () { return true; }))) {
+    await new Promise(function () {});   // 이동하는 동안 아래가 그려지거나 결제창이 열리지 않게 여기서 멈춘다
+  }
 
   /* 체험 기간은 없다 — 신청 즉시 첫 달이 결제되고 매월 같은 날 갱신된다
      (2026-09-15 사용자 확정). 날짜를 화면에 박아 두면 하루 만에 틀린 값이 되므로 그릴 때 센다.

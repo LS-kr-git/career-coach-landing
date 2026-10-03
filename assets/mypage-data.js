@@ -120,12 +120,17 @@ export const SUNDAY_STATIC = [
  * 로그인한 사람인지 본다. 아니면 /login/ 으로 보내고 **거짓**을 돌려준다 —
  * 부른 화면은 그때 아무것도 그리지 않는다(잠깐 남의 것처럼 보이는 빈 화면을 안 그린다).
  * 세션 확인 자체가 실패하면 던진다 — 로그인 안 한 것과 못 물어본 것은 다르다.
+ * `next` 를 주면 로그인 뒤 그리로 돌아온다(assets/return-to.js 의 허용 목록 안에서만).
  */
-export async function requireLogin() {
+export async function requireLogin(next) {
   const supabase = await supa();
   const { data, error } = await supabase.auth.getSession();
   if (error) throw error;
-  if (!data.session) { location.replace('/login/'); return false; }
+  if (!data.session) {
+    if (next) (await import('/assets/return-to.js')).rememberNext(next);
+    location.replace('/login/');
+    return false;
+  }
   return true;
 }
 

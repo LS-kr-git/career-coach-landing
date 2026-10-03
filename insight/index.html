@@ -286,22 +286,20 @@
     blocked:  '지금은 열 수 없어요',
   };
 
-  /* 구독 CTA 의 목적지. **결제 화면이 아직 없어서 비어 있다** — 비어 있으면 버튼이
-     눌리지 않는 '준비 중' 으로 그려진다(갈 곳 없는 죽은 링크를 만들지 않기 위해서다).
-     결제 화면이 생기면 이 한 줄을 채우되 **그 페이지를 먼저 저장소에 만든다** —
-     page-audit 의 깨진 링크 검사는 이 상수를 못 본다 (2026-08-10 실측).
-     이 주석에 빈 앵커나 이동문을 원문으로 쓰지 마라 — 그 검사가 주석까지 훑어 막는다.
-     ※ 아래 버튼 문구 2개는 미승인 임시 문구다. */
-  const CHECKOUT_URL = '';
-  const NEEDS_SUB = new Set(['need_subscription', 'saved_need_subscription']);
+  /* 구독 CTA 의 목적지 — 결제 화면(2026-10-03 실결제 채널). 결제 화면이 로그인을 먼저 보고,
+     로그인 뒤 다시 결제 화면으로 데려온다(assets/return-to.js). 전문 페이지는 토큰으로만 열려
+     로그인이 없을 수 있어서다.
+     page-audit 의 깨진 링크 검사는 이 상수를 못 본다 (2026-08-10 실측) — 주소를 바꾸면
+     그 페이지가 저장소에 있는지 직접 본다. */
+  const CHECKOUT_URL = '/checkout/';
 
-  /* 구독 버튼의 두 갈래 문구. 삼항 안에 그대로 두면 docs-audit 이 못 본다(<script> 를
-     걷어내고 웹을 훑는다). 상수로 묶고 webScriptText 에 이름을 적어 두 갈래 다 피그마
-     프레임과 맞대 본다 — 2088:846(구독가능) 과 2058:775·2058:800(구독 준비 중).
-     ※ 위 주석이 말한 「미승인 임시 문구 2개」가 이 둘이다. 결제 화면이 확정되면 함께 고친다. */
+  /* 구독 버튼 문구는 잠긴 이유에 따라 갈린다 (2026-10-03 사용자 확정).
+     소장한 편이 있다 = 구독했던 사람이라 「다시」다. 삼항 안에 그대로 두면 docs-audit 이 못 본다
+     (<script> 를 걷어내고 웹을 훑는다) — 상수로 묶고 webScriptText 에 이름을 적어 피그마
+     2058:775(구독필요)·2058:800(소장·구독만료) 과 맞댄다. */
   const SUB_CTA = {
-    ready:   '구독 시작하기',
-    pending: '구독 준비 중이에요',
+    need_subscription:       '구독 시작하기',
+    saved_need_subscription: '다시 구독하기',
   };
 
   const params = new URLSearchParams(location.search);
@@ -409,9 +407,8 @@
     $('makeup').hidden = row.state !== 'makeup_offer';
 
     const sub = $('subscribe');
-    sub.hidden = !NEEDS_SUB.has(row.state);
-    sub.disabled = !CHECKOUT_URL;
-    sub.textContent = CHECKOUT_URL ? SUB_CTA.ready : SUB_CTA.pending;
+    sub.hidden = !SUB_CTA[row.state];
+    sub.textContent = SUB_CTA[row.state] || '';
   }
 
   /** 소장 알림 — **처음 담기는 그 순간에만** 뜬다. 이미 담긴 편을 다시 열면 안 뜬다
@@ -451,7 +448,6 @@
     }
   });
 
-  // 목적지가 빌 때는 버튼이 disabled 라 이 핸들러가 돌 일이 없다(클릭 이벤트 자체가 안 난다).
   $('subscribe').addEventListener('click', () => { location.href = CHECKOUT_URL; });
 
   /* 「이 글, 도움이 됐나요?」 — 누른 쪽이 눌린 모양이 된다(고마움 한 줄은 2026-09-26 피그마를 따라 뺐다). 다시 누르면 바뀐다.

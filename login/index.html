@@ -221,6 +221,7 @@
   // 접속 정보는 /assets/supabase-config.js 한 곳에만 둔다.
   import { SUPABASE_URL, SUPABASE_ANON_KEY } from '/assets/supabase-config.js';
   import { track } from '/assets/track.js';
+  import { takeNext } from '/assets/return-to.js';
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   const form = document.getElementById('form');
@@ -234,7 +235,8 @@
 
   // 이미 로그인돼 있으면 온보딩으로 — /auth/callback/ 이 세션을 받으면 가는 곳과 같다.
   const { data: { session } } = await supabase.auth.getSession();
-  if (session) location.replace('/onboarding/1/');
+  // 결제 화면에서 보내 온 사람은 그리로 돌려보낸다(assets/return-to.js).
+  if (session) location.replace(takeNext('/onboarding/1/'));
 
   // 카카오 — /signup/ · 랜딩 헤더와 **같은 문자열**이어야 한다 (세 곳이 같은 로그인이다).
   kakaoBtn.addEventListener('click', async () => {
@@ -269,7 +271,7 @@
     track('login', { method: 'email' }, data.session.access_token);
     // /auth/callback/ 이 세션을 받았을 때와 같은 목적지. 온보딩을 마쳤는지의 판정은 아직 없다 —
     // 결제 화면이 배선되면 여기와 /auth/callback/ 이 같은 판정을 갖는다.
-    location.replace('/onboarding/1/');
+    location.replace(takeNext('/onboarding/1/'));
   };
   form.addEventListener('submit', (e) => { e.preventDefault(); if (!btn.disabled) login(); });
   window.ccLoginReady = true;   // 여기까지 와야 제출이 실제로 동작한다 — 위 게이트가 이 표시를 본다
