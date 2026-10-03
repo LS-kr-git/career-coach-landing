@@ -205,7 +205,7 @@
     ?.addEventListener('click', () => track('signup_start'), { once: true });
 
   // 카카오 로그인이 끝나지 못하고 돌아온 경우 한 건 남긴다 — 어드민 「카카오 로그인이 실패하고
-  // 있나」가 센다(career-coach 0117). 이 모듈에 두는 이유는 위와 같다: CDN 이 막혀도 남아야 한다.
+  // 있나」가 센다(career-coach 마이그레이션 *_kakao_login_watch). 이 모듈에 두는 이유는 위와 같다: CDN 이 막혀도 남아야 한다.
   // `why`·`code` 는 콜백 화면(auth/callback/)이 실어 보낸 것이다. 새로고침하면 한 건 더 남지만
   // 어드민은 건이 아니라 브라우저 수를 센다.
   const 돌아옴 = new URLSearchParams(location.search);

@@ -55,13 +55,15 @@
   //   다시 잰다. 8초 동안 아무 진척이 없을 때만 실패로 넘긴다. (2026-08-09)
   //   인증에 성공한 경우는 모듈이 곧바로 go() 를 불러 done 이 서므로 여기서 다시 보지 않는다.
   // 실패로 돌려보낼 때 **어디서 끊겼나**를 주소에 싣는다 — 가입 화면이 그것을 `login_fail` 로
-  // 남기고 어드민 「카카오 로그인이 실패하고 있나」가 센다 (2026-10-03, career-coach 0117).
+  // 남기고 어드민 「카카오 로그인이 실패하고 있나」가 센다 (2026-10-03, career-coach 마이그레이션 *_kakao_login_watch).
   // 카카오·로그인 서버가 오류를 돌려줬으면 그 코드가 이 주소(?error=… 또는 #error=…)에 와 있다.
   // ★ 맨 처음에 읽는다 — supabase-js 가 주소를 정리하기 전이어야 한다.
   // ★ 코드만 옮긴다. 설명문(error_description)은 길고 사람 말이라 원장에 안 넣는다.
   const 받은오류 = (() => {
     const q = new URLSearchParams(location.search), h = new URLSearchParams(location.hash.slice(1));
-    const c = q.get('error_code') || q.get('error') || h.get('error_code') || h.get('error') || '';
+    // `error` 를 먼저 본다 — OAuth 표준 코드라 카카오 「취소」가 늘 `access_denied` 로 온다.
+    // `error_code` 는 Supabase 가 덧붙이는 세부 이름이라 취소에도 다른 값이 올 수 있다(어드민이 취소를 실패로 세게 된다).
+    const c = q.get('error') || h.get('error') || q.get('error_code') || h.get('error_code') || '';
     return c.replace(/[^A-Za-z0-9_]/g, '').slice(0, 40);
   })();
   window.ccFail = (why) => window.ccGo(받은오류
