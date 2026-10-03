@@ -206,7 +206,7 @@
 </div>
 
 <script type="module">
-  import '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
+  import { metaEvent } from '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
   import { getPlan, getSubscription, billingView, priceText, wonText, saveBillingKey, billingCustomerId, requireLogin, FAIL } from '/assets/mypage-data.js';
 
   var $ = function (id) { return document.getElementById(id); };
@@ -273,6 +273,7 @@
       ? '새 카드로 <b>매' + 요금 + ' 자동 결제</b>에 동의합니다.'
       : '<b>매' + 요금 + ' 자동 결제</b>되는 정기결제에 동의합니다.';
     $('submit').disabled = false;
+    if (!변경) metaEvent('InitiateCheckout', { value: plan.price_krw, currency: 'KRW' });
   }).catch(function () {
     // 못 읽은 금액 자리는 비우지 않고 「—」 로 둔다 (2026-09-24 사용자 확정 A안).
     $('submit').classList.add('locked');

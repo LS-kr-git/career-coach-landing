@@ -101,7 +101,8 @@ export function track(name, props = {}, accessToken = null) {
     // 운영 주소에서만 보낸다. 2026-10-03 에 localhost 에서 돈 자동 시험(헤드리스 크롬)이
     // 운영 원장에 onboarding_done 4건·「저장 실패」 1건을 남겼다 — 로그인을 안 하니
     // 우리 브라우저 표식(0111)으로도 안 걸러진다. 받는 쪽은 주소를 모르므로 여기서 막는다.
-    if (!/(^|\.)careercoach\.my$/.test(location.hostname)) return;
+    if (!onSite()) return;
+    if (META_OF[name]) metaEvent(META_OF[name]);
     const mark = browserMark();
     const body = JSON.stringify({
       p_name: name,
@@ -122,6 +123,49 @@ export function track(name, props = {}, accessToken = null) {
     }).catch(() => {});                 // 실패는 삼킨다. 추적이 화면을 막으면 안 된다.
   } catch { /* 무시 */ }
 }
+
+function onSite() { return /(^|\.)careercoach\.my$/.test(location.hostname); }
+
+/**
+ * 메타 픽셀 (2026-10-03) — 광고를 보고 온 사람이 결제까지 갔는지 메타가 재고 학습하게 한다.
+ * 이 파일을 import 하는 모든 화면에서 PageView 가 나간다.
+ *
+ * 🔴 픽셀은 **현재 주소 전체**를 메타로 보낸다. 그래서 주소에 utm·fbclid·gclid 말고 다른
+ *    값이 있으면 아예 안 켠다 — `/insight/?t=` 열람 토큰, `/auth/callback/` 의 `#access_token`,
+ *    결제창에서 돌아올 때 `/checkout/?` 에 붙는 값이 메타에 실리면 안 된다.
+ * 🔴 autoConfig 를 끈다 — 켜 두면 픽셀이 버튼·입력칸을 스스로 긁어 간다(로그인 화면에 이메일 칸이 있다).
+ */
+const PIXEL_ID = '1578800443456736';
+const META_OF = { signup_start: 'Lead', onboarding_done: 'CompleteRegistration' };
+
+function urlIsClean() {
+  if (location.hash.includes('=')) return false;
+  return [...new URLSearchParams(location.search).keys()].every((k) => /^(utm_\w+|fbclid|gclid)$/.test(k));
+}
+
+function loadPixel() {
+  if (window.fbq || !onSite() || location.pathname.startsWith('/ops/') || !urlIsClean()) return;
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  window.fbq('set', 'autoConfig', false, PIXEL_ID);
+  window.fbq('init', PIXEL_ID);
+  window.fbq('track', 'PageView');
+}
+
+/**
+ * 메타 표준 이벤트 1건. 픽셀이 안 켜진 화면에서는 아무 일도 안 한다.
+ * @param {string} name   Purchase·InitiateCheckout 같은 메타 표준 이름
+ * @param {object} props  value·currency 정도만. 개인정보를 넣지 말 것
+ * @param {string} [eventID]  같은 결제가 두 번 세어지지 않게 메타가 묶는 열쇠
+ */
+export function metaEvent(name, props = {}, eventID) {
+  try { if (window.fbq) window.fbq('track', name, props, eventID ? { eventID } : undefined); } catch { /* 무시 */ }
+}
+
+if (typeof window !== 'undefined') { try { loadPixel(); } catch { /* 픽셀 때문에 화면이 깨지면 안 된다 */ } }
 
 /** 대부분의 페이지가 쓰는 형태: 유입 저장 + 진입 이벤트 1건. */
 export function pageView(name, props = {}, accessToken = null) {

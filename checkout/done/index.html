@@ -138,7 +138,7 @@
 </div>
 
 <script type="module">
-  import '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
+  import { metaEvent } from '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
   import { requireLogin, getSubscription, billingView, wonText, dayText, firstSendDay, shortDayText, FAIL } from '/assets/mypage-data.js';
   var $ = function (id) { return document.getElementById(id); };
   $('firstDay').textContent = shortDayText(firstSendDay()) + ' 아침 8시';
@@ -152,6 +152,12 @@
     $('amount').textContent = wonText(s.price_krw);
     $('card').textContent = v.card + (s.card_last4 ? ' ' + v.cardSub : '');
     $('next').textContent = dayText(s.current_period_end) + ' (매월 자동)';
+    /* 이 화면은 새로고침·뒤로가기로 또 열린다. 같은 결제 기간이면 메타에 한 번만 보낸다 —
+       eventID 가 같으면 메타도 묶지만 그건 48시간까지라, 기기에도 적어 둔다. */
+    var 결제키 = 'purchase-' + s.current_period_end;
+    var 처음 = true;
+    try { 처음 = localStorage.getItem('cc_px_buy') !== 결제키; localStorage.setItem('cc_px_buy', 결제키); } catch (e) { /* 못 적으면 eventID 에 맡긴다 */ }
+    if (처음) metaEvent('Purchase', { value: s.price_krw, currency: 'KRW' }, 결제키);
   }, function () {
     ['amount', 'card', 'next'].forEach(function (id) { $(id).textContent = FAIL.line; $(id).style.color = 'var(--error-600)'; });
   });
