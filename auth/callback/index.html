@@ -54,10 +54,23 @@
   //   그래서 시간이 아니라 **진척**을 본다 — 모듈이 한 걸음 나아갈 때마다 ccAlive() 로 이 타이머를
   //   다시 잰다. 8초 동안 아무 진척이 없을 때만 실패로 넘긴다. (2026-08-09)
   //   인증에 성공한 경우는 모듈이 곧바로 go() 를 불러 done 이 서므로 여기서 다시 보지 않는다.
+  // 실패로 돌려보낼 때 **어디서 끊겼나**를 주소에 싣는다 — 가입 화면이 그것을 `login_fail` 로
+  // 남기고 어드민 「카카오 로그인이 실패하고 있나」가 센다 (2026-10-03, career-coach 0117).
+  // 카카오·로그인 서버가 오류를 돌려줬으면 그 코드가 이 주소(?error=… 또는 #error=…)에 와 있다.
+  // ★ 맨 처음에 읽는다 — supabase-js 가 주소를 정리하기 전이어야 한다.
+  // ★ 코드만 옮긴다. 설명문(error_description)은 길고 사람 말이라 원장에 안 넣는다.
+  const 받은오류 = (() => {
+    const q = new URLSearchParams(location.search), h = new URLSearchParams(location.hash.slice(1));
+    const c = q.get('error_code') || q.get('error') || h.get('error_code') || h.get('error') || '';
+    return c.replace(/[^A-Za-z0-9_]/g, '').slice(0, 40);
+  })();
+  window.ccFail = (why) => window.ccGo(받은오류
+    ? '/signup/?error=auth&why=provider&code=' + 받은오류
+    : '/signup/?error=auth&why=' + why);
   let timer;
   window.ccAlive = () => {
     clearTimeout(timer);
-    timer = setTimeout(() => window.ccGo('/signup/?error=auth'), 8000);
+    timer = setTimeout(() => window.ccFail('stalled'), 8000);
   };
   window.ccAlive();
 </script>
@@ -156,7 +169,7 @@
     window.ccAlive();
     const { data } = await supabase.auth.getSession();
     markLogin(data.session);
-    if (data.session) 성공(); else go('/signup/?error=auth');
+    if (data.session) 성공(); else window.ccFail('no_session');
   }, 3000);
 </script>
 </body>

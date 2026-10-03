@@ -167,7 +167,7 @@
   // ★ supabase-js 를 부르는 아래 블록과 **일부러 분리**했다 — signup/index.html 과 같은 이유.
   //   같은 모듈에 두면 CDN 이 느리거나 막힌 순간 추적도 같이 죽는다.
   // 이름은 analytics.event_name 허용 목록(visit·signup_view·signup_start·login·onboarding_step·
-  //   onboarding_done·client_error)에 있는 것만 통과한다 — 목록은 career-coach 저장소에 있다.
+  //   onboarding_done·client_error·login_fail)에 있는 것만 통과한다 — 목록은 career-coach 저장소에 있다.
   //   로그인 화면 전용 이름이 없어 카카오 버튼은 signup_start + props 로 적는다(같은 버튼이다).
   import { track } from '/assets/track.js';
   document.getElementById('kakaoBtn')?.addEventListener('click', () => track('signup_start', { from: 'login' }), { once: true });
@@ -252,6 +252,8 @@
       kakaoBtn.disabled = false;
       err.textContent = window.ccERR.kakao;   // 위 게이트 모듈이 먼저 돌며 세워 둔다
       err.classList.add('on');
+      // 카카오로 넘어가지도 못한 실패 — 콜백까지 안 가므로 여기서 남긴다(어드민이 센다).
+      track('login_fail', { why: 'start' });
     }
   });
 

@@ -203,6 +203,17 @@
   // 클릭 시점을 남긴다 — 여기와 login 사이의 차이가 카카오 동의 화면 이탈률이다.
   document.getElementById('startBtn')
     ?.addEventListener('click', () => track('signup_start'), { once: true });
+
+  // 카카오 로그인이 끝나지 못하고 돌아온 경우 한 건 남긴다 — 어드민 「카카오 로그인이 실패하고
+  // 있나」가 센다(career-coach 0117). 이 모듈에 두는 이유는 위와 같다: CDN 이 막혀도 남아야 한다.
+  // `why`·`code` 는 콜백 화면(auth/callback/)이 실어 보낸 것이다. 새로고침하면 한 건 더 남지만
+  // 어드민은 건이 아니라 브라우저 수를 센다.
+  const 돌아옴 = new URLSearchParams(location.search);
+  if (돌아옴.get('error') === 'auth') {
+    const why = (돌아옴.get('why') || '').replace(/[^a-z_]/g, '').slice(0, 20);
+    const code = (돌아옴.get('code') || '').replace(/[^A-Za-z0-9_]/g, '').slice(0, 40);
+    track('login_fail', { ...(why && { why }), ...(code && { code }) });
+  }
 </script>
 
 <script type="module">
@@ -315,6 +326,8 @@
     if (error) {
       btn.disabled = !(window.ccAgreeOk?.() ?? true);   // 동의 상태를 다시 보고 되살린다
       showError(window.ccERR.kakao);
+      // 카카오로 넘어가지도 못한 실패 — 콜백까지 안 가므로 여기서 남긴다(어드민이 센다).
+      import('/assets/track.js').then(({ track }) => track('login_fail', { why: 'start' })).catch(() => {});
     }
   });
   window.ccOAuthReady = true;   // 여기까지 와야 클릭이 실제로 동작한다 — 위 게이트가 이 표시를 본다
