@@ -206,7 +206,7 @@
 </div>
 
 <script type="module">
-  import { getPlan, getSubscription, billingView, priceText, wonText, saveBillingKey, requireLogin, FAIL } from '/assets/mypage-data.js';
+  import { getPlan, getSubscription, billingView, priceText, wonText, saveBillingKey, billingCustomerId, requireLogin, FAIL } from '/assets/mypage-data.js';
 
   var $ = function (id) { return document.getElementById(id); };
 
@@ -315,7 +315,9 @@
         (`saveBillingKey` → 엣지 함수 `portone-6r2k9tvq/billing-key`). 서버는 보관한 그 자리에서
         첫 달을 걷고 `charged` 로 결과를 돌려준다(career-coach 0091). `개시` 일 때만
         결제 완료 화면(/checkout/done/)으로 넘긴다. 청구의 customerId 는 서버가 회원 id 로 넣는다 —
-        아래 issueId 는 발급용이다. */
+        아래 issueId 는 발급용이다.
+     ✅ 2026-10-03 — 발급의 customerId 도 회원 번호(로그인 계정 id)로 싣는다. 앞 판은 issueId 를
+        넣어, 보관이 실패해 포트원에만 남은 카드가 누구 것인지 알 길이 없었다(career-coach 결제사 대조). */
   var PORTONE_STORE_ID = 'store-a4b087e3-89d3-4369-8558-02d158bf6564';
   var PORTONE_CHANNEL_KEY = 'channel-key-10f48f35-76db-4560-8a2f-b2bcdbadf850';
 
@@ -390,14 +392,15 @@
     note('');
     // 발급 건 식별자. 같은 값으로 두 번 부르면 포트원이 중복으로 본다.
     var issueId = 'cc-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
-    loadPortOne().then(function (PortOne) {
+    Promise.all([loadPortOne(), billingCustomerId()]).then(function (둘) {
+      var PortOne = 둘[0];
       return PortOne.requestIssueBillingKey({
         storeId: PORTONE_STORE_ID,
         channelKey: PORTONE_CHANNEL_KEY,
         billingKeyMethod: 'CARD',
         issueId: issueId,
         issueName: '커리어코치 직군 브리핑 월 구독',
-        customer: { customerId: issueId },
+        customer: { customerId: 둘[1] },
         // 모바일은 이 주소로 돌아온다(위 「돌아옴」). 지금 주소의 질의(카드 변경 `mode=change`)를 그대로 싣는다.
         redirectUrl: location.origin + location.pathname + location.search,
       });

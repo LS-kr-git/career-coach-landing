@@ -220,6 +220,23 @@ export async function saveBillingKey(billingKey) {
   return res.json();
 }
 
+/**
+ * 결제창에 실을 **회원 번호** — 로그인 계정 id(auth.users.id)다 (2026-10-03 사용자 지시).
+ *
+ * 왜 — 포트원에 카드만 등록되고 우리 보관이 실패하면(결제창을 닫음·서버 불통) 그 카드가 누구 것인지
+ * 알 길이 없었다. 앞 판은 일회용 번호(issueId)를 넘겼다. 이 번호가 실려 있으면 career-coach 의
+ * 결제사 대조(portone-6r2k9tvq/pg-reconcile)가 그 카드를 우리 회원과 잇는다.
+ * ⚠️ 로그인 세션이 없으면 던진다 — 빈 값으로 결제창을 열면 그 카드는 다시 누구 것인지 모르게 된다.
+ */
+export async function billingCustomerId() {
+  const supabase = await supa();
+  const { data, error } = await supabase.auth.getSession();
+  if (error) throw error;
+  const id = data.session && data.session.user && data.session.user.id;
+  if (!id) throw new Error('로그인 세션이 없습니다');
+  return id;
+}
+
 export async function getTopics() { return TOPICS; }
 /** 그 사람에게 **실제로 나간** 편 전부. 최신 발행일이 먼저다 (0089 `mypage_received`). */
 export async function getReceived() { return rpc('mypage_received', false); }
