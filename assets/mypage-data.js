@@ -438,6 +438,22 @@ export async function withdraw(reason) {
   return data;
 }
 
+/**
+ * 마이페이지 고치기 화면(연차·근무지)의 저장 — 고른 값을 브라우저에 먼저 써 둔 뒤 부른다.
+ * 진입 때 띄운 retryPending() 이 아직 돌면 store 가 'busy' 를 준다 — 실패가 아니라 「지금은 못
+ * 보낸다」라 잠깐 기다렸다 다시 보낸다(주제 화면 mypage/topics 와 같은 처리).
+ * 'ok' 만 저장된 것이다. 'incomplete' 면 보낼 것이 없어 재시도 대상도 아니므로 `before` 로 되돌린다.
+ */
+export async function savePrefs(before) {
+  const { saveOnboarding, writeState } = await import('/assets/onboarding-store.js');
+  for (let 남은기회 = 5; ; 남은기회--) {
+    const { status } = await saveOnboarding();
+    if (status === 'busy' && 남은기회 > 0) { await new Promise((r) => setTimeout(r, 400)); continue; }
+    if (status === 'incomplete') writeState(before);
+    return status;
+  }
+}
+
 /** 연차 구간 글자 — 「1 ~ 3년」·「0년」·「7 ~ 15년+」. 연차 고치기 화면과 마이페이지 줄이 같이 쓴다. */
 export function yearsText(lo, hi) {
   const one = (v) => (v >= 15 ? '15년+' : v + '년');

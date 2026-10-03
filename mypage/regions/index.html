@@ -126,8 +126,8 @@
 <script type="module">
   /* 고른 근무지는 온보딩 3단계와 **같은 값**이다 — 칩 글자가 곧 지역 코드다(save_onboarding 계약).
      저장·복원·서버 전송은 assets/onboarding-store.js 를 그대로 쓴다. */
-  import { readState, writeState, saveOnboarding, retryPending, pullFromServer } from '/assets/onboarding-store.js';
-  import { requireLogin, FAIL } from '/assets/mypage-data.js';
+  import { readState, writeState, retryPending, pullFromServer } from '/assets/onboarding-store.js';
+  import { requireLogin, FAIL, savePrefs } from '/assets/mypage-data.js';
   retryPending();
   /* 🔴 상한 3. 온보딩 3단계·onboarding-store 의 MAX_REGIONS·save_onboarding 검증과 같은 수다 */
   const MAX = 3;
@@ -149,8 +149,14 @@
   }
   chips.forEach((c) => c.addEventListener('click', () => { if (!c.classList.contains('lock')) { c.classList.toggle('on'); refresh(); } }));
   save.addEventListener('click', () => {
+    const before = { regions: readState().regions };
     writeState({ regions: chips.filter(isOn).map((c) => c.textContent.trim()) });
-    saveOnboarding().then((r) => { if (r.status !== 'no-session') location.href = '/mypage/'; });
+    save.disabled = true;
+    savePrefs(before).then((st) => {
+      if (st === 'no-session') return;          // store 가 이미 /signup/ 으로 보냈다
+      if (st !== 'ok') { lab.textContent = FAIL.line; save.disabled = false; return; }   // 저장된 것만 저장됐다고 말한다
+      location.href = '/mypage/';
+    }, () => { lab.textContent = FAIL.line; save.disabled = false; });
   });
   function hydrate() {
     const want = new Set(readState().regions); let n = 0;

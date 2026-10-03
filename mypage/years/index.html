@@ -147,8 +147,8 @@
 <script type="module">
   /* 고른 연차는 온보딩 2단계와 **같은 값**이다 — 저장·복원·서버 전송은 assets/onboarding-store.js 를 그대로 쓴다.
      슬라이더 동작은 onboarding/2/index.html 의 것을 옮겼다(눈금 0~15 · 밴드 4칸). 한쪽을 고치면 다른 쪽도 고친다. */
-  import { readState, writeState, saveOnboarding, retryPending, pullFromServer } from '/assets/onboarding-store.js';
-  import { requireLogin, FAIL, yearsText } from '/assets/mypage-data.js';
+  import { readState, writeState, retryPending, pullFromServer } from '/assets/onboarding-store.js';
+  import { requireLogin, FAIL, yearsText, savePrefs } from '/assets/mypage-data.js';
   retryPending();
   const MAX = 15;
   const $ = (s) => document.querySelector(s);
@@ -198,9 +198,14 @@
   addEventListener('mouseup', () => { drag = null; });
   addEventListener('touchend', () => { drag = null; });
   save.addEventListener('click', () => {
+    const s0 = readState(); const before = { years: s0.years, yearsMax: s0.yearsMax };
     writeState({ years: lo, yearsMax: hi });
-    /* 'error'·'incomplete' 처리는 직군 화면(mypage/jobs)과 같다 — 마이페이지로 돌아간다 */
-    saveOnboarding().then((r) => { if (r.status !== 'no-session') location.href = '/mypage/'; });
+    save.disabled = true;
+    savePrefs(before).then((st) => {
+      if (st === 'no-session') return;          // store 가 이미 /signup/ 으로 보냈다
+      if (st !== 'ok') { lab.textContent = FAIL.line; save.disabled = false; return; }   // 저장된 것만 저장됐다고 말한다
+      location.href = '/mypage/';
+    }, () => { lab.textContent = FAIL.line; save.disabled = false; });
   });
   function hydrate() {
     const s = readState();
