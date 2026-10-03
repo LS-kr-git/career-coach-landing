@@ -13,9 +13,9 @@
 <style>
   :root{
     color-scheme: only light;
-    --amber-50:#FFFBEB; --amber-100:#FEF3C7; --amber-500:#F59E0B; --amber-600:#D97706;
+    --amber-50:#FFFBEB; --amber-100:#FEF3C7; --amber-200:#FDE68A; --amber-500:#F59E0B; --amber-600:#D97706;
     --amber-700:#B45309; --amber-800:#92400E; --amber-950:#451A03;
-    --emerald-500:#10B981;
+    --emerald-500:#10B981; --navy-900:#1E3A8A;
     --gray-50:#F8FAFC; --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-300:#CBD5E1;
     --gray-400:#94A3B8; --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155;
     --gray-800:#1E293B; --gray-900:#0F172A; --stone-50:#FAFAF9;
@@ -54,12 +54,15 @@
 
   .bill{padding:30px var(--pad-x) 32px;display:flex;flex-direction:column;gap:44px;flex:1}
   .sec{display:flex;flex-direction:column;gap:14px}
-  .mcard{position:relative;overflow:hidden;border:1px solid var(--gray-200);border-radius:16px;
-    background:#fff;padding:22px 20px 22px 24px;display:flex;flex-direction:column;gap:10px}
-  .mcard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--amber-500)}
+  /* 멤버십 카드 — 2026-10-04 사용자 확정(앰버 100 바탕 · 앰버 200 테두리 · 네이비 글자 · 흰 상태 칩).
+     왼쪽 주황 세로선은 이날 뺐다. 피그마 925:661 과 같은 값이다. */
+  .mcard{border:1px solid var(--amber-200);border-radius:16px;
+    background:var(--amber-100);padding:22px 20px;display:flex;flex-direction:column;gap:10px}
+  .mcard .t-h3{color:var(--navy-900)}
   .mtop{display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .kicker{color:var(--amber-600);letter-spacing:.16em}
-  .live{display:flex;align-items:center;gap:5px;color:var(--gray-600);flex:none}
+  .kicker{color:var(--amber-700);letter-spacing:.16em}
+  .live{display:flex;align-items:center;gap:5px;color:var(--navy-900);flex:none;
+    background:#fff;border-radius:9999px;padding:4px 9px}
   .live i{width:6px;height:6px;border-radius:9999px;background:var(--emerald-500);flex:none}
   .pcard{border:1px solid var(--gray-200);border-radius:14px;padding:18px;
     display:flex;flex-direction:column;gap:16px}
@@ -76,21 +79,6 @@
   .cancel{align-self:flex-end;color:var(--gray-400);background:none;border:0;
     font:inherit;font-size:14px;line-height:20px;cursor:pointer}
 
-  /* ===== 푸터 — 전자상거래법 제10조 신원정보 =====
-     이 화면에도 두는 이유: PG·카드사 심사는 사업자 정보가 메인뿐 아니라 이용자가 지나는
-     화면들에 상시 노출돼 있는지를 본다(포트원 「서비스 필수 구축요건」). 2026-09-17 사용자 지시.
-
-     랜딩(index.html)·결제(checkout/index.html)의 footer 와 **문구·줄 순서·색·글자 크기·굵기·
-     링크가 한 글자도 다르지 않다** — 한 곳을 고치면 나머지도 같이 고친다.
-     여백(32/40)과 좌우 24px 는 결제 화면과 같은 값이다. 랜딩만 80/120 을 쓰는 예외다.
-     피그마 기준: 이 화면 프레임 안의 「footer (사업자정보)」 (랜딩 6:361 을 복제한 것).
-     ⚠️ main 바깥에 둔다 — main 은 좌우 패딩이 있어 안에 넣으면 회색 배경이 꽉 차지 않는다. */
-  footer{background:var(--gray-100);margin-top:32px;padding:32px 24px 40px}
-  footer .biz{display:flex;flex-direction:column;gap:8px;color:var(--gray-500)}
-  footer .biz-name{font-size:13px;line-height:18px;font-weight:600}
-  footer .biz-lines{font-size:13px;line-height:18px}
-  footer .links a{color:var(--gray-500);text-decoration:none;font-size:13px;line-height:18px}
-  footer .links a[href$="privacy.html"]{font-weight:600}
   /* 넓은 화면 카드 어포던스 — 랜딩(index.html)의 같은 블록과 값이 같다(2026-09-24 사용자 지시 · 모든 페이지).
      page-audit.mjs 「넓은 화면 바탕」이 빠진 페이지를 막는다. */
   @media (min-width:451px){
@@ -115,7 +103,7 @@
           <span class="t-micro live"><i aria-hidden="true"></i>구독 중</span>
         </div>
         <span class="t-h3">커리어코치 멤버십</span>
-        <span class="t-caption" style="color:var(--gray-500)">구독 정보는 결제 후 여기에 표시돼요</span>
+        <span class="t-caption" style="color:var(--gray-600)">구독 정보는 결제 후 여기에 표시돼요</span>
       </div>
     </section>
 
@@ -140,14 +128,6 @@
     </section>
   </div>
 </main>
-<footer>
-  <div class="biz">
-    <div class="biz-name">주식회사 오늘의논문</div>
-    <!-- 랜딩 index.html·결제 checkout/index.html 의 같은 블록과 줄 순서까지 같게 유지한다. 피그마 6:364 가 기준이다. -->
-    <div class="biz-lines">대표 : 이채빈<br>사업자등록번호 : 450-86-03846<br>통신판매업신고 : 2026-서울서대문-0831<br>주소 : 서울특별시 서대문구 이화여대7길 37, 3층 J15호<br>문의 : careercoach.my@gmail.com<br>전화번호 : 070-8018-9238</div>
-    <div class="links"><a href="/terms.html">이용약관</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="/privacy.html">개인정보처리방침</a></div>
-  </div>
-</footer>
 <script type="module">
   import '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
   /* 값은 전부 서버에서 온다 (career-coach 0086 `mypage_subscription` · `plan` 표).
