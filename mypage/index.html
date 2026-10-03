@@ -167,15 +167,26 @@
 <script type="module">
   /* 자료는 assets/mypage-data.js 한 곳에서 온다. 마크업의 값은 피그마 기준 프레임 상태(= 빈 상태,
      대조용)이고, 실제 화면은 여기서 받은 값으로 다시 채운다. */
-  import { requireLogin, getProfile, profileView, profileFail, sundayState } from '/assets/mypage-data.js';
+  import { requireLogin, getProfile, profileView, profileFail, getSunday, sundayStateOf, kstToday } from '/assets/mypage-data.js';
 
   /* 일요일 배너 세 상태 — 서울 기준 오늘 요일 + 이번 주 열람 여부로 정한다 (피그마 01-A/01-B/01-C).
-     ?state=open|done|locked 는 디자인 검수용 미리보기다 — 요일과 무관하게 그 상태를 보여준다. */
+     ?state=open|done|locked 는 디자인 검수용 미리보기다 — 요일과 무관하게 그 상태를 보여준다.
+     「이번 주에 썼나」는 서버 기록이다(0114) — 기기를 바꿔도 같다. 평일은 서버에 물을 것이
+     없으므로(잠김뿐이다) 바로 세운다. */
+  function showBanner(state) {
+    document.querySelectorAll('.banner').forEach(function (el) { el.hidden = el.dataset.state !== state; });
+  }
   var q = new URLSearchParams(location.search).get('state');
-  var state = (q === 'open' || q === 'done' || q === 'locked') ? q : sundayState();
-  document.querySelectorAll('.banner').forEach(function (el) {
-    el.hidden = el.dataset.state !== state;
-  });
+  if (q === 'open' || q === 'done' || q === 'locked') showBanner(q);
+  else if (!kstToday().sunday) showBanner('locked');
+  else {
+    /* 🔴 일요일에는 답이 오기 전까지 배너를 세우지 않는다. 마크업 기본(잠김)을 두면 「일요일
+       오픈」을 일요일에 보여 주고, 「열람 가능」을 먼저 세우면 이미 쓴 사람에게 다시 고르라고 한다.
+       조회가 실패해도 같다 — 지어낸 상태를 그리느니 배너 없이 둔다(저장소 줄은 그대로 남는다). */
+    showBanner(null);
+    requireLogin().then(function (ok) { return ok ? getSunday() : null; })
+      .then(function (s) { if (s) showBanner(sundayStateOf(s)); }, function (e) { console.error('일요일 상태 조회 실패', e); });
+  }
 
   /* 네 자리를 한 함수로 그린다 — 값·빈 상태·실패가 **같은 자리**에 들어가야 한 갈래만 고쳐지는
      일이 안 생긴다. 문구는 전부 데이터 층(profileView·profileFail)이 정한다. */

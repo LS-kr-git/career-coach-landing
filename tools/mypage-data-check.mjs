@@ -77,15 +77,22 @@ expectInOrder('mypage/sunday/index.html', staticHtml('mypage/sunday/index.html')
   /* 2026-08-08 은 토요일이고 그 주는 08-03(월)~08-09(일)이다. 경계 양쪽을 하나씩 둔다 —
      한쪽만 두면 `<=`/`<` 를 뒤집어도 통과한다. */
   const 옮긴것 = data.weekRows(
-    [{ publish_date: '2026-08-10', track: '디자인', title: '다음주 월', read: false },
-     { publish_date: '2026-08-09', track: '디자인', title: '이번주 일', read: false },
-     { publish_date: '2026-08-03', track: '디자인', title: '이번주 월', read: true },
-     { publish_date: '2026-08-02', track: '디자인', title: '지난주 일', read: false }],
+    [{ insight_id: 4, publish_date: '2026-08-10', track: '디자인', title: '다음주 월', read: false },
+     { insight_id: 3, publish_date: '2026-08-09', track: '디자인', title: '이번주 일', read: false },
+     { insight_id: 2, publish_date: '2026-08-03', track: '디자인', title: '이번주 월', read: true },
+     { insight_id: 1, publish_date: '2026-08-02', track: '디자인', title: '지난주 일', read: false }],
     '2026-08-08');
-  const 기대 = [{ date: '08. 09 일', topic: '디자인', title: '이번주 일', read: false },
-               { date: '08. 03 월', topic: '디자인', title: '이번주 월', read: true }];
+  // id 는 06 에서 고른 편을 서버(0114 mypage_use_makeup)에 넘기는 값이다 — 빠지면 고를 수 없다.
+  const 기대 = [{ id: 3, date: '08. 09 일', topic: '디자인', title: '이번주 일', read: false },
+               { id: 2, date: '08. 03 월', topic: '디자인', title: '이번주 월', read: true }];
   if (JSON.stringify(옮긴것) !== JSON.stringify(기대)) {
     problems.push(`mypage/sunday/index.html: weekRows 가 주 경계(월~일)나 날짜 표기를 바꿨다 — ${JSON.stringify(옮긴것)}`);
+  }
+  // 01 배너 세 상태 — 서버 두 칸(0114)을 그대로 옮긴다. 평일에 썼다는 기록이 있어도 잠김이다.
+  const 배너 = [[{ is_sunday: false, used: false }, 'locked'], [{ is_sunday: false, used: true }, 'locked'],
+               [{ is_sunday: true, used: false }, 'open'], [{ is_sunday: true, used: true }, 'done']];
+  for (const [s, 기대상태] of 배너) {
+    if (data.sundayStateOf(s) !== 기대상태) problems.push(`mypage/index.html: sundayStateOf(${JSON.stringify(s)}) 가 ${data.sundayStateOf(s)} 다 (${기대상태} 여야 한다)`);
   }
   // 마크업의 표기와 같은 자로 찍히는가 — 위 기대값의 모양이 SUNDAY_STATIC 과 같아야 한다.
   if (!/^\d{2}\. \d{2} [일월화수목금토]$/.test(data.SUNDAY_STATIC[0].date)) {

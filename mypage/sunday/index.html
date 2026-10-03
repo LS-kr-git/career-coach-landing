@@ -190,7 +190,7 @@
 <script type="module">
   /* 목록은 **서버에서** 온다 (2026-09-24 · 0089 `mypage_received`). 마크업의 5편은 피그마
      기준 프레임 상태(대조용)이고, 여기서 그 자리를 실제 기록으로 다시 채운다. */
-  import { requireLogin, getThisWeek, markSundayUsed, FAIL } from '/assets/mypage-data.js';
+  import { requireLogin, getThisWeek, getSunday, useSunday, FAIL } from '/assets/mypage-data.js';
 
   var btn = document.getElementById('open');
   var idle = document.getElementById('lab-idle');
@@ -198,6 +198,7 @@
      세션을 **못 물어본** 것과 로그인 안 한 것은 다르다 — 삼키지 않고 버튼 라벨로 드러낸다. */
   requireLogin().catch(function () { btn.disabled = true; idle.textContent = FAIL.line; });
   var pick = document.getElementById('lab-pick');
+  var 다씀 = false;   // 이번 주 기회를 썼거나 그걸 못 물어봤다 — 고르기를 막는다
   var secs = document.querySelectorAll('.sec .items');
   function esc(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
   function meta(a) {
@@ -211,7 +212,7 @@
      `.catch` 가 아니라 `.then(성공, 실패)` 로 건다. */
   getThisWeek().then(function (week) {
     secs[0].innerHTML = week.filter(function (a) { return !a.read; }).map(function (a) {
-      return '<button class="item" type="button" aria-pressed="false" data-title="' + esc(a.title) + '">'
+      return '<button class="item" type="button" aria-pressed="false" data-id="' + esc(String(a.id)) + '">'
         + '<span class="col">' + meta(a) + '</span>'
         + '<span class="radio" aria-hidden="true"><i></i></span></button>';
     }).join('');
@@ -228,7 +229,7 @@
 
   document.querySelector('.lists').addEventListener('click', function (e) {
     var item = e.target.closest('.item[aria-pressed]');
-    if (!item) return;
+    if (!item || 다씀) return;
     document.querySelectorAll('.item[aria-pressed]').forEach(function (el) {
       el.setAttribute('aria-pressed', el === item ? 'true' : 'false');
     });
@@ -237,12 +238,31 @@
     pick.hidden = false;
   });
 
-  /* 전문 열기 = 이번 주 열람 기회를 쓴 것. 기록을 남기고 01 로 돌아가면 배너가 「완료」(01-B)가 된다.
-     아티클 본문 화면은 아직 없다 — 생기면 기록 뒤 그 주소로 간다. */
+  /* 남은 기회는 서버 기록이다(0114) — 다른 기기에서 쓴 것도 여기서 0 이 된다.
+     못 물어본 것은 0 으로 그리지 않는다 — 버튼을 막고 실패 문구를 둔다. */
+  var quota = document.querySelector('.quota .v');
+  getSunday().then(function (s) {
+    다씀 = !!s.used;
+    quota.textContent = (다씀 ? 0 : 1) + '개 남음';
+    if (다씀) btn.disabled = true;
+  }, function () {
+    btn.disabled = true;
+    idle.hidden = false; pick.hidden = true;
+    idle.textContent = FAIL.hint;
+    quota.textContent = FAIL.line;
+    다씀 = true;   // 못 물어봤으면 고를 수 없게 둔다 — 고르는 순간 아래 클릭이 버튼을 다시 열지 않게
+  });
+
+  /* 전문 열기 = 이번 주 열람 기회를 쓴 것. 서버에 기록하고 그 편 전문 페이지로 간다.
+     열리지 않았으면(구독이 끝남·이번 주 이미 씀 등) 그 이유는 전문 페이지가 확정 문구로 말한다. */
   btn.addEventListener('click', function () {
     /* 버튼은 하나를 고르기 전까지 disabled 라 여기 왔으면 눌린 항목이 있다 */
     var on = document.querySelector('.item[aria-pressed="true"]');
-    markSundayUsed(on.dataset.title).then(function () { location.href = '/mypage/'; });
+    btn.disabled = true;
+    useSunday(on.dataset.id).then(function (r) { location.href = r.href; }, function () {
+      idle.hidden = false; pick.hidden = true;
+      idle.textContent = FAIL.hint;
+    });
   });
 </script>
 </div>

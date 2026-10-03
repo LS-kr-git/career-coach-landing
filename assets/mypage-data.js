@@ -10,9 +10,8 @@
  *   프로필·구독·결제수단·소장 목록은 career-coach 0086 의 RPC 에서 온다.
  *   직군·연차·근무지·주제는 assets/onboarding-store.js 가 정본이다 — 온보딩과 같은 값이라
  *   통로도 같다(user_preference* 직접 조회 + save_onboarding).
- *   **이번 주 5편(06 화면)만 아직 목값이다.** 누가 어느 편을 받았는지가 서버에 안 남아 있다 —
- *   발송 원장(briefing_delivery)은 「그날 보냈다」까지만 적고 어느 인사이트인지를 안 적는다.
- *   그 칸이 생기기 전에는 실제 기록으로 못 그린다. 지어내지 않고 목값인 채로 둔다.
+ *   일요일 추가 열람(01 배너 · 06 화면)도 서버다 — 받은 편은 0089, 「이번 주에 썼나」와
+ *   쓰기는 0114. 브라우저에 남기던 기록(cc_mypage)은 2026-10-03 에 걷었다.
  *
  * 모양
  *   읽기 함수는 전부 async 이고 **실패하면 던진다.** 삼키고 빈 값을 돌려주면 화면이 그것을
@@ -24,7 +23,6 @@
  * ⚠️ 정적 HTML 에도 **빈 상태** 한 벌이 있다 (피그마 기준 프레임 상태 — docs-audit 대조용).
  *   두 벌이 어긋나면 tools/mypage-data-check.mjs 가 푸시를 막는다. 직군 목록은 build.mjs 가 만든다.
  */
-const KEY = 'cc_mypage';
 
 /**
  * supabase-js 클라이언트. 온보딩과 **같은 하나**를 쓴다 — 둘이면 로그인 세션을 두 벌 들고
@@ -137,9 +135,9 @@ export async function requireLogin() {
  * 말하기로 돼 있어서(0086), 행이 안 오는 것은 못 물어본 것이다. 접어서 null 을 돌려주면
  * 화면이 그것을 빈 상태로 그려 결제한 사람에게 「등록된 결제수단 없음」을 보여 준다.
  */
-async function rpc(name, one) {
+async function rpc(name, one, args) {
   const supabase = await supa();
-  const { data, error } = await supabase.rpc(name);
+  const { data, error } = await supabase.rpc(name, args);
   if (error) throw error;
   if (one && !(data && data[0])) throw new Error(`${name}: 행이 오지 않았습니다`);
   return one ? data[0] : (data || []);
@@ -232,7 +230,7 @@ export function weekRows(rows, todayIso) {
   const 일요일 = 더한날(월요일, 6);
   return (rows || [])
     .filter((r) => r.publish_date >= 월요일 && r.publish_date <= 일요일)
-    .map((r) => ({ date: dayLabel(r.publish_date), topic: r.track, title: r.title, read: !!r.read }));
+    .map((r) => ({ id: r.insight_id, date: dayLabel(r.publish_date), topic: r.track, title: r.title, read: !!r.read }));
 }
 
 const 요일이름 = ['일', '월', '화', '수', '목', '금', '토'];
@@ -383,26 +381,6 @@ export function monthChips(rows) {
   return out.sort((a, b) => b.정렬 - a.정렬);
 }
 
-/* ── 선택값 (브라우저에 남는 것) ───────────────────────────── */
-
-/** 일요일 열람 기록. **직군·연차·근무지·주제는 여기 없다** — onboarding-store 가 정본이다. */
-export function readPrefs() {
-  try {
-    const s = JSON.parse(localStorage.getItem(KEY) || '{}') || {};
-    return { sunday: s.sunday && typeof s.sunday.date === 'string' ? s.sunday : null };
-  } catch {
-    return { sunday: null };   // 사파리 프라이빗 모드 등 — 읽기 실패로 화면이 깨지면 안 된다
-  }
-}
-
-/* 저장 실패는 삼키지 않는다 — 여기서 던져야 호출한 화면이 「저장됐다」고 넘어가지 않는다.
-   (조용히 넘어가면 06 에서 열람 기회를 쓴 사람의 01 배너가 다시 「열람 가능」으로 돌아간다) */
-function writePrefs(patch) {
-  const next = { ...readPrefs(), ...patch };
-  localStorage.setItem(KEY, JSON.stringify(next));
-  return next;
-}
-
 /* ── 일요일 추가 열람 ─────────────────────────────────────── */
 
 /** 한국 시간 기준 오늘 — { date: 'YYYY-MM-DD', sunday: boolean }. 기기 시간대와 무관하게 서울 요일로 판정한다. */
@@ -412,19 +390,22 @@ export function kstToday() {
   return { date: `${y}-${m}-${d}`, sunday: 요일 === 'Sun' };
 }
 
-/**
- * 01 배너 상태 — 'open'(일요일·아직 안 씀) | 'done'(일요일·이번 주 씀) | 'locked'(평일).
- * "이번 주에 썼다" 는 곧 "오늘(일요일)에 썼다" 다 — 열람은 일요일에만 열리므로 날짜 하나로 족하다.
- * 🔴 아직 브라우저 기록으로 판정한다. 06 의 목록이 목값이라 서버에 「어느 편을 열었다」를
- *    보낼 수가 없다(머리말 참조). 그 목록이 실제 기록이 되는 날 insight_read 로 옮긴다.
- */
-export function sundayState() {
-  const today = kstToday();
-  if (!today.sunday) return 'locked';
-  const used = readPrefs().sunday;
-  return used && used.date === today.date ? 'done' : 'open';
+/** 일요일 추가 열람 — { is_sunday, used } (0114). 「썼다」는 서버의 보충 기록이라 기기를 바꿔도 같다. */
+export async function getSunday() { return rpc('mypage_sunday', true); }
+
+/** 01 배너 상태 — 'open'(일요일·아직 안 씀) | 'done'(일요일·이번 주 씀) | 'locked'(평일). */
+export function sundayStateOf(s) {
+  if (!s.is_sunday) return 'locked';
+  return s.used ? 'done' : 'open';
 }
 
-export async function markSundayUsed(title) {
-  return writePrefs({ sunday: { date: kstToday().date, title } });
+/**
+ * 고른 편에 이번 주 보충 1편을 쓰고, 그 편 전문 주소를 돌려준다 (0114 `mypage_use_makeup`).
+ * 열렸든 아니든 받은 편이면 주소가 온다 — 잠긴 이유(구독 필요·이번 주 이미 씀)는 전문 페이지가
+ * 확정된 문구로 말한다. 주소가 없으면(받지 않은 편) 던진다.
+ */
+export async function useSunday(insightId) {
+  const r = await rpc('mypage_use_makeup', true, { p_insight_id: insightId });
+  if (!r.token) throw new Error('mypage_use_makeup: 받은 편이 아닙니다');
+  return { state: r.state, href: `/insight/?t=${encodeURIComponent(r.token)}&id=${encodeURIComponent(insightId)}` };
 }
