@@ -102,9 +102,10 @@
   .cta.danger{background:var(--gray-800);box-shadow:none}
   .cta.danger[disabled]{background:var(--gray-100);color:var(--gray-400)}
   .err{color:var(--error-600);font-size:13px;line-height:18px;text-align:center;margin-top:-16px}
-  /* 탈퇴 완료 — 체크·제목·문구 묶음을 화면 정가운데에 (2026-10-03 사용자 지시).
-     아래 여백을 헤더(48)와 같게 둬서 위아래가 대칭이 된다 — 피그마 09-C 프레임 아래 여백 48 과 같은 값 */
-  #bye{padding-bottom:calc(48px + env(safe-area-inset-bottom))}
+  /* 탈퇴 완료 — 체크·제목·문구 묶음을 「화면 맨 위 ~ 떠 있는 CTA 버튼 윗변」 사이의 정가운데에 (2026-10-03 사용자 지시).
+     CTA 윗변 = 화면높이 − 74(버튼 54 + 바닥 20). main 은 헤더(48) 아래에서 시작하므로 아래 여백을 74+48 = 122 로 두면
+     main 의 가운데가 그 영역의 가운데와 겹친다. .cta-dock 은 safe-area 를 안 더하므로 여기도 안 더한다. 피그마 09-C 프레임 아래 여백 122 와 같은 값 */
+  #bye{padding-bottom:122px}
   .done{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 var(--pad-x);gap:14px}
   .ok{width:64px;height:64px;border-radius:50%;background:var(--amber-100);display:flex;align-items:center;justify-content:center;margin-bottom:6px}
   .done .t-display{font-size:24px;line-height:32px;font-weight:700;color:var(--gray-900)}
