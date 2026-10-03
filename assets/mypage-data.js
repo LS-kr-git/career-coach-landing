@@ -67,12 +67,14 @@ export const FAIL = {
   list: '목록을 불러오지 못했어요',
 };
 
-export const COMMON_TOPIC = '일하는 사람 공통';
+/* 🔴 **발송이 받는 트랙 이름 그대로다** (career-coach `sources.TRACK_CAREER` · 2026-10-03).
+   앞 판의 「일하는 사람 공통」은 발송 쪽 이름표에 없어 그 칩을 고른 사람에게 직군 트랙이 나갔다. */
+export const COMMON_TOPIC = '일 잘하는 법 · 커리어(공통)';
 
 /** 가입 경로 표기. 서버는 Supabase 가 적은 코드('kakao'·'email')를 그대로 준다. */
 const PROVIDER_LABEL = { kakao: '카카오', email: '이메일' };
 
-/* 04 화면 칩 순서 그대로 — 「일하는 사람 공통」이 항상 첫 번째다. */
+/* 04 화면 칩 순서 그대로 — 공통 칩이 항상 첫 번째다. */
 const TOPICS = [
   COMMON_TOPIC,
   'UI·UX 디자인',

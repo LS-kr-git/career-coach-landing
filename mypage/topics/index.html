@@ -109,14 +109,14 @@
   <div class="week-wrap">
     <div class="week">
       <div class="day own"><span class="t-micro d">월</span><span class="t-caption t">디자인</span></div>
-      <div class="day"><span class="t-micro d">화</span><span class="t-caption t">AI로 일하기</span></div>
+      <div class="day"><span class="t-micro d">화</span><span class="t-caption t">커리어</span></div>
       <div class="day own"><span class="t-micro d">수</span><span class="t-caption t">디자인</span></div>
-      <div class="day"><span class="t-micro d">목</span><span class="t-caption t">커리어·이직</span></div>
+      <div class="day"><span class="t-micro d">목</span><span class="t-caption t">공고</span></div>
       <div class="day own"><span class="t-micro d">금</span><span class="t-caption t">디자인</span></div>
     </div>
   </div>
   <div class="topics">
-    <button class="chip" type="button" aria-pressed="false">일하는 사람 공통</button>
+    <button class="chip" type="button" aria-pressed="false">일 잘하는 법 · 커리어(공통)</button>
     <button class="chip" type="button" aria-pressed="false">UI·UX 디자인</button>
     <button class="chip" type="button" aria-pressed="true">디자인</button>
     <button class="chip" type="button" aria-pressed="false">개발·AI</button>
@@ -157,20 +157,16 @@
   import { readState, writeState, saveOnboarding, pullFromServer, retryPending } from '/assets/onboarding-store.js';
   retryPending();     // 지난 저장이 실패한 채 남아 있으면 온보딩·직군 화면과 같이 여기서도 다시 보낸다
 
-  /* 주간 미리보기는 고른 주제에서 나온다 — 디자인 캔버스의 규칙 그대로다.
-     월·수·금이 고른 주제, 화는 'AI로 일하기', 목은 '커리어·이직'.
-     '일하는 사람 공통' 을 고르면 내 주제 칸이 없어져 다섯 칸이 모두 공통 편성이 된다. */
+  /* 주간 미리보기는 고른 주제에서 나온다 — 발송 편성(career-coach `sources.py` 의 요일 편성) 그대로다.
+     월·수·금이 고른 주제, 화는 전원이 받는 「일 잘하는 법 · 커리어」, 목은 글 없이 공고.
+     공통 칩을 고르면 월·수·금도 그 트랙이다(2026-10-03). 칸이 좁아 이름은 「커리어」로 줄여 쓴다. */
   var cells = Array.prototype.slice.call(document.querySelectorAll('.day'));
   var box = document.querySelector('.topics');
   var cta = document.querySelector('.cta');
   function paint(topic) {
-    var common = topic === COMMON_TOPIC;
-    var labels = common
-      ? ['커리어·이직', 'AI로 일하기', '일하는 법', '커리어·이직', 'AI로 일하기']
-      : [topic, 'AI로 일하기', topic, '커리어·이직', topic];
-    cells.forEach(function (cell, i) {
-      var own = !common && (i === 0 || i === 2 || i === 4);
-      cell.classList.toggle('own', own);
+    var mine = topic === COMMON_TOPIC ? '커리어' : topic;
+    var labels = [mine, '커리어', mine, '공고', mine];
+    cells.forEach(function (cell, i) {     // 월·수·금 강조(.own)는 마크업 그대로 — 어느 주제든 같다
       cell.querySelector('.t').textContent = labels[i];
     });
   }
@@ -186,6 +182,9 @@
     if (!topics) return;
     /* 저장된 주제가 없으면 마크업이 눌러 둔 칩(피그마 기준 상태)을 그대로 쓴다 */
     var on = readState().topic || current();
+    /* 옛 칩 이름(「일하는 사람 공통」, 2026-10-03 에 바뀜)이 이 브라우저에 남아 있으면 목록에 없어
+       아무 칩도 안 눌린다 — 그러면 저장 버튼의 current() 가 빈 손이 된다. 기본 칩으로 돌린다. */
+    if (topics.indexOf(on) < 0) on = current();
     box.innerHTML = topics.map(function (t) {
       return '<button class="chip" type="button" aria-pressed="' + (t === on) + '">' + esc(t) + '</button>';
     }).join('');

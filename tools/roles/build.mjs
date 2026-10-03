@@ -72,6 +72,10 @@ for (const [code, t] of Object.entries(SUB)) {
 for (const t of TRK.tracks) {
   if (![...Object.values(TRK.byGroup), ...Object.values(SUB)].includes(t)) bad.push(`트랙 "${t}" 에 붙은 직군이 하나도 없다`);
 }
+// 고를 수 있는 주제 = 직군 트랙 전부 + 고른 사람에게 더 나가는 공통 트랙(2026-10-03 「일 잘하는 법 · 커리어(공통)」).
+// 정본은 career-coach `sources.고를_수_있는_트랙` — 직군 트랙이 하나라도 빠지면 그 주제를 못 고른다.
+const CHOICES = TRK.choices ?? [];
+for (const t of TRK.tracks) if (!CHOICES.includes(t)) bad.push(`트랙 "${t}" 가 choices 에 없다 — 완료 화면에서 못 고른다`);
 if (bad.length) {
   console.error('❌ 직무 표기·실측 검증 실패\n   ' + bad.join('\n   '));
   console.error("\n   규칙: code = sourceLabel.replace('·','_'). 화면 표기를 바꾸려면 label 만 고치세요.");
@@ -146,7 +150,7 @@ const buildMypage = () =>
  *  화면에 보이는 중분류만 넣는다 — 못 고르는 코드는 저장될 일이 없다. */
 const topicsHtml = () =>
   '<div class="topics">' +
-  TRK.tracks.map((t) => `<div class="c" data-track="${esc(t)}">${esc(t)}</div>`).join('') +
+  CHOICES.map((t) => `<div class="c" data-track="${esc(t)}">${esc(t)}</div>`).join('') +
   '</div>';
 
 const jobMapHtml = () => {
@@ -168,7 +172,9 @@ const jobMapHtml = () => {
   TAX.groups.forEach((g, gi) => {
     for (const c of g.children) jobs[c.code] = [c.label, gi, TRK.tracks.indexOf(SUB[c.code] ?? '')];
   });
-  const json = JSON.stringify({ tracks: TRK.tracks, groups, jobs });
+  // `common` = 직군에서는 안 풀리고 직접 골라야만 되는 주제 — 화면이 그 주제의 설명 문구를 가른다.
+  const common = CHOICES.filter((t) => !TRK.tracks.includes(t));
+  const json = JSON.stringify({ tracks: TRK.tracks, common, groups, jobs });
   return `<script id="cc-topic-map" type="application/json">${json}<\/script>`;
 };
 
@@ -242,4 +248,4 @@ console.log(`✅ 온보딩 1단계 · 마이페이지 직군 · 완료 화면 �
 console.log(`   숨긴 대분류(주 ${MIN_D1_PER_WEEK}건 미만) ${hiddenGroups.length}개: ` +
   hiddenGroups.map((g) => `${g.label} 주${Math.round(perWeek(g.code))}`).join(' · '));
 console.log(`   숨긴 중분류(30일 신규 0건) ${hiddenChips.length}개: ` + hiddenChips.join(' · '));
-console.log(`✅ 완료 화면 갱신 — 주제 ${TRK.tracks.length}개 · 대분류 ${visible.length}개 · 중분류 ${shown}건`);
+console.log(`✅ 완료 화면 갱신 — 주제 ${CHOICES.length}개 · 대분류 ${visible.length}개 · 중분류 ${shown}건`);
