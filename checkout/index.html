@@ -252,7 +252,7 @@
   $('submit').disabled = true;
   var 변경요청 = new URLSearchParams(location.search).get('mode') === 'change';
   var 구독 = 변경요청 ? getSubscription().catch(function () { return null; }) : Promise.resolve(null);
-  Promise.all([getPlan(), 구독]).then(function (r) {
+  var 준비 = Promise.all([getPlan(), 구독]).then(function (r) {
     var plan = r[0];
     var 내것 = r[1] && billingView(r[1], plan);
     if (내것 && 내것.live) 변경모드();
@@ -331,6 +331,50 @@
     return sdk;
   }
 
+  /* 결과 한 줄. PC(결제창이 겹창)와 모바일(결제창으로 페이지가 넘어갔다 돌아옴)이 같은 길을 탄다. */
+  function 보관하고_알린다(billingKey) {
+    // 🔴 여기서 끝내지 않는다. 서버가 포트원에 되물어 보관해야 구독이 열린다.
+    //    보관이 실패했는데 「등록되었습니다」를 그리면 사용자는 결제될 줄 알고 기다린다.
+    return saveBillingKey(billingKey).then(function (r) {
+      // 「결제가 완료되었습니다」는 첫 달이 실제로 걷혔을 때(`개시`)만 쓴다 (2026-09-24 사용자 지시).
+      // 카드사가 첫 청구를 거절했으면 카드만 보관된 것이다 — 결제된 줄 알고 기다리지 않게 그 자리에서 말한다.
+      // `청구실패`(우리 쪽 고장)는 카드 탓이 아니라 따로 말한다 — 다시 누르면 같은 주문번호로 다시 걷는다(0091).
+      // 그대로 두어도 매일 새벽 청구 회차가 3일 동안 같은 주문번호로 다시 걷는다(career-coach 0105 · 2026-09-26 사용자 확정 안 B).
+      // 카드 변경(`이미구독`)은 등록 문구다.
+      var charged = r && r.charged;
+      if (charged === '개시') note('결제가 완료되었습니다.');
+      else if (charged === '첫결제실패')
+        note('카드는 등록됐지만 결제가 되지 않았어요. 카드 한도나 잔액을 확인해 주세요.', true);
+      else if (charged === '청구실패')
+        note('결제 연결이 잠시 불안정했어요. 3일 안에 등록하신 카드로 자동으로 다시 결제해요. 지금 다시 결제하셔도 두 번 결제되지 않아요.', true);
+      else note(변경 && charged === '이미구독' ? CHANGE.done : '결제수단이 등록되었습니다.');
+    });
+  }
+  function 실패(e) {
+    note((e && e.message) || '결제수단 등록에 실패했습니다. 다시 시도해 주세요.', true);
+  }
+
+  /* 모바일 — 결제창이 겹창이 아니라 **페이지째 넘어갔다가** redirectUrl 로 돌아온다 (2026-10-03).
+     포트원 V2 는 모바일에서 redirectUrl 이 없으면 결과를 돌려줄 길이 없다 — 앞 판은 그 칸이 없어
+     휴대폰으로 카드를 등록하면 돌아올 곳도 결과도 없었다. 돌아온 주소에는 포트원이
+     `billingKey`(성공) 또는 `code`·`message`(실패·취소)를 붙인다. 돌아온 뒤에는 그 칸을 주소에서
+     지운다 — 새로고침이 같은 빌링키를 다시 보내지 않게(서버는 같은 키를 두 번 받아도 한 번만 걷지만,
+     화면이 결과를 두 번 말하지 않게). 금액·변경 모드가 그려진 뒤(`준비`)에 처리한다. */
+  var 돌아옴 = new URLSearchParams(location.search);
+  if (돌아옴.has('billingKey') || 돌아옴.has('code')) {
+    var 키 = 돌아옴.get('billingKey'), 코드 = 돌아옴.get('code'), 말 = 돌아옴.get('message');
+    ['billingKey', 'code', 'message', 'transactionType', 'pgCode', 'pgMessage'].forEach(function (k) { 돌아옴.delete(k); });
+    var 남은 = 돌아옴.toString();
+    history.replaceState(null, '', location.pathname + (남은 ? '?' + 남은 : ''));
+    준비.then(function () {
+      var 전 = $('submit').disabled;      // 금액을 못 읽어 잠긴 버튼을 여기서 풀지 않는다
+      $('submit').disabled = true;
+      var 끝 = 코드 != null || !키 ? Promise.resolve(실패(new Error(말 || '')))
+                                   : 보관하고_알린다(키).catch(실패);
+      return 끝.then(function () { $('submit').disabled = 전; });
+    });
+  }
+
   $('submit').addEventListener('click', function () {
     var btn = this;
     btn.disabled = true;
@@ -345,31 +389,16 @@
         issueId: issueId,
         issueName: '커리어코치 직군 브리핑 월 구독',
         customer: { customerId: issueId },
+        // 모바일은 이 주소로 돌아온다(위 「돌아옴」). 지금 주소의 질의(카드 변경 `mode=change`)를 그대로 싣는다.
+        redirectUrl: location.origin + location.pathname + location.search,
       });
     }).then(function (res) {
       // 포트원은 실패를 throw 하지 않고 code 를 채워 돌려준다 (사용자가 창을 닫은 경우 포함).
       if (res && res.code != null) throw new Error(res.message);
       // billingKey 가 없으면 등록된 것이 아니다 — code 만 비어 있는 응답을 성공으로 읽지 않는다.
       if (!res || !res.billingKey) throw new Error('');
-      // 🔴 여기서 끝내지 않는다. 서버가 포트원에 되물어 보관해야 구독이 열린다.
-      //    보관이 실패했는데 「등록되었습니다」를 그리면 사용자는 결제될 줄 알고 기다린다.
-      return saveBillingKey(res.billingKey);
-    }).then(function (r) {
-      // 「결제가 완료되었습니다」는 첫 달이 실제로 걷혔을 때(`개시`)만 쓴다 (2026-09-24 사용자 지시).
-      // 카드사가 첫 청구를 거절했으면 카드만 보관된 것이다 — 결제된 줄 알고 기다리지 않게 그 자리에서 말한다.
-      // `청구실패`(우리 쪽 고장)는 카드 탓이 아니라 따로 말한다 — 다시 누르면 같은 주문번호로 다시 걷는다(0091).
-      // 그대로 두어도 매일 새벽 청구 회차가 3일 동안 같은 주문번호로 다시 걷는다(career-coach 0105 · 2026-09-26 사용자 확정 안 B).
-      // 카드 변경(`이미구독`)은 등록 문구다.
-      var charged = r && r.charged;
-      if (charged === '개시') note('결제가 완료되었습니다.');
-      else if (charged === '첫결제실패')
-        note('카드는 등록됐지만 결제가 되지 않았어요. 카드 한도나 잔액을 확인해 주세요.', true);
-      else if (charged === '청구실패')
-        note('결제 연결이 잠시 불안정했어요. 3일 안에 등록하신 카드로 자동으로 다시 결제해요. 지금 다시 결제하셔도 두 번 결제되지 않아요.', true);
-      else note(변경 && charged === '이미구독' ? CHANGE.done : '결제수단이 등록되었습니다.');
-    }).catch(function (e) {
-      note(e.message || '결제수단 등록에 실패했습니다. 다시 시도해 주세요.', true);
-    }).then(function () { btn.disabled = false; });
+      return 보관하고_알린다(res.billingKey);
+    }).catch(실패).then(function () { btn.disabled = false; });
   });
 </script>
 </body>
