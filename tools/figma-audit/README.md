@@ -518,9 +518,17 @@ for (const id of REG) {
                      page: p ? p.id : null,
                      parent: n.parent.id, parentType: n.parent.type };
 }
+// 섹션 안(중첩 포함)의 모든 화면 프레임 — tree-audit 「화면 높이」 가 휴대폰 화면(폭 480 이하)이
+// 800 보다 짧은지 본다(2026-10-04). 등록 여부와 무관하게 전부 넣는다.
+const screens = [];
+const walk = (s) => { for (const c of s.children) {
+  if (c.type === 'SECTION') walk(c);
+  else if (c.type === 'FRAME') screens.push({ id: c.id, name: c.name, w: Math.round(c.width), h: Math.round(c.height) });
+} };
+for (const s of page.children) if (s.type === 'SECTION') walk(s);
 // dumpedAt 은 tree-audit 의 신선도 판정에 쓴다. 빼도 돌지만 그때는 파일 mtime 만 보므로,
 // 체크아웃·복사로 시각이 새로 찍힌 낡은 덤프를 "방금 뽑은 것" 으로 통과시킨다.
-return { dumpedAt: new Date().toISOString(), pageId: page.id, pageName: page.name, children, registered };
+return { dumpedAt: new Date().toISOString(), pageId: page.id, pageName: page.name, children, registered, screens };
 ```
 
 `use_figma` 한 번에 `setCurrentPageAsync` 는 한 번만 부를 수 있다. 그래서 이 덤프는 **운영 페이지

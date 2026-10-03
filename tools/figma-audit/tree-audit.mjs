@@ -64,6 +64,9 @@ const dumpPath = argv.find((a) => !a.startsWith('--'));
 
 const findings = [];
 const add = (level, kind, where, detail, note) => findings.push({ level, kind, where, detail, note });
+// 휴대폰 화면 최소 높이 — 프레임 360 기준 실제 폰(360×800). 이 폭 이하만 휴대폰 화면으로 본다.
+const MIN_SCREEN_H = 800;
+const MOBILE_MAX_W = 480;
 
 const SNAP_PATH = join(HERE, 'figma-tree.json');
 const read = (p) => JSON.parse(readFileSync(p, 'utf8'));
@@ -201,6 +204,29 @@ if (!dumpPath) {
       add('BLOCK', 무엇, `${e.node} (${html})`,
           `검수 대상이 아닌 페이지(${r.page})의 섹션에 들어 있습니다`,
           `운영 페이지는 ${snap.page} 입니다. 라이브에 살아 있는 화면이면 되돌리고, 정말 죽은 화면이면 page-figma-map.json 에서 먼저 내리세요.`);
+    }
+  }
+
+  /* 휴대폰 화면의 최소 높이 (2026-10-04 사용자 지시 · 운영 페이지의 모든 화면 · 앞으로도 항상).
+     265px 짜리 「불러오는 중」 프레임처럼 내용만큼만 그린 화면은 실제 폰에서 어떻게 보이는지
+     판단이 안 된다. 가로는 그대로 두고 세로만 이 값 이상이어야 한다.
+     옛 스니펫으로 뽑아 screens 가 없으면 통과로 세지 않고 미실행으로 찍는다. */
+  if (pageOk) {
+    const 잘못 = Array.isArray(dump.screens)
+      ? dump.screens.filter((s) => !Number.isFinite(s && s.w) || !Number.isFinite(s && s.h)) : [];
+    if (!Array.isArray(dump.screens) || !dump.screens.length || 잘못.length) {
+      add('SKIP', '화면 높이', dumpPath,
+          !Array.isArray(dump.screens) ? 'screens 가 없어 휴대폰 화면 높이를 확인하지 못했습니다'
+            : !dump.screens.length ? 'screens 가 비어 있어 휴대폰 화면 높이를 확인하지 못했습니다'
+            : `screens ${잘못.length}개에 숫자 w·h 가 없어 휴대폰 화면 높이를 확인하지 못했습니다`,
+          'README "피그마 트리 덤프" 의 최신 스니펫으로 다시 뽑으세요 — screens 를 넣습니다.');
+    } else {
+      for (const s of dump.screens) {
+        if (s.w <= MOBILE_MAX_W && s.h < MIN_SCREEN_H) {
+          add('BLOCK', '화면 높이', `${s.id} ${s.name}`, `세로 ${s.h}px — 휴대폰 높이 ${MIN_SCREEN_H}px 보다 짧습니다`,
+              `가로는 두고 세로만 늘리세요. 세로 오토레이아웃(hug)이면 minHeight=${MIN_SCREEN_H}, 아니면 resize. 바닥 고정 요소는 제약을 MAX 로.`);
+        }
+      }
     }
   }
 
