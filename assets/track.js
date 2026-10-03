@@ -16,7 +16,9 @@
  *   여기서 보내는 것은 이벤트 이름·유입 경로·화면 크기뿐이다.
  *   이름·전화번호·이메일은 **절대 넣지 않는다** — 넣어도 DB 의 CHECK 가 거부한다
  *   (career-coach: analytics.event.event_props_no_pii).
- *   저장은 localStorage 하나(cc_attr)뿐이고 개인 식별자는 담기지 않는다.
+ *   저장은 localStorage 두 칸 — 최초 유입(cc_attr)과 브라우저 표식(cc_b, 무작위 값)뿐이다.
+ *   cc_b 는 이름·계정과 묶이지 않은 난수이고, 운영 DB 는 **우리(운영자) 계정으로 로그인한
+ *   브라우저**의 것만 따로 적어 가입 퍼널에서 우리 시험을 뺀다(career-coach 0111).
  */
 
 // 접속 정보는 /assets/supabase-config.js 한 곳에만 둔다 (2026-08-06 복구 훈련 결과).
@@ -27,6 +29,7 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from '/assets/supabase-config.js';
 const API = SUPABASE_URL;
 const KEY = SUPABASE_ANON_KEY;
 const STORE = 'cc_attr';
+const MARK = 'cc_b';
 
 const UTM = ['source', 'medium', 'campaign', 'content', 'term'];
 
@@ -75,6 +78,18 @@ export function attribution() {
   return currentUtm();
 }
 
+/** 브라우저 표식 — 처음 부를 때 한 번 만들고 그대로 쓴다. 못 만들면 null(표식 없이 보낸다). */
+function browserMark() {
+  try {
+    let b = localStorage.getItem(MARK);
+    if (!b || !/^[A-Za-z0-9_-]{8,64}$/.test(b)) {
+      b = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()).replace(/-/g, '');
+      localStorage.setItem(MARK, b);
+    }
+    return b;
+  } catch { return null; }
+}
+
 /**
  * 이벤트 1건.
  * @param {string} name   career-coach 의 analytics.event_name 에 있는 이름만 통과한다
@@ -83,10 +98,12 @@ export function attribution() {
  */
 export function track(name, props = {}, accessToken = null) {
   try {
+    const mark = browserMark();
     const body = JSON.stringify({
       p_name: name,
       p_utm: attribution(),
-      p_props: { ...props, w: window.innerWidth },
+      // b 는 맨 뒤에 둔다 — 부르는 쪽 props 가 같은 이름을 써도 표식이 이긴다.
+      p_props: { ...props, w: window.innerWidth, ...(mark ? { b: mark } : {}) },
     });
     // keepalive — 버튼 누르고 바로 페이지가 넘어가도 요청이 살아남는다.
     fetch(API + '/rest/v1/rpc/track', {
