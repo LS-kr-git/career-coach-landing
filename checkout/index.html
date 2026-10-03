@@ -289,10 +289,10 @@
   });
 
   /* ── 빌링 결제창 ───────────────────────────────────────────────────────────
-     PG사 입점심사는 "결제페이지와 결제모듈 호출"이 구현돼 있어야 진행된다
-     (포트원 2026-08-07 「PG 계약에 필요한 테스트모드 설정 안내」). 실연동 승인 전에도
-     테스트 채널로 그 둘을 보여줄 수 있어서, 아래는 포트원 테스트 채널에 물려 있다
-     — 토스페이먼츠 결제창 정기결제 · 공용 MID iamporttest_4 (2026-09-17 생성).
+     🔴 2026-10-03 — **실결제 채널로 바꿨다**(사용자 지시). 토스페이먼츠 정기결제 실상점
+     MID bill_im_can15j(9/29 계약 완료). 이제 이 화면에서 등록한 카드는 **실제로 걷힌다.**
+     그 전(2026-09-17~)에는 테스트 채널(공용 MID iamporttest_4)이었다 — 서버(career-coach
+     portone-6r2k9tvq/billing-key)는 이제 테스트 채널 키를 받지 않는다.
 
      두 값은 **공개 값이다** — 브라우저에 그대로 내려가도 되는 것만 둔다
      (assets/supabase-config.js 와 같은 판단). 시크릿 키는 여기에 절대 두지 않는다.
@@ -309,7 +309,7 @@
         「결제가 완료되었습니다」를 그린다. 청구의 customerId 는 서버가 회원 id 로 넣는다 —
         아래 issueId 는 발급용이다. */
   var PORTONE_STORE_ID = 'store-a4b087e3-89d3-4369-8558-02d158bf6564';
-  var PORTONE_CHANNEL_KEY = 'channel-key-07bc635a-da47-4202-90d1-e69c076bce4e';
+  var PORTONE_CHANNEL_KEY = 'channel-key-10f48f35-76db-4560-8a2f-b2bcdbadf850';
 
   var note = function (text, bad) {
     var el = $('note');
