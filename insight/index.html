@@ -69,6 +69,9 @@
      알림톡에서 이미 읽은 5줄이라 본문과 같은 말이 두 번 나온다. */
   .summary{color:var(--gray-600);margin-top:24px}
   .summary[hidden]{display:none}
+  /* 판정표(LOCKED)에 없는 상태 — 요약·잠김 상자 대신 이 한 줄만 선다 (피그마 2279:1307, 2026-10-04 사용자 지시) */
+  .blocked{color:var(--gray-500);margin-top:24px}
+  .blocked[hidden]{display:none}
 
   /* 전문 */
   .body{margin-top:36px}
@@ -161,7 +164,13 @@
     text-decoration:underline;text-underline-offset:3px}
 
   /* 안내(로딩·오류) — 본문이 없을 때만 보인다 */
-  .notice{padding:56px var(--pad-x);text-align:center;color:var(--gray-500)}
+  .notice{text-align:center;color:var(--gray-500);white-space:pre-line}
+  /* 안내 묶음을 「화면 맨 위 ~ 화면 바닥」 사이의 정가운데에 — 09-C(mypage/leave #bye)와 같은 방식 (2026-10-04 사용자 지시).
+     이 화면은 떠 있는 CTA 가 없어 아래 경계가 화면 바닥이다. main 은 헤더 아래에서 시작하므로 아래 여백을 헤더 높이로 두면
+     main 의 가운데가 화면 가운데와 겹친다. 로고 헤더 77 = 피그마 2070:799·823·847 의 content 아래 여백 77 */
+  .page:has(#notice:not([hidden])){display:flex;flex-direction:column}
+  .page:has(#notice:not([hidden])) .brief{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 var(--pad-x) 77px}
+  .page:has(#notice:not([hidden])):has(#backHd:not([hidden])) .brief{padding-bottom:calc(48px + env(safe-area-inset-top))}
 
 
   @media (min-width:451px){
@@ -202,6 +211,7 @@
         <span class="meta-i" id="metaMins" hidden><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="mins"></span></span>
       </p>
       <p class="t-body summary" id="summary" hidden></p>
+      <p class="t-body blocked" id="blocked" hidden></p>
 
       <section class="lock" id="lock" hidden>
         <p class="lock-pill t-caption-strong"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span id="lockMsg"></span></p>
@@ -303,9 +313,9 @@
      docs-audit 은 <script> 를 걷어내고 웹을 훑으므로 흩어진 리터럴은 어느 대조도 못 받는다.
      상수로 모으고 스냅샷의 webScriptText 에 이름을 적으면 피그마 프레임과 맞대 본다. */
   const MSG = {
-    badLink:  '링크가 올바르지 않아요. 알림톡에서 받은 링크로 다시 열어 주세요.',
+    badLink:  '링크가 올바르지 않아요.\n알림톡에서 받은 링크로 다시 열어 주세요.',   // 줄바꿈은 피그마 2070:870 그대로 (.notice 가 pre-line)
     notFound: '없는 글이에요',
-    blocked:  '지금은 열 수 없어요',
+    blocked:  '지금은 전문을 열 수 없어요.',
   };
 
   /* 구독 CTA 의 목적지 — 결제 화면(2026-10-03 실결제 채널). 결제 화면이 로그인을 먼저 보고,
@@ -425,9 +435,12 @@
     $('src').hidden = true;
     $('fb').hidden = true;
     $('metaMins').hidden = true;
-    $('summary').hidden = false;
-    $('lock').hidden = false;
-    $('lockMsg').textContent = LOCKED[row.state] || MSG.blocked;
+    const 잠김문구 = LOCKED[row.state];
+    $('summary').hidden = !잠김문구;
+    $('lock').hidden = !잠김문구;
+    $('lockMsg').textContent = 잠김문구 || '';
+    $('blocked').textContent = MSG.blocked;
+    $('blocked').hidden = !!잠김문구;
     $('makeup').hidden = row.state !== 'makeup_offer';
 
     const sub = $('subscribe');
