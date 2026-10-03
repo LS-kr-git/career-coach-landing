@@ -188,6 +188,7 @@
   </button>
 </div>
 <script type="module">
+  import '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
   /* 목록은 **서버에서** 온다 (2026-09-24 · 0089 `mypage_received`). 마크업의 5편은 피그마
      기준 프레임 상태(대조용)이고, 여기서 그 자리를 실제 기록으로 다시 채운다. */
   import { requireLogin, getThisWeek, getSunday, useSunday, FAIL } from '/assets/mypage-data.js';

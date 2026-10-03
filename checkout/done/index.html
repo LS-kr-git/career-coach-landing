@@ -138,6 +138,7 @@
 </div>
 
 <script type="module">
+  import '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
   import { requireLogin, getSubscription, billingView, wonText, dayText, firstSendDay, shortDayText, FAIL } from '/assets/mypage-data.js';
   var $ = function (id) { return document.getElementById(id); };
   $('firstDay').textContent = shortDayText(firstSendDay()) + ' 아침 8시';

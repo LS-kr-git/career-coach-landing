@@ -98,6 +98,10 @@ function browserMark() {
  */
 export function track(name, props = {}, accessToken = null) {
   try {
+    // 운영 주소에서만 보낸다. 2026-10-03 에 localhost 에서 돈 자동 시험(헤드리스 크롬)이
+    // 운영 원장에 onboarding_done 4건·「저장 실패」 1건을 남겼다 — 로그인을 안 하니
+    // 우리 브라우저 표식(0111)으로도 안 걸러진다. 받는 쪽은 주소를 모르므로 여기서 막는다.
+    if (!/(^|\.)careercoach\.my$/.test(location.hostname)) return;
     const mark = browserMark();
     const body = JSON.stringify({
       p_name: name,
@@ -137,7 +141,7 @@ export function pageView(name, props = {}, accessToken = null) {
  * 왜 페이지가 부르지 않고 자동인가
  *   부르게 하면 **다음에 만드는 페이지에서 반드시 빠진다.** 이 저장소가 이미 같은
  *   모양으로 물렸다(웹에만 만든 페이지가 어느 검수에도 안 잡힌 2026-08-07 사고).
- *   지금 이 파일을 import 하는 화면이 일곱이고, 여기 한 줄이 곧 전 화면이다.
+ *   2026-10-03 부터 어드민(ops) 말고 모든 화면이 이 파일을 부른다(auth/callback 만 처리 도중에) — 여기 한 줄이 곧 전 화면이다.
  *
  * 🔴 **주소의 쿼리·해시를 절대 보내지 않는다.** `/auth/callback/` 는 해시에
  *    `access_token` 이 들어 있다 — 넣는 순간 그게 분석 원장에 박힌다.

@@ -206,6 +206,7 @@
 </div>
 
 <script type="module">
+  import '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
   import { getPlan, getSubscription, billingView, priceText, wonText, saveBillingKey, billingCustomerId, requireLogin, FAIL } from '/assets/mypage-data.js';
 
   var $ = function (id) { return document.getElementById(id); };
