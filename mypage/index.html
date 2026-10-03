@@ -179,7 +179,7 @@
 
   /* 일요일 배너 세 상태 — 서울 기준 오늘 요일 + 이번 주 열람 여부로 정한다 (피그마 01-A/01-B/01-C).
      ?state=open|done|locked 는 디자인 검수용 미리보기다 — 요일과 무관하게 그 상태를 보여준다.
-     「이번 주에 썼나」는 서버 기록이다(0114) — 기기를 바꿔도 같다. 평일은 서버에 물을 것이
+     「이번 주에 썼나」는 서버 기록이다(0115) — 기기를 바꿔도 같다. 평일은 서버에 물을 것이
      없으므로(잠김뿐이다) 바로 세운다. */
   function showBanner(state) {
     document.querySelectorAll('.banner').forEach(function (el) { el.hidden = el.dataset.state !== state; });

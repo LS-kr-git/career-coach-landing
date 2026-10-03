@@ -11,7 +11,7 @@
  *   직군·연차·근무지·주제는 assets/onboarding-store.js 가 정본이다 — 온보딩과 같은 값이라
  *   통로도 같다(user_preference* 직접 조회 + save_onboarding).
  *   일요일 추가 열람(01 배너 · 06 화면)도 서버다 — 받은 편은 0089, 「이번 주에 썼나」와
- *   쓰기는 0114. 브라우저에 남기던 기록(cc_mypage)은 2026-10-03 에 걷었다.
+ *   쓰기는 0115. 브라우저에 남기던 기록(cc_mypage)은 2026-10-03 에 걷었다.
  *
  * 모양
  *   읽기 함수는 전부 async 이고 **실패하면 던진다.** 삼키고 빈 값을 돌려주면 화면이 그것을
@@ -390,7 +390,7 @@ export function kstToday() {
   return { date: `${y}-${m}-${d}`, sunday: 요일 === 'Sun' };
 }
 
-/** 일요일 추가 열람 — { is_sunday, used } (0114). 「썼다」는 서버의 보충 기록이라 기기를 바꿔도 같다. */
+/** 일요일 추가 열람 — { is_sunday, used } (0115). 「썼다」는 서버의 보충 기록이라 기기를 바꿔도 같다. */
 export async function getSunday() { return rpc('mypage_sunday', true); }
 
 /** 01 배너 상태 — 'open'(일요일·아직 안 씀) | 'done'(일요일·이번 주 씀) | 'locked'(평일). */
@@ -400,7 +400,7 @@ export function sundayStateOf(s) {
 }
 
 /**
- * 고른 편에 이번 주 보충 1편을 쓰고, 그 편 전문 주소를 돌려준다 (0114 `mypage_use_makeup`).
+ * 고른 편에 이번 주 보충 1편을 쓰고, 그 편 전문 주소를 돌려준다 (0115 `mypage_use_makeup`).
  * 열렸든 아니든 받은 편이면 주소가 온다 — 잠긴 이유(구독 필요·이번 주 이미 씀)는 전문 페이지가
  * 확정된 문구로 말한다. 주소가 없으면(받지 않은 편) 던진다.
  */
@@ -418,7 +418,7 @@ export function insightHref(token, insightId, from) {
   return `/insight/?t=${encodeURIComponent(token)}&id=${encodeURIComponent(insightId)}&from=${encodeURIComponent(from)}`;
 }
 
-/** 저장소에서 소장한 편을 열 때 쓰는 그 사람의 토큰 (0114 `mypage_insight_token`). */
+/** 저장소에서 소장한 편을 열 때 쓰는 그 사람의 토큰 (0115 `mypage_insight_token`). */
 export async function getInsightToken() {
   const supabase = await supa();
   const { data, error } = await supabase.rpc('mypage_insight_token');
@@ -428,7 +428,7 @@ export async function getInsightToken() {
 }
 
 /**
- * 탈퇴 (0115 `mypage_withdraw`). 'withdrawn' | 'membership'(멤버십이 남아 거절) | 'not_found'.
+ * 탈퇴 (0116 `mypage_withdraw`). 'withdrawn' | 'membership'(멤버십이 남아 거절) | 'not_found'.
  * 서버가 멤버십을 다시 본다 — 화면이 「탈퇴할 수 있다」고 그렸어도 그 사이 결제가 걸렸으면 거절한다.
  */
 export async function withdraw(reason) {
