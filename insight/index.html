@@ -124,22 +124,26 @@
      없으면 JS 가 hidden 을 걸어도 버튼이 그대로 보인다 (playwright 로 확인). */
   .cta[hidden]{display:none}
 
-  /* 소장 알림 — 전문이 처음 열린 그 순간에만 3초 떠 있다가 사라진다 (2026-09-13 컨펌 T2).
-     본문 끝의 「소장한 글에 담았어요」 한 줄은 2026-09-25 사용자 지시로 뺐다. */
-  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;z-index:20;
+  /* 소장 알림 — 전문이 처음 열린 그 순간에만 떴다가 사라진다 (2026-09-13 컨펌 T2).
+     2026-10-04 피그마 2062:821 대로 제목 한 줄만 남겼다(링크·설명 줄 삭제).
+     모션: 아래에서 12px 떠오르며 나타남(.24s) → 2.5초 머묾 → 12px 가라앉으며 사라짐(.26s).
+     바닥에 붙은 알림이라 들어온 방향으로 나간다. 감속 설정이면 움직임 없이 흐려지기만 한다. */
+  .toast{position:fixed;left:50%;bottom:24px;z-index:20;
     width:calc(100% - 40px);max-width:410px;
     background:#fff;border:1px solid var(--amber-200);border-radius:14px;padding:16px;
-    box-shadow:0 10px 30px rgba(120,72,10,.16)}
+    box-shadow:0 10px 30px rgba(120,72,10,.16);
+    transform:translate(-50%,12px);opacity:0;
+    transition:transform .24s cubic-bezier(.2,.8,.2,1),opacity .24s ease-out}
+  .toast.in{transform:translate(-50%,0);opacity:1}
+  .toast.out{transform:translate(-50%,12px);opacity:0;
+    transition:transform .26s cubic-bezier(.4,0,1,1),opacity .26s ease-in}
   .toast-top{display:flex;align-items:center;gap:10px}
   .toast-ic{flex:0 0 26px;width:26px;height:26px;border-radius:50%;background:var(--amber-100);
     display:flex;align-items:center;justify-content:center}
-  .toast-ttl{color:var(--gray-800);font-size:15px;line-height:22px;font-weight:700}
-  .toast-link{margin-left:auto;color:var(--amber-600);font-size:13px;line-height:18px;
-    font-weight:700;white-space:nowrap;text-decoration:none}
-  /* 제목 다음 설명은 아랫줄로 내린다 (2026-09-13 사용자 지시). */
-  .toast-sub{color:var(--gray-500);font-size:13px;line-height:19px;margin-top:8px}
-  .toast.out{opacity:0;transition:opacity .35s ease}
-  @media (prefers-reduced-motion:reduce){ .toast.out{transition:none} }
+  .toast-ttl{color:var(--gray-800);font-size:15px;line-height:23px;font-weight:600}
+  @media (prefers-reduced-motion:reduce){
+    .toast,.toast.in,.toast.out{transform:translate(-50%,0)}
+  }
 
   /* 소장해둔 글 — 지금 보는 글을 뺀 최근 3편 (2026-09-25 컨펌). 서버가 이 글을 빼고 고른다(0102).
      목록을 못 받으면 이 절 전체가 hidden 으로 남는다. 위에 반응 칸이 없을 때(잠김)도 같은
@@ -241,9 +245,7 @@
     <div class="toast-top">
       <span class="toast-ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"></path></svg></span>
       <span class="toast-ttl" id="toastTtl"></span>
-      <a class="toast-link" id="toastLink" href="/mypage/archive/"></a>
     </div>
-    <div class="toast-sub" id="toastSub"></div>
   </div>
 </div>
 
@@ -273,9 +275,7 @@
      이름을 바꾸려면 webScriptText 도 같이 바꿔라(안 바꾸면 푸시가 막힌다).
      문구 근거: 2026-09-13 사용자가 고른 T2 시안. */
   const SAVED_TOAST = {
-    title: '전문을 소장했어요',   // 2026-09-26 사용자 지시 — 피그마 2062:787 문구에 맞춘다
-    link:  '저장소 보기 →',
-    sub:   ['구독하는 동안 언제든 다시 볼 수 있어요.'],
+    title: '전문을 소장했어요',   // 2026-10-04 피그마 2062:821 — 제목 한 줄만 남았다
   };
 
   /* 서버 값에 붙여 그리는 글자 조각 (2026-09-25 컨펌 시안). 위 상수들과 같은 이유로 여기 모으고
@@ -438,28 +438,21 @@
 
   /** 소장 알림 — **처음 담기는 그 순간에만** 뜬다. 이미 담긴 편을 다시 열면 안 뜬다
       (그 판정은 서버의 just_saved 가 한다 — 화면이 기억하지 않는다).
-      3.2초 뒤 흐려지고, 전환이 끝나면 지운다. 전환을 안 쓰는 기기(감속 설정)에서는
+      떠오름(.24s) → 2.5초 머묾 → 가라앉음(.26s) 뒤 지운다. 전환을 안 쓰는 기기에서는
       transitionend 가 안 오므로 **타이머로도 한 번 더 지운다** — 둘 중 먼저 오는 쪽이 이긴다. */
   function 알림() {
     const el = $('toast');
     $('toastTtl').textContent = SAVED_TOAST.title;
-    $('toastLink').textContent = SAVED_TOAST.link;
-    // 설명은 줄마다 한 줄이다(2026-09-26 부터 한 문장). <br> 대신 노드로 넣는다 —
-    // 문구가 상수에 있으므로 innerHTML 을 쓸 이유가 없다.
-    const sub = $('toastSub');
-    sub.replaceChildren();
-    SAVED_TOAST.sub.forEach((line, i) => {
-      if (i) sub.appendChild(document.createElement('br'));
-      sub.appendChild(document.createTextNode(line));
-    });
+    el.classList.remove('in', 'out');
     el.hidden = false;
-    el.classList.remove('out');
-    const 숨김 = () => { el.hidden = true; el.classList.remove('out'); };
+    // 한 프레임 그린 뒤에 in 을 붙여야 시작 위치(12px 아래)에서 전환이 걸린다.
+    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('in')));
+    const 숨김 = () => { el.hidden = true; el.classList.remove('in', 'out'); };
     setTimeout(() => {
       el.classList.add('out');
       el.addEventListener('transitionend', 숨김, { once: true });
-      setTimeout(숨김, 600);
-    }, 3200);
+      setTimeout(숨김, 500);
+    }, 240 + 2500);
   }
 
   $('makeup').addEventListener('click', async (e) => {
