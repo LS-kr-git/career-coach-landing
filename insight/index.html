@@ -65,12 +65,8 @@
   .meta-i[hidden]{display:none}
   .meta svg{flex:0 0 13px}
 
-  /* 요약은 **잠겼을 때만** 보인다. 열린 글은 요약 없이 바로 본문이다 (2026-09-25 컨펌) —
-     알림톡에서 이미 읽은 5줄이라 본문과 같은 말이 두 번 나온다. */
-  .summary{color:var(--gray-600);margin-top:24px}
-  .summary[hidden]{display:none}
   /* 판정표(LOCKED)에 없는 상태 — 요약·잠김 상자 대신 이 한 줄만 선다 (피그마 2279:1307, 2026-10-04 사용자 지시) */
-  .blocked{color:var(--gray-500);margin-top:24px}
+  .blocked{color:var(--gray-500);margin-top:24px;white-space:pre-line}
   .blocked[hidden]{display:none}
 
   /* 전문 */
@@ -99,14 +95,19 @@
   .fb-btn[aria-pressed="true"]{border-color:var(--amber-500);background:var(--amber-50);color:var(--amber-600)}
   .fb-btn[disabled]{cursor:default}
 
-  /* 잠김 — 요약 아래 알약 안내 + 아래로 흐려지며 사라지는 본문 (2026-10-04 사용자 확정 P1·S3·B2).
+  /* 잠김 — 제목 아래 흐려지며 사라지는 본문 + 그 아래 알약 안내 (2026-10-04 사용자 확정 P1·S3·B2,
+     같은 날 피그마 762:2673 등 잠김 6장에서 요약을 빼고 알약을 흐린 본문 아래로 옮겼다).
      흐린 글은 진짜 본문이 아니다 — 잠긴 글은 서버가 본문을 안 보내므로(0023) 화면용 고정 문장이다.
      잠긴 글에는 반응 칸이 없으므로 아래 「소장해둔 글」 막대와 사이를 여기서 띄운다. */
   .lock{margin:24px 0 32px}
-  .lock-pill{display:flex;align-items:center;gap:6px;width:max-content;max-width:100%;margin:0 auto;
-    padding:7px 14px;border-radius:999px;background:var(--amber-100);color:var(--amber-800);word-break:keep-all}
+  .lock-pill{display:flex;align-items:center;gap:6px;width:max-content;max-width:100%;margin:24px auto 0;
+    padding:7px 14px;border-radius:999px;background:var(--amber-100);color:var(--amber-800);word-break:keep-all;
+    text-align:center;white-space:pre-line}
+  /* 두 줄짜리 안내는 피그마처럼 알약이 폭을 다 채우고 글은 그 안 가운데에 선다(762:2694 · 2058:774 — 312 폭) */
+  .lock-pill.multi{width:100%}
+  .lock-pill.multi span{flex:1}
   .lock-pill svg{flex:none;color:var(--amber-600)}
-  .ghost{margin-top:20px;color:var(--gray-700);filter:blur(3px);user-select:none;pointer-events:none;
+  .ghost{color:var(--gray-700);filter:blur(3px);user-select:none;pointer-events:none;
     -webkit-mask-image:linear-gradient(#000,rgba(0,0,0,.55) 45%,transparent);
     mask-image:linear-gradient(#000,rgba(0,0,0,.55) 45%,transparent)}
   .ghost p+p{margin-top:16px}
@@ -210,15 +211,14 @@
         <span class="meta-i" id="metaTrack"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span id="track"></span></span>
         <span class="meta-i" id="metaMins" hidden><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="mins"></span></span>
       </p>
-      <p class="t-body summary" id="summary" hidden></p>
       <p class="t-body blocked" id="blocked" hidden></p>
 
       <section class="lock" id="lock" hidden>
-        <p class="lock-pill t-caption-strong"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span id="lockMsg"></span></p>
         <div class="ghost" aria-hidden="true">
           <p class="t-body">일하는 방식이 바뀌면 필요한 역량도 함께 바뀝니다. 현업에서 실제로 무엇이 달라지고 있는지 채용 공고와 인터뷰로 짚어 봅니다.</p>
           <p class="t-body">같은 직무라도 회사마다 기대하는 경험이 다릅니다. 지금 시장에서 어떤 경험이 더 높게 평가받는지 사례와 함께 정리했습니다.</p>
         </div>
+        <p class="lock-pill t-caption-strong"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span id="lockMsg"></span></p>
       </section>
 
       <div class="body" id="body" hidden></div>
@@ -272,9 +272,9 @@
 
   /* 열람 판정은 DB(insight_access)가 한다. 여기 있는 것은 그 결과 상태를 화면 문구로
      옮기는 표뿐이고, 조건을 다시 계산하지 않는다.
-     문구 정본: career-coach `docs/기획/전문-열람-규칙.md` 3절.
+     문구 정본: 피그마 섹션 762:2672 의 잠김 프레임(전문-열람-규칙.md 3절이 가리킨다).
      상태 정본: `supabase/migrations/0023_insight_access.sql` 5절.
-     ※ locked_past 는 3절 표에 없다 — 미승인 임시 문구다(보고서에 남겼다). */
+     줄바꿈은 피그마 그대로 두고 .lock-pill 이 pre-line 으로 그린다(2026-10-04). */
   /* 소장 알림·흔적의 문구. **마크업이 아니라 여기에 둔다** — docs-audit 은 <script> 를
      걷어내고 웹을 훑으므로, 마크업에 두면 피그마에 없는 낱말이 EXTRA 로 잡히고 그걸
      끄려면 「있어요.」 같은 흔한 낱말까지 영구 면제해야 한다(검사관 2026-09-13 ①).
@@ -301,11 +301,11 @@
   const CHARS_PER_MIN = 500;
 
   const LOCKED = {
-    makeup_offer:            '오늘은 지난 편 1개를 더 볼 수 있어요',
-    makeup_used:             '이번 주 보충은 다 쓰셨어요. 다음 주 일요일에 다시 열려요',
+    makeup_offer:            '이번주에 못 읽은 전문 1개를 열 수 있어요',
+    makeup_used:             '이번 주 추가 열기는 다 쓰셨어요.\n다음 주 일요일에 다시 열려요.',
     need_subscription:       '구독하면 지난 편도 이어서 볼 수 있어요',
-    saved_need_subscription: '소장한 글이에요. 구독을 다시 시작하면 바로 열려요',
-    locked_past:             '지난 편이에요. 같은 주에 놓친 글은 일요일에 1편 다시 열려요',
+    saved_need_subscription: '소장한 글이에요. 구독을 다시 시작하면 바로 열려요.',
+    locked_past:             '지나간 전문이에요. 매주 일요일,\n이번주에 못 읽은 전문 1편을 다시 열수 있어요.',
   };
 
   /* 안내문(#notice)에 뜨는 문구. **여기 한 곳에 모아 둔다** — 「없는 글이에요」는 두 자리에서
@@ -314,8 +314,8 @@
      상수로 모으고 스냅샷의 webScriptText 에 이름을 적으면 피그마 프레임과 맞대 본다. */
   const MSG = {
     badLink:  '링크가 올바르지 않아요.\n알림톡에서 받은 링크로 다시 열어 주세요.',   // 줄바꿈은 피그마 2070:870 그대로 (.notice 가 pre-line)
-    notFound: '없는 글이에요',
-    blocked:  '지금은 전문을 열 수 없어요.',
+    notFound: '없는 글이에요.',
+    blocked:  '지금은 전문을 열 수 없어요.\n문제가 발생하면\ncareercoach.my@gmail.com 로 문의해 주세요.',   // 줄바꿈은 피그마 2279:1326 그대로 (.blocked 가 pre-line)
   };
 
   /* 구독 CTA 의 목적지 — 결제 화면(2026-10-03 실결제 채널). 결제 화면이 로그인을 먼저 보고,
@@ -388,7 +388,6 @@
     $('notice').hidden = true;
     $('letter').hidden = false;
     $('title').textContent = row.title || '';
-    $('summary').textContent = row.summary || '';
     // 분야 — 0102 전에는 track 이 안 온다(undefined). 그때는 줄을 통째로 감춘다.
     $('track').textContent = row.track || '';
     $('meta').hidden = !row.track;
@@ -419,7 +418,6 @@
       $('mins').textContent = Math.max(1, Math.ceil(chars / CHARS_PER_MIN)) + PAGE_TEXT.minsTail;
       $('metaMins').hidden = false;
       bodyEl.hidden = false;
-      $('summary').hidden = true;
       $('lock').hidden = true;
       반응표시(row.reaction || null);
       $('fb').hidden = false;
@@ -430,15 +428,15 @@
       return;
     }
 
-    // 잠김 — 제목·요약은 그대로 두고 전문만 막는다 (전문-열람-규칙 2절).
+    // 잠김 — 제목은 그대로 두고 전문만 막는다 (전문-열람-규칙 2절). 요약은 2026-10-04 피그마에서 빠졌다.
     bodyEl.hidden = true;
     $('src').hidden = true;
     $('fb').hidden = true;
     $('metaMins').hidden = true;
     const 잠김문구 = LOCKED[row.state];
-    $('summary').hidden = !잠김문구;
     $('lock').hidden = !잠김문구;
     $('lockMsg').textContent = 잠김문구 || '';
+    $('lockMsg').parentElement.classList.toggle('multi', !!잠김문구 && 잠김문구.includes('\n'));
     $('blocked').textContent = MSG.blocked;
     $('blocked').hidden = !!잠김문구;
     $('makeup').hidden = row.state !== 'makeup_offer';
