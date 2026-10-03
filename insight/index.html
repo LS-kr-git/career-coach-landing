@@ -16,10 +16,10 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
   /* 커리어코치 디자인 시스템 — letter.html·terms.html 과 같은 토큰·폭·타이포·헤더를 쓴다.
-     새로 만든 값은 없다. */
+     이 페이지에서 새로 둔 값은 --amber-800 하나다(잠김 알약 글자색, 2026-10-04). */
   :root{
     color-scheme: only light;
-    --amber-50:#FFFBEB; --amber-100:#FEF3C7; --amber-200:#FDE68A; --amber-500:#F59E0B; --amber-600:#D97706;
+    --amber-50:#FFFBEB; --amber-100:#FEF3C7; --amber-200:#FDE68A; --amber-500:#F59E0B; --amber-600:#D97706; --amber-800:#92400E;
     --navy-900:#1E3A8A; --navy-950:#172554;
     --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-400:#94A3B8;
     --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155; --gray-800:#1E293B;
@@ -96,13 +96,25 @@
   .fb-btn[aria-pressed="true"]{border-color:var(--amber-500);background:var(--amber-50);color:var(--amber-600)}
   .fb-btn[disabled]{cursor:default}
 
-  /* 잠김 안내 — 카드는 letter.html .insight 와 같은 값 */
-  /* 잠긴 글에는 반응 칸이 없으므로 아래 「소장해둔 글」 막대와 사이를 여기서 띄운다. */
-  .lock{margin-top:24px;margin-bottom:48px;background:#fff;border:1px solid var(--gray-200);
-    box-shadow:0 1px 3px rgba(15,23,42,.05);border-radius:14px;padding:20px;text-align:center}
-  .lock-msg{color:var(--gray-700)}
+  /* 잠김 — 요약 아래 알약 안내 + 아래로 흐려지며 사라지는 본문 (2026-10-04 사용자 확정 P1·S3·B2).
+     흐린 글은 진짜 본문이 아니다 — 잠긴 글은 서버가 본문을 안 보내므로(0023) 화면용 고정 문장이다.
+     잠긴 글에는 반응 칸이 없으므로 아래 「소장해둔 글」 막대와 사이를 여기서 띄운다. */
+  .lock{margin:24px 0 32px}
+  .lock-pill{display:flex;align-items:center;gap:6px;width:max-content;max-width:100%;margin:0 auto;
+    padding:7px 14px;border-radius:999px;background:var(--amber-100);color:var(--amber-800);word-break:keep-all}
+  .lock-pill svg{flex:none;color:var(--amber-600)}
+  .ghost{margin-top:20px;color:var(--gray-700);filter:blur(3px);user-select:none;pointer-events:none;
+    -webkit-mask-image:linear-gradient(#000,rgba(0,0,0,.55) 45%,transparent);
+    mask-image:linear-gradient(#000,rgba(0,0,0,.55) 45%,transparent)}
+  .ghost p+p{margin-top:16px}
+  /* 버튼은 화면 바닥에 고정한다(시안 E). 잠긴 화면에서 누를 버튼이 있을 때만 선다. */
+  .dock{position:fixed;left:50%;bottom:0;transform:translateX(-50%);z-index:20;width:100%;max-width:var(--card-max);
+    padding:12px 20px calc(20px + env(safe-area-inset-bottom));background:linear-gradient(rgba(255,255,255,0),#fff 30%)}
+  /* 보충으로 글이 열리면 「이 편 열기」 의 hidden 은 그대로라 잠김 칸이 사라질 때 같이 숨긴다. */
+  .page:has(#lock[hidden]) .dock, .dock:not(:has(.cta:not([hidden]))){display:none}
+  .page:has(#lock:not([hidden])) .brief{padding-bottom:120px}
   .cta{display:flex;align-items:center;justify-content:center;width:100%;max-width:var(--cta-max);
-    height:var(--cta-h);margin:16px auto 0;border:0;cursor:pointer;
+    height:var(--cta-h);margin:0 auto;border:0;cursor:pointer;
     background:var(--amber-500);color:#fff;font-family:inherit;
     font-weight:var(--cta-fw);font-size:var(--cta-fs);border-radius:var(--cta-radius);
     box-shadow:0 6px 18px rgba(245,158,11,.25)}
@@ -188,9 +200,11 @@
       <p class="t-body summary" id="summary" hidden></p>
 
       <section class="lock" id="lock" hidden>
-        <p class="t-h3 lock-msg" id="lockMsg"></p>
-        <button class="cta" id="makeup" type="button" hidden>이 편 열기</button>
-        <button class="cta" id="subscribe" type="button" hidden></button>
+        <p class="lock-pill t-caption-strong"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span id="lockMsg"></span></p>
+        <div class="ghost" aria-hidden="true">
+          <p class="t-body">일하는 방식이 바뀌면 필요한 역량도 함께 바뀝니다. 현업에서 실제로 무엇이 달라지고 있는지 채용 공고와 인터뷰로 짚어 봅니다.</p>
+          <p class="t-body">같은 직무라도 회사마다 기대하는 경험이 다릅니다. 지금 시장에서 어떤 경험이 더 높게 평가받는지 사례와 함께 정리했습니다.</p>
+        </div>
       </section>
 
       <div class="body" id="body" hidden></div>
@@ -216,6 +230,11 @@
       <a class="saved-all t-caption" id="savedAll" href="/mypage/archive/"></a>
     </section>
   </main>
+
+  <div class="dock" id="dock">
+    <button class="cta" id="makeup" type="button" hidden>이 편 열기</button>
+    <button class="cta" id="subscribe" type="button" hidden></button>
+  </div>
 
   <!-- 알림은 <div class="page"> 안에 두되 position:fixed 라 스크롤과 무관하게 바닥에 선다. -->
   <div class="toast" id="toast" role="status" hidden>
