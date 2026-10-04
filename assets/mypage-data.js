@@ -79,7 +79,7 @@ const TOPICS = [
   COMMON_TOPIC,
   'UI·UX 디자인',
   '디자인',
-  '개발·AI',
+  '개발',
   '마케팅·그로스',
   '프로덕트·전략',
   '세일즈·GTM',
