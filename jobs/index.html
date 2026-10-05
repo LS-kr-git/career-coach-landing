@@ -179,10 +179,12 @@
   const $ = (id) => document.getElementById(id);
 
   /* 안내문 — 상수로 모아 둔다. figma-docs-text.json 의 webScriptText 가 MSG 를 선언해
-     피그마 상태 프레임(2170:1043·1050·1319·1477)과 대조한다. */
+     피그마 상태 프레임(2170:1043·1050·2384:1209·2176:1334·1503)과 대조한다. */
   const MSG = {
     badLink: '링크가 올바르지 않아요',
     badLinkSub: '알림톡에서 받은 링크로 다시 열어 주세요.',
+    expired: '링크 사용 기간이 지났어요',
+    expiredSub: '가장 최근에 받은 알림톡에서 다시 열어 주세요.',
     blocked: '지금은 열 수 없어요',
     none:    '이번 주에 보낸 공고가 없어요.',
     noHit:   '에 맞는 공고가 없어요',
@@ -213,7 +215,7 @@
       body: JSON.stringify({ p_token: token, p_send_date: day }),
     });
     const data = await res.json().catch(() => null);
-    if (!res.ok || !data) throw new Error((data && data.message) || MSG.blocked);
+    if (!res.ok || !data) throw Object.assign(new Error((data && data.message) || MSG.blocked), { code: data && data.code });
     return data;
   }
 
@@ -333,7 +335,9 @@
       $('open').hidden = false;
       그리기();
     } catch (err) {
-      console.error(err);   // 서버 문구(예: 만료된 링크)는 화면에 안 쓴다 — 피그마에 그 화면이 없다
+      console.error(err);
+      // P0001 = jobs_briefing 의 유일한 raise — 토큰이 없거나 만료·폐기됐다(career-coach 0101). 피그마 2384:1209
+      if (err && err.code === 'P0001') return notice(MSG.expired, MSG.expiredSub, MSG.ask);
       notice(MSG.blocked, '', MSG.askBlocked);
     }
   })();
