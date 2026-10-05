@@ -25,8 +25,16 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..', '..');
 const API = 'https://api.zighang.com/api/recruitments/v3';
 
-/** 직행 '민간 플랫폼' 출처. V1 = 화면의 '직행 수집'. */
-const PRIVATE = ['V1', '원티드', '로켓펀치', '그룹바이', '랠릿'];
+/** 셀 출처 — 2026-10-05 사용자 확정(안 A): 08-07 정의와 **이름이 같은 것만**.
+ *  직행이 2026-10 에 출처 값을 바꿨다. V1·리크루터_V1·리크루터_V2·그리팅·나인하이어 는 이제 오류(GLOBAL-301, HTTP 는 200)를 내고
+ *  '직행' 하나로 묶였다. 새로 생긴 출처(잡코리아·인크루트·리멤버 …)와 공공 출처는 세지 않는다.
+ *  ⚠️ 값을 화면 필터 라벨로 짐작하지 말 것 — 하나라도 틀리면 API 가 HTTP 200 에 data:null 을 준다(아래 total 이 던진다).
+ *  근거: career-coach `docs/claude/아카이브/실측/실측-2026-10-05-직군-볼륨-*.md` */
+const PRIVATE = [
+  '직행', '원티드', '그룹바이', '랠릿', '로켓펀치', '아이브릭', '유엔리쿠르터',
+  '아이원잡', '대한상공회의소', '금융투자협회', '여신금융협회', '한국관세사회',
+  '한국공인회계사회', '한국보험계리사회', '한국상담학회', '한국벤처캐피탈협회',
+];
 const PRIV_Q = PRIVATE.map((v) => 'affiliates=' + encodeURIComponent(v)).join('&');
 
 const arg = (name, dflt) => {
@@ -42,7 +50,10 @@ const since = new Date(now.getTime() - DAYS * 864e5).toISOString().slice(0, 10) 
 const total = async (q) => {
   const r = await fetch(`${API}?page=0&size=1&${q}`);
   if (!r.ok) throw new Error(`${r.status} ${q}`);
-  return (await r.json())?.data?.totalElements ?? -1;
+  const n = (await r.json())?.data?.totalElements;
+  // -1 로 적어 두면 build.mjs 가 그 직군을 「0건」처럼 숨긴다 — 조용히 넘기지 않는다.
+  if (typeof n !== 'number') throw new Error(`totalElements 없음 ${q}`);
+  return n;
 };
 /** 동시 8개 — 더 올리면 직행 쪽에 부담이 된다 */
 const mapLimit = async (items, fn, limit = 8) => {
@@ -73,7 +84,7 @@ d2.forEach(([g, c], i) => { (depthTwo[g] ||= {})[c] = d2res[i]; });
 writeFileSync(OUT, JSON.stringify({
   _설명: '직무별 공고 볼륨 실측. 온보딩에서 무엇을 보여줄지 정하는 근거다.',
   _측정일: now.toISOString().slice(0, 10),
-  _대상: `직행 '민간 플랫폼' 출처만 — ${PRIVATE.join(' · ')}`,
+  _대상: `08-07 정의와 이름이 같은 출처만 (2026-10-05 안 A) — ${PRIVATE.join(' · ')}`,
   _지표: { open: '현재 열려 있는 공고 수 (재고)', new30: `최근 ${DAYS}일 신규 공고 수 (유입). 주당 = new30 / ${(DAYS / 7).toFixed(1)}` },
   depthOne: Object.fromEntries(d1.map((c, i) => [c, d1res[i]])),
   depthTwo,
