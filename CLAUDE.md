@@ -523,9 +523,14 @@ cta.y = Math.round(f.height - 80);
 - **만드는 법 (플러그인 API)**
   - 상태가 바뀌는 부품은 **컴포넌트 세트의 배리언트**로 만든다(예: `상태=꺼짐/켜짐/꺼짐-눌림/켜짐-눌림`).
     라벨이 다른 부품은 텍스트를 인스턴스에서 덮어쓰지 말고 배리언트 속성(예: `이유=…`)으로 나눈다(위 「인스턴스 텍스트 오버라이드 금지」).
-  - 누르면 바뀜: 배리언트에 `ON_CLICK → CHANGE_TO` + `DISSOLVE · EASE_OUT · 0.12` (웹의 `.12s`).
-  - 누르는 동안 눌림: `ON_PRESS`(While pressing) `→ CHANGE_TO` 눌림 배리언트, `transition: null`(웹은 즉시).
+  - 눌림 효과가 **없는** 부품: 배리언트에 `ON_CLICK → CHANGE_TO` + `DISSOLVE · EASE_OUT · 0.12` (웹의 `.12s`).
+  - 눌림 효과가 **있는** 부품: 기본 배리언트 `MOUSE_DOWN → CHANGE_TO 눌림`(`transition: null`) ·
+    눌림 배리언트 `MOUSE_UP → 원래 클릭 동작`(CHANGE_TO·SET_VARIABLE·NAVIGATE) + `MOUSE_LEAVE → 기본으로`.
     눌림 배리언트는 내용 프레임을 `rescale(0.97)`/`(0.98)` 한다.
+    🔴 **`ON_PRESS`(While pressing)와 `ON_CLICK` 을 한 배리언트에 같이 달지 마라** (2026-10-05 실측) —
+    누르는 순간 눌림 배리언트로 바뀌어 클릭이 먹히지 않는다. 회원 탈퇴 09-A-2 에서 「기타」 체크 해제·입력칸 숨김이 안 됐다.
+  - 화면 가운데 뜨는 모달: 고정(`numberOfFixedChildren`) 딤의 높이를 **프레임 높이가 아니라 휴대폰 화면 높이(800)** 로 잡는다.
+    프레임 전체(예: 1073)로 잡으면 프리뷰에서 모달이 화면 가운데보다 아래에 뜬다(09-B 실측).
   - 다른 곳을 보이고 숨기는 것(「기타」 입력칸, 동의해야 켜지는 버튼): **불리언 변수**를 만들고 그 노드의 `visible` 을
     `setBoundVariable('visible', 변수)` 로 묶은 뒤, 누르는 배리언트의 `actions` 에 `SET_VARIABLE` 을 함께 넣는다.
     상태별 정지 프레임(예: 입력칸 있는/없는 판)은 같은 컬렉션의 **모드**를 프레임에 `setExplicitVariableModeForCollection` 으로 건다.
