@@ -81,6 +81,17 @@
   .kv b{font-weight:600;color:var(--gray-800);text-align:right}
   .cancel{align-self:flex-end;color:var(--gray-400);background:none;border:0;
     font:inherit;font-size:14px;line-height:20px;cursor:pointer;margin-top:-20px}
+  /* 해지 예약된 사람의 「해지 취소하기」 — 해지하기 자리에 앰버 700 글자 + 같은 색 밑줄
+     (2026-10-05 사용자 컨펌 「해지 취소 v6」 · 「글자 버튼 색 v7」 1안) */
+  .cancel.undo{color:var(--amber-700);text-decoration:underline;text-decoration-color:var(--amber-700);text-underline-offset:3px}
+  /* 아래 고정 버튼 위 안내 한 줄 */
+  .cta-dock.resume{flex-direction:column;align-items:center;gap:10px}
+  .dock-note{font-size:13px;line-height:18px;color:var(--gray-600);text-align:center;padding:0 20px;word-break:keep-all}
+  .dock-note.fail{color:var(--error-600)}
+  .page.has-dock.resume main{padding-bottom:124px}
+  /* 해지 취소 뒤 잠깐 뜨는 안내 */
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--gray-800);color:#fff;
+    border-radius:12px;padding:12px 16px;font-size:14px;line-height:20px;white-space:nowrap;z-index:30}
 
   /* 구독권 고르기 — 결제 화면 26판(피그마 2369:1325)의 요금 카드와 같은 값.
      안 고른 카드 gray-50 바탕 · 고른 카드 흰 바탕 + amber-500 테두리 + 그림자. 색은 바로 바뀐다(피그마 프리뷰도 즉시). */
@@ -178,6 +189,8 @@
   </div>
 </main>
 <div class="cta-dock" id="dock" hidden><button class="cta" type="button" id="cta"></button></div>
+<div class="cta-dock resume" id="resumeDock" hidden><span class="dock-note" id="resumeNote"></span><button class="cta" type="button" id="resume">해지 취소하기</button></div>
+<div class="toast" id="toast" role="status" hidden>해지를 취소했어요. 멤버십이 이어져요</div>
 <script type="module">
   import '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
   /* 값은 전부 서버에서 온다 (career-coach 0086 `mypage_subscription` · `plan` 표).
@@ -187,7 +200,7 @@
        구독 전 — 구독권 고르기 + 결제수단 + 하단 결제 버튼 (마크업 기본 상태 · 피그마 908:606)
        구독 중 — 멤버십 + 결제 + 이용 중인 요금제 + 맨 아래 해지 (피그마 03-C)
        조회 실패 — 멤버십 + 결제 자리에 실패 문구 (피그마 03-B 2157:997) */
-  import { requireLogin, getSubscription, getPlans, planCards, cancelSubscription, billingView, billingFail }
+  import { requireLogin, getSubscription, getPlans, planCards, resumeSubscription, billingView, billingFail }
     from '/assets/mypage-data.js';
 
   var $ = function (id) { return document.getElementById(id); };
@@ -236,7 +249,11 @@
     var 고를곳 = !bad && !v.subscribed && cards;
     $('pick').hidden = !고를곳;
     $('dock').hidden = !고를곳;
-    page.classList.toggle('has-dock', !!고를곳);
+    $('resumeDock').hidden = !v.canResume;
+    $('resumeNote').textContent = v.resumeNote;
+    $('resumeNote').classList.remove('fail');
+    page.classList.toggle('has-dock', !!고를곳 || v.canResume);
+    page.classList.toggle('resume', v.canResume);
     $('member').hidden = 고를곳;
     $('payLabel').textContent = 고를곳 ? '결제수단' : '결제';
     $('mine').hidden = !v.subscribed;
@@ -250,7 +267,9 @@
     $('price').textContent = v.price;
     $('nextLabel').textContent = v.nextLabel;
     $('next').textContent = v.next;
-    cancel.hidden = !v.canCancel;
+    cancel.hidden = !v.canCancel && !v.canResume;
+    cancel.textContent = v.canResume ? '해지 취소하기' : '구독 해지하기';
+    cancel.classList.toggle('undo', v.canResume);
     if (고를곳) 카드그리기(cards);
   }
 
@@ -284,15 +303,29 @@
     else 결제로();
   });
 
-  /* 해지는 기간 끝 해지다 — 서버가 다음 결제일을 그대로 이용 종료일로 돌려준다.
-     누르고 나면 화면이 해지된 상태로 바뀐다(다시 읽어 그린다). 실패하면 실패로 그린다. */
+  /* 해지는 해지 화면(/mypage/cancel/)에서 이유를 받고 한다 (2026-10-05 사용자 컨펌 「해지 사유 v3」).
+     해지 예약된 사람에게는 같은 자리가 「해지 취소하기」다 — 아래 고정 버튼과 똑같이 동작한다. */
   cancel.addEventListener('click', function () {
-    cancel.disabled = true;
-    cancelSubscription().then(다시읽는다).then(
-      function (r) { paint(billingView(r[0]), false, r[1]); },
-      function () { paint(billingFail(), true, null); }
-    ).then(function () { cancel.disabled = false; });
+    if (cancel.classList.contains('undo')) 되돌리기();
+    else location.href = '/mypage/cancel/';
   });
+  $('resume').addEventListener('click', 되돌리기);
+
+  /* 해지 취소 — 확인 창 없이 바로 되돌리고 「구독 중」으로 다시 그린다 (2026-10-05 사용자 지시).
+     실패하면 화면은 해지 예약 그대로 두고 안내 자리에 빨간 글씨로 알린다. */
+  var 되돌리는중 = false;
+  function 되돌리기() {
+    if (되돌리는중) return;
+    되돌리는중 = true;
+    resumeSubscription().then(다시읽는다).then(function (r) {
+      paint(billingView(r[0]), false, r[1]);
+      $('toast').hidden = false;
+      setTimeout(function () { $('toast').hidden = true; }, 2500);
+    }, function () {
+      $('resumeNote').textContent = '해지를 취소하지 못했어요. 잠시 후 다시 눌러 주세요';
+      $('resumeNote').classList.add('fail');
+    }).then(function () { 되돌리는중 = false; });
+  }
 </script>
 </div>
 </body>

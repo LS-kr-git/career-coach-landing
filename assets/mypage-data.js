@@ -170,8 +170,14 @@ export async function getProfile() { return rpc('mypage_profile', true); }
 /** 구독·결제수단. 서버가 **항상 한 행**을 준다 — 없는 값은 null 이다. */
 export async function getSubscription() { return rpc('mypage_subscription', true); }
 
-/** 해지. 기간 끝 해지라 다음 결제일이 그대로 「이용 종료일」이 된다. */
-export async function cancelSubscription() { return rpc('mypage_cancel_subscription', true); }
+/** 해지. 기간 끝 해지라 다음 결제일이 그대로 「이용 종료일」이 된다.
+ *  이유는 해지 화면(/mypage/cancel/)이 고른 것을 「 · 」로 이은 한 줄이다(career-coach 0124). */
+export async function cancelSubscription(reason) {
+  return rpc('mypage_cancel_subscription', true, { p_reason: reason || null });
+}
+
+/** 해지 취소 — 이용 종료일 전의 해지 예약을 되돌린다(career-coach 0124). */
+export async function resumeSubscription() { return rpc('mypage_resume_subscription', true); }
 
 /** 소장한 편 전부 — { insight_id, title, track, publish_date }. */
 export async function getArchive() { return rpc('mypage_archive', false); }
@@ -402,6 +408,12 @@ export function dayText(value) {
   return `${y}년 ${Number(m)}월 ${Number(d)}일`;
 }
 
+/** 「11월 3일」 — 해 없이. 해지 취소 안내처럼 가까운 날만 말하는 자리에 쓴다. */
+function monthDay(value) {
+  const { m, d } = kstParts(value);
+  return `${Number(m)}월 ${Number(d)}일`;
+}
+
 /**
  * 01 프로필 카드 네 자리. 값이 없는 자리는 EMPTY 를 그대로 쓴다 —
  * 「null 님」 같은 것을 그리지 않고, 없는 사람을 지어내지도 않는다.
@@ -450,6 +462,9 @@ export function billingView(s, plan) {
     amount: 구독중 ? priceText(s) : (plan ? priceText(plan) : ''),
     // 해지할 것이 없거나 이미 예약된 사람에게는 누를 것을 주지 않는다.
     canCancel: Boolean(구독중 && !해지예약),
+    // 해지 예약된 사람에게만 「해지 취소하기」 (2026-10-05 사용자 컨펌 「해지 취소 v6」).
+    canResume: 해지예약,
+    resumeNote: 해지예약 ? `${monthDay(s.current_period_end)}에 멤버십이 끝나요. 지금 취소하면 끝나지 않아요.` : '',
   };
 }
 
@@ -461,7 +476,8 @@ export function profileFail() {
 /** 구독 조회가 실패했을 때. 결제수단 자리에 실패 문구를 쓰고, 요금제·금액은 안 그린다 — 못 물어본 값이다. */
 export function billingFail() {
   return { subscribed: false, live: null, card: FAIL.line, cardSub: FAIL.hint, hasCard: false,
-           planLabel: '', price: '', nextLabel: '', next: '', amount: '', canCancel: false };
+           planLabel: '', price: '', nextLabel: '', next: '', amount: '', canCancel: false,
+           canResume: false, resumeNote: '' };
 }
 
 /** 05 목록 한 줄 — 서버 행을 화면 표기로. date 는 「08. 07」, month 는 월 칩이 묶는 단위다. */
