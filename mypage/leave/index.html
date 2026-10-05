@@ -41,15 +41,18 @@
     width:36px;height:36px;border-radius:10px;background:transparent;transition:background .12s}
   .back:active::before{background:var(--gray-100)}
   main{flex:1;display:flex;flex-direction:column;width:100%;max-width:var(--card-max);margin:0 auto}
-  /* 푸터를 걷어낸 뒤(2026-10-03 사용자 지시) 마지막 내용이 떠 있는 CTA(20+54)·그라데이션(26)에 안 깔리게 — 피그마 09-A·B 프레임 아래 여백 100 과 같은 값 */
-  main{padding-bottom:calc(100px + env(safe-area-inset-bottom))}
+  /* 마지막 내용이 바닥의 동의 체크 + 탈퇴하기 묶음(.cta-dock 높이 152)에 안 깔리게 — 피그마 09-A·A-2·B 프레임 아래 여백 170 과 같은 값 */
+  main{padding-bottom:calc(170px + env(safe-area-inset-bottom))}
   /* 피그마 텍스트 스타일 대응 (careercoach 컬렉션 text/*) */
-  .t-h4{font-size:15px;line-height:22px;font-weight:600}
   .t-body-s{font-size:14px;line-height:20px;font-weight:400}
   /* 하단 플로팅 CTA — 온보딩 1단계(.fade + .cta)와 같은 모양: 흰 그라데이션 100px 위에 떠 있고 바닥에서 20 */
   .cta-dock{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:var(--card-max);
     padding:26px 0 20px;background:linear-gradient(180deg,rgba(255,255,255,0),#fff 55%);
-    display:flex;justify-content:center;pointer-events:none;z-index:10}
+    display:flex;flex-direction:column;align-items:center;pointer-events:none;z-index:10}
+  /* 탈퇴 확인(09-A) — 동의 체크가 버튼 바로 위에 붙는다. 위 40px 동안 투명 → 흰색(본문이 문구 뒤로 들어가며 사라진다)
+     2026-10-05 사용자 컨펌 목업 「회원탈퇴 시안 v7」 · 피그마 09-A foot */
+  .cta-dock.leave{padding:44px 0 20px;gap:14px;background:linear-gradient(180deg,rgba(255,255,255,0) 0,#fff 40px)}
+  .cta-dock.leave .agree{pointer-events:auto;width:calc(100% - 40px);max-width:410px;padding:0 4px}
   /* 폭은 저장소 정본을 따른다 — CLAUDE.md 「CTA 규칙」: 플로팅은 calc(100% - 40px) · max 410.
      피그마 프레임이 320 인 것은 360 기준이라 그런 것이고, 웹 폭(카드 450)과 다른 것이 의도된 상태다
      (career-coach docs/기획/피그마-웹-동기화.md 「폭에 관한 확정 사항」). */
@@ -67,40 +70,58 @@
   .title h1{font-size:24px;line-height:32px;font-weight:700;letter-spacing:-.01em;color:var(--gray-900)}
   .desc{padding:10px var(--pad-x) 0;color:var(--gray-500);word-break:keep-all}
 
-  .chip{border:0;background:#fff;box-shadow:inset 0 0 0 1px var(--gray-200);border-radius:10px;
-    padding:9px 12px;font:inherit;font-size:13px;line-height:18px;font-weight:400;color:var(--gray-600);
-    cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent;
-    transition:background .12s,box-shadow .12s,color .12s}
-  .chip:active{transform:scale(.97)}
-  .chip[aria-pressed="true"]{background:var(--amber-50);box-shadow:inset 0 0 0 1px var(--amber-500);color:var(--amber-600)}
-  .chip.lock{background:var(--gray-100);color:var(--gray-400);cursor:default}
-  .chip.lock:active{transform:none}
 
 
-  /* 회원 탈퇴 — 2026-10-03 사용자 컨펌 「5번」. 멤버십이 남아 있으면 탈퇴를 막는다(서버 0117 도 막는다) */
-  .lv{padding:28px var(--pad-x) 40px;display:flex;flex-direction:column;gap:28px}
-  .lst{border:1px solid var(--gray-200);border-radius:14px;padding:6px 18px}
-  .lst li{list-style:none;display:flex;gap:10px;padding:14px 0;color:var(--gray-700);word-break:keep-all}
+  /* 회원 탈퇴 — 2026-10-03 사용자 컨펌 「5번」. 멤버십이 남아 있으면 탈퇴를 막는다(서버 0117 도 막는다).
+     2026-10-05 사용자 컨펌 목업 「회원탈퇴 시안 v7」 — 아이콘 목록 · 회색 띠 · 이유 중복 선택 · 「기타」 입력 · 멤버십 모달 */
+  .lv{padding:40px var(--pad-x) 0;display:flex;flex-direction:column}
+  .lst li{list-style:none;display:flex;align-items:center;gap:12px;padding:14px 0;color:var(--gray-700);word-break:keep-all}
+  .lst li:first-child{padding-top:0}
+  .lst li:last-child{padding-bottom:0}
   .lst li + li{border-top:1px solid var(--gray-100)}
-  .lst li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--amber-500);flex:none;margin-top:8px}
+  .tile{flex:none;width:36px;height:36px;border-radius:10px;background:var(--amber-100);display:flex;align-items:center;justify-content:center}
+  /* 전체 공고(/jobs/) 요약·목록 사이 띠와 같은 값 — 높이 12 · gray-100 · 화면 끝까지. 위아래 40 */
+  .band{height:12px;background:var(--gray-100);margin:40px calc(var(--pad-x) * -1)}
   .t-caption{font-size:13px;line-height:18px;font-weight:400}
-  .why .lab{color:var(--gray-500);margin-bottom:10px;display:block}
-  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .why{display:flex;flex-direction:column;gap:12px}
+  .why h2{font-size:20px;line-height:28px;font-weight:700;color:var(--gray-900);word-break:keep-all}
+  .why h2 .multi{font-size:15px;font-weight:400;color:var(--gray-500)}
+  .rs{display:flex;flex-direction:column}
+  .r{display:flex;align-items:center;gap:12px;width:100%;padding:14px 2px;border:0;border-bottom:1px solid var(--gray-100);
+    background:#fff;font:inherit;font-size:15px;line-height:22px;color:var(--gray-700);text-align:left;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;transition:color .12s}
+  .r:last-child{border-bottom:0}
+  .r:active{transform:scale(.97)}
+  .r[aria-checked="true"]{color:var(--gray-900);font-weight:600}
+  .r[aria-checked="true"] .box{border-color:var(--amber-500);background:var(--amber-500)}
+  .r[aria-checked="true"] .box svg{visibility:visible}
+  .r .box{margin-top:0}
+  .other{border:1.5px solid var(--amber-500);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+  .other textarea{border:0;outline:0;resize:none;height:56px;font:inherit;font-size:14px;line-height:20px;color:var(--gray-900);background:transparent;padding:0}
+  .other textarea::placeholder{color:var(--gray-400)}
+  .other .cnt{align-self:flex-end;color:var(--gray-400);font-variant-numeric:tabular-nums}
   .agree{display:flex;align-items:flex-start;gap:10px;background:none;border:0;padding:0;font:inherit;text-align:left;cursor:pointer}
   .box{width:20px;height:20px;border-radius:6px;border:1.6px solid var(--gray-300);background:#fff;
-    display:flex;align-items:center;justify-content:center;margin-top:1px;flex-shrink:0}
+    display:flex;align-items:center;justify-content:center;margin-top:1px;flex-shrink:0;transition:background .12s,border-color .12s}
   .box svg{visibility:hidden}
   .agree[aria-checked="true"] .box{border-color:var(--amber-500);background:var(--amber-500)}
   .agree[aria-checked="true"] .box svg{visibility:visible}
   .agree-t{font-size:14px;line-height:20px;color:var(--gray-700)}
-  /* 멤버십이 남아 있을 때 — 확인 목록 위에 뜬다 */
-  .block{border-radius:14px;background:var(--amber-50);padding:16px 18px;display:flex;flex-direction:column;gap:6px;word-break:keep-all}
-  .block .b-title{color:var(--amber-800)}
-  .block .b-body{color:var(--gray-600)}
+  /* 멤버십이 남아 있을 때 — 화면 위에 모달(09-B). 버튼은 「닫기」 하나, 누르면 모달만 닫힌다(탈퇴하기는 잠긴 채) */
+  .dim{position:fixed;inset:0;z-index:30;background:rgba(15,23,42,.5);display:flex;align-items:center;justify-content:center;padding:0 var(--pad-x)}
+  .modal{width:100%;max-width:402px;background:#fff;border-radius:20px;padding:28px 20px 20px;box-shadow:0 12px 32px rgba(15,23,42,.16);display:flex;flex-direction:column;word-break:keep-all}
+  .modal h2{font-size:17px;line-height:24px;font-weight:600;color:var(--gray-900);margin-bottom:8px}
+  .modal .m-body{color:var(--gray-600)}
+  .m-date{margin-top:16px;background:var(--gray-50);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .m-date .l{color:var(--gray-500)}
+  .m-date .v{font-size:15px;line-height:23px;font-weight:600;color:var(--gray-900)}
+  .m-close{margin-top:24px;height:48px;border-radius:12px;background:var(--gray-800);color:#fff;font-size:15px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;border:0;width:100%;font:inherit;font-size:15px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .m-close:active{transform:scale(.98)}
   /* 탈퇴 버튼은 앰버가 아니라 짙은 회색 — 권하는 행동이 아니다 */
   .cta.danger{background:var(--gray-800);box-shadow:none}
   .cta.danger[disabled]{background:var(--gray-100);color:var(--gray-400)}
-  .err{color:var(--error-600);font-size:13px;line-height:18px;text-align:center;margin-top:-16px}
+  .err{color:var(--error-600);font-size:13px;line-height:18px;text-align:center;margin-top:16px}
   /* 탈퇴 완료 — 체크·제목·문구 묶음을 「화면 맨 위 ~ 떠 있는 CTA 버튼 윗변」 사이의 정가운데에 (2026-10-03 사용자 지시).
      CTA 윗변 = 화면높이 − 74(버튼 54 + 바닥 20). main 은 헤더(48) 아래에서 시작하므로 아래 여백을 74+48 = 122 로 두면
      main 의 가운데가 그 영역의 가운데와 겹친다. .cta-dock 은 safe-area 를 안 더하므로 여기도 안 더한다. 피그마 09-C 프레임 아래 여백 122 와 같은 값 */
@@ -123,23 +144,18 @@
 <main id="ask">
   <div class="title"><h1>탈퇴하기 전에<br>확인해 주세요</h1></div>
   <div class="lv">
-    <!-- 멤버십(구독 중 · 해지 예약 · 미납)이 남아 있으면 보인다. 날짜 줄은 JS 가 그 사람의 값으로 채운다 -->
-    <div class="block" id="block" hidden>
-      <span class="t-h4 b-title">멤버십이 남아 있어 지금은 탈퇴할 수 없어요</span>
-      <span class="t-body-s b-body">멤버십 이용 기간이 끝난 뒤에 탈퇴할 수 있어요. 아직 해지하지 않았다면 먼저 해지해 주세요.</span>
-      <span class="t-body-s b-body" id="blockDate"></span>
-    </div>
     <ul class="lst">
-      <li class="t-body-s">이름·전화번호·이메일 같은 개인정보는 모두 지워져요.</li>
-      <li class="t-body-s">소장한 아티클과 고른 직군·연차·근무지·주제는 더 이상 볼 수 없어요.</li>
-      <li class="t-body-s">알림톡이 더 이상 오지 않아요.</li>
-      <li class="t-body-s">결제·환불 기록은 전자상거래법에 따라 5년 동안 따로 보관돼요.</li>
-      <li class="t-body-s">같은 카카오 계정으로 언제든 다시 가입할 수 있어요.</li>
+      <li class="t-body-s"><span class="tile"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#B45309" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.5h5.8l.6-8.5"/></svg></span><span>모든 개인정보는 삭제돼요.</span></li>
+      <li class="t-body-s"><span class="tile"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#B45309" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 2.5h7v11L8 11l-3.5 2.5z"/></svg></span><span>모든 소장한 아티클은 더 이상 볼 수 없어요.</span></li>
+      <li class="t-body-s"><span class="tile"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#B45309" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5h8M5 11.5V7a3 3 0 0 1 5.6-1.5M11 8v3.5M7 13.5h2M2.5 2.5l11 11"/></svg></span><span>알림톡이 더 이상 오지 않아요.</span></li>
+      <li class="t-body-s"><span class="tile"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#B45309" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2h8v12l-2-1.2L8 14l-2-1.2L4 14zM6 6h4M6 8.5h4"/></svg></span><span>결제·환불 기록은 전자상거래법에 따라 5년 동안 따로 보관돼요.</span></li>
+      <li class="t-body-s"><span class="tile"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#B45309" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.5M13 2.5V5h-2.5"/></svg></span><span>같은 카카오 계정으로 언제든 다시 가입할 수 있어요.</span></li>
     </ul>
-    <div class="why" id="why"><span class="t-caption lab">떠나시는 이유를 알려 주시면 고칠게요 (선택)</span>
-      <div class="chips"><button class="chip" type="button" aria-pressed="false">알림이 너무 자주 와요</button><button class="chip" type="button" aria-pressed="false">내용이 도움이 안 돼요</button><button class="chip" type="button" aria-pressed="false">가격이 부담돼요</button><button class="chip" type="button" aria-pressed="false">이직을 마쳤어요</button><button class="chip" type="button" aria-pressed="false">기타</button></div></div>
-    <button class="agree" id="agree" type="button" role="checkbox" aria-checked="false"><span class="box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-      <span class="agree-t">위 내용을 확인했고, 탈퇴할게요</span></button>
+    <div class="band" aria-hidden="true"></div>
+    <div class="why" id="why"><h2>떠나시는 이유를 알려 주세요 <span class="multi">(중복 선택)</span></h2>
+      <div class="rs" id="rs" role="group" aria-label="떠나시는 이유"><button class="r" type="button" role="checkbox" aria-checked="false"><span class="box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>알림이 너무 자주 와요</span></button><button class="r" type="button" role="checkbox" aria-checked="false"><span class="box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>내용이 도움이 안 돼요</span></button><button class="r" type="button" role="checkbox" aria-checked="false"><span class="box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>가격이 부담돼요</span></button><button class="r" type="button" role="checkbox" aria-checked="false"><span class="box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>이직을 마쳤어요</span></button><button class="r" type="button" role="checkbox" aria-checked="false" id="etc"><span class="box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>기타</span></button></div>
+      <div class="other" id="other" hidden><textarea id="otherText" maxlength="2000" rows="3" placeholder="떠나시는 이유를 자유롭게 적어 주세요" aria-label="기타 이유"></textarea><span class="t-caption cnt" id="cnt">0/2,000</span></div>
+    </div>
     <p class="err" id="err" role="status" hidden></p>
   </div>
 </main>
@@ -150,7 +166,18 @@
     <p class="t-body-s desc">그동안 커리어코치를 이용해 주셔서 감사합니다.<br>언제든지 다시 돌아오세요.</p>
   </div>
 </main>
-<div class="cta-dock">
+<!-- 멤버십(구독 중 · 해지 예약 · 미납)이 남아 있으면 뜬다. 날짜 칸은 JS 가 그 사람의 값으로 채운다 -->
+<div class="dim" id="block" hidden role="dialog" aria-modal="true" aria-labelledby="blockTitle">
+  <div class="modal">
+    <h2 id="blockTitle">멤버십이 남아 있어<br>지금은 탈퇴할 수 없어요</h2>
+    <p class="t-body-s m-body">멤버십 이용 기간이 끝난 뒤에 탈퇴할 수 있어요. 아직 해지하지 않았다면 먼저 해지해 주세요.</p>
+    <div class="m-date" id="blockDate" hidden><span class="t-caption l" id="blockDateL"></span><span class="v" id="blockDateV"></span></div>
+    <button class="m-close" type="button" id="blockClose">닫기</button>
+  </div>
+</div>
+<div class="cta-dock leave" id="dock">
+  <button class="agree" id="agree" type="button" role="checkbox" aria-checked="false"><span class="box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    <span class="agree-t">위 내용을 전부 꼼꼼히 확인했어요</span></button>
   <button class="cta danger" type="button" id="go" disabled><span id="lab">탈퇴하기</span></button>
 </div>
 <script type="module">
@@ -168,18 +195,32 @@
   /* 멤버십이 남아 있으면 — 이유·동의는 거두고 안내를 세운다. 날짜는 그 사람의 기간 끝이다 */
   function block(s) {
     막힘 = true;
-    $('block').hidden = false; $('why').hidden = true; agree.hidden = true;
+    $('block').hidden = false;
     if (s && s.current_period_end) {
-      $('blockDate').textContent = (s.cancel_at_period_end ? '이번 구독 종료일 · ' : '다음 결제일 · ') + dayText(s.current_period_end);
+      $('blockDateL').textContent = s.cancel_at_period_end ? '이번 구독 종료일' : '다음 결제일';
+      $('blockDateV').textContent = dayText(s.current_period_end);
+      $('blockDate').hidden = false;
     }
     refresh();
   }
-  document.querySelector('.chips').addEventListener('click', (e) => {
-    const c = e.target.closest('.chip'); if (!c) return;
-    const on = c.getAttribute('aria-pressed') !== 'true';
-    document.querySelectorAll('.chips .chip').forEach((x) => x.setAttribute('aria-pressed', 'false'));
-    c.setAttribute('aria-pressed', on ? 'true' : 'false');    // 하나만 고른다 · 다시 누르면 풀린다
+  $('blockClose').addEventListener('click', () => { $('block').hidden = true; });
+  /* 이유는 여러 개 고른다(2026-10-05). 「기타」에 체크했을 때만 입력칸이 열린다 — 펼침 효과 없이 바로 */
+  const other = $('other'), otherText = $('otherText');
+  $('rs').addEventListener('click', (e) => {
+    const r = e.target.closest('.r'); if (!r) return;
+    const on = r.getAttribute('aria-checked') !== 'true';
+    r.setAttribute('aria-checked', on ? 'true' : 'false');
+    if (r.id === 'etc') { other.hidden = !on; if (on) otherText.focus(); }
   });
+  otherText.addEventListener('input', () => { $('cnt').textContent = otherText.value.length.toLocaleString('ko-KR') + '/2,000'; });
+  /* 서버(withdraw_reason)에는 한 줄로 보낸다 — 고른 이유를 「 · 」로 잇고, 기타는 적은 글을 붙인다 */
+  function reasonText() {
+    return [...document.querySelectorAll('#rs .r[aria-checked="true"]')].map((r) => {
+      const t = r.textContent.trim();
+      const memo = r.id === 'etc' ? otherText.value.trim() : '';
+      return memo ? `${t}: ${memo}` : t;
+    }).join(' · ');
+  }
   agree.addEventListener('click', () => {
     agree.setAttribute('aria-checked', agree.getAttribute('aria-checked') === 'true' ? 'false' : 'true');
     refresh();
@@ -187,14 +228,13 @@
   go.addEventListener('click', async () => {
     if (go.disabled) return;
     go.disabled = true; $('err').hidden = true;
-    const pick = document.querySelector('.chips .chip[aria-pressed="true"]');
     try {
-      const r = await withdraw(pick ? pick.textContent : null);
+      const r = await withdraw(reasonText() || null);
       /* 서버가 멤버십을 다시 본다 — 화면을 연 뒤에 결제가 걸렸으면 여기서 막힌다 */
       if (r === 'membership') { block(await getSubscription().catch(() => null)); return; }
       // 'withdrawn' · 'not_found'(이미 탈퇴) 둘 다 끝난 것이다. 로그인 계정이 지워졌으니 이 기기의 세션도 버린다
       (await client()).auth.signOut({ scope: 'local' }).catch(() => {});
-      $('ask').hidden = true; $('bye').hidden = false;
+      $('ask').hidden = true; $('bye').hidden = false; agree.hidden = true;
       go.classList.remove('danger'); go.disabled = false; lab.textContent = '처음 화면으로';
       go.onclick = () => { location.href = '/'; };
     } catch (e) {
