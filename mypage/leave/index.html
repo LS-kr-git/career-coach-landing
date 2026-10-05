@@ -97,7 +97,6 @@
   .block{border-radius:14px;background:var(--amber-50);padding:16px 18px;display:flex;flex-direction:column;gap:6px;word-break:keep-all}
   .block .b-title{color:var(--amber-800)}
   .block .b-body{color:var(--gray-600)}
-  .block a{align-self:flex-start;margin-top:6px;color:var(--gray-800);font-size:14px;line-height:20px;font-weight:700;text-underline-offset:3px}
   /* 탈퇴 버튼은 앰버가 아니라 짙은 회색 — 권하는 행동이 아니다 */
   .cta.danger{background:var(--gray-800);box-shadow:none}
   .cta.danger[disabled]{background:var(--gray-100);color:var(--gray-400)}
@@ -129,7 +128,6 @@
       <span class="t-h4 b-title">멤버십이 남아 있어 지금은 탈퇴할 수 없어요</span>
       <span class="t-body-s b-body">멤버십 이용 기간이 끝난 뒤에 탈퇴할 수 있어요. 아직 해지하지 않았다면 먼저 해지해 주세요.</span>
       <span class="t-body-s b-body" id="blockDate"></span>
-      <a href="/mypage/billing/">멤버십·결제로 가기</a>
     </div>
     <ul class="lst">
       <li class="t-body-s">이름·전화번호·이메일 같은 개인정보는 모두 지워져요.</li>
@@ -148,8 +146,8 @@
 <main id="bye" hidden>
   <div class="done">
     <span class="ok"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg></span>
-    <h1 class="t-display">탈퇴가 끝났어요</h1>
-    <p class="t-body-s desc">그동안 커리어코치를 써 주셔서 고마워요.</p>
+    <h1 class="t-display">탈퇴가 완료되었어요</h1>
+    <p class="t-body-s desc">그동안 커리어코치를 이용해 주셔서 감사합니다.<br>언제든지 다시 돌아오세요.</p>
   </div>
 </main>
 <div class="cta-dock">
@@ -172,7 +170,7 @@
     막힘 = true;
     $('block').hidden = false; $('why').hidden = true; agree.hidden = true;
     if (s && s.current_period_end) {
-      $('blockDate').textContent = (s.cancel_at_period_end ? '이용 종료일 · ' : '다음 결제일 · ') + dayText(s.current_period_end);
+      $('blockDate').textContent = (s.cancel_at_period_end ? '이번 구독 종료일 · ' : '다음 결제일 · ') + dayText(s.current_period_end);
     }
     refresh();
   }
