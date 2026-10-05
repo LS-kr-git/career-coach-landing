@@ -120,6 +120,9 @@
   .card-me .banner{background:#F59E0B;text-decoration:none;color:inherit}
   .card-me .banner .b-title{color:var(--ink)}
   .card-me .banner .sub{color:#3B2A06}
+  /* 누를 수 있는 배너(열람 가능)에만 진한 원 꺾쇠 — 완료·잠김은 눌러서 할 일이 없어 넣지 않는다 (2026-10-05 사용자 확정 C안 · 피그마 2470:2902) */
+  .card-me .banner .go{width:28px;height:28px;border-radius:50%;background:var(--ink);flex:none;
+    display:flex;align-items:center;justify-content:center}
   [data-skin="new"] .logout,[data-skin="new"] .leave{color:var(--muted)}
   .sep.bar{font-size:12px;color:#D6C9B0}
 </style>
@@ -153,6 +156,7 @@
 
       <a class="banner" data-state="open" href="/mypage/sunday/" hidden>
         <span class="col"><span class="t-label b-title">놓친 아티클 전문, 지금 열 수 있어요</span><span class="t-caption sub">일요일마다 1편씩 다시 열 수 있어요</span></span>
+        <span class="go" aria-hidden="true"><svg width="7" height="12" viewBox="0 0 8 14" fill="none"><path d="M1.5 1.5 6.5 7l-5 5.5" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </a>
 
       <div class="banner" data-state="done" hidden>
