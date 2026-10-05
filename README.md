@@ -22,7 +22,6 @@
 | 파일 | 내용 |
 |---|---|
 | `index.html` | 랜딩 본문 (CSS 인라인) |
-| `letter.html` | 브리핑 레터 샘플 |
 | `signup/index.html` | 시작하기 — 카카오 로그인 (`/signup/`) |
 | `auth/callback/index.html` | 카카오 로그인 콜백 착지 (`/auth/callback/`) |
 | `terms.html` · `privacy.html` | 이용약관 · 개인정보처리방침 |

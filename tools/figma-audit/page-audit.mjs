@@ -5,7 +5,7 @@
  *   node tools/figma-audit/page-audit.mjs [--json]
  *
  * audit.mjs 는 피그마 기준이 있는 index.html 만 본다.
- * 이 스크립트는 기준 프레임이 없는 나머지 결과물(letter/signup/terms/privacy, CNAME, assets)까지
+ * 이 스크립트는 기준 프레임이 없는 나머지 결과물(signup/terms/privacy, CNAME, assets)까지
  * "이건 어느 페이지든 틀리면 안 된다" 수준의 것만 본다.
  *
  * 검사 항목
@@ -393,8 +393,8 @@ for (const page of pages) {
  * 색인돼도 되는 페이지는 랜딩과 법적 문서뿐이다. 나머지는 전부 noindex 여야 한다.
  *
  * 왜 검사로 만드는가 (2026-08-03)
- *   letter.html 은 실제 발행물이 아니라 데모인데, 실존 인물 이름과 "표본 추적 예시"라고
- *   각주를 단 통계가 들어 있다. 검색 결과에 뜨면 예시가 실측치로 읽힌다.
+ *   (계기: 옛 데모 letter.html — 실존 인물 이름과 예시 통계가 든 페이지가 색인될 뻔했다.
+ *    그 페이지는 2026-10-05 에 지웠지만 규칙은 모든 새 페이지에 그대로 걸린다.)
  *   그런데 이걸 사람 기억에 맡기면 새 페이지를 만들 때마다 다시 빠뜨린다 —
  *   실제로 signup/auth 에는 있었고 letter/onboarding 에는 없었다.
  *   "새 HTML 을 만들었으면 색인 여부를 정해야 한다"를 파이프라인이 묻게 한다.

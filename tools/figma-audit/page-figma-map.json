@@ -26,16 +26,11 @@
       "name": "개인정보처리방침",
       "textAudit": "docs-audit"
     },
-    "letter.html": {
-      "node": "362:2482",
-      "name": "브리핑 상세페이지",
-      "textAudit": "docs-audit"
-    },
     "insight/index.html": {
       "node": "762:2673",
       "name": "전문_인사이트_잠김",
       "textAudit": "docs-audit",
-      "비고": "알림톡 링크로 로그인 없이 열리는 인사이트 전문 페이지. 열람 판정은 전부 DB(insight_letter RPC)가 하고 이 페이지는 상태→문구만 옮긴다. 루트 letter.html 과 다른 화면이다 — 그쪽은 브리핑 상세 데모(362:2482)다. 프레임은 섹션 762:2672 '인사이트 전문 페이지' 안에 있다.",
+      "비고": "알림톡 링크로 로그인 없이 열리는 인사이트 전문 페이지. 열람 판정은 전부 DB(insight_letter RPC)가 하고 이 페이지는 상태→문구만 옮긴다. 프레임은 섹션 762:2672 '인사이트 전문 페이지' 안에 있다.",
       "비고2": "2026-08-16 — 08-10 부터 node:null · textAudit:pending 이었고 사유가 「피그마에 대응 화면이 아직 없다」 였는데, 그 사이 프레임 762:2673 이 만들어져 있었다. 등록부가 낡은 것을 아무 검수도 못 잡는다 — pending 은 「없다」 를 사람이 적는 값이라 생겼는지 여부를 되묻지 않기 때문이다.",
       "stateNodes": [
         {
@@ -161,7 +156,7 @@
         }
       ],
       "textAudit": "docs-audit",
-      "비고": "'주 N건' 과 노출 그룹은 tools/roles/volume.json 실측에서 build.mjs 가 웹을 생성한 값이고, 피그마도 같은 측정값을 그린 것이다. 다시 재면 volume.json → 피그마 3프레임 → 스냅샷 → 웹(build.mjs) 순서로 함께 갱신한다. depth2 칩은 build.mjs --check 가 대조하므로 ignoreWebText, CTA 는 JS 렌더라 jsRenderedText."
+      "비고": "그룹 순서는 tools/roles/volume.json 실측에서 build.mjs 가 웹을 생성한 값이고, 피그마도 같은 순서를 그린 것이다(2026-10-05 사용자 지시로 숨김과 「주 N건」 표기는 없앴다 — 전량 25/296). 다시 재면 volume.json → 피그마 3프레임 → 스냅샷 → 웹(build.mjs) 순서로 함께 갱신한다. depth2 칩은 build.mjs --check 가 대조하므로 ignoreWebText, CTA 는 JS 렌더라 jsRenderedText."
     },
     "onboarding/3/index.html": {
       "node": "275:2440",

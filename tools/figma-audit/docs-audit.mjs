@@ -444,11 +444,11 @@ for (const page of snap.pages) {
    * (같은 수가 onboarding-store 에도 있어 상수를 합칠 이유가 실제로 있다), onboarding/2 의
    * `const MAX=15` 처럼 **선택 상한이 아닌 값**(연차 슬라이더 눈금)에 붙어 의미 없이 통과한다.
    * 선언한 상수를 못 찾으면 통과가 아니라 막는다. 선언이 없는 화면은 넘을 상한 자체가 없다
-   * (letter.html 의 '15개 사이트' 처럼 숫자가 든 산문은 상한이 아니다). */
+   * (예: '15개 사이트' 처럼 숫자가 든 산문은 상한이 아니다). */
   /* 선언 자체를 빠뜨리는 경로도 막는다. 상한이 있는 화면은 예외 없이 "상한이 차면 안 고른 칩을
    * 잠그는" 코드를 갖는다 — 그 잠금이 곧 상한의 존재 증거다. 잠금이 있는데 selectionCap 이
    * 없으면 위 검사가 통째로 안 도는 상태이므로 통과로 세지 않는다.
-   * 문구에 든 숫자로는 이 판정을 못 한다 — letter.html 의 '15개 사이트' 는 상한이 아니라 산문이다. */
+   * 문구에 든 숫자로는 이 판정을 못 한다 — 예컨대 '15개 사이트' 는 상한이 아니라 산문이다. */
   if (/classList\.toggle\('lock'/.test(html) && !page.selectionCap) {
     findings.push({ level: 'DIFF', page: page.html, kind: '상한 선언 없음',
       detail: `${page.html} 에 칩 잠금(상한)이 있는데 스냅샷에 selectionCap 이 없습니다 — ` +

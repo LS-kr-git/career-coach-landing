@@ -559,7 +559,7 @@ cta.y = Math.round(f.height - 80);
 잘려 CTA 를 못 누르게 된다. 짧은 화면은 "막는" 게 아니라 "넘치지 않게" 만든다.
 내용이 화면보다 **64px 이하로 넘칠 때만 여백을 조여 흡수**하고, 그 이상이면 그냥 스크롤을 허용한다.
 
-적용 완료: 온보딩 3개 · `signup` · `letter` · `privacy` · `terms` · `index.html`(2026-08-02, 피그마 대조 통과).
+적용 완료: 온보딩 3개 · `signup` · `privacy` · `terms` · `index.html`(2026-08-02, 피그마 대조 통과).
 
 > 참고: `index.html` 의 `.page` 는 `box-sizing:border-box` 인데 `padding-top:100vh` 가 이미 border-box 높이를
 > 100vh 이상으로 만들기 때문에, 거기서는 `min-height` 가 **실제로는 한 번도 걸리지 않는 잉여값**이다(실측 확인).
@@ -782,11 +782,11 @@ node tools/figma-audit/build-type-snapshot.mjs figma_type.json --write  # 반영
 
 ## 약관·개인정보·브리핑 화면 — 피그마↔웹 동기화 (2026-08-02 신설)
 
-이용약관·개인정보처리방침·브리핑 상세페이지도 랜딩처럼 **피그마가 기준**이다. 웹은 파생물.
-- 피그마 파일 `LnT8TgFVBxky0bVyaF6Tob`, 문서/브리핑 섹션 2개:
+이용약관·개인정보처리방침도 랜딩처럼 **피그마가 기준**이다. 웹은 파생물.
+- 피그마 파일 `LnT8TgFVBxky0bVyaF6Tob`, 문서 섹션:
   - 섹션 **`327:2474` "이용약관 / 개인정보처리방침"** — 프레임 `339:2474`=이용약관↔`terms.html`, `340:2478`=개인정보처리방침↔`privacy.html`
-  - 섹션 **`356:3106` "브리핑 상세페이지"** — 프레임 `362:2482` ↔ `letter.html`
-- 세 화면 모두 랜딩과 **같은 디자인 시스템**으로 만들었다: 헤더는 랜딩 헤더(`6:162`) 클론,
+  - (옛 섹션 `356:3106` "브리핑 상세페이지" ↔ 데모 `letter.html` 은 2026-10-05 사용자 지시로 웹·피그마 모두 지웠다 — 어디서도 링크되지 않던 샘플.)
+- 두 화면 모두 랜딩과 **같은 디자인 시스템**으로 만들었다: 헤더는 랜딩 헤더(`6:162`) 클론,
   타이포는 텍스트 스타일(`text/display`·`h2`·`h3`·`body`·`body-s`·`label`·`caption`·`button`·`micro`),
   색은 원시 fill(navy-900/gray-*/amber-600), 표·카드는 auto-layout + 보더(gray-200)·헤더 gray-100.
   브리핑의 선 차트는 `createNodeFromSvg` 로 넣고 프레임 이름을 **`chart-viz`** 로 둔다(아래 표기 규칙 참고).
@@ -810,7 +810,7 @@ pre-push 2겹(a)에서 **`*.html` 이 하나라도 바뀐 푸시**마다 자동�
    (스타일을 먼저 입히면 Pretendard 미로드 상태가 되어 이후 `textAutoResize` 등 쓰기가 막힌다. 실측으로 겪음.)
 2. `use_figma`(읽기)로 세 프레임의 텍스트를 다시 뽑는다 — **마커·차트 텍스트는 제외:**
    ```js
-   const frames = { '339:2474':'terms.html', '340:2478':'privacy.html', '362:2482':'letter.html' };
+   const frames = { '339:2474':'terms.html', '340:2478':'privacy.html' };
    const underChart = n => { let p=n.parent; while(p){ if(p.name==='chart-viz') return true; p=p.parent; } return false; };
    // 상태바(9:41·배터리 등)는 웹에 없는 목업 요소다. 안 빼면 검수가 '웹에서 못 찾음' 으로 막는다.
    const underStatusBar = n => { let p=n.parent; while(p){ if(p.name==='상태바') return true; p=p.parent; } return false; };
@@ -829,7 +829,7 @@ pre-push 2겹(a)에서 **`*.html` 이 하나라도 바뀐 푸시**마다 자동�
    확인: `node -p "new Date(Date.now()+9*36e5).toISOString().slice(0,10)"`
    (`TZ=Asia/Seoul date +%F` 는 쓰지 마라 — tzdata 가 없는 Git Bash 에서 UTC 를 뱉는다.
    위 한 줄은 검수 코드와 **같은 산술**이라 어긋날 수가 없다.)
-4. 웹(terms/privacy/letter.html)도 같은 문구로 고치고 `docs-audit` 가 "차이 없음" 이면 커밋.
+4. 웹(terms/privacy.html)도 같은 문구로 고치고 `docs-audit` 가 "차이 없음" 이면 커밋.
 5. **커밋 직전에 2번 스니펫을 한 번 더 돌린다. 길이·시간과 무관하게 늘 한다.**
    신선도 게이트는 **같은 날 안에서는 못 거른다**(`dumpedAt == 커밋일` 이면 통과). 즉 내가
    덤프한 뒤 같은 날에 **다른 세션·디자이너가 피그마를 고치면 아무 검수도 그걸 못 본다.**
@@ -859,10 +859,10 @@ pre-push 2겹(a)에서 **`*.html` 이 하나라도 바뀐 푸시**마다 자동�
   - **피그마 CTA 두께 700 — 공유 스타일 `text/button-strong` 로 반영 완료** (플러그인 ❌ 생성 / figma.com 웹앱 ✅ 생성 · 플러그인 ✅ 적용). 플러그인(`use_figma`)은 Pretendard 를 `loadFontAsync` 못 해 **스타일 생성·굵기 변경은 브라우저(figma.com)** 에서 한다.
     - **`text/button-strong`(Pretendard 15/700 · LH20) 생성 완료** (id `S:8d73ed28…`, 2026-08-03). 만든 법: 레터 CTA 를 브라우저에서 Bold 로(스타일 Detach → Weight=Bold) → Typography 스타일 아이콘 → 팝오버 **+ (Create style)** → 이름 `text/button-strong`. 설명은 플러그인 `style.description` 로 넣었다(폰트 로드 불필요).
     - **비랜딩 CTA 는 이제 `text/button-strong` 을 쓴다** — 적용 완료(10개): 레터 `364:2502`, 온보딩 CTA버튼 컴포넌트 `299:2412`·`299:2414`, 온보딩 스텝 플로팅 CTA `277:2465`·`277:2468`·`277:2471`·`278:2518`·`278:2598`·`278:2692`·`278:2807`. **적용은 플러그인 `setTextStyleIdAsync`(폰트 로드 불필요) 로 한다** — 새 CTA 는 이 스타일만 붙이면 700 이 된다.
-    - **안 붙인 것(의도)**: 뒤로가기 링크 `339:2604`·`340:2615`(CTA 아님·text/button 이지만 그대로 둠), 디자인시스템 견본 `25:199`·`25:201`(text/button 자체를 보여주는 샘플), 랜딩 `6:368`(17/600 예외). 웹(letter·onboarding·signup)은 이미 700 — 피그마·웹 두께 일치.
+    - **안 붙인 것(의도)**: 뒤로가기 링크 `339:2604`·`340:2615`(CTA 아님·text/button 이지만 그대로 둠), 디자인시스템 견본 `25:199`·`25:201`(text/button 자체를 보여주는 샘플), 랜딩 `6:368`(17/600 예외). 웹(onboarding·signup)은 이미 700 — 피그마·웹 두께 일치.
     - 브라우저 주의: 이 세션에서 Chrome 창이 228px↔풀사이즈로 튀었다. `navigate(노드 URL) → resize_window(1440×900) → 6s 대기` 순서로 뷰포트를 살린 뒤 작업. **zoom 액션은 Figma 캔버스를 얼려 렌더러 타임아웃**을 낸다 — 쓰지 말고 전체 screenshot 만. `Ctrl+B` 는 400↔스타일두께(600) 토글이라 700 이 안 되니 위 드롭다운 방법을 쓴다. 굵기 검증은 `use_figma` 읽기(`fontWeight`)가 정확하다(패널 표기·너비는 못 믿는다).
 - **풀폭**: 플로팅은 `width:calc(100% - 40px); max-width:410px`, 폼/문서 하단은 `width:100%`(max 410 가운데). 색은 맥락 유지(랜딩=카카오 옐로, 나머지=앰버). **랜딩 CTA의 말풍선 아이콘은 없애지 않는다.**
-- 적용됨: `signup/index.html`(카카오 버튼) · `letter.html` · `onboarding/1·2·3`. (랜딩 제외)
+- 적용됨: `signup/index.html`(카카오 버튼) · `onboarding/1·2·3`. (랜딩 제외)
 - **피그마에도 같은 값을 넣는다 — 2026-08-08 까지 60 인 채로 남아 있었다.** 웹만 54 로 통일하고
   피그마 온보딩 프레임 8개의 CTA 는 60 이었다(사용자가 "다시 길어진 것 같다"고 해서 발견).
   이제 8개 전부 **54 · radius 14** 이고 `y = 프레임높이 − 74` 다. 랜딩 `6:148` 의 CTA(`450:2608`)만 60 예외.
