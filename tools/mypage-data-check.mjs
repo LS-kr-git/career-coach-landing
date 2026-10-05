@@ -158,13 +158,13 @@ for (const [rel, 값갈래, 실패갈래] of [
   ['mypage/years/index.html', 'pullFromServer', 'FAIL.line'],
   ['mypage/regions/index.html', 'pullFromServer', 'FAIL.line'],
   ['mypage/leave/index.html', 'getSubscription', 'FAIL.line'],
-  ['checkout/done/index.html', 'getSubscription', 'FAIL.line'],
+  ['checkout/done/index.html', 'getSubscription', null],   // 2026-10-05 새판은 서버 값을 그리지 않는다 — 구독 확인(되돌려 보내기)·구매 이벤트에만 쓴다
 ]) {
   const src = scriptOnly(rel);
   if (!src.includes(값갈래)) {
     problems.push(`${rel}: 서버 조회(${값갈래})를 부르지 않습니다 — 배선이 끊겼는데 빈 상태로 보입니다`);
   }
-  if (!src.includes(실패갈래)) {
+  if (실패갈래 && !src.includes(실패갈래)) {
     problems.push(`${rel}: 조회 실패 갈래(${실패갈래})를 부르지 않습니다 — 실패가 빈 상태로 보입니다`);
   }
 }
