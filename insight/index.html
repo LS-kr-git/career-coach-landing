@@ -16,13 +16,14 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
   /* 커리어코치 디자인 시스템 — terms.html 과 같은 토큰·폭·헤더를 쓴다.
-     이 페이지에서 새로 둔 값은 --amber-800 하나다(잠김 알약 글자색, 2026-10-04). */
+     이 페이지에서 새로 둔 값은 --amber-800(잠김 알약 글자색, 2026-10-04)과 --ink-*(아래)다. */
   :root{
     color-scheme: only light;
     --amber-50:#FFFBEB; --amber-100:#FEF3C7; --amber-200:#FDE68A; --amber-500:#F59E0B; --amber-600:#D97706; --amber-800:#92400E;
-    --navy-900:#1E3A8A; --navy-950:#172554;
-    --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-400:#94A3B8;
-    --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155; --gray-800:#1E293B;
+    /* 글자·선은 무채색 잉크 — 피그마 변수 ext-ink/* 와 같은 값 (2026-10-05 사용자 확정 B안).
+       회색 띠(--gray-100)만 그대로 남겼다. */
+    --ink-900:#141414; --ink-800:#1F1F1F; --ink-700:#3A3A3A; --ink-500:#737373; --ink-200:#E5E5E5;
+    --gray-100:#F1F5F9;
     --pad-x: 24px;
     --card-max: 450px;
     /* CTA 규칙(2026-08-03) — 제품 공통. 값·근거는 CLAUDE.md "CTA 규칙" */
@@ -32,7 +33,7 @@
   html{background:var(--gray-100)}
   body{
     font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;
-    background:#fff; color:var(--gray-800); line-height:1.6; -webkit-font-smoothing:antialiased;
+    background:#fff; color:var(--ink-800); line-height:1.6; -webkit-font-smoothing:antialiased;
   }
   .page{width:100%;max-width:var(--card-max);margin:0 auto;background:#fff;min-height:100vh;min-height:100svh}
 
@@ -55,25 +56,25 @@
   .prog i{display:block;height:3px;width:0;background:var(--amber-500)}
 
   .brief{padding:8px var(--pad-x) 56px}
-  h1{color:var(--navy-950)}
+  h1{color:var(--ink-900)}
 
   /* 제목 아래 분야 · 소요 시간 — 왼쪽 주황 세로선 + 아이콘 (시안 M4 + 세로선) */
   .meta{display:flex;align-items:center;gap:12px;margin-top:14px;
-    border-left:3px solid var(--amber-500);padding-left:10px;color:var(--gray-500)}
+    border-left:3px solid var(--amber-500);padding-left:10px;color:var(--ink-500)}
   .meta[hidden]{display:none}
   .meta-i{display:inline-flex;align-items:center;gap:4px}
   .meta-i[hidden]{display:none}
   .meta svg{flex:0 0 13px}
 
   /* 판정표(LOCKED)에 없는 상태 — 요약·잠김 상자 대신 이 한 줄만 선다 (피그마 2279:1307, 2026-10-04 사용자 지시) */
-  .blocked{color:var(--gray-500);margin-top:24px;white-space:pre-line}
+  .blocked{color:var(--ink-500);margin-top:24px;white-space:pre-line}
   .blocked[hidden]{display:none}
 
   /* 전문 */
   .body{margin-top:36px}
-  .body p{color:var(--gray-700);margin-top:24px}
+  .body p{color:var(--ink-700);margin-top:24px}
   .body p:first-child{margin-top:0}
-  .src{margin-top:24px;color:var(--gray-500)}
+  .src{margin-top:24px;color:var(--ink-500)}
   .src[hidden]{display:none}
 
   /* 「이 글, 도움이 됐나요?」 — 위아래 12px 회색 막대가 화면 끝까지 닿는다 (시안 R3 · E3 · 2026-10-04 8→12) */
@@ -84,11 +85,11 @@
   #letter:has(#fb:not([hidden])) + .saved{border-top:0}
   .fb{margin-top:80px;padding:32px var(--pad-x) 40px}
   .fb[hidden]{display:none}
-  .fb-q{color:var(--gray-800)}
-  .fb-sub{color:var(--gray-500);margin-top:4px}
+  .fb-q{color:var(--ink-800)}
+  .fb-sub{color:var(--ink-500);margin-top:4px}
   .fb-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:20px}
-  .fb-btn{height:52px;border-radius:14px;border:1px solid var(--gray-200);background:#fff;
-    color:var(--gray-700);font-family:inherit;cursor:pointer;
+  .fb-btn{height:52px;border-radius:14px;border:1px solid var(--ink-200);background:#fff;
+    color:var(--ink-700);font-family:inherit;cursor:pointer;
     display:flex;align-items:center;justify-content:center;gap:6px}
   /* 얼굴은 OS 이모지 대신 피그마(emoji-smile·emoji-confused)와 같은 입체 SVG — 기기마다 모양이 달라지지 않게 (2026-09-26 사용자 확정) */
   .fb-btn .em{flex:0 0 18px;display:block}
@@ -107,7 +108,7 @@
   .lock-pill.multi{width:100%}
   .lock-pill.multi span{flex:1}
   .lock-pill svg{flex:none;color:var(--amber-600)}
-  .ghost{color:var(--gray-700);filter:blur(3px);user-select:none;pointer-events:none;
+  .ghost{color:var(--ink-700);filter:blur(3px);user-select:none;pointer-events:none;
     -webkit-mask-image:linear-gradient(#000,rgba(0,0,0,.55) 45%,transparent);
     mask-image:linear-gradient(#000,rgba(0,0,0,.55) 45%,transparent)}
   .ghost p+p{margin-top:16px}
@@ -144,7 +145,7 @@
   .toast-top{display:flex;align-items:center;gap:10px}
   .toast-ic{flex:0 0 26px;width:26px;height:26px;border-radius:50%;background:var(--amber-100);
     display:flex;align-items:center;justify-content:center}
-  .toast-ttl{color:var(--gray-800);font-size:15px;line-height:23px;font-weight:600}
+  .toast-ttl{color:var(--ink-800);font-size:15px;line-height:23px;font-weight:600}
   @media (prefers-reduced-motion:reduce){
     .toast,.toast.in,.toast.out{transform:translate(-50%,0)}
   }
@@ -153,19 +154,19 @@
      목록을 못 받으면 이 절 전체가 hidden 으로 남는다. 위에 반응 칸이 없을 때(잠김)도 같은
      막대로 시작하게 막대는 이 절이 따로 갖는다. */
   .saved{padding:48px var(--pad-x) 0}
-  .saved-head h2{color:var(--navy-900)}
+  .saved-head h2{color:var(--ink-900)}
   .idx{margin-top:10px}
   .idx-row{display:flex;gap:14px;align-items:flex-start;text-decoration:none;
-    padding:16px 0;border-top:1px solid var(--gray-200)}
+    padding:16px 0;border-top:1px solid var(--ink-200)}
   .idx-row:first-child{border-top:0}
   .idx-n{flex:0 0 20px;color:var(--amber-500);letter-spacing:0.04em;padding-top:1px}
-  .idx-t{flex-grow:1;color:var(--gray-800)}
+  .idx-t{flex-grow:1;color:var(--ink-800)}
   /* 밑줄은 2026-10-03 사용자 지시 — 피그마 2059:824 등 네 노드와 같은 값(밑줄 · 3px 띄움) */
-  .saved-all{display:flex;justify-content:center;margin-top:20px;color:var(--gray-500);
+  .saved-all{display:flex;justify-content:center;margin-top:20px;color:var(--ink-500);
     text-decoration:underline;text-underline-offset:3px}
 
   /* 안내(로딩·오류) — 본문이 없을 때만 보인다 */
-  .notice{text-align:center;color:var(--gray-500);white-space:pre-line}
+  .notice{text-align:center;color:var(--ink-500);white-space:pre-line}
   /* 안내 묶음을 「화면 맨 위 ~ 화면 바닥」 사이의 정가운데에 — 09-C(mypage/leave #bye)와 같은 방식 (2026-10-04 사용자 지시).
      이 화면은 떠 있는 CTA 가 없어 아래 경계가 화면 바닥이다. main 은 헤더 아래에서 시작하므로 아래 여백을 헤더 높이로 두면
      main 의 가운데가 화면 가운데와 겹친다. 로고 헤더 77 = 피그마 2070:799·823·847 의 content 아래 여백 77 */
