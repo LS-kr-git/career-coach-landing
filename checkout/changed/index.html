@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="only light">
+<meta name="format-detection" content="telephone=no">
+<meta name="robots" content="noindex,nofollow"><title>결제수단 변경 완료 — 커리어코치</title>
+<link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root{
+    color-scheme: only light;   /* meta 와 같은 값 — CSS 로도 선언해 확실히 적용한다 */
+    --amber-600:#D97706;--amber-500:#F59E0B;
+    --stone-800:#292524;
+    --gray-100:#F1F5F9;--gray-200:#E2E8F0;--gray-500:#64748B;--gray-600:#475569;--gray-800:#1E293B;
+    --pad-x:24px; --card-max:450px;
+    /* CTA 규칙(2026-08-03) — 제품 공통. 값·근거는 CLAUDE.md "CTA 규칙" */
+    --cta-h:54px; --cta-radius:14px; --cta-fs:15px; --cta-fw:700; --cta-max:410px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{background:var(--gray-100)}
+  body{font-family:'Pretendard Variable',Pretendard,'Noto Sans CJK KR',-apple-system,'Apple SD Gothic Neo',sans-serif;
+    background:#fff;color:var(--gray-800);line-height:1.6;-webkit-font-smoothing:antialiased}
+  .page{width:100%;max-width:var(--card-max);margin:0 auto;background:#fff;
+    min-height:100vh;min-height:100svh;padding-bottom:108px;position:relative}
+
+  /* 결제 완료(/checkout/done/)와 같은 뼈대 — 체크·제목·안내를 화면 가운데 한 덩어리로 둔다.
+     안내 상자 자리에 새 카드와 다음 결제를 보여 준다(멤버십·결제 화면의 .pcard · .kv 와 같은 값). */
+  main{min-height:calc(100svh - 140px);padding:0 var(--pad-x) 96px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center}
+  .ok{width:64px;height:64px;border-radius:50%;background:#FEF3C7;display:flex;align-items:center;justify-content:center}
+  h1{margin-top:18px;font-size:28px;line-height:36px;font-weight:800;letter-spacing:-0.01em;color:var(--stone-800)}
+  .lead{font-size:15px;line-height:23px;color:var(--gray-600);margin-top:8px;word-break:keep-all}
+  .pcard{margin-top:28px;width:100%;text-align:left;border:1px solid var(--gray-200);border-radius:14px;padding:18px;
+    display:flex;flex-direction:column;gap:16px;font-size:14px;line-height:20px}
+  .prow{display:flex;align-items:center;gap:14px}
+  .art{width:56px;height:36px;border-radius:6px;background:var(--amber-600);flex:none;position:relative;overflow:hidden}
+  .art::before{content:'';position:absolute;left:0;right:0;top:9px;height:7px;background:rgba(120,53,15,.55)}
+  .art::after{content:'';position:absolute;left:7px;bottom:7px;width:11px;height:8px;border-radius:2px;background:#FED7AA}
+  .pcol{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+  .card{font-size:16px;line-height:23px}
+  .masked{font-size:13px;line-height:18px;color:var(--gray-500);letter-spacing:.06em}
+  .line{height:1px;background:var(--gray-200)}
+  .kv{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--gray-600)}
+  .kv b{font-weight:600;color:var(--gray-800);text-align:right}
+
+  .bar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:var(--card-max);
+    padding:14px 20px calc(20px + env(safe-area-inset-bottom));background:#fff;
+    box-shadow:0 -8px 24px rgba(15,23,42,.06)}
+  .cta{display:flex;text-decoration:none;align-items:center;justify-content:center;width:100%;max-width:var(--cta-max);
+    margin:0 auto;height:var(--cta-h);border:0;cursor:pointer;background:var(--amber-500);color:#fff;
+    font-family:inherit;font-weight:var(--cta-fw);font-size:var(--cta-fs);border-radius:var(--cta-radius);
+    box-shadow:0 12px 32px rgba(217,119,6,.28)}
+  .cta:active{transform:scale(.98)}
+  [hidden]{display:none!important}
+
+  @media (min-width:451px){
+    body{background:var(--gray-100)}
+    .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
+  }
+  :focus-visible{outline:2px solid var(--amber-500);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="page">
+  <main>
+    <div class="ok"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg></div>
+    <h1>결제수단이 바뀌었어요</h1>
+    <p class="lead" id="lead">다음 결제부터 새 카드로 결제돼요.</p>
+    <div class="pcard" id="sum" hidden>
+      <div class="prow">
+        <span class="art" aria-hidden="true"></span>
+        <span class="pcol"><span class="card" id="card"></span><span class="masked" id="cardSub"></span></span>
+      </div>
+      <div class="line"></div>
+      <div class="kv"><span id="nextLabel"></span><b id="next"></b></div>
+      <div class="kv" id="amountRow"><span>결제 금액</span><b id="amount"></b></div>
+    </div>
+  </main>
+
+  <div class="bar"><a class="cta" href="/mypage/billing/">확인</a></div>
+</div>
+
+<script type="module">
+  import '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
+  import { requireLogin, getSubscription, billingView } from '/assets/mypage-data.js';
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* 결제 화면이 카드 변경(`이미구독`)을 받은 뒤에만 여기로 보낸다. 값은 전부 서버에서 다시 읽는다 —
+     주소로 카드 번호를 넘기지 않는다. 구독 중이 아니면 「바뀌었어요」를 말할 근거가 없으므로 돌려보낸다.
+     조회가 실패하면 제목·안내만 둔다(표식이 있으면 변경 자체는 서버가 이미 끝냈다). */
+  var 방금바꿈 = false;
+  try { 방금바꿈 = sessionStorage.getItem('cc_card_changed') === '1'; sessionStorage.removeItem('cc_card_changed'); } catch (e) { /* 못 읽으면 근거 없음으로 본다 */ }
+  if (!방금바꿈) location.replace('/mypage/billing/');
+  else requireLogin().then(function (ok) { return ok ? getSubscription() : undefined; }).then(function (s) {
+    if (s === undefined) return;
+    var v = billingView(s);
+    if (!v.subscribed) { location.replace('/mypage/billing/'); return; }
+    // 미납 중이면 다음 재시도(매일 새벽, 3일)가 새 카드로 걷는다. 해지 예약이면 더 걷지 않는다.
+    if (s.status === 'past_due') $('lead').textContent = '밀린 요금은 새 카드로 다시 결제돼요.';
+    else if (s.cancel_at_period_end) $('lead').textContent = '해지 예약은 그대로예요.';
+    $('card').textContent = v.card;
+    $('cardSub').textContent = v.cardSub;
+    $('nextLabel').textContent = v.nextLabel;
+    $('next').textContent = v.next;
+    $('amount').textContent = v.price;
+    $('amountRow').hidden = Boolean(s.cancel_at_period_end);
+    $('sum').hidden = false;
+  }, function () { /* 조회 실패 — 요약 상자를 안 그린다 */ });
+</script>
+</body>
+</html>
