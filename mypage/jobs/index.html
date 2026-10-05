@@ -178,7 +178,7 @@
       });
     });
     /* 저장된 직군이 있으면 그 칩을 눌러 둔다. 없으면 마크업 상태(피그마 기준 · 0개) 그대로다.
-       목록에서 사라진 옛 코드는 건너뛴다 — 그 코드는 서버에서도 더는 유효하지 않다 */
+       화면 칩은 taxonomy.json 전량이라, 건너뛰는 것은 taxonomy 에 없는 코드(이름이 바뀐 옛 코드)뿐이다 */
     function hydrate() {
       readState().jobs.forEach(function (code) {
         var chip = groups.querySelector('.chip[data-d2="' + code + '"]');

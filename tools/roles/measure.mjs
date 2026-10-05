@@ -5,7 +5,7 @@
  *   node tools/roles/measure.mjs [--days 30] [--out tools/roles/volume.json]
  *
  * 왜 필요한가
- *   "이 직무를 온보딩에 남길까" 를 감으로 정하지 않기 위해서다.
+ *   온보딩·마이페이지 직무 목록의 **순서**를 감으로 정하지 않기 위해서다(2026-10-05 부터 숨김은 없다).
  *   판단 지표는 재고(open)가 아니라 **유입(new30)** 이다. 구독자가 체감하는 건
  *   "이번 주에 새로 뜬 게 있나" 지 "지금 몇 개가 열려 있나" 가 아니다.
  *
@@ -51,7 +51,7 @@ const total = async (q) => {
   const r = await fetch(`${API}?page=0&size=1&${q}`);
   if (!r.ok) throw new Error(`${r.status} ${q}`);
   const n = (await r.json())?.data?.totalElements;
-  // -1 로 적어 두면 build.mjs 가 그 직군을 「0건」처럼 숨긴다 — 조용히 넘기지 않는다.
+  // -1 로 적어 두면 build.mjs 가 그 직군을 「0건」처럼 맨 뒤로 보낸다 — 조용히 넘기지 않는다.
   if (typeof n !== 'number') throw new Error(`totalElements 없음 ${q}`);
   return n;
 };
