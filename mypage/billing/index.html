@@ -206,7 +206,7 @@
     cards.forEach(function (c) {
       var b = document.createElement('button');
       b.type = 'button'; b.className = 'pc'; b.setAttribute('role', 'radio');
-      b.innerHTML = (c.rec ? '<span class="chip">추천</span>' : '') +
+      b.innerHTML = (c.rec ? '<span class="chip">추천 · 기간 한정 특가</span>' : '') +
         '<span class="top"><span class="radio" aria-hidden="true"></span><span></span></span>' +
         '<span class="tiers"><span class="day"><span>하루</span><b></b></span><span class="amt"></span></span>';
       b.querySelector('.top span:last-child').textContent = c.name;
