@@ -13,7 +13,8 @@
   :root{
     color-scheme: only light;
     --amber-500:#F59E0B; --amber-600:#D97706;
-    --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-500:#64748B; --gray-800:#1E293B;
+    --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-400:#94A3B8; --gray-500:#64748B; --gray-800:#1E293B;
+    --teal-700:#0F766E;
     --card-max: 450px;
   }
   *{margin:0;padding:0;box-sizing:border-box}
@@ -21,12 +22,30 @@
   body{font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;
     background:#fff;color:var(--gray-800);-webkit-font-smoothing:antialiased}
   .page{width:100%;max-width:var(--card-max);margin:0 auto;background:#fff;
-    min-height:100vh;min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
-  .spin{width:28px;height:28px;border:3px solid var(--gray-200);border-top-color:var(--amber-500);
-    border-radius:50%;animation:sp .8s linear infinite}
+    min-height:100vh;min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  /* 피그마 595:2646 「로그인 처리 중」 · 진행 표시 컴포넌트 2484:1713 「로그인 처리 중/진행」(단계=1·2·3·완료).
+     단계는 시간이 아니라 아래 스크립트의 실제 진척 지점에서 넘어간다 — ccStep() 주석 참고. */
+  .wrap{width:280px;display:flex;flex-direction:column;align-items:center}
+  .mark{position:relative;width:56px;height:56px}
+  .mark svg{display:block;width:56px;height:56px}
+  .mark::after{content:"";position:absolute;inset:-8px;border-radius:50%;border:2px solid var(--amber-500);
+    opacity:0;animation:ring 1.6s ease-out infinite}
+  @keyframes ring{0%{transform:scale(.8);opacity:.55}100%{transform:scale(1.25);opacity:0}}
+  .ttl{margin-top:22px;font-size:17px;line-height:24px;font-weight:600;color:var(--gray-800);text-align:center}
+  .steps{list-style:none;align-self:stretch;margin-top:24px;display:flex;flex-direction:column;gap:14px}
+  .steps li{display:flex;align-items:center;gap:12px;font-size:14px;line-height:20px;color:var(--gray-400);transition:color .25s}
+  .dot{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--gray-200);
+    display:flex;align-items:center;justify-content:center;transition:all .25s}
+  .dot svg{width:12px;height:12px;opacity:0;transform:scale(.4);transition:all .25s}
+  .steps li.on,.steps li.done{color:var(--gray-800)}
+  .steps li.on .dot{border-color:var(--amber-500);border-top-color:transparent;animation:sp .8s linear infinite}
+  .steps li.done .dot{background:var(--teal-700);border-color:var(--teal-700)}
+  .steps li.done .dot svg{opacity:1;transform:scale(1)}
   @keyframes sp{to{transform:rotate(360deg)}}
-  @media (prefers-reduced-motion:reduce){.spin{animation-duration:2.4s}}
-  p{font-size:14px;line-height:20px;color:var(--gray-500)}
+  .bye{margin-top:22px;font-size:13px;line-height:18px;color:var(--gray-500);text-align:center;opacity:0;transition:opacity .3s}
+  .wrap.finish .bye{opacity:1}
+  .wrap.finish .mark::after{animation:none}
+  @media (prefers-reduced-motion:reduce){.steps li.on .dot{animation-duration:2.4s}.mark::after{animation:none}}
   @media (min-width:451px){
     body{background:var(--gray-100)}
     .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
@@ -35,17 +54,36 @@
 </head>
 <body>
 <div class="page">
-  <div class="spin" aria-hidden="true"></div>
-  <p role="status">로그인 중입니다…</p>
+  <div class="wrap" id="prog">
+    <div class="mark" aria-hidden="true"><svg viewBox="0 0 42 42"><circle cx="21" cy="21" r="21" fill="#FEF3C7"/><path d="M23.722 12.911L23.686 12.967L23.662 13.042L23.661 13.122L23.683 13.198L23.725 13.265L23.849 13.388L23.904 13.426L23.967 13.448L24.031 13.455L26.976 13.456L27.027 13.471L27.049 13.486L27.076 13.516L27.097 13.565L27.097 13.619L27.083 13.657L27.057 13.691L24.113 16.635L23.985 16.750L23.884 16.824L23.776 16.888L23.662 16.940L23.563 16.976L23.442 17.007L23.318 17.027L23.157 17.035L20.282 17.036L20.146 17.043L20.036 17.059L19.914 17.089L19.783 17.136L19.670 17.190L19.563 17.255L19.473 17.322L19.379 17.406L19.286 17.509L19.212 17.610L19.148 17.718L19.095 17.832L19.057 17.937L19.023 18.072L19.005 18.196L19.000 18.318L19.000 20.562L18.992 20.713L18.975 20.837L18.940 20.978L18.897 21.096L18.842 21.209L18.788 21.299L18.714 21.400L18.631 21.494L18.539 21.579L18.439 21.654L18.332 21.719L18.219 21.774L18.101 21.817L17.980 21.848L17.836 21.870L17.684 21.877L15.532 21.877L15.397 21.884L15.273 21.903L15.151 21.934L15.046 21.972L14.932 22.025L14.813 22.096L14.712 22.172L14.620 22.256L14.545 22.339L14.469 22.440L14.398 22.559L14.350 22.660L14.307 22.778L14.276 22.900L14.257 23.024L14.250 23.159L14.250 25.311L14.243 25.463L14.221 25.607L14.196 25.709L14.154 25.827L14.102 25.941L14.038 26.049L13.952 26.166L13.867 26.258L13.773 26.341L13.689 26.404L13.582 26.469L13.450 26.531L13.351 26.567L13.230 26.598L13.086 26.619L12.935 26.627L10.782 26.627L10.660 26.633L10.536 26.650L10.401 26.684L10.296 26.722L10.182 26.775L10.063 26.846L9.963 26.921L9.870 27.006L9.795 27.089L9.720 27.190L9.648 27.309L9.600 27.410L9.557 27.528L9.526 27.649L9.507 27.773L9.500 27.909L9.500 30.101L9.507 30.230L9.526 30.354L9.557 30.475L9.595 30.581L9.648 30.694L9.720 30.814L9.795 30.914L9.880 31.006L9.973 31.090L10.063 31.157L10.170 31.222L10.283 31.276L10.401 31.319L10.536 31.353L10.660 31.371L10.782 31.376L23.928 31.376L24.064 31.369L24.188 31.350L24.297 31.323L24.415 31.281L24.529 31.228L24.637 31.164L24.738 31.090L24.831 31.006L24.924 30.904L24.991 30.814L25.056 30.706L25.110 30.593L25.153 30.475L25.187 30.341L25.205 30.216L25.210 30.101L25.211 21.219L25.218 21.068L25.235 20.944L25.265 20.822L25.306 20.704L25.368 20.572L25.433 20.465L25.509 20.365L25.611 20.253L29.432 16.432L29.467 16.406L29.505 16.392L29.531 16.389L29.558 16.392L29.596 16.406L29.618 16.421L29.645 16.450L29.662 16.487L29.668 16.513L29.668 19.001L29.673 19.052L29.698 19.128L29.719 19.162L29.751 19.201L29.842 19.292L29.876 19.320L29.923 19.346L29.974 19.363L30.040 19.370L30.107 19.360L30.169 19.334L30.225 19.292L32.417 17.100L32.450 17.062L32.486 16.990L32.496 16.951L32.500 16.901L32.500 10.901L32.493 10.838L32.476 10.787L32.457 10.751L32.433 10.719L32.394 10.682L32.361 10.659L32.312 10.638L32.273 10.628L32.229 10.624L26.043 10.624L25.978 10.631L25.939 10.643L25.902 10.661L25.840 10.710Z" fill="#F59E0B"/></svg></div>
+    <p class="ttl" role="status">가입을 마무리하고 있어요</p>
+    <ul class="steps">
+      <li class="on"><span class="dot" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M2.5 6.2l2.2 2.2 4.8-4.8" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>카카오 계정 확인</li>
+      <li><span class="dot" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M2.5 6.2l2.2 2.2 4.8-4.8" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>회원 정보 불러오기</li>
+      <li><span class="dot" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M2.5 6.2l2.2 2.2 4.8-4.8" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>맞춤 브리핑 준비</li>
+    </ul>
+    <p class="bye">곧 이동합니다</p>
+  </div>
 </div>
 
 <script>
   // ★ supabase CDN 을 쓰는 아래 모듈과 **일부러 분리**했다. CDN 이 막히면 그 모듈은 한 줄도
   //   실행되지 않아 3초 폴백조차 등록되지 못하고, getSession() 이 응답 없이 멎어도 그 뒤의
-  //   setTimeout 에 닿지 못한다 — 두 경우 모두 화면이 '로그인 중입니다…' 로 영영 멈춘다.
+  //   setTimeout 에 닿지 못한다 — 두 경우 모두 화면이 진행 표시 첫 단계에서 영영 멈춘다.
   //   (signup/index.html 이 동의 게이트를 분리해 둔 것과 같은 이유.)
   let done = false;
   window.ccGo = (path) => { if (!done) { done = true; location.replace(path); } };
+  // 진행 표시 — 아래 모듈이 실제 진척 지점에서만 부른다(1 서버 연결 · 2 로그인 확인 · 3 이동 직전).
+  // 시간으로 흉내 내지 않으므로 빠른 로그인은 그만큼 빨리 지나간다. 뒤로는 가지 않는다.
+  // 이 블록에 두는 이유는 위와 같다 — 모듈이 죽어도 첫 단계는 그려져 있다(마크업 기본값).
+  const 단계 = [...document.querySelectorAll('.steps li')];
+  let 지금 = 0;
+  window.ccStep = (n) => {
+    if (n <= 지금) return;
+    지금 = n;
+    단계.forEach((li, i) => { li.className = i < n ? 'done' : i === n ? 'on' : ''; });
+    document.getElementById('prog').classList.toggle('finish', n >= 3);
+  };
   // 모듈이 살아 있으면 자기 3초 폴백으로 먼저 나간다. 이건 그마저 못 도는 경우만 맡는다.
   //
   // ★ "3초가 먼저" 는 CDN 이 빠를 때만 성립한다. 아래 3초 타이머는 CDN 로딩이 **끝난 뒤에야**
@@ -85,6 +123,7 @@
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   window.ccAlive();   // CDN 로딩이 끝났다 — 위 하드 폴백의 8초를 여기서부터 다시 잰다
+  window.ccStep(1);   // 서버 연결 → 「회원 정보 불러오기」
 
   const { track } = await import('/assets/track.js');
   window.ccAlive();   // track.js 도 별도 fetch 다 — 이 구간에 진척 신호가 없으면
@@ -143,6 +182,7 @@
   const markLogin = (session) => {
     if (logged || !session) return;
     logged = true;
+    window.ccStep(2);   // 로그인 확인 → 「맞춤 브리핑 준비」
     track('login', {}, session.access_token);
     syncKakao(session);
   };
@@ -150,7 +190,7 @@
   const go = window.ccGo;   // 이동 잠금은 위 폴백과 공유한다 — 두 경로가 겹쳐 두 번 이동하지 않게
   // 로그인 성공의 목적지. 결제 화면에서 로그인하러 온 사람은 그리로 돌아간다(assets/return-to.js).
   // 실패 쪽(/signup/?error=auth)에서는 꺼내지 않는다 — 다시 로그인하면 그때 돌아가게.
-  const 성공 = () => go(takeNext('/onboarding/1/'));
+  const 성공 = () => { window.ccStep(3); go(takeNext('/onboarding/1/')); };
 
   // supabase-js 는 detectSessionInUrl 기본값이 true 라 이 페이지에 도착하는 순간
   // 인가 코드를 세션으로 교환한다. 교환이 끝나면 SIGNED_IN 이 온다.
