@@ -21,11 +21,12 @@
   body{font-family:'Pretendard Variable',Pretendard,'Noto Sans CJK KR',-apple-system,'Apple SD Gothic Neo',sans-serif;
     background:#fff;color:var(--gray-800);line-height:1.6;-webkit-font-smoothing:antialiased}
   .page{width:100%;max-width:var(--card-max);margin:0 auto;background:#fff;
-    min-height:100vh;min-height:100svh;padding-bottom:108px;position:relative}
+    min-height:100vh;min-height:100svh;padding-bottom:calc(88px + env(safe-area-inset-bottom));position:relative}
 
-  /* 결제 완료(/checkout/done/)와 같은 뼈대 — 체크·제목·안내를 화면 가운데 한 덩어리로 둔다.
-     안내 상자 자리에 새 카드와 다음 결제를 보여 준다(멤버십·결제 화면의 .pcard · .kv 와 같은 값). */
-  main{min-height:calc(100svh - 140px);padding:0 var(--pad-x) 96px;display:flex;flex-direction:column;
+  /* 결제 완료(/checkout/done/)와 같은 뼈대 — 체크·제목·안내·카드를 한 덩어리로 둔다
+     (카드는 멤버십·결제 화면의 .pcard · .kv 와 같은 값). 덩어리는 하단 버튼(88 = 위 14 + 버튼 54 + 아래 20)을
+     뺀 화면의 가운데에 놓는다 — 2026-10-05 사용자 지시 「화면 중앙에 있는 것처럼」. */
+  main{min-height:calc(100svh - 88px - env(safe-area-inset-bottom));padding:24px var(--pad-x);display:flex;flex-direction:column;
     align-items:center;justify-content:center;text-align:center}
   .ok{width:64px;height:64px;border-radius:50%;background:#FEF3C7;display:flex;align-items:center;justify-content:center}
   h1{margin-top:18px;font-size:28px;line-height:36px;font-weight:800;letter-spacing:-0.01em;color:var(--stone-800)}
@@ -44,8 +45,7 @@
   .kv b{font-weight:600;color:var(--gray-800);text-align:right}
 
   .bar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:var(--card-max);
-    padding:14px 20px calc(20px + env(safe-area-inset-bottom));background:#fff;
-    box-shadow:0 -8px 24px rgba(15,23,42,.06)}
+    padding:14px 20px calc(20px + env(safe-area-inset-bottom));background:transparent}   /* 바 바탕 투명 — 2026-10-05 사용자 지시 */
   .cta{display:flex;text-decoration:none;align-items:center;justify-content:center;width:100%;max-width:var(--cta-max);
     margin:0 auto;height:var(--cta-h);border:0;cursor:pointer;background:var(--amber-500);color:#fff;
     font-family:inherit;font-weight:var(--cta-fw);font-size:var(--cta-fs);border-radius:var(--cta-radius);

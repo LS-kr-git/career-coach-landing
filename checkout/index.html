@@ -333,7 +333,7 @@
       if (charged === '개시') location.href = '/checkout/done/';
       else if (변경 && charged === '이미구독') {
         // 완료 화면은 이 표식이 있을 때만 「바뀌었어요」를 말한다 — 주소로 바로 들어온 사람에게는 근거가 없다.
-        try { sessionStorage.setItem('cc_card_changed', '1'); } catch (e) { /* 못 적으면 완료 화면이 결제 화면으로 돌려보낸다 */ }
+        try { sessionStorage.setItem('cc_card_changed', '1'); } catch (e) { /* 못 적으면 완료 화면이 멤버십·결제 화면으로 돌려보낸다 */ }
         location.replace('/checkout/changed/');
       }
       else if (charged === '첫결제실패')
