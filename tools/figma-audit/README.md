@@ -579,7 +579,7 @@ node tools/figma-audit/docs-audit.mjs
 node tools/figma-audit/docs-audit.mjs --json
 ```
 
-- 기준: 피그마 섹션 `327:2474`·`356:3106` — `terms.html`↔`339:2474`, `privacy.html`↔`340:2478`, `letter.html`↔`362:2482`.
+- 기준: `page-figma-map.json` 에서 `textAudit: "docs-audit"` 인 페이지 전부(예: `terms.html`↔`339:2474`, `privacy.html`↔`340:2478`). 옛 데모 `letter.html`(`362:2482`)은 2026-10-05 에 지웠다.
 - 피그마 텍스트는 **커밋된 스냅샷** `figma-docs-text.json` 에 들어 있다(마커 `•`·`1.` 및 차트 `chart-viz` 하위 텍스트 제외).
 - 웹 텍스트는 각 html 을 태그 제거해 뽑고, 둘을 공백 무시로 대조한다.
 
