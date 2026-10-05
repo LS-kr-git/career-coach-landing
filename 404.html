@@ -66,8 +66,8 @@
      CTA 윗변 = 화면높이 − 74(버튼 54 + 바닥 20). 이 화면은 헤더가 없어 아래 여백이 74 그대로다. 피그마 2222:2155 프레임 아래 여백 74 와 같은 값 */
   main{padding-bottom:74px}
   .done{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 var(--pad-x);gap:14px}
-  .done img{margin-bottom:10px}
-  .done h1{font-size:24px;line-height:32px;font-weight:700;letter-spacing:-.01em;color:var(--gray-900)}
+  .done img{margin-bottom:24px}   /* 피그마: 간격 14 + 빈칸 10 */
+  .done h1{font-size:23px;line-height:32px;font-weight:700;letter-spacing:-.01em;color:var(--gray-900)}
   .done p{color:var(--gray-500);word-break:keep-all}
   .cta{text-decoration:none}
   /* 넓은 화면 카드 어포던스 — 랜딩(index.html)의 같은 블록과 값이 같다(2026-09-24 사용자 지시 · 모든 페이지).
@@ -83,8 +83,8 @@
 <main>
   <div class="done">
     <img src="/assets/logo-circle.svg" width="56" height="56" alt="">
-    <h1>페이지를<br>찾을 수 없어요</h1>
-    <p class="t-body-s">주소가 바뀌었거나 없어진 페이지예요.<br>알림톡 링크였다면 가장 최근에 받은<br>알림톡에서 다시 열어 주세요.</p>
+    <h1>페이지를 찾을 수 없어요</h1>
+    <p class="t-body-s">주소가 바뀌었거나 없어진 페이지예요.<br>알림톡 링크였다면<br>가장 최근에 받은 알림톡에서 다시 열어 주세요.</p>
   </div>
 </main>
 <div class="cta-dock"><a class="cta" href="/">커리어코치 홈으로</a></div>

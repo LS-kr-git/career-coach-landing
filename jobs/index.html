@@ -89,7 +89,13 @@
   /* 안내 — 화면 세로 가운데, 13px (360 폭에서 문의 줄이 한 줄) */
   .center{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
   .center>*{pointer-events:auto}
-  .notice{padding:0 var(--pad-x);max-width:var(--card-max);text-align:center;color:var(--gray-500);font-size:13px;line-height:20px;word-break:keep-all}
+  /* 안내·구독필요 — 로고 56 · 제목 23 · 설명 (피그마 2170:1043·2170:1050·2167:1176, 2026-10-05 사용자 갱신) */
+  .msg{padding:0 var(--pad-x);max-width:var(--card-max);display:flex;flex-direction:column;align-items:center;text-align:center;word-break:keep-all}
+  .msg img{display:block;margin-bottom:10px}
+  .msg h1{font-size:23px;line-height:32px;font-weight:700;letter-spacing:-0.01em;color:#0F172A}
+  .msg p{font-size:13px;line-height:20px;color:var(--gray-500)}
+  .msg.lock img{margin-bottom:26px}   /* 피그마 lock: 간격 8 · 빈칸 10 · 간격 8 */
+  .msg.lock p{font-size:14px;line-height:21px;margin-top:8px}
   /* 불러오는 중 — 어드민 「화면을 여는 동안」 고리와 같은 모양·크기·색 (ops/index.html .ld-art) */
   .ld-art{width:40px;height:40px;animation:ld-spin 1.6s linear infinite}
   .ld-art circle{fill:none;stroke:var(--amber-500);stroke-width:9;stroke-linecap:round;animation:ld-dash 1.4s ease-in-out infinite}
@@ -98,9 +104,6 @@
   @media (prefers-reduced-motion:reduce){.ld-art,.ld-art circle{animation:none}.ld-art circle{stroke-dasharray:70 200;opacity:.6}}
   .sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
   /* 구독이 끝난 사람 — 상자 없이 가운데, 버튼은 하단 플로팅 (B1) */
-  .lock{padding:0 var(--pad-x);max-width:var(--card-max);text-align:center}
-  .lock .a{font-size:17px;line-height:24px;font-weight:600;color:var(--gray-700)}
-  .lock .b{font-size:14px;line-height:21px;color:var(--gray-500);margin-top:8px;word-break:keep-all}
   .float{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;padding:12px 20px calc(20px + env(safe-area-inset-bottom));
     background:linear-gradient(rgba(255,255,255,0),#fff 35%)}
   .cta{display:flex;align-items:center;justify-content:center;width:100%;max-width:var(--cta-max);height:var(--cta-h);margin:0;
@@ -125,7 +128,7 @@
   </header>
 
   <div class="center" id="loading"><svg class="ld-art" viewBox="0 0 50 50" aria-hidden="true"><circle cx="25" cy="25" r="20"/></svg><span class="sr" role="status">불러오는 중이에요…</span></div>
-  <div class="center" id="notice" hidden><p class="notice" role="status"><span id="notice-t"></span><span class="ask" id="notice-ask"></span></p></div>
+  <div class="center" id="notice" hidden><div class="msg" role="status"><img src="/assets/logo-circle.svg" width="56" height="56" alt=""><h1 id="notice-t"></h1><p id="notice-b"></p><p id="notice-ask"></p></div></div>
 
   <main id="open" hidden>
     <div class="eyebrow" id="eyebrow" hidden></div>
@@ -154,9 +157,10 @@
   </main>
 
   <section id="closed" hidden>
-    <div class="center"><div class="lock">
-      <div class="a">구독 중에만 볼 수 있는 브리핑이에요</div>
-      <div class="b">다시 구독하면 모든 화면을 볼 수 있어요.</div>
+    <div class="center"><div class="msg lock">
+      <img src="/assets/logo-circle.svg" width="56" height="56" alt="">
+      <h1>구독 중에만 볼 수 있는<br>브리핑이에요</h1>
+      <p>다시 구독하면 모든 화면을 볼 수 있어요</p>
     </div></div>
     <div class="float"><a class="cta" href="/checkout/">다시 구독하기</a></div>
   </section>
@@ -171,11 +175,13 @@
   /* 안내문 — 상수로 모아 둔다. figma-docs-text.json 의 webScriptText 가 MSG 를 선언해
      피그마 상태 프레임(2170:1043·1050·1319·1477)과 대조한다. */
   const MSG = {
-    badLink: '링크가 올바르지 않아요. 알림톡에서 받은 링크로 다시 열어 주세요.',
-    blocked: '지금은 열 수 없어요.',
+    badLink: '링크가 올바르지 않아요',
+    badLinkSub: '알림톡에서 받은 링크로 다시 열어 주세요.',
+    blocked: '지금은 열 수 없어요',
     none:    '이번 주에 보낸 공고가 없어요.',
     noHit:   '에 맞는 공고가 없어요',
     ask:     '오류는 careercoach.my@gmail.com로 문의해 주세요.',   // 링크로 만들지 않는다(2026-09-25 사용자 지시)
+    askBlocked: '오류는 careercoach.my@gmail.com로 문의해 주세요',  // 「열 수 없음」 프레임 2170:1050 은 마침표가 없다(피그마 그대로)
   };
 
   // 숫자 칸 이름은 SQL(0063 market_trend)이 정본이다. 구간이 아닌 칸만 여기서 안다.
@@ -189,8 +195,8 @@
 
   let 공고 = [], q = '', page = 1, 정렬 = '기본';
 
-  const notice = (t) => {
-    $('notice-t').textContent = t; $('notice-ask').textContent = MSG.ask;
+  const notice = (t, b, ask) => {
+    $('notice-t').textContent = t; $('notice-b').textContent = b || ''; $('notice-b').hidden = !b; $('notice-ask').textContent = ask;
     $('loading').hidden = true; $('notice').hidden = false; $('open').hidden = true; $('closed').hidden = true;
   };
 
@@ -307,12 +313,12 @@
   $('q').addEventListener('input', (e) => { q = e.target.value.trim(); page = 1; 그리기(); });
 
   (async () => {
-    if (!wellFormed) return notice(MSG.badLink);
+    if (!wellFormed) return notice(MSG.badLink, MSG.badLinkSub, MSG.ask);
     try {
       const d = await load();
       $('loading').hidden = true;
       if (d['상태'] === '구독필요') { $('closed').hidden = false; return; }
-      if (d['상태'] !== '열림') return notice(MSG.blocked);   // 모르는 상태를 구독필요로 읽지 않는다
+      if (d['상태'] !== '열림') return notice(MSG.blocked, '', MSG.askBlocked);   // 모르는 상태를 구독필요로 읽지 않는다
       숫자칸(d['지표'] || []);
       $('when').textContent = 기간(d['지표'] || []);
       const 칩 = d['칩'] || [];
@@ -321,7 +327,8 @@
       $('open').hidden = false;
       그리기();
     } catch (err) {
-      notice(err && err.message ? err.message : MSG.blocked);
+      console.error(err);   // 서버 문구(예: 만료된 링크)는 화면에 안 쓴다 — 피그마에 그 화면이 없다
+      notice(MSG.blocked, '', MSG.askBlocked);
     }
   })();
 </script>
