@@ -8,8 +8,9 @@
  * 세 가지를 한다.
  *   1) 표기 검증 — code = sourceLabel.replace('·','_') 를 296개 전부에 건다.
  *      label(화면 표기)은 자유롭게 다듬을 수 있고, code 와의 관계는 sourceLabel 이 잡는다.
- *   2) 볼륨 필터·정렬 — volume.json 실측으로 "골라도 아무것도 못 받는" 항목을 화면에서 빼고,
- *      남은 것을 신규 공고 많은 순으로 세운다(대분류·중분류 모두).
+ *   2) 정렬 — volume.json 실측으로 신규 공고 많은 순으로 세운다(대분류·중분류 모두).
+ *      🔴 2026-10-05 사용자 지시: **숨기지 않는다**(전량 25/296을 보인다) · **「주 N건」 표기를 없앤다.**
+ *      그 전에는 기준 미만을 화면에서 뺐는데, 그러면 전에 고른 직무가 조용히 사라졌다.
  *      **taxonomy.json 에서 지우지 않는다.** 그 표는 들어오는 공고를 분류하는 데도 쓰이므로
  *      항상 전량이어야 한다. 여기서 하는 건 '보여줄지' 판단뿐이고, volume.json 을 다시 재면
  *      자동으로 늘고 준다 — 손으로 관리하는 목록이 아니게 하는 것이 요점이다.
@@ -41,8 +42,7 @@ const DONE = join(ROOT, 'onboarding', 'done', 'index.html');
  *  중분류: 30일 신규 0건이면 뺀다. 한 달 내내 새 공고가 없었다 = 골라도 아무것도 안 온다.
  *  판단 지표는 재고(open)가 아니라 유입(new30)이다 — 재고만 많으면 매주 같은 공고를 다시 보낸다.
  *  (실제로 어긋난다: 게임은 재고 319건으로 15위인데 주당 신규는 7건으로 20위다) */
-const MIN_D1_PER_WEEK = 5;
-const MIN_D2_NEW30 = 1;
+// 🔴 2026-10-05 사용자 지시로 숨김을 없앴다(전량을 보인다). 위 기준은 그 전의 기록이다 — 되살리려면 사용자에게 묻는다.
 const WEEKS = 30 / 7;
 
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -90,20 +90,13 @@ if (bad.length) {
 const perWeek = (code) => VOL.depthOne[code].new30 / WEEKS;
 const childNew30 = (gcode, ccode) => VOL.depthTwo[gcode][ccode].new30;
 const desc = (f) => (a, b) => f(b) - f(a);
+// 전량을 신규 공고 많은 순으로 세운다. 이름은 `visible` 그대로 둔다(아래 마크업·완료 화면이 같이 쓴다).
 const visible = TAX.groups
-  .filter((g) => perWeek(g.code) >= MIN_D1_PER_WEEK)
   .map((g) => ({
     ...g,
-    children: g.children
-      .filter((c) => childNew30(g.code, c.code) >= MIN_D2_NEW30)
-      .sort(desc((c) => childNew30(g.code, c.code))),
+    children: [...g.children].sort(desc((c) => childNew30(g.code, c.code))),
   }))
   .sort(desc((g) => perWeek(g.code)));
-
-const hiddenGroups = TAX.groups.filter((g) => perWeek(g.code) < MIN_D1_PER_WEEK);
-const hiddenChips = TAX.groups.flatMap((g) =>
-  perWeek(g.code) < MIN_D1_PER_WEEK ? [] : g.children.filter((c) => childNew30(g.code, c.code) < MIN_D2_NEW30).map((c) => `${g.label}/${c.label}`),
-);
 
 // ── 3. HTML 생성 ────────────────────────────────────────────
 /** 시작 상태 = 전부 접힘 · 아무것도 안 골라 CTA 잠김 (피그마 278:2693) */
@@ -115,7 +108,7 @@ const build = () =>
       return (
         `<div class="acc" data-d1="${esc(g.code)}">` +
         `<div class="arow"><div class="nm">${esc(g.label)}</div>` +
-        `<div class="cnt">주 ${Math.round(perWeek(g.code))}건</div><div class="cv">▼</div></div>` +
+        `<div class="cv">▼</div></div>` +
         `<div class="abody" hidden><div class="chips">${chips}</div></div>` +
         `</div>`
       );
@@ -134,8 +127,7 @@ const buildMypage = () =>
       return (
         `<div class="group" data-d1="${esc(g.code)}">` +
         `<button class="acc" type="button" aria-expanded="false">` +
-        `<span class="nm"><span class="t-h4">${esc(g.label)}</span>` +
-        `<span class="cnt">주 ${Math.round(perWeek(g.code))}건</span></span>` +
+        `<span class="nm"><span class="t-h4">${esc(g.label)}</span></span>` +
         `<span class="ac" aria-hidden="true">▼</span></button>` +
         `<div class="chips" hidden>${chips}</div>` +
         `</div>`
@@ -244,8 +236,4 @@ writeFileSync(DONE, doneNext);
 const shown = visible.reduce((a, g) => a + g.children.length, 0);
 const all = TAX.groups.reduce((a, g) => a + g.children.length, 0);
 console.log(`✅ 온보딩 1단계 · 마이페이지 직군 · 완료 화면 주제 갱신 — 대분류 ${visible.length}/${TAX.groups.length} · 중분류 ${shown}/${all}`);
-// 잘라낸 건 반드시 알린다. 조용히 줄이면 "다 넣었다" 로 읽힌다.
-console.log(`   숨긴 대분류(주 ${MIN_D1_PER_WEEK}건 미만) ${hiddenGroups.length}개: ` +
-  hiddenGroups.map((g) => `${g.label} 주${Math.round(perWeek(g.code))}`).join(' · '));
-console.log(`   숨긴 중분류(30일 신규 0건) ${hiddenChips.length}개: ` + hiddenChips.join(' · '));
 console.log(`✅ 완료 화면 갱신 — 주제 ${CHOICES.length}개 · 대분류 ${visible.length}개 · 중분류 ${shown}건`);
