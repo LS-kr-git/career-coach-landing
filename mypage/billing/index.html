@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="only light">
 <meta name="format-detection" content="telephone=no">
 <title>멤버십·결제 — 커리어코치</title>
-<meta name="description" content="커리어코치 멤버십 상태와 결제 수단을 확인합니다.">
+<meta name="description" content="커리어코치 구독권을 고르고 멤버십 상태와 결제 수단을 확인합니다.">
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
@@ -22,6 +22,7 @@
     --error-600:#DC2626;
     /* 랜딩과 동일한 폭 시스템 */
     --pad-x:24px; --card-max:450px;
+    --cta-h:54px; --cta-radius:14px; --cta-fs:15px; --cta-fw:700;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html{background:var(--gray-100)}
@@ -75,10 +76,46 @@
   .masked{color:var(--gray-500);letter-spacing:.06em}
   .link{color:var(--gray-600);text-decoration:underline;text-underline-offset:3px;
     background:none;border:0;font:inherit;font-size:14px;line-height:20px;cursor:pointer;flex:none;white-space:nowrap}
-  .nrow{border-top:1px solid var(--gray-100);padding-top:14px;display:flex;
-    align-items:center;justify-content:space-between;gap:10px;color:var(--gray-600)}
+  /* 이용 중인 요금제 — 이름은 왼쪽 회색, 값은 오른쪽 진하게 (2026-10-05 사용자 컨펌 시안 v3 C) */
+  .kv{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--gray-600)}
+  .kv b{font-weight:600;color:var(--gray-800);text-align:right}
   .cancel{align-self:flex-end;color:var(--gray-400);background:none;border:0;
-    font:inherit;font-size:14px;line-height:20px;cursor:pointer}
+    font:inherit;font-size:14px;line-height:20px;cursor:pointer;margin-top:-20px}
+
+  /* 구독권 고르기 — 결제 화면 26판(피그마 2369:1325)의 요금 카드와 같은 값.
+     안 고른 카드 gray-50 바탕 · 고른 카드 흰 바탕 + amber-500 테두리 + 그림자. 색은 바로 바뀐다(피그마 프리뷰도 즉시). */
+  .plans{display:flex;flex-direction:column;gap:12px;padding-top:6px}
+  .pc{position:relative;display:flex;flex-direction:column;gap:10px;padding:16px 18px;border-radius:14px;
+    background:var(--gray-50);border:1.5px solid var(--gray-50);text-align:left;font:inherit;color:inherit;
+    cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .pc[aria-checked="true"]{background:#fff;border-color:var(--amber-500);box-shadow:0 6px 18px rgba(15,23,42,.08)}
+  .pc .chip{position:absolute;left:16px;top:-11px;background:var(--amber-500);color:#fff;border-radius:9999px;
+    padding:4px 9px;font-size:11px;line-height:14px;font-weight:800}
+  .pc .top{display:flex;align-items:center;gap:8px;font-size:16px;line-height:24px;font-weight:700;color:var(--gray-900)}
+  .pc .radio{width:20px;height:20px;border-radius:50%;border:1.6px solid var(--gray-300);background:#fff;flex:none;
+    display:flex;align-items:center;justify-content:center}
+  .pc[aria-checked="true"] .radio{border-color:var(--amber-500)}
+  .pc[aria-checked="true"] .radio::after{content:'';width:10px;height:10px;border-radius:50%;background:var(--amber-500)}
+  .pc .tiers{display:flex;flex-direction:column;gap:4px;padding-left:28px}
+  .pc .day{display:flex;align-items:baseline;gap:6px}
+  .pc .day span{font-size:14px;line-height:20px;font-weight:500;color:var(--gray-500)}
+  .pc .day b{font-size:26px;line-height:34px;font-weight:700;color:var(--gray-900)}
+  .pc[aria-checked="true"] .day b{color:var(--amber-600)}
+  .pc .amt{display:flex;align-items:baseline;gap:6px;font-size:14px;line-height:22px}
+  .pc .amt s{color:var(--gray-400)}
+  .pc .amt .pct{font-weight:700;color:var(--error-600)}
+  .pc .amt .won{font-size:16px;font-weight:500;color:var(--gray-800)}
+  .pc .amt .per{font-size:13px;color:var(--gray-500);margin-left:-5px}
+  /* 하단 결제 버튼 — 26판처럼 바탕 투명·그림자 없음, 버튼 자체의 앰버 그림자만. 폭은 CLAUDE.md 「CTA 규칙」 */
+  .cta-dock{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:var(--card-max);
+    padding:14px 0 20px;display:flex;justify-content:center;pointer-events:none;z-index:10}
+  .cta{width:calc(100% - 40px);max-width:410px;height:var(--cta-h);border:0;border-radius:var(--cta-radius);
+    background:var(--amber-500);color:#fff;font:inherit;font-size:var(--cta-fs);font-weight:var(--cta-fw);
+    line-height:22px;cursor:pointer;box-shadow:0 12px 32px rgba(217,119,6,.28);pointer-events:auto;
+    -webkit-tap-highlight-color:transparent}
+  .cta:active{transform:scale(.98)}
+  /* 버튼이 마지막 줄을 가리지 않게 — 버튼 높이 + 위아래 여백 */
+  .page.has-dock main{padding-bottom:96px}
 
   /* 넓은 화면 카드 어포던스 — 랜딩(index.html)의 같은 블록과 값이 같다(2026-09-24 사용자 지시 · 모든 페이지).
      page-audit.mjs 「넓은 화면 바탕」이 빠진 페이지를 막는다. */
@@ -96,88 +133,155 @@
 <main>
   <div class="title"><h1 class="t-display">멤버십·결제</h1></div>
   <div class="bill">
-    <section class="sec">
+    <!-- 구독 전 (피그마 908:606 · 기준 상태) — 카드는 서버 요금제로 스크립트가 그린다 -->
+    <section class="sec" id="pick">
+      <h2 class="t-h4">구독권을 골라 주세요</h2>
+      <div class="plans" id="plans" role="radiogroup" aria-label="구독권"></div>
+    </section>
+
+    <!-- 구독 중 (피그마 03-C) -->
+    <section class="sec" id="member" hidden>
       <h2 class="t-h4">멤버십</h2>
       <div class="mcard">
         <div class="mtop">
           <span class="t-micro kicker">MEMBERSHIP</span>
-          <span class="t-micro live"><i aria-hidden="true"></i>구독 중</span>
+          <span class="t-micro live" hidden><i aria-hidden="true"></i>구독 중</span>
         </div>
         <span class="t-h3">커리어코치 멤버십</span>
-        <span class="t-caption" style="color:var(--gray-600)">구독 정보는 결제 후 여기에 표시돼요</span>
+        <span class="t-caption" style="color:var(--gray-600)">일하는 사람들의 커리어 성장을 위해</span>
       </div>
     </section>
 
     <section class="sec">
-      <h2 class="t-h4">결제</h2>
+      <h2 class="t-h4" id="payLabel">결제수단</h2>
       <div class="pcard">
         <div class="prow">
           <span class="art" aria-hidden="true"></span>
           <span class="pcol">
             <span class="t-body-l">등록된 결제수단 없음</span>
-            <span class="t-caption masked">등록 후 여기에 표시돼요</span>
+            <span class="t-caption masked">결제할 때 등록해요</span>
           </span>
-          <button class="link" type="button">변경</button>
-        </div>
-        <div class="nrow t-body-s">
-          <span>다음 결제일 · 결제 후 표시</span>
-          <!-- 금액은 계정별 값이라 스크립트가 채운다 — CLAUDE.md 「가격은 어디에도 박지 않는다」 -->
-          <span id="amount"></span>
+          <button class="link" type="button">등록</button>
         </div>
       </div>
-      <button class="cancel" type="button">구독 해지하기</button>
     </section>
+
+    <section class="sec" id="mine" hidden>
+      <h2 class="t-h4">이용 중인 요금제</h2>
+      <div class="pcard t-body-s">
+        <div class="kv"><span>요금제</span><b id="planLabel"></b></div>
+        <div class="kv"><span>결제 금액</span><b id="price"></b></div>
+        <div class="kv"><span id="nextLabel">다음 결제일</span><b id="next"></b></div>
+      </div>
+    </section>
+    <button class="cancel" type="button" hidden>구독 해지하기</button>
   </div>
 </main>
+<div class="cta-dock" id="dock" hidden><button class="cta" type="button" id="cta"></button></div>
 <script type="module">
   import '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
   /* 값은 전부 서버에서 온다 (career-coach 0086 `mypage_subscription` · `plan` 표).
      🔴 금액 상수를 여기 두지 않는다 (2026-09-21 사용자 결정 「세 곳 다 서버 값으로」) —
         화면에 적힌 금액과 실제 청구액이 갈리는 자리가 하나도 없어야 한다.
-     마크업의 글자는 **빈 상태**(피그마 기준 상태)이고, 값·실패는 여기서 같은 자리에 다시 쓴다. */
-  import { requireLogin, getSubscription, getPlan, cancelSubscription, billingView, billingFail }
+     세 상태 (2026-10-05 사용자 컨펌 시안 v3 C · v5 A):
+       구독 전 — 구독권 고르기 + 결제수단 + 하단 결제 버튼 (마크업 기본 상태 · 피그마 908:606)
+       구독 중 — 멤버십 + 결제 + 이용 중인 요금제 + 맨 아래 해지 (피그마 03-C)
+       조회 실패 — 멤버십 + 결제 자리에 실패 문구 (피그마 03-B 2157:997) */
+  import { requireLogin, getSubscription, getPlans, planCards, cancelSubscription, billingView, billingFail }
     from '/assets/mypage-data.js';
 
+  var $ = function (id) { return document.getElementById(id); };
+  var page = document.querySelector('.page');
   var live = document.querySelector('.live');
   var cancel = document.querySelector('.cancel');
-  var slots = {
-    plan: document.querySelector('.mcard .t-caption'),
-    card: document.querySelector('.pcol .t-body-l'),
-    cardSub: document.querySelector('.pcol .masked'),
-    next: document.querySelector('.nrow span'),
-    amount: document.getElementById('amount'),
-  };
+  var card = document.querySelector('.pcol .t-body-l');
+  var cardSub = document.querySelector('.pcol .masked');
+  var link = document.querySelector('.pcard .link');
+  var 고른것 = null;     // 구독 전에 고른 카드
+  var 구독중 = false;
 
-  /* 다섯 자리를 한 함수로 그린다 — 값·빈 상태·실패가 같은 자리에 들어가야
-     한 갈래만 고쳐지는 일이 안 생긴다. 문구는 데이터 층이 정한다. */
-  function paint(v, bad) {
-    ['plan', 'card', 'cardSub', 'next'].forEach(function (k) { slots[k].classList.toggle('fail', !!bad); });
-    slots.plan.textContent = v.plan;
-    slots.card.textContent = v.card;
-    slots.cardSub.textContent = v.cardSub;
-    slots.next.textContent = v.next;
-    slots.amount.textContent = v.amount;
+  function 카드그리기(cards) {
+    var box = $('plans');
+    box.textContent = '';
+    cards.forEach(function (c) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'pc'; b.setAttribute('role', 'radio');
+      b.innerHTML = (c.rec ? '<span class="chip">추천</span>' : '') +
+        '<span class="top"><span class="radio" aria-hidden="true"></span><span></span></span>' +
+        '<span class="tiers"><span class="day"><span>하루</span><b></b></span><span class="amt"></span></span>';
+      b.querySelector('.top span:last-child').textContent = c.name;
+      b.querySelector('.day b').textContent = c.day;
+      var amt = b.querySelector('.amt');
+      if (c.strike) {
+        var s = document.createElement('s'); s.textContent = c.strike; amt.appendChild(s);
+        var p = document.createElement('span'); p.className = 'pct'; p.textContent = c.pct; amt.appendChild(p);
+      }
+      var w = document.createElement('span'); w.className = 'won'; w.textContent = c.price; amt.appendChild(w);
+      if (c.per) { var per = document.createElement('span'); per.className = 'per'; per.textContent = c.per; amt.appendChild(per); }
+      b.addEventListener('click', function () { 고르기(c, cards); });
+      c.el = b;
+      box.appendChild(b);
+    });
+    고르기(cards.find(function (c) { return c.on; }) || cards[0], cards);
+  }
+  function 고르기(c, cards) {
+    고른것 = c;
+    cards.forEach(function (x) { x.el.setAttribute('aria-checked', String(x === c)); });
+    $('cta').textContent = c.cta;
+  }
+
+  /* 한 함수로 그린다 — 값·빈 상태·실패가 같은 자리에 들어가야 한 갈래만 고쳐지는 일이 안 생긴다. */
+  function paint(v, bad, cards) {
+    구독중 = v.subscribed;
+    var 고를곳 = !bad && !v.subscribed && cards;
+    $('pick').hidden = !고를곳;
+    $('dock').hidden = !고를곳;
+    page.classList.toggle('has-dock', !!고를곳);
+    $('member').hidden = 고를곳;
+    $('payLabel').textContent = 고를곳 ? '결제수단' : '결제';
+    $('mine').hidden = !v.subscribed;
+    [card, cardSub].forEach(function (el) { el.classList.toggle('fail', !!bad); });
+    card.textContent = v.card;
+    cardSub.textContent = v.cardSub;
+    link.textContent = v.hasCard || bad ? '변경' : '등록';
     live.hidden = !v.live;
     if (v.live) live.lastChild.textContent = v.live;
+    $('planLabel').textContent = v.planLabel;
+    $('price').textContent = v.price;
+    $('nextLabel').textContent = v.nextLabel;
+    $('next').textContent = v.next;
     cancel.hidden = !v.canCancel;
+    if (고를곳) 카드그리기(cards);
   }
 
   /* 🔴 실패 처리기는 **조회 실패만** 받는다 (`.then(성공, 실패)`). `.catch` 로 뒤에 달면
      paint() 안의 오류까지 받아 실패 갈래가 또 터지고, 화면에는 마크업의 빈 상태가 남는다. */
-  function 다시읽는다() { return Promise.all([getSubscription(), getPlan()]); }
+  function 다시읽는다() {
+    return getSubscription().then(function (s) {
+      if (billingView(s).subscribed) return [s, null];
+      return getPlans().then(function (plans) { return [s, planCards(plans)]; });
+    });
+  }
   requireLogin().then(function (ok) {
     return ok ? 다시읽는다() : null;
   }).then(function (r) {
-    if (r) paint(billingView(r[0], r[1]));
+    if (r) paint(billingView(r[0]), false, r[1]);
   }, function () {
     /* 실패를 빈 상태로 그리면 결제한 사람이 「등록된 결제수단 없음」을 본다. */
-    paint(billingFail(), true);
+    paint(billingFail(), true, null);
   });
 
+  /* 결제 버튼 — 고른 요금제를 결제 화면에 넘긴다. */
+  function 결제로() {
+    location.href = '/checkout/' + (고른것 ? '?plan=' + encodeURIComponent(고른것.code) : '');
+  }
+  $('cta').addEventListener('click', 결제로);
   /* 「변경」은 카드 등록 화면으로 보낸다 (2026-09-25 사용자 지시). 구독 중이면 서버가 새 카드만
-     보관하고 걷지 않는다(`이미구독`) — 미납 중이면 다음 재시도가 그 카드로 걷는다. */
-  document.querySelector('.pcard .link').addEventListener('click', function () {
-    location.href = '/checkout/?mode=change';
+     보관하고 걷지 않는다(`이미구독`) — 미납 중이면 다음 재시도가 그 카드로 걷는다.
+     카드가 없는 구독 전 사람에게는 「등록」으로 뜨고, 카드를 등록하는 것이 곧 결제라 결제 버튼과 같은 길로 간다. */
+  link.addEventListener('click', function () {
+    if (구독중 || link.textContent === '변경') location.href = '/checkout/?mode=change';
+    else 결제로();
   });
 
   /* 해지는 기간 끝 해지다 — 서버가 다음 결제일을 그대로 이용 종료일로 돌려준다.
@@ -185,8 +289,8 @@
   cancel.addEventListener('click', function () {
     cancel.disabled = true;
     cancelSubscription().then(다시읽는다).then(
-      function (r) { paint(billingView(r[0], r[1])); },
-      function () { paint(billingFail(), true); }
+      function (r) { paint(billingView(r[0]), false, r[1]); },
+      function () { paint(billingFail(), true, null); }
     ).then(function () { cancel.disabled = false; });
   });
 </script>

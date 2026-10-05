@@ -58,7 +58,7 @@ const { EMPTY, FAIL } = data;
 expectInOrder('mypage/index.html', staticHtml('mypage/index.html'),
   [EMPTY.insight, EMPTY.name, EMPTY.account, EMPTY.archive]);
 expectInOrder('mypage/billing/index.html', staticHtml('mypage/billing/index.html'),
-  [EMPTY.plan, EMPTY.card, EMPTY.cardSub, EMPTY.next]);
+  [EMPTY.card, EMPTY.cardSub]);
 
 expectInOrder('mypage/topics/index.html', staticHtml('mypage/topics/index.html'), await data.getTopics());
 
@@ -125,6 +125,22 @@ for (const [화면, a, b] of [['01 프로필', 빈것, 실패한것], ['03 결�
       problems.push(`${화면}: 「${k}」 자리의 실패 문구가 빈 상태 문구와 같습니다 (「${a[k]}」)`);
     }
   }
+}
+/* 03 요금 표기 — 금액은 아무 값이나(위와 같은 이유). 결제 화면 26판의 칸과 같은 모양이어야 한다. */
+{
+  const 한달 = { code: 'm', price_krw: 1000, period_unit: 'month', period_count: 1 };
+  const 일년 = { code: 'y', price_krw: 8000, period_unit: 'month', period_count: 12 };
+  const 기대 = [
+    [data.priceText(한달), '월 1,000원'],
+    [data.priceText(일년), '12개월(8+4개월) 8,000원'],
+    [data.planLabel(일년), '12개월권(8+4개월)'],
+    [data.planLabel(한달), '1개월권'],
+  ];
+  const [y, m] = data.planCards([한달, 일년]);
+  기대.push([`${y.name}|${y.day}|${y.strike}|${y.pct}|${y.price}|${y.cta}|${y.rec}|${y.on}`,
+             '8개월+4개월|22원|12,000원|33%|8,000원|12개월권 · 8,000원 결제하기|true|true'],
+            [`${m.name}|${m.day}|${m.strike}|${m.per}|${m.on}`, '1개월|33원|null|/월|false']);
+  for (const [값, 바람] of 기대) if (값 !== 바람) problems.push(`03 결제: 「${바람}」 이어야 할 자리가 「${값}」 입니다`);
 }
 if (FAIL.list === EMPTY.archive) problems.push('05 저장소: 목록 실패 문구가 빈 상태 문구와 같습니다');
 

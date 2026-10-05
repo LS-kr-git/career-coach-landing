@@ -51,10 +51,8 @@ export const EMPTY = {
   archive: '소장한 아티클이 여기에 모여요',
   // 05 화면에서만 쓰는 둘째 줄. 01 의 같은 문구 아래에 붙는 설명이라 여기 둔다.
   archiveHint: '아티클 전문을 읽으면 여기에 담겨요',
-  plan: '구독 정보는 결제 후 여기에 표시돼요',
   card: '등록된 결제수단 없음',
-  cardSub: '등록 후 여기에 표시돼요',
-  next: '다음 결제일 · 결제 후 표시',
+  cardSub: '결제할 때 등록해요',
 };
 
 /* 🔴 실패는 빈 상태와 **다른 글자**로 그린다 (2026-09-21 사용자 지시 6번 · 협상 대상 아님).
@@ -178,6 +176,19 @@ export async function getPlan() {
   return data[0];
 }
 
+/** 살아 있는 요금제 **전부** — 멤버십·결제 화면(03)의 「구독권을 골라 주세요」가 쓴다.
+ *  getPlan 과 달리 여러 개를 받는다. 달 단위가 아닌 요금제는 그 카드를 그릴 수 없으니 실패로 본다. */
+export async function getPlans() {
+  const supabase = await supa();
+  const { data, error } = await supabase
+    .from('plan').select('code, name, price_krw, period_unit, period_count').eq('is_active', true);
+  if (error) throw error;
+  if (!data || !data.length) throw new Error('살아 있는 요금제가 없습니다');
+  const 못그림 = data.find((p) => p.period_unit !== 'month');
+  if (못그림) throw new Error(`이 화면이 못 그리는 요금제입니다 (${못그림.code})`);
+  return data;
+}
+
 /* ── 결제수단 보관 ─────────────────────────────────────────── */
 
 // 배포된 엣지 함수 슬러그. 이름을 못 맞히게 길게 지은 값이라 주소가 곧 접근 통제의 일부다
@@ -299,9 +310,59 @@ const PERIOD_LABEL = { day: '일', month: '월', year: '년' };
 /** 「3,900원」 — 금액만. 결제 화면의 「오늘 결제 금액」처럼 기간이 붙지 않는 자리가 있다. */
 export function wonText(krw) { return krw.toLocaleString('ko-KR') + '원'; }
 
-/** 「월 3,900원」. period_count 가 1 인 요금제만 이 모양으로 말할 수 있다 — getPlan 이 그걸 지킨다. */
+/* 여러 달짜리 요금제가 덤으로 얹어 주는 달 수 — 「12개월권 = 8개월 값 + 4개월」(2026-10-05 사용자 확정).
+   금액이 아니라 기간 구성이라 여기 둔다. 금액은 여전히 서버 값만 쓴다. */
+const BONUS_MONTHS = { 12: 4 };
+
+/** 「8개월+4개월」 · 「1개월」 — 요금 카드 이름(결제 화면 26판과 같은 표기). */
+function 기간이름(n) {
+  const 덤 = BONUS_MONTHS[n];
+  return 덤 ? `${n - 덤}개월+${덤}개월` : `${n}개월`;
+}
+
+/** 「12개월권(8+4개월)」 · 「1개월권」 — 이용 중인 요금제의 「요금제」 칸. */
+export function planLabel(plan) {
+  const n = plan.period_count, 덤 = BONUS_MONTHS[n];
+  return `${n}개월권${덤 ? `(${n - 덤}+${덤}개월)` : ''}`;
+}
+
+/** 「월 3,900원」 · 「12개월(8+4개월) 47,200원」. 한 달짜리는 앞 모양, 여러 달짜리는 뒤 모양이다. */
 export function priceText(plan) {
+  const n = plan.period_count;
+  if (plan.period_unit === 'month' && n > 1) {
+    const 덤 = BONUS_MONTHS[n];
+    return `${n}개월${덤 ? `(${n - 덤}+${덤}개월)` : ''} ${wonText(plan.price_krw)}`;
+  }
   return `${PERIOD_LABEL[plan.period_unit] || plan.period_unit} ${wonText(plan.price_krw)}`;
+}
+
+/**
+ * 「구독권을 골라 주세요」 카드들 — 결제 화면 26판의 요금 카드와 같은 칸이다.
+ * 금액은 전부 서버 값에서 센다: 하루 금액 = 값 ÷ 날수(1개월 30 · 12개월 365, 반올림),
+ * 정가 = 1개월 요금제 값 × 달 수, 할인율 = 1 − 값/정가(반올림). 1개월 요금제가 없으면 정가·할인율은 안 그린다.
+ * 「추천」은 여러 달짜리에 붙고, 기본 선택도 그것이다(없으면 첫 카드). 긴 것이 먼저다.
+ */
+export function planCards(plans) {
+  const 한달 = plans.find((p) => p.period_count === 1);
+  const 카드 = [...plans].sort((a, b) => b.period_count - a.period_count).map((p) => {
+    const n = p.period_count;
+    const 날수 = n === 1 ? 30 : Math.round(n * 365 / 12);
+    const 정가 = 한달 && n > 1 ? 한달.price_krw * n : null;
+    return {
+      code: p.code,
+      name: 기간이름(n),
+      day: wonText(Math.round(p.price_krw / 날수)),
+      strike: 정가 && 정가 > p.price_krw ? wonText(정가) : null,
+      pct: 정가 && 정가 > p.price_krw ? `${Math.round((1 - p.price_krw / 정가) * 100)}%` : null,
+      price: wonText(p.price_krw),
+      per: n === 1 ? '/월' : '',
+      rec: n > 1,
+      cta: `${n}개월권 · ${wonText(p.price_krw)} 결제하기`,
+    };
+  });
+  const 고른 = 카드.findIndex((c) => c.rec);
+  카드.forEach((c, i) => { c.on = i === (고른 < 0 ? 0 : 고른); });
+  return 카드;
 }
 
 /** 'YYYY-MM-DD' | ISO → 서울 기준 { y, m, d }. 기기 시간대와 무관해야 한다. */
@@ -345,28 +406,28 @@ export function profileView(p) {
 }
 
 /**
- * 03 멤버십·결제 다섯 자리. 구독 전·카드 전은 EMPTY 를 쓴다.
- * plan 은 요금제 행(구독 전에도 금액을 보여 주려고 따로 읽는다).
+ * 03 멤버십·결제. 구독 중이면 멤버십 카드 · 결제수단 · 이용 중인 요금제를, 아니면 결제수단만 그린다
+ * (요금제 고르기는 planCards). 카드 전은 EMPTY 를 쓴다.
+ * plan 은 결제 화면(checkout)이 「구독 전 금액」을 받으려고 넘기는 요금제 행이다 — 이 화면은 안 넘긴다.
  */
 export function billingView(s, plan) {
-  const 구독중 = s && s.status && ['trialing', 'active', 'past_due'].includes(s.status);
+  const 구독중 = Boolean(s && s.status && ['trialing', 'active', 'past_due'].includes(s.status));
   const 해지예약 = Boolean(구독중 && s.cancel_at_period_end);
   const card = s && s.card_last4;
   /* 🔴 구독 중인 사람의 요금은 **그 사람 구독에 매달린 값**이다 — 지금 살아 있는 요금제가
      아니다. 프라이싱 테스트로 새 요금제를 켜고 옛 것을 내리면, 옛 요금으로 청구되는 사람의
      화면이 새 요금을 말하게 된다. 서버가 그 값을 같은 응답에 실어 준다(0086). */
-  const 요금 = 구독중 ? priceText(s) : priceText(plan);
   return {
+    subscribed: 구독중,
     live: 구독중 ? (해지예약 ? '해지 예약됨' : '구독 중') : null,
-    plan: 구독중
-      ? `${요금} · ${해지예약 ? '이용 종료일' : '다음 결제일'} ${dayText(s.current_period_end)}`
-      : EMPTY.plan,
     card: card ? [s.card_issuer, s.card_brand].filter(Boolean).join(' ') || '등록된 카드' : EMPTY.card,
     cardSub: card ? `•••• ${s.card_last4}` : EMPTY.cardSub,
-    next: 구독중
-      ? `${해지예약 ? '이용 종료일' : '다음 결제일'} · ${dayText(s.current_period_end)}`
-      : EMPTY.next,
-    amount: 요금,
+    hasCard: Boolean(card),
+    planLabel: 구독중 ? planLabel(s) : '',
+    price: 구독중 ? wonText(s.price_krw) : '',
+    nextLabel: 해지예약 ? '이용 종료일' : '다음 결제일',
+    next: 구독중 ? dayText(s.current_period_end) : '',
+    amount: 구독중 ? priceText(s) : (plan ? priceText(plan) : ''),
     // 해지할 것이 없거나 이미 예약된 사람에게는 누를 것을 주지 않는다.
     canCancel: Boolean(구독중 && !해지예약),
   };
@@ -377,10 +438,10 @@ export function profileFail() {
   return { count: null, insight: FAIL.line, initial: '', name: FAIL.line, account: FAIL.hint };
 }
 
-/** 구독 조회가 실패했을 때 그 다섯 자리. 금액도 안 그린다 — 못 물어본 값이다. */
+/** 구독 조회가 실패했을 때. 결제수단 자리에 실패 문구를 쓰고, 요금제·금액은 안 그린다 — 못 물어본 값이다. */
 export function billingFail() {
-  return { live: null, plan: FAIL.line, card: FAIL.line, cardSub: FAIL.hint,
-           next: FAIL.line, amount: '', canCancel: false };
+  return { subscribed: false, live: null, card: FAIL.line, cardSub: FAIL.hint, hasCard: false,
+           planLabel: '', price: '', nextLabel: '', next: '', amount: '', canCancel: false };
 }
 
 /** 05 목록 한 줄 — 서버 행을 화면 표기로. date 는 「08. 07」, month 는 월 칩이 묶는 단위다. */
