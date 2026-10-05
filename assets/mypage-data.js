@@ -132,6 +132,22 @@ export async function requireLogin(next) {
   return true;
 }
 
+/**
+ * 마이페이지 첫 화면을 어느 벌로 그릴지 — PG(토스페이먼츠 카드사) 심사 계정은 심사 때 화면('old'),
+ * 나머지는 새 화면('new'). 2026-10-05 사용자 지시 「심사관 계정 이외에는 이 마이페이지가 되도록」.
+ * 이메일이 아니라 auth uid 로 가른다 — 공개 저장소라 심사용 아이디를 여기 적지 않는다.
+ * 세션을 못 읽으면 던진다 — 부른 쪽이 심사 때 화면('old')으로 연다(2026-10-05 검사관 ①:
+ * 그 실패가 'new' 로 새면 심사관에게 새 화면이 아무 신호 없이 나간다).
+ */
+const REVIEW_USER_IDS = ['d2a1f389-563a-4a0c-a051-1bb511915357'];
+export async function homeSkin() {
+  const supabase = await supa();
+  const { data, error } = await supabase.auth.getSession();
+  if (error) throw error;
+  const id = data.session && data.session.user.id;
+  return REVIEW_USER_IDS.includes(id) ? 'old' : 'new';
+}
+
 /* ── 서버 조회 ─────────────────────────────────────────────── */
 
 /**

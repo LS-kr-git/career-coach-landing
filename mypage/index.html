@@ -62,23 +62,13 @@
   .row + .row,.card .row:not(:first-child){border-top:1px solid var(--gray-100)}
   .col{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
   .prof{display:flex;align-items:center;gap:14px;padding:20px 18px 18px;border-bottom:1px solid var(--gray-100)}
-  .prof[hidden] + .row{border-top:0}
   .avatar{width:52px;height:52px;border-radius:9999px;background:var(--gray-800);color:#fff;flex:none;
     display:flex;align-items:center;justify-content:center}
   .sub{color:var(--gray-400)}
-  .card-archive{padding:0 12px 12px}
-  .card-archive .row{padding-left:6px;padding-right:6px;border-top:0}
   .banner{border-radius:12px;background:var(--amber-50);padding:14px 16px;
     display:flex;align-items:center;gap:12px}
   .banner .col{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;word-break:keep-all}
   .banner .b-title{color:var(--amber-700)}
-  .pick-btn{height:32px;padding:0 14px;border:0;border-radius:9999px;background:var(--gray-800);
-    color:#fff;font:inherit;font-size:13px;line-height:18px;font-weight:600;cursor:pointer;
-    white-space:nowrap;flex:none;text-decoration:none;display:flex;align-items:center}
-  .state-done{color:var(--amber-700);white-space:nowrap;flex:none}
-  .state-locked{display:flex;align-items:center;gap:9px;flex:none;white-space:nowrap;color:var(--amber-800)}
-  .state-locked i{width:5px;height:5px;border-radius:9999px;background:var(--amber-500);
-    box-shadow:0 0 0 3.5px rgba(245,158,11,.20);flex:none}
   .row .val{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:55%}
   /* 로그아웃 · 회원 탈퇴 — 같은 크기·색의 글자 링크 둘 (2026-10-03 사용자 컨펌 「5번 첫 페이지」) */
   .bottom{align-self:flex-end;display:flex;align-items:center;padding:4px 0 0}
@@ -95,6 +85,43 @@
   }
   /* 조회 실패 — 값 자리의 글자를 빨갛게 (2026-09-24 사용자 확정 A안). */
   .fail{color:var(--error-600)!important}
+
+  /* ── 두 벌 화면 (2026-10-05 사용자 확정 B1) ─────────────────────────────
+     PG 심사 계정은 지금까지의 화면(old)을, 나머지 회원은 새 화면(new)을 본다. 누가 심사 계정인지는
+     로그인 세션을 읽어야 알므로, 그 전에는 아무것도 그리지 않는다 — 심사관에게 새 화면이 한 번 비치면
+     「심사 때와 다른 화면」이 된다. 피그마: 새 화면 908:538·908:555·908:572·2157:941 / 심사 계정 2456:1327. */
+  html:not([data-skin]) .page{visibility:hidden}
+  [data-skin="new"] .old-only,[data-skin="old"] .new-only{display:none!important}
+
+  [data-skin="new"]{--paper:#FEEAC1;--ink:#111111;--line:#F5EAD6;--edge:#F9D99A;--muted:#8A7A62;--caret-new:#B9A989}
+  [data-skin="new"] .page,[data-skin="new"] .mp-main{background:var(--paper)}
+  [data-skin="new"] .hd{background:var(--ink)}
+  [data-skin="new"] .back path{stroke:#fff}
+  [data-skin="new"] .back:active::before{background:#2a2a2a}
+  [data-skin="new"] .mp-main{padding-top:0}
+  [data-skin="new"] .hero{margin:0 calc(-1 * var(--pad-x)) 6px;padding:26px 20px 30px;background:var(--ink)}
+  [data-skin="new"] .hero .t-display{font-size:24px;line-height:32px;color:#fff}
+  [data-skin="new"] .hero-sub{color:#BDBDBD;align-items:center}
+  .slot{display:inline-flex;margin:0 3px 0 5px;color:#FBBF24;font-size:22px;line-height:28px;height:28px;font-weight:800;
+    overflow:hidden;font-variant-numeric:tabular-nums}
+  .slot .reel{display:flex;flex-direction:column}
+  .slot .reel span{height:28px;text-align:center}
+  [data-skin="new"] .card{border-color:var(--edge)}
+  [data-skin="new"] .row{color:var(--ink)}
+  [data-skin="new"] .row + .row,[data-skin="new"] .card .row:not(:first-child){border-top-color:var(--line)}
+  [data-skin="new"] .caret{color:var(--caret-new)}
+  [data-skin="new"] .sub{color:var(--muted)}
+  .card-me .prof{gap:12px;padding:18px 18px 16px;border-bottom-color:var(--line)}
+  .card-me .avatar{width:40px;height:40px;background:#F59E0B;color:var(--ink);font-size:16px;font-weight:700}
+  .card-me .t-h3{color:var(--ink)}
+  .card-me .arch{padding:0 12px 12px}
+  .card-me .arch .row{padding-left:6px;padding-right:6px;border-top:0}
+  .card-me .am{color:#D97706;font-weight:700}
+  .card-me .banner{background:#F59E0B;text-decoration:none;color:inherit}
+  .card-me .banner .b-title{color:var(--ink)}
+  .card-me .banner .sub{color:#3B2A06}
+  [data-skin="new"] .logout,[data-skin="new"] .leave{color:var(--muted)}
+  .sep.bar{font-size:12px;color:#D6C9B0}
 </style>
 </head>
 <body>
@@ -103,56 +130,62 @@
 <main class="mp-main">
   <section class="hero">
     <h1 class="t-display">남들보다 앞서가는<br>커리어 경쟁력 쌓이는 중</h1>
-    <p class="t-body-l hero-sub">받은 인사이트가 여기에 쌓여요</p>
+    <!-- 심사 계정 화면(2456:1327)의 문구 -->
+    <p class="t-body-l hero-sub old-only" id="heroOld">받은 인사이트가 여기에 쌓여요</p>
+    <!-- 새 화면. 숫자는 소장 편수이고 0 도 그대로 보인다(2026-10-05 사용자 확정 — 빈 상태 문구로 바꾸지 않는다) -->
+    <p class="t-body-l hero-sub new-only" id="heroNew">지금까지<span class="slot" id="slot">0</span>개의 인사이트를 쌓았어요</p>
+  </section>
+
+  <!-- 새 화면만 — 내 계정 + 아티클 저장소 + 일요일 배너. 심사 계정에는 2026-09-24 부터 이 칸들이 없다. -->
+  <section class="card card-me new-only">
+    <div class="prof">
+      <div class="avatar"></div>
+      <div class="col">
+        <span class="t-h3" id="profName">내 계정</span>
+        <span class="t-caption sub" id="profAccount">로그인한 계정으로 이용 중이에요</span>
+      </div>
+    </div>
+    <div class="arch">
+      <a class="row" href="/mypage/archive/">
+        <span class="col"><span class="t-body-l">내 아티클 저장소</span><span class="t-caption sub" id="savedLine">소장한 아티클 <span class="am" id="savedCount">0편</span></span></span>
+        <span class="caret" aria-hidden="true">›</span>
+      </a>
+
+      <a class="banner" data-state="open" href="/mypage/sunday/" hidden>
+        <span class="col"><span class="t-label b-title">놓친 아티클 전문, 지금 열 수 있어요</span><span class="t-caption sub">일요일마다 1편씩 다시 열 수 있어요</span></span>
+      </a>
+
+      <div class="banner" data-state="done" hidden>
+        <span class="col"><span class="t-label b-title">이번 주 전문 1편 추가 소장 완료</span><span class="t-caption sub">다음주 일요일에 1편이 또 열려요</span></span>
+      </div>
+
+      <div class="banner" data-state="locked">
+        <span class="col"><span class="t-label b-title">일요일에 놓친 전문을 1편 열 수 있어요</span><span class="t-caption sub">일요일마다 1편씩 다시 열 수 있어요</span></span>
+      </div>
+    </div>
   </section>
 
   <section class="card">
-    <!-- 2026-09-24 토스페이먼츠 심사 기간 동안 숨긴다(사용자 지시). 심사 통과 후 hidden 을 지워 되살린다.
-         마크업을 남기는 이유: 피그마 01-A/B/C 와의 문구 대조(docs-audit)는 숨긴 요소도 본다. -->
-    <div class="prof" hidden>
-      <div class="avatar t-h3"></div>
-      <div class="col">
-        <span class="t-h3">내 계정</span>
-        <span class="t-caption sub">로그인한 계정으로 이용 중이에요</span>
-      </div>
-    </div>
     <a class="row" href="/mypage/jobs/"><span class="col t-body-l">채용공고 받을 직군</span><span class="caret" aria-hidden="true">›</span></a>
-    <!-- 현재 값(회색)은 JS 가 채운다 — 서버에서 못 읽었으면 빈 채로 둔다(지어낸 값을 그리지 않는다) -->
-    <a class="row" href="/mypage/years/"><span class="col t-body-l">채용공고 받을 연차</span><span class="t-caption sub val" id="valYears"></span><span class="caret" aria-hidden="true">›</span></a>
-    <a class="row" href="/mypage/regions/"><span class="col t-body-l">채용공고 받을 근무지</span><span class="t-caption sub val" id="valRegions"></span><span class="caret" aria-hidden="true">›</span></a>
+    <!-- 현재 값(회색)은 심사 계정 화면에만 있다. JS 가 채운다 — 서버에서 못 읽었으면 빈 채로 둔다(지어낸 값을 그리지 않는다) -->
+    <a class="row" href="/mypage/years/"><span class="col t-body-l">채용공고 받을 연차</span><span class="t-caption sub val old-only" id="valYears"></span><span class="caret" aria-hidden="true">›</span></a>
+    <a class="row" href="/mypage/regions/"><span class="col t-body-l">채용공고 받을 근무지</span><span class="t-caption sub val old-only" id="valRegions"></span><span class="caret" aria-hidden="true">›</span></a>
     <a class="row" href="/mypage/topics/"><span class="col t-body-l">인사이트 받을 주제</span><span class="caret" aria-hidden="true">›</span></a>
-    <a class="row" href="/mypage/billing/"><span class="col t-body-l">멤버십·결제</span><span class="caret" aria-hidden="true">›</span></a>
+    <a class="row" href="/mypage/billing/"><span class="col t-body-l"><span class="old-only">멤버십·결제</span><span class="new-only">구독 · 결제</span></span><span class="caret" aria-hidden="true">›</span></a>
   </section>
 
-  <!-- 2026-09-24 토스페이먼츠 심사 기간 동안 숨긴다(사용자 지시) — 저장소 입구와 일요일 배너 셋. 되살릴 때 hidden 만 지운다. -->
-  <section class="card card-archive" hidden>
-    <a class="row" href="/mypage/archive/">
-      <span class="col"><span class="t-body-l">내 아티클 저장소</span><span class="t-caption sub">소장한 아티클이 여기에 모여요</span></span>
-      <span class="caret" aria-hidden="true">›</span>
-    </a>
-
-    <div class="banner" data-state="open" hidden>
-      <span class="col"><span class="t-label b-title">놓친 아티클 전문, 지금 열 수 있어요</span><span class="t-caption sub">일요일마다 1편씩 다시 열 수 있어요</span></span>
-      <a class="pick-btn" href="/mypage/sunday/">고르기</a>
-    </div>
-
-    <div class="banner" data-state="done" hidden>
-      <span class="col"><span class="t-label b-title">이번 주 전문 1편 추가 소장 완료</span><span class="t-caption sub">다음주 일요일에 1편이 또 열려요</span></span>
-      <span class="t-caption state-done">✓ 완료됨</span>
-    </div>
-
-    <div class="banner" data-state="locked">
-      <span class="col"><span class="t-label b-title">일요일에 놓친 전문을 1편 열 수 있어요</span><span class="t-caption sub">일요일마다 1편씩 다시 열 수 있어요</span></span>
-      <span class="t-caption state-locked"><i aria-hidden="true"></i>일요일 오픈</span>
-    </div>
-  </section>
-
-  <div class="bottom"><button class="logout" type="button">로그아웃</button><span class="sep" aria-hidden="true">·</span><a class="leave" href="/mypage/leave/">회원 탈퇴</a></div>
+  <div class="bottom"><button class="logout" type="button">로그아웃</button><span class="sep old-only" aria-hidden="true">·</span><span class="sep bar new-only" aria-hidden="true">|</span><a class="leave" href="/mypage/leave/">회원 탈퇴</a></div>
 </main>
 <script type="module">
   /* 자료는 assets/mypage-data.js 한 곳에서 온다. 마크업의 값은 피그마 기준 프레임 상태(= 빈 상태,
      대조용)이고, 실제 화면은 여기서 받은 값으로 다시 채운다. */
-  import { requireLogin, getProfile, profileView, profileFail, getSunday, sundayStateOf, kstToday } from '/assets/mypage-data.js';
+  import { requireLogin, getProfile, profileView, profileFail, getSunday, sundayStateOf, kstToday, homeSkin } from '/assets/mypage-data.js';
+
+  /* 어느 벌을 그릴지 정하기 전에는 .page 가 안 보인다(CSS). 세션을 못 읽어 정하지 못하면 심사 때
+     화면으로 연다 — 심사관에게 새 화면이 나가는 쪽이 회원에게 옛 화면이 한 번 보이는 쪽보다 비싸다. */
+  var root = document.documentElement;
+  homeSkin().then(function (k) { root.dataset.skin = k; },
+    function (e) { console.error('화면 벌 판정 실패', e); root.dataset.skin = 'old'; });
 
   /* 일요일 배너 세 상태 — 서울 기준 오늘 요일 + 이번 주 열람 여부로 정한다 (피그마 01-A/01-B/01-C).
      ?state=open|done|locked 는 디자인 검수용 미리보기다 — 요일과 무관하게 그 상태를 보여준다.
@@ -173,20 +206,43 @@
       .then(function (s) { if (s) showBanner(sundayStateOf(s)); }, function (e) { console.error('일요일 상태 조회 실패', e); });
   }
 
-  /* 네 자리를 한 함수로 그린다 — 값·빈 상태·실패가 **같은 자리**에 들어가야 한 갈래만 고쳐지는
-     일이 안 생긴다. 문구는 전부 데이터 층(profileView·profileFail)이 정한다. */
+  /* 값·빈 상태·실패가 **같은 자리**에 들어가야 한 갈래만 고쳐지는 일이 안 생긴다 — 한 함수로 그린다.
+     두 벌을 같이 칠한다(보이는 것은 skin 이 고른다). 문구는 데이터 층(profileView·profileFail)이 정한다. */
+  var $ = function (id) { return document.getElementById(id); };
   function paint(v, bad) {
-    ['.hero-sub', '.prof .col .t-h3', '.prof .sub'].forEach(function (s) {
-      document.querySelector(s).classList.toggle('fail', !!bad);
-    });
-    document.querySelector('.hero-sub').innerHTML = v.count == null
+    ['heroOld', 'heroNew', 'profName', 'profAccount', 'savedLine'].forEach(function (id) { $(id).classList.toggle('fail', !!bad); });
+    /* 심사 계정 화면 — 2026-10-05 전 그대로: 0편이면 빈 상태 문구 */
+    $('heroOld').innerHTML = v.count == null
       ? escapeHtml(v.insight)
       : '지금까지<span class="t-number-xl num">' + v.count + '</span>개의 인사이트를 쌓았어요';
+    /* 새 화면 — 0 도 숫자로 둔다. 실패면 숫자 자리 둘 다 실패 문구다(지어낸 0 을 그리지 않는다) */
+    if (bad) { $('heroNew').textContent = v.insight; $('savedLine').textContent = v.insight; }
+    else { spin(v.count || 0); $('savedCount').textContent = (v.count || 0) + '편'; }
     document.querySelector('.avatar').textContent = v.initial;
-    document.querySelector('.prof .col .t-h3').textContent = v.name;
-    document.querySelector('.prof .sub').textContent = v.account;
+    $('profName').textContent = v.name;
+    $('profAccount').textContent = v.account;
   }
   function escapeHtml(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+  /* 「지금까지 N개」의 N — 자리마다 숫자 띠가 두 바퀴 이상 돌다 멈춘다(시안 v9 · 피그마 컴포넌트
+     「마이페이지/슬롯 숫자」와 같은 ease-out). 움직임을 줄이도록 설정한 기기에서는 바로 숫자만 둔다. */
+  function spin(n) {
+    var el = $('slot'), digits = String(n).split('');
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { el.textContent = n; return; }
+    el.textContent = '';
+    digits.forEach(function (d, i) {
+      var reel = document.createElement('span'), total = (2 + i) * 10 + Number(d), h = '';
+      reel.className = 'reel';
+      for (var k = 0; k <= total; k++) h += '<span>' + (k % 10) + '</span>';
+      reel.innerHTML = h;
+      el.appendChild(reel);
+      requestAnimationFrame(function () { requestAnimationFrame(function () {
+        reel.style.transition = 'transform ' + (1.2 + i * 0.35) + 's cubic-bezier(.16,1,.3,1)';
+        reel.style.transform = 'translateY(-' + (total * 28) + 'px)';
+      }); });
+    });
+    el.setAttribute('role', 'img'); el.setAttribute('aria-label', String(n));
+  }
 
   /* 🔴 실패 처리기는 **조회 실패만** 받는다 (`.then(성공, 실패)`). `.catch` 로 뒤에 달면
      paint() 안에서 난 오류까지 받아서, 실패 갈래가 같은 paint 를 다시 불러 또 터지고

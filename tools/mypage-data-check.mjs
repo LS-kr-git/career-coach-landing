@@ -56,7 +56,7 @@ function expectInOrder(rel, html, texts) {
 /* ── ① 빈 상태 문구 ↔ 마크업 ───────────────────────────────── */
 const { EMPTY, FAIL } = data;
 expectInOrder('mypage/index.html', staticHtml('mypage/index.html'),
-  [EMPTY.insight, EMPTY.name, EMPTY.account, EMPTY.archive]);
+  [EMPTY.insight, EMPTY.name, EMPTY.account]);   // 저장소 줄은 2026-10-05 부터 「소장한 아티클 N편」이다(EMPTY.archive 는 05 화면만 쓴다)
 expectInOrder('mypage/billing/index.html', staticHtml('mypage/billing/index.html'),
   [EMPTY.card, EMPTY.cardSub]);
 
