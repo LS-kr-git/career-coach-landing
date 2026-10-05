@@ -15,7 +15,7 @@
     color-scheme: only light;
     --amber-50:#FFFBEB; --amber-100:#FEF3C7; --amber-200:#FDE68A; --amber-500:#F59E0B; --amber-600:#D97706;
     --amber-700:#B45309; --amber-800:#92400E; --amber-950:#451A03;
-    --emerald-500:#10B981; --navy-900:#1E3A8A;
+    --emerald-500:#10B981; --emerald-700:#047857;
     --gray-50:#F8FAFC; --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-300:#CBD5E1;
     --gray-400:#94A3B8; --gray-500:#64748B; --gray-600:#475569; --gray-700:#334155;
     --gray-800:#1E293B; --gray-900:#0F172A; --stone-50:#FAFAF9;
@@ -54,14 +54,15 @@
 
   .bill{padding:30px var(--pad-x) 32px;display:flex;flex-direction:column;gap:44px;flex:1}
   .sec{display:flex;flex-direction:column;gap:14px}
-  /* 멤버십 카드 — 2026-10-04 사용자 확정(앰버 100 바탕 · 앰버 200 테두리 · 네이비 글자 · 흰 상태 칩).
-     왼쪽 주황 세로선은 이날 뺐다. 피그마 925:661 과 같은 값이다. */
+  /* 멤버십 카드 — 2026-10-04 사용자 확정(앰버 100 바탕 · 앰버 200 테두리 · 흰 상태 칩).
+     왼쪽 주황 세로선은 이날 뺐다. 피그마 925:661 과 같은 값이다.
+     2026-10-05 사용자 지시 — 남색을 뺐다: 멤버십 이름은 앰버 800, 「구독 중」은 에메랄드 700. */
   .mcard{border:1px solid var(--amber-200);border-radius:16px;
     background:var(--amber-100);padding:22px 20px;display:flex;flex-direction:column;gap:10px}
-  .mcard .t-h3{color:var(--navy-900)}
+  .mcard .t-h3{color:var(--amber-800)}
   .mtop{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .kicker{color:var(--amber-700);letter-spacing:.16em}
-  .live{display:flex;align-items:center;gap:5px;color:var(--navy-900);flex:none;
+  .live{display:flex;align-items:center;gap:5px;color:var(--emerald-700);flex:none;
     background:#fff;border-radius:9999px;padding:4px 9px}
   .live i{width:6px;height:6px;border-radius:9999px;background:var(--emerald-500);flex:none}
   .pcard{border:1px solid var(--gray-200);border-radius:14px;padding:18px;
