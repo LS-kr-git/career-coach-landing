@@ -10,23 +10,17 @@
 #   1.5겹 · 온보딩 직군 목록 ↔ taxonomy.json (roles/build.mjs --check) — 모든 푸시
 #   1.6겹 · 마이페이지 데이터 층 ↔ 정적 마크업 (mypage-data-check.mjs) — 모든 푸시
 #   2겹a  · 약관·개인정보·가입·온보딩 문구 대조 (docs-audit.mjs) — *.html 이 바뀐 푸시
-#   2겹b  · 랜딩 피그마 대조 (audit.mjs) — index.html / assets 가 바뀐 푸시
-#           기준 프레임(6:148)이 있는 랜딩만 해당.
+#   2겹b  · (2026-10-06 은퇴) 랜딩 피그마 대조 — 랜딩 프레임이 레거시 페이지로 옮겨져 기준이 아니다
 #
 #   🔴 1~2겹은 전부 **node 로 돈다.** node 가 없는 PC 에서는 막지 않고 건너뛴다(아래 HAVE_NODE).
 #      같은 검수가 .github/workflows/landing-audit.yml 에서 리눅스로 다시 돈다.
 #
-#   🔴 피그마 덤프는 **셋 다 사실상 필수**다. 훅은 figma_meta.xml 만 없을 때 막지만,
-#      audit.mjs 가 TYPE·STYLE 을 findings 로 올리고 그 등급들로 종료코드 1 을 낸다.
-#      "없어도 경고만" 이 아니다.
+#   피그마 덤프 3종은 2겹b 와 함께 2026-10-06 부터 요구하지 않는다.
 #
 # 설치 (클론한 세션에서 한 줄):
 #   git config core.hooksPath tools/hooks
 #
-# 피그마 덤프 세 개를 찾는 순서:
-#   1) 환경변수 FIGMA_META / FIGMA_TYPE / FIGMA_STYLE
-#   2) 저장소 루트의 figma_meta.xml / figma_type.json / figma_style.json
-#   3) 상위 디렉터리(/home/claude 등)의 같은 이름 파일
+# 피그마 트리 덤프(figma_tree.json)를 찾는 순서는 1.2겹 주석에 있다.
 #
 # 급할 때만: git push --no-verify
 
@@ -35,7 +29,7 @@ ROOT="$(git rev-parse --show-toplevel)"
 # 🔴 예전에는 `|| exit 0` 이었다. 그러면 여기서 실패했을 때 **출력 한 줄 없이 7겹 전부**
 #    건너뛰고 푸시가 나간다 — "검사가 안 돈 것" 이 "통과" 로 보인다(2026-08-13 재현).
 # `cd ""` 는 bash 에서 **성공한다**(제자리에 머문다). 빈 값도 실패로 본다 — 안 그러면
-# ROOT="" 로 아래 덤프 탐색이 `/figma_meta.xml` 같은 루트 경로를 뒤진다(검사관 지적).
+# ROOT="" 로 아래 덤프 탐색이 `/figma_tree.json` 같은 루트 경로를 뒤진다(검사관 지적).
 [ -n "$ROOT" ] && cd "$ROOT" || {
   echo "✋ 푸시 중단 — 저장소 루트를 못 찾았습니다 ('$ROOT'). 검수를 하나도 못 돌렸습니다." >&2
   exit 1
@@ -67,9 +61,8 @@ DONE_MSG="✅ 검수 통과 — 푸시합니다."
 if [ -n "$DR_NODE" ]; then
   HAVE_NODE=1
 else
-  DONE_MSG="✅ 검수 통과(부분 — node 가 없어 이 PC 에서는 검수를 못 돌렸습니다. 셋은 CI 가, 피그마 대조 둘과 1.6겹은 아무도 안 봅니다) — 푸시합니다."
+  DONE_MSG="✅ 검수 통과(부분 — node 가 없어 이 PC 에서는 검수를 못 돌렸습니다. 셋은 CI 가, 피그마 트리 대조와 1.6겹은 아무도 안 봅니다) — 푸시합니다."
   HAVE_NODE=0
-  echo "   → index.html/assets 를 고쳤다면 node 가 있는 곳에서 피그마 대조를 한 번 돌리고 미세요." >&2
 fi
 
 fail() {
@@ -204,7 +197,7 @@ fi
 #   검수 여섯 종이 전부 통과했다 — 나머지는 방향이 '웹 → 피그마' 이거나 프레임 안쪽만 본다.
 #
 #   덤프 없이도 돈다(스냅샷 자체 정합성). 라이브 고아 노드까지 보려면
-#   figma_tree.json 을 준다 — 찾는 순서는 아래 2겹의 덤프와 같다.
+#   figma_tree.json 을 준다 — 환경변수 FIGMA_TREE → 저장소 루트 → 상위 디렉터리 → $HOME 순서.
 #   등록부나 트리 스냅샷을 건드린 푸시에는 덤프를 **요구**한다(그때가 어긋나기 제일 쉬운 순간이라).
 #
 #   섹션이 늘거나 이름이 바뀌어 스냅샷이 낡은 것은 **막지 않는다** — `↺ 스냅샷 낡음` 으로만
@@ -282,7 +275,7 @@ fi
 # 2겹 — 피그마 대조
 #   (a) 약관·개인정보 화면 (docs-audit.mjs) — terms/privacy.html 또는 스냅샷이 바뀐 푸시.
 #       커밋된 스냅샷(figma-docs-text.json)과 문구를 대조하므로 라이브 피그마 덤프가 필요 없다.
-#   (b) 랜딩 (audit.mjs) — index.html/assets 가 바뀐 푸시. 피그마 덤프 3개가 필요하다.
+#   (b) 랜딩 (audit.mjs) — 2026-10-06 은퇴. 아래 (b) 주석 참조.
 # ───────────────────────────────────────────────────
 RANGE_BASE="$(git rev-parse --verify -q origin/main 2>/dev/null || echo '')"
 diff_names() {
@@ -309,71 +302,9 @@ MSG
   fi
 fi
 
-# (b) 랜딩 대조 (index.html/assets 가 바뀐 푸시만)
-CHANGED_LANDING="$(diff_names briefing/index.html assets)"   # 2026-09-24 심사 기간: 랜딩은 briefing/ 에 있다
-if [ -z "$CHANGED_LANDING" ]; then
-  echo "· 랜딩(index.html/assets)은 그대로 → 랜딩 피그마 대조 건너뜀"
-  echo "${DONE_MSG}"
-  exit 0
-fi
-
-# node 가 없으면 피그마 덤프를 **요구하지도 않는다.** 요구해 봐야 돌릴 것이 없고,
-# 못 돌리는 이유로 푸시를 막으면 --no-verify 로 7겹이 통째로 꺼진다.
-if [ "$HAVE_NODE" = "0" ]; then
-  echo "🔴 node 가 없어 랜딩 피그마 대조(2겹b)를 건너뜁니다. **CI 도 이건 못 봅니다** —"
-  echo "   라이브 피그마 덤프가 필요해 CI 로 못 옮긴 유일한 검사입니다."
-  echo "   index.html/assets 를 고쳤으니, node 가 있는 곳에서 한 번 대조하는 것이 좋습니다."
-  echo "${DONE_MSG}"
-  exit 0
-fi
-
-find_file() {
-  local name="$1" env_val="$2"
-  [ -n "$env_val" ] && [ -f "$env_val" ] && { echo "$env_val"; return; }
-  for p in "$ROOT/$name" "$ROOT/../$name" "$HOME/$name"; do
-    [ -f "$p" ] && { echo "$p"; return; }
-  done
-}
-
-META="$(find_file figma_meta.xml "${FIGMA_META:-}")"
-TYPE="$(find_file figma_type.json "${FIGMA_TYPE:-}")"
-STYLE="$(find_file figma_style.json "${FIGMA_STYLE:-}")"
-
-if [ -z "$META" ]; then
-  fail <<'MSG'
-
-✋ 푸시 중단 — 피그마 메타데이터(figma_meta.xml)를 찾지 못했습니다.
-
-랜딩 결과물이 바뀌었는데 피그마와 대조하지 않은 상태입니다.
-CLAUDE.md "랜딩을 건드렸다면 — 푸시 전에" 절차대로
-  1) get_metadata → figma_meta.xml
-  2) use_figma 타이포 스니펫 → figma_type.json
-  3) use_figma 스타일 스니펫 → figma_style.json
-를 만든 뒤 다시 푸시하세요.
-MSG
-fi
-
-echo "▶ 피그마 대조 검수 실행…"
-ARGS=("$META")
-[ -n "$TYPE" ] && ARGS+=("$TYPE")
-if [ -n "$STYLE" ]; then
-  [ -z "$TYPE" ] && { echo "✋ figma_style.json 만 있고 figma_type.json 이 없습니다 — 인자 순서상 둘 다 필요합니다." >&2; exit 1; }
-  ARGS+=("$STYLE")
-fi
-# 🔴 "경고" 가 아니다. audit.mjs 는 TYPE·STYLE 등급을 findings 로 올리고 그것으로 종료코드 1 을
-#    낸다 — 바로 아래에서 확실히 막힌다. 안심시키는 문구를 쓰면 원인을 엉뚱한 데서 찾게 된다.
-[ -z "$TYPE" ]  && echo "✋ figma_type.json 이 없습니다 — 타이포 대조를 못 해 아래에서 막힙니다." >&2
-[ -z "$STYLE" ] && echo "✋ figma_style.json 이 없습니다 — 스타일 대조를 못 해 아래에서 막힙니다." >&2
-node tools/figma-audit/audit.mjs "${ARGS[@]}"
-STATUS=$?
-
-if [ $STATUS -ne 0 ]; then
-  fail <<'MSG'
-
-✋ 푸시 중단 — 피그마 대조에서 조치 필요 항목이 나왔습니다.
-위 목록을 피그마 기준으로 해결한 뒤 다시 푸시하세요.
-MSG
-fi
-
+# (b) 랜딩 피그마 대조 — 2026-10-06 은퇴.
+# 사용자 지시로 랜딩(6:148)·상품목록(2143:3144) 프레임이 운영 페이지에서 「레퍼런스, 기타 자료들」
+# 페이지로 옮겨져 더는 기준이 아니다. 두 페이지는 page-figma-map.json 의 exempt 에 있다.
+# audit.mjs 와 덤프 3종(figma_meta/type/style)은 더 이상 요구하지 않는다.
 echo "${DONE_MSG}"
 exit 0

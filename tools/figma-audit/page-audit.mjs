@@ -494,10 +494,10 @@ if (!existsSync(figmaMapPath)) {
       add('WARN', '피그마 대응', page,
           `문구 동기화 미적용 (프레임 ${entry.node})`,
           entry.pendingSync || '사유가 적혀 있지 않습니다. page-figma-map.json 에 pendingSync 로 남기세요.');
-    } else if (entry.textAudit !== 'docs-audit' && entry.textAudit !== 'audit') {
+    } else if (entry.textAudit !== 'docs-audit') {
       add('BLOCK', '피그마 대응', page,
           `textAudit 값이 올바르지 않습니다: ${JSON.stringify(entry.textAudit)}`,
-          '"audit"(랜딩 전용) · "docs-audit"(스냅샷 대조) · "pending"(사유 필수) 중 하나여야 합니다.');
+          '"docs-audit"(스냅샷 대조) · "pending"(사유 필수) 중 하나여야 합니다. "audit"(랜딩 3종 덤프 대조)은 2026-10-06 에 은퇴했다 — 그 값으로 두면 아무 대조도 안 돈다.');
     }
   }
 
