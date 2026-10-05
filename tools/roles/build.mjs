@@ -32,6 +32,9 @@ const PAGE = join(ROOT, 'onboarding', '1', 'index.html');
  *  마크업이 다른 것은 화면 디자인이 다르기 때문이고, **데이터·순서·문구는 같은 자리에서 나온다.** */
 const PAGE_MYPAGE = join(ROOT, 'mypage', 'jobs', 'index.html');
 const DONE = join(ROOT, 'onboarding', 'done', 'index.html');
+/** 마이페이지 「인사이트 받을 주제」도 「내 직군 추천」을 그리려면 같은 직군→주제 표가 필요하다 (2026-10-05).
+ *  표가 두 벌이 되면 두 화면의 추천이 갈리므로 같은 생성기가 같은 값을 심는다. */
+const TOPICS_PAGE = join(ROOT, 'mypage', 'topics', 'index.html');
 
 /** 노출 기준 (2026-08-04 사용자 확정 → 같은 날 10 → 5 로 완화)
  *  대분류: 주당 신규 5건 미만이면 뺀다.
@@ -169,11 +172,11 @@ const jobMapHtml = () => {
 };
 
 /** 표식 사이만 갈아 끼운다. 표식이 없으면 화면이 조용히 옛 값을 그리게 되므로 멈춘다. */
-const patch = (src, mark, body) => {
+const patch = (src, mark, body, file = 'onboarding/done/index.html') => {
   const a = `<!--roles:${mark}-->`, b = `<!--/roles:${mark}-->`;
   const i = src.indexOf(a), j = src.indexOf(b);
   if (i < 0 || j < 0) {
-    console.error(`❌ onboarding/done/index.html 에서 ${a} 표식을 찾지 못했습니다.`);
+    console.error(`❌ ${file} 에서 ${a} 표식을 찾지 못했습니다.`);
     process.exit(2);
   }
   return src.slice(0, i + a.length) + body + src.slice(j);
@@ -216,12 +219,15 @@ if (missing.length || values.size > 1) {
 }
 const doneHtml = readFileSync(DONE, 'utf8');
 const doneNext = patch(patch(doneHtml, 'topics', topicsHtml()), 'jobmap', jobMapHtml());
+const topicsPageHtml = readFileSync(TOPICS_PAGE, 'utf8');
+const topicsPageNext = patch(topicsPageHtml, 'jobmap', jobMapHtml(), 'mypage/topics/index.html');
 
 if (process.argv.includes('--check')) {
   const stale = [
     next !== html && '온보딩 1단계 직군 목록',
     next2 !== html2 && '마이페이지 직군 목록',
     doneNext !== doneHtml && '완료 화면 주제 목록',
+    topicsPageNext !== topicsPageHtml && '마이페이지 주제 화면 직군→주제 표',
   ].filter(Boolean);
   if (!stale.length) { console.log('✅ 직군·주제 목록이 taxonomy.json + volume.json + tracks.json 과 일치합니다 (온보딩 1단계 · 마이페이지 · 완료 화면).'); process.exit(0); }
   console.error(`❌ ${stale.join(' · ')} 이(가) 기준과 다릅니다 — node tools/roles/build.mjs 를 돌리세요.`);
@@ -231,6 +237,7 @@ if (process.argv.includes('--check')) {
 writeFileSync(PAGE, next);
 writeFileSync(PAGE_MYPAGE, next2);
 writeFileSync(DONE, doneNext);
+writeFileSync(TOPICS_PAGE, topicsPageNext);
 const shown = visible.reduce((a, g) => a + g.children.length, 0);
 const all = TAX.groups.reduce((a, g) => a + g.children.length, 0);
 console.log(`✅ 온보딩 1단계 · 마이페이지 직군 · 완료 화면 주제 갱신 — 대분류 ${visible.length}/${TAX.groups.length} · 중분류 ${shown}/${all}`);
