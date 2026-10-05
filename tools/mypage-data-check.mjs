@@ -194,10 +194,13 @@ for (const rel of ['mypage/index.html', 'mypage/billing/index.html', 'mypage/arc
 }
 
 /* ── 값 갈래 — 표기 규칙이 마크업과 같은 모양인가 ───────────── */
-const 프로필 = data.profileView({ name: '가', provider: 'kakao', email: 'user@careercoach.my', saved_count: 3 });
+const 프로필 = data.profileView({ name: '가', provider: 'kakao', email: 'user@careercoach.my', saved_count: 3, received_count: 0 });
 if (프로필.name !== '가 님') problems.push(`01 프로필: 이름 표기가 「${프로필.name}」 입니다 (「가 님」 이어야 합니다)`);
 if (프로필.account !== '카카오 · user@careercoach.my') problems.push(`01 프로필: 가입 경로 표기가 「${프로필.account}」 입니다`);
 if (프로필.count !== 3) problems.push('01 프로필: 소장 편수가 그대로 안 나옵니다');
+if (프로필.received !== 0 || 프로필.receivedFail) problems.push('01 프로필: 받은 편수 0 이 숫자로 안 나옵니다');
+const 옛서버 = data.profileView({ name: '가', provider: 'kakao', email: 'user@careercoach.my', saved_count: 3 });
+if (옛서버.received !== null || !옛서버.receivedFail) problems.push('01 프로필: 받은 편수가 없는데 실패 문구가 아닙니다 (지어낸 0)');
 
 /* 05 은 값이 서버에서 오지만 **표기 규칙은 피그마 기준 마크업**이다 — 날짜 「08. 07」,
    월 칩 「8월」, 해가 바뀌는 자리의 연도 구분. 그 세 모양이 마크업에 그대로 있는지 본다. */

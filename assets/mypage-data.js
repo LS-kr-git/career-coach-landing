@@ -164,7 +164,7 @@ async function rpc(name, one, args) {
   return one ? data[0] : (data || []);
 }
 
-/** 프로필 — { name, provider, email, saved_count }. 회원 행이 없으면 서버가 예외를 던진다. */
+/** 프로필 — { name, provider, email, saved_count, received_count }. 회원 행이 없으면 서버가 예외를 던진다. */
 export async function getProfile() { return rpc('mypage_profile', true); }
 
 /** 구독·결제수단. 서버가 **항상 한 행**을 준다 — 없는 값은 null 이다. */
@@ -412,8 +412,12 @@ export function profileView(p) {
   const name = (p && p.name) || null;
   const label = p && PROVIDER_LABEL[p.provider];
   const count = p && p.saved_count > 0 ? p.saved_count : null;
+  // 받은 편 수(새 화면 머리 숫자) — 0 도 숫자다. 서버가 안 주면 null 이고 화면은 실패 문구를 그린다.
+  const received = p && Number.isInteger(p.received_count) ? p.received_count : null;
   return {
     count,
+    received,
+    receivedFail: p && received == null ? FAIL.line : null,
     insight: count == null ? EMPTY.insight : null,     // 수가 있으면 화면이 숫자 꼴로 그린다
     initial: name ? name.trim()[0] : '',
     name: name ? `${name} 님` : EMPTY.name,

@@ -217,7 +217,11 @@
       : '지금까지<span class="t-number-xl num">' + v.count + '</span>개의 인사이트를 쌓았어요';
     /* 새 화면 — 0 도 숫자로 둔다. 실패면 숫자 자리 둘 다 실패 문구다(지어낸 0 을 그리지 않는다) */
     if (bad) { $('heroNew').textContent = v.insight; $('savedLine').textContent = v.insight; }
-    else { spin(v.count || 0); $('savedCount').textContent = (v.count || 0) + '편'; }
+    else {
+      if (v.receivedFail) { $('heroNew').classList.add('fail'); $('heroNew').textContent = v.receivedFail; }
+      else spin(v.received || 0);   /* 머리 숫자는 받은 편 수, 아래 줄은 소장 편수 — 2026-10-05 */
+      $('savedCount').textContent = (v.count || 0) + '편';
+    }
     document.querySelector('.avatar').textContent = v.initial;
     $('profName').textContent = v.name;
     $('profAccount').textContent = v.account;
