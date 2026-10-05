@@ -42,6 +42,7 @@
   main{flex:1;display:flex;flex-direction:column;width:100%;max-width:var(--card-max);margin:0 auto}
   /* 피그마 텍스트 스타일 대응 (careercoach 컬렉션 text/*) */
   .t-display{font-size:28px;line-height:36px;font-weight:800;letter-spacing:-.02em;color:var(--gray-900)}
+  .t-h3{font-size:17px;line-height:24px;font-weight:600}
   .t-h4{font-size:15px;line-height:22px;font-weight:600}
   .t-body-s{font-size:14px;line-height:20px;font-weight:400}
   .t-caption{font-size:13px;line-height:18px;font-weight:400}
@@ -62,13 +63,15 @@
   .title{padding:20px var(--pad-x) 9px}
   .desc{padding:10px var(--pad-x);color:var(--gray-500);word-break:keep-all}
   .quota-wrap{padding:16px var(--pad-x) 0}
-  .quota{border-radius:12px;background:var(--amber-50);padding:14px 16px;
+  .quota{border-radius:12px;background:var(--gray-900);padding:14px 16px;
     display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .quota .k{color:var(--amber-700)}
-  .quota .v{color:var(--amber-600);white-space:nowrap}
-  .lists{padding:22px var(--pad-x) 24px;display:flex;flex-direction:column;gap:22px;flex:1}
-  .sec{display:flex;flex-direction:column;gap:10px}
-  .sec > .lab{color:var(--gray-500)}
+  .quota .k{color:var(--gray-200)}
+  .quota .v{color:#fff;white-space:nowrap;display:flex;align-items:center;gap:6px}
+  .quota .n{width:26px;height:26px;border-radius:9999px;background:var(--amber-500);color:var(--gray-900);
+    display:flex;align-items:center;justify-content:center}
+  .lists{padding:24px var(--pad-x) 24px;display:flex;flex-direction:column;gap:32px;flex:1}
+  .sec{display:flex;flex-direction:column;gap:12px}
+  .sec > .lab{color:var(--gray-900)}
   .items{display:flex;flex-direction:column;gap:8px}
   .item{border-radius:12px;padding:15px 16px;display:flex;align-items:center;gap:12px;
     background:#fff;box-shadow:inset 0 0 0 1px var(--gray-100);
@@ -108,12 +111,12 @@
   <div class="quota-wrap">
     <div class="quota">
       <span class="t-caption k">이번 주 추가 열람 기회</span>
-      <span class="t-h4 v">1개 남음</span>
+      <span class="t-h4 v"><span class="n">1</span>개 남음</span>
     </div>
   </div>
   <div class="lists">
     <section class="sec">
-      <span class="t-caption lab">아직 안 읽은 아티클</span>
+      <span class="t-h3 lab">아직 안 읽은 아티클</span>
       <div class="items">
         <button class="item" type="button" aria-pressed="false" data-title="핸드오프 문서를 줄이는 다섯 가지 습관">
           <span class="col">
@@ -139,7 +142,7 @@
       </div>
     </section>
     <section class="sec">
-      <span class="t-caption lab">이미 읽은 아티클</span>
+      <span class="t-h3 lab">이미 읽은 아티클</span>
       <div class="items">
         <div class="item done">
           <span class="col">
@@ -221,7 +224,7 @@
   var quota = document.querySelector('.quota .v');
   getSunday().then(function (s) {
     다씀 = !!s.used;
-    quota.textContent = (다씀 ? 0 : 1) + '개 남음';
+    quota.querySelector('.n').textContent = 다씀 ? 0 : 1;
     if (다씀) btn.disabled = true;
   }, function () {
     btn.disabled = true;
