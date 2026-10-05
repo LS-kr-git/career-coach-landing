@@ -509,12 +509,19 @@ for (const page of snap.pages) {
   // ⚠️ **중복을 지운다** — 같은 문구가 프레임마다 있으므로, 안 지우면 품는 쪽을
   //    프레임 수만큼 더해 어떤 짧은 문구도 못 넘는 문턱이 된다.
   const figmaKeys = [...new Set(allFigma.map(key))];
-  const 나온횟수 = (k) => (k ? webAll.split(k).length - 1 : 0);
   const 자기자리가있나 = (k) => {
     const 품는것 = figmaKeys.filter((b) => b !== k && b.includes(k));
     if (품는것.length === 0) return true;                       // 삼켜지지 않는다 — 종전대로
-    // 긴 쪽이 웹에 나온 만큼은 짧은 쪽도 「덤으로」 세어진다. 그 몫을 뺀 뒤에도 남아야 한다.
-    return 나온횟수(k) > 품는것.reduce((s, b) => s + 나온횟수(b), 0);
+    // 긴 쪽이 웹에 나온 **자리** 안에 든 짧은 쪽은 「덤」이다. 덮이지 않은 자리가 하나라도 남아야 한다.
+    // 🔴 수를 더해 빼지 않고 자리로 센다 (2026-10-05). 긴 쪽끼리 겹치면(「일 잘하는 법 · 커리어(공통)」이
+    //    「"일 잘하는 법 · 커리어(공통)"는 화요일 …」 안에 또 들어 있으면) 같은 자리를 두 번 빼서,
+    //    웹에 자기 자리가 멀쩡히 있는 「일 잘하는 법·커리어」가 거짓 빨강이 됐다(mypage/topics).
+    const 덮인 = [];
+    for (const b of 품는것) for (let i = webAll.indexOf(b); i >= 0; i = webAll.indexOf(b, i + 1)) 덮인.push([i, i + b.length]);
+    for (let i = webAll.indexOf(k); i >= 0; i = webAll.indexOf(k, i + 1)) {
+      if (!덮인.some(([a, z]) => a <= i && i + k.length <= z)) return true;
+    }
+    return false;
   };
 
   for (const f of frames) {
