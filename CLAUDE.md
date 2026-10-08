@@ -391,7 +391,7 @@ x 약 18,000px · y 약 10,100px 떨어진 자리(하필 REF 섹션 위)에 겹�
   사유가 비면 막힌다. **`figma-tree.json` 에서 손으로 관리하는 것은 이 목록 하나뿐이다.**
 - **섹션을 새로 만들거나 이름을 바꿔도 아무것도 안 해도 된다.** `↺ 스냅샷 낡음` 만 찍히고
   푸시는 나간다. `sections` 는 `tree-audit.mjs … --update` 가 덤프에서 다시 쓰고,
-  **예약 점검(하루 1회)이 매일 그 한 줄을 대신 돌려 커밋한다.** 손으로 편집하지 마라 — 덮어쓴다.
+  **라이브↔피그마 대조 카드가 도는 날(3주에 한 번) 그 한 줄을 대신 돌려 커밋한다**(2026-10-08 정정 — 「하루 1회」는 낡았다. 카드 §4-3 #4). 손으로 편집하지 마라 — 덮어쓴다.
 
 ## 새 페이지는 폴더 주소로 만든다 (2026-08-02 확정)
 
@@ -861,7 +861,7 @@ pre-push 2겹(a)에서 **`*.html` 이 하나라도 바뀐 푸시**마다 자동�
    for (const [fid, html] of Object.entries(frames)) {
      const f = await figma.getNodeByIdAsync(fid);
      const texts = f.findAllWithCriteria({ types:['TEXT'] })
-       .filter(t=>t.name!=='marker' && !underChart(t) && !underStatusBar(t)).map(t=>t.characters);   // 마커·차트 눈금·상태바 제외
+       .filter(t=>t.name!=='marker' && !/^(\d+\.|•)$/.test(t.characters.trim()) && !underChart(t) && !underStatusBar(t)).map(t=>t.characters);   // 마커·차트 눈금·상태바 제외
      pages.push({ html, figmaNode: fid, name: f.name, ignoreWebText: [], texts });
    }
    return { fileKey: figma.fileKey, pages };
@@ -884,6 +884,7 @@ pre-push 2겹(a)에서 **`*.html` 이 하나라도 바뀐 푸시**마다 자동�
 
 ### 표기 규칙 (동기화가 안 깨지게)
 - 리스트 마커(번호 `1.`·불릿 `•`)는 피그마에서 **노드 이름을 `marker` 로** 둔다 — 스냅샷·검수가 걸러낸다.
+  이름이 `marker` 가 아닌 번호 노드도 있다(약관 `339:2474`). 그래서 덤프 스니펫과 라이브↔피그마 카드 A-2 해시가 **글자 「1.」·「•」 뿐인 노드도 같이 뺀다** — 둘은 짝이다(2026-10-08).
   웹은 `<ol>`/`<ul>` 로 자동 생성하므로 마커가 DOM 텍스트에 없다(양쪽 다 "문구"가 아니다).
 - `date`·`back` 같은 내용 노드는 이름을 내용과 같게 둔다(autoRename). 검수는 텍스트 문자열만 본다.
 - 웹 문단 안 `<strong>`·`<a>` 는 대조에 영향 없다(공백 제거 후 이어붙여 비교).
