@@ -67,7 +67,8 @@
   .meta svg{flex:0 0 13px}
 
   /* 판정표(LOCKED)에 없는 상태 — 요약·잠김 상자 대신 이 한 줄만 선다 (피그마 2279:1307, 2026-10-04 사용자 지시) */
-  .blocked{color:var(--ink-500);margin-top:24px;white-space:pre-line}
+  /* 피그마 2279:1307 의 2418:1329 — 13/20 · 가운데 · 머리(제목·분야) 아래 24 + 98 지점 (2026-10-08 사용자 지시 「피그마로 맞춰 줘」) */
+  .blocked{color:var(--ink-500);margin-top:122px;white-space:pre-line;text-align:center;font-size:13px;line-height:20px}
   .blocked[hidden]{display:none}
 
   /* 전문 */
@@ -167,12 +168,20 @@
 
   /* 안내(로딩·오류) — 본문이 없을 때만 보인다 */
   .notice{text-align:center;color:var(--ink-500);white-space:pre-line}
+  /* 없는 글·링크 오류 — 로고 원 56 · 간격 10 · 제목 23/32 Bold · 설명 13/20 (피그마 2070:823·2070:847, /jobs/ .msg 와 같은 꼴).
+     2026-10-08 사용자 지시 「피그마로 맞춰 줘」 */
+  .notice-card{display:flex;flex-direction:column;align-items:center;text-align:center;word-break:keep-all}
+  .notice-card[hidden]{display:none}
+  .notice-card img{display:block;margin-bottom:10px}
+  .notice-card h1{font-size:23px;line-height:32px;font-weight:700;letter-spacing:-0.01em;color:var(--ink-900)}
+  .notice-card p{font-size:13px;line-height:20px;color:var(--ink-500)}
+  .notice-card p[hidden]{display:none}
   /* 안내 묶음을 「화면 맨 위 ~ 화면 바닥」 사이의 정가운데에 — 09-C(mypage/leave #bye)와 같은 방식 (2026-10-04 사용자 지시).
      이 화면은 떠 있는 CTA 가 없어 아래 경계가 화면 바닥이다. main 은 헤더 아래에서 시작하므로 아래 여백을 헤더 높이로 두면
      main 의 가운데가 화면 가운데와 겹친다. 로고 헤더 77 = 피그마 2070:799·823·847 의 content 아래 여백 77 */
-  .page:has(#notice:not([hidden])){display:flex;flex-direction:column}
-  .page:has(#notice:not([hidden])) .brief{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 var(--pad-x) 77px}
-  .page:has(#notice:not([hidden])):has(#backHd:not([hidden])) .brief{padding-bottom:calc(48px + env(safe-area-inset-top))}
+  .page:has(:is(#notice,#noticeCard):not([hidden])){display:flex;flex-direction:column}
+  .page:has(:is(#notice,#noticeCard):not([hidden])) .brief{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 var(--pad-x) 77px}
+  .page:has(:is(#notice,#noticeCard):not([hidden])):has(#backHd:not([hidden])) .brief{padding-bottom:calc(48px + env(safe-area-inset-top))}
 
 
   @media (min-width:451px){
@@ -205,6 +214,7 @@
 
   <main class="brief">
     <p class="notice t-body" id="notice" role="status">불러오는 중이에요…</p>
+    <div class="notice-card" id="noticeCard" role="status" hidden><img src="/assets/logo-circle.svg" width="56" height="56" alt=""><h1 id="noticeT"></h1><p id="noticeB"></p><p id="noticeAsk"></p></div>
 
     <article id="letter" hidden>
       <h1 class="t-h2" id="title"></h1>
@@ -314,10 +324,17 @@
      docs-audit 은 <script> 를 걷어내고 웹을 훑으므로 흩어진 리터럴은 어느 대조도 못 받는다.
      상수로 모으고 스냅샷의 webScriptText 에 이름을 적으면 피그마 프레임과 맞대 본다. */
   const MSG = {
-    badLink:  '링크가 올바르지 않아요.\n알림톡에서 받은 링크로 다시 열어 주세요.',   // 줄바꿈은 피그마 2070:870 그대로 (.notice 가 pre-line)
-    notFound: '없는 글이에요.',
-    blocked:  '지금은 전문을 열 수 없어요.\n문제가 발생하면\ncareercoach.my@gmail.com 로 문의해 주세요.',   // 줄바꿈은 피그마 2279:1326 그대로 (.blocked 가 pre-line)
+    // 안내 카드(#noticeCard) — 제목 · 설명 · 문의 줄. 피그마 2070:847(링크 오류)·2070:823(없는 글) 그대로 (2026-10-08)
+    badLink:    '링크가 올바르지 않아요',
+    badLinkSub: '알림톡에서 받은 링크로 다시 열어 주세요.',
+    notFound:   '없는 글이에요',
+    ask:        '오류는 careercoach.my@gmail.com로 문의해 주세요.',   // 링크로 만들지 않는다 — /jobs/ 와 같은 문구(2026-09-25 사용자 지시)
+    blocked:  '지금은 전문을 열 수 없어요.\n오류는 careercoach.my@gmail.com로\n문의해 주세요.',   // 줄바꿈은 피그마 2418:1329 그대로 (.blocked 가 pre-line)
   };
+  /* 서버(insight_letter)가 없는 글에 올리는 예외 문구 — career-coach 0023·0084·0102·0121 의 raise.
+     이 글자를 그대로 띄우면 피그마 2070:823 과 다른 화면이 된다. 이 머리로 시작하면 「없는 글」 카드로 바꾼다.
+     전체 일치가 아니라 머리만 보는 것은 서버 쪽 마침표·어미가 바뀌어도 날것의 서버 문구로 조용히 새지 않게 하려는 것이다(검사관 ①). */
+  const SERVER_NOT_FOUND = '없는 글';
 
   /* 구독 CTA 의 목적지 — 결제 화면(2026-10-03 실결제 채널). 결제 화면이 로그인을 먼저 보고,
      로그인 뒤 다시 결제 화면으로 데려온다(assets/return-to.js). 전문 페이지는 토큰으로만 열려
@@ -354,7 +371,12 @@
     $('logoHd').hidden = true;
   }
 
-  const notice = (text) => { $('notice').textContent = text; $('notice').hidden = false; $('letter').hidden = true; };
+  const notice = (text) => { $('notice').textContent = text; $('notice').hidden = false; $('noticeCard').hidden = true; $('letter').hidden = true; };
+  /** 안내 카드 — 제목 · (설명) · 문의 줄. 피그마 2070:823·2070:847 */
+  const card = (t, b) => {
+    $('noticeT').textContent = t; $('noticeB').textContent = b || ''; $('noticeB').hidden = !b; $('noticeAsk').textContent = MSG.ask;
+    $('noticeCard').hidden = false; $('notice').hidden = true; $('letter').hidden = true;
+  };
 
   /** RPC 한 번. 토큰은 본문(POST)으로만 나간다 — 쿼리스트링·로그·이벤트에 싣지 않는다.
       args 는 함수마다 다르다. PostgREST 는 **모르는 인자를 404 로 거절**하므로
@@ -559,7 +581,7 @@
   }
 
   if (!wellFormed) {
-    notice(MSG.badLink);
+    card(MSG.badLink, MSG.badLinkSub);
   } else {
     try {
       render(await call('insight_letter'));
@@ -568,7 +590,8 @@
       await loadSaved();
       진행();
     } catch (err) {
-      notice(err.message);
+      if (err.message === MSG.notFound || String(err.message).startsWith(SERVER_NOT_FOUND)) card(MSG.notFound);
+      else notice(err.message);
     }
   }
 </script>

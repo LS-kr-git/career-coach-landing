@@ -84,6 +84,7 @@
   .pg:empty{display:none}
   .empty.sm{font-size:13px;line-height:20px}
   .ask{display:block}
+  .empty.br{white-space:pre-line}
   .pg{padding:18px var(--pad-x) 0}
   .pg nav{display:flex;align-items:center}
   .pg .mid{flex:1;display:flex;justify-content:center}
@@ -186,7 +187,7 @@
     expired: '링크 사용 기간이 지났어요',
     expiredSub: '가장 최근에 받은 알림톡에서 다시 열어 주세요.',
     blocked: '지금은 열 수 없어요',
-    none:    '이번 주에 보낸 공고가 없어요.',
+    none:    '이번 주에 받은 공고가 없어요.\n오류는 careercoach.my@gmail.com로\n문의해 주세요.',   // 피그마 2176:1502 한 덩어리 · 줄바꿈 그대로(.empty.br 가 pre-line) — 2026-10-08 사용자 지시 「피그마로 맞춰 줘」
     noHit:   '에 맞는 공고가 없어요',
     ask:     '오류는 careercoach.my@gmail.com로 문의해 주세요.',   // 링크로 만들지 않는다(2026-09-25 사용자 지시)
     askBlocked: '오류는 careercoach.my@gmail.com로 문의해 주세요',  // 「열 수 없음」 프레임 2170:1050 은 마침표가 없다(피그마 그대로)
@@ -306,7 +307,7 @@
     page = Math.min(page, last);
     const list = $('list'); list.replaceChildren();
     if (q && !hit.length) list.append(el('div', 'empty', '「' + q + '」' + MSG.noHit));
-    else if (!hit.length) { const e = el('div', 'empty sm', MSG.none); e.append(el('span', 'ask', MSG.ask)); list.append(e); }
+    else if (!hit.length) list.append(el('div', 'empty sm br', MSG.none));
     else hit.slice((page - 1) * PER, page * PER).forEach(r => list.append(행(r)));
     // 건수는 맨 아래 「총 73개 · 1 / 8쪽」 한 줄 (2026-09-25 사용자 지시). 한 쪽뿐이면 「총 N개」 만, 0건이면 안내가 대신한다.
     const 줄 = hit.length ? el('div', 'pos', '총 ' + hit.length.toLocaleString('ko-KR') + '개' + (last > 1 ? ' · ' + page + ' / ' + last + '쪽' : '')) : null;
