@@ -236,7 +236,9 @@ function metaCookies() {
   return { fbp: 값('_fbp'), fbc: 값('_fbc') };
 }
 
-export async function saveBillingKey(billingKey) {
+// `plan` 은 결제 화면이 고른 요금제 코드다(career-coach 0126 · 2026-10-09). 안 넘기면 서버가
+// 살아 있는 요금제 하나로 건다 — 요금제를 둘 켠 뒤에는 꼭 넘겨야 첫 청구가 걸린다.
+export async function saveBillingKey(billingKey, plan) {
   const { SUPABASE_URL } = await import('/assets/supabase-config.js');
   const supabase = await supa();
   const { data, error } = await supabase.auth.getSession();
@@ -248,7 +250,7 @@ export async function saveBillingKey(billingKey) {
       authorization: `Bearer ${data.session.access_token}`,
       'content-type': 'application/json',
     },
-    body: JSON.stringify({ billingKey, meta: metaCookies() }),
+    body: JSON.stringify({ billingKey, plan: plan || undefined, meta: metaCookies() }),
   });
   if (!res.ok) {
     // 🔴 상태코드는 **콘솔에만** 남기고 던지는 메시지는 비운다. 부르는 화면이 이 값을
