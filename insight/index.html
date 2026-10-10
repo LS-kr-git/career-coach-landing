@@ -444,6 +444,7 @@
       $('lock').hidden = true;
       반응표시(row.reaction || null);
       $('fb').hidden = false;
+      완독지켜보기($('src').hidden ? bodyEl.lastElementChild : $('src'));
 
       // 소장은 **서버가 한다** — 전문을 내주는 그 자리에서 기록한다(0084).
       // 화면은 그 결과를 옮기기만 한다. 누를 버튼이 없는 것이 이 설계의 값어치다.
@@ -539,6 +540,35 @@
   };
   addEventListener('scroll', 진행, { passive: true });
   addEventListener('resize', 진행);
+
+  /* 완독 — 본문 마지막 줄(출처 캡션이 있으면 그 줄)의 끝이 화면 안에 **2초** 머물면 한 번 적는다(0128
+     insight_finish). 스크롤하며 스쳐 지나간 것은 세지 않는다. 화면에 보이는 것은 없다.
+     서버가 열람 줄이 있는 사람만 · 처음 한 번만 적으므로 여기서는 이 페이지에서 한 번 보내는 것만 지킨다.
+     실패는 삼킨다 — 기록 하나 때문에 읽기를 방해하지 않는다.
+     어드민 「아티클 반응」 의 완독시작(ireact.ts)이 이 기록이 시작된 날이다 — 조건을 바꾸면 그 날도 옮긴다. */
+  let 끝줄 = null, 완독타이머 = 0, 완독보냄 = false;
+  function 완독지켜보기(el) {
+    끝줄 = el || null;
+    requestAnimationFrame(완독살피기);
+  }
+  function 완독살피기() {
+    if (!끝줄 || 완독보냄) return;
+    const 아래 = 끝줄.getBoundingClientRect().bottom;
+    const 보임 = 아래 > 0 && 아래 <= innerHeight;
+    if (보임 && !완독타이머) 완독타이머 = setTimeout(완독보내기, 2000);
+    else if (!보임 && 완독타이머) { clearTimeout(완독타이머); 완독타이머 = 0; }
+  }
+  function 완독보내기() {
+    완독보냄 = true;
+    fetch(SUPABASE_URL + '/rest/v1/rpc/insight_finish', {
+      method: 'POST', keepalive: true,
+      headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY,
+                 Authorization: 'Bearer ' + SUPABASE_ANON_KEY },
+      body: JSON.stringify({ p_token: token, p_insight_id: Number(id) }),
+    }).catch(() => {});
+  }
+  addEventListener('scroll', 완독살피기, { passive: true });
+  addEventListener('resize', 완독살피기);
 
   /* 소장한 글 최근 3편. **전문과 별개의 호출이고, 실패해도 전문을 막지 않는다** —
      이 절은 전문에 덧붙는 것이라, 목록을 못 받았다고 편지를 못 읽게 만들 이유가 없다.
