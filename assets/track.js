@@ -212,6 +212,15 @@ function redactUrls(v) {
   return String(v || '').replace(/(https?:\/\/[^\s'"]+?)[?#][^\s'"]*/g, '$1');
 }
 
+// 회원이 쓰는 기능과 무관한 바깥 스크립트 — 광고 차단기·추적 방지가 늘 막는다. 그 로드 실패는
+// 고장이 아니므로 안 보낸다(2026-10-10: 메타 픽셀 하나로 오류 리포트가 빨개졌다).
+// jsdelivr(로그인 SDK)·portone(결제)은 여기 넣지 않는다 — 그쪽 실패는 진짜 고장이다.
+// 어드민 errors.ts 의 SQL_CLIENT 가 같은 호스트를 거른다(이미 퍼진 옛 track.js 몫).
+const OPTIONAL_HOSTS = ['connect.facebook.net'];
+function optionalSrc(src) {
+  try { return OPTIONAL_HOSTS.includes(new URL(src).hostname); } catch { return false; }
+}
+
 const ERR_MAX = 3;          // 한 번 로드에 이만큼만. 루프 안에서 터지면 원장이 잠긴다
 const ERR_CUT = 300;        // 메시지 길이 상한 (props 전체가 2,000자를 넘으면 RPC 가 거부한다)
 let errSent = 0;
@@ -240,6 +249,7 @@ if (typeof window !== 'undefined') {
     // 리소스 로드 실패(<img>·<script>)는 message 가 없고 target 이 있다. 그것도 고장이다.
     if (!e.message && e.target && e.target !== window) {
       const el = e.target;
+      if (optionalSrc(el.src || el.href)) return;
       reportError('resource load failed: ' + (el.tagName || '?'), cutUrl(el.src || el.href), 0, 0);
       return;
     }
