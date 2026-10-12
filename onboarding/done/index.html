@@ -40,73 +40,38 @@
   .prog{display:flex;gap:5px;padding:22px 24px 0}
   .prog i{height:3px;border-radius:99px;flex:1;
     background-image:linear-gradient(90deg,var(--amber-400) 0%,var(--amber-600) 100%);
-    background-size:300% 100%;background-repeat:no-repeat}
+    background-size:400% 100%;background-repeat:no-repeat}
   .prog i:nth-child(1){background-position:0% 0}
-  .prog i:nth-child(2){background-position:50% 0}
-  .prog i:nth-child(3){background-position:100% 0}
+  .prog i:nth-child(2){background-position:33.3% 0}
+  .prog i:nth-child(3){background-position:66.6% 0}
+  .prog i:nth-child(4){background-position:100% 0}
+  [hidden]{display:none!important}
 
-  .kick{padding:20px 24px 0;font-size:13px;line-height:18px;font-weight:600;color:var(--amber-600);
-    display:flex;align-items:center;gap:6px}
-  .title{padding:9px 24px 0;font-size:24px;line-height:32px;font-weight:700;color:var(--gray-900);letter-spacing:-0.01em}
+  /* 「✓ 설정 완료」 줄은 없다(2026-10-05 확정) — 1~4단계처럼 진행 바 아래 끝 → 제목 글자 상자 위 끝 44px */
+  .title{padding:44px 24px 0;font-size:24px;line-height:32px;font-weight:700;color:var(--gray-900);letter-spacing:-0.01em}
 
-  /* 고른 값 요약 — 칩 한 줄. 값은 저장된 선택에서 채운다. */
-  .sum{display:flex;flex-wrap:wrap;gap:6px;padding:14px 24px 0}
-  .sum b{height:28px;display:flex;align-items:center;padding:0 10px;border:1px solid var(--gray-200);
-    border-radius:8px;font-size:13px;line-height:18px;font-weight:400;color:var(--gray-600)}
-  .sum a{height:28px;display:flex;align-items:center;padding:0 10px;border-radius:8px;
-    font-size:13px;line-height:18px;font-weight:600;color:var(--amber-600);text-decoration:none;
-    -webkit-tap-highlight-color:transparent}
+  /* 고른 값 요약 — 항목 넷(직군·연차·근무지·인사이트 주제). 피그마 2470:2492 「summary」.
+     요약 칸에서 주황은 「바꾸기」뿐이다 — 칩은 흰 바탕 + 회색 테두리. */
+  .sum{padding:10px 24px 0}
+  .it{padding:16px 0;box-shadow:inset 0 -1px 0 var(--gray-100)}
+  .it.last{box-shadow:none}
+  .it .hd2{display:flex;align-items:center;justify-content:space-between}
+  .it .k{display:flex;gap:4px;font-size:13px;line-height:18px;font-weight:600;color:var(--gray-500)}
+  .it .n{font-weight:700;color:var(--gray-400)}
+  .it .chg{font-size:13px;line-height:18px;font-weight:600;color:var(--amber-600);text-decoration:none;
+    padding:8px 0;margin:-8px 0;-webkit-tap-highlight-color:transparent}
+  .it .vals{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .it .vals b{padding:6px 10px;background:#fff;border:1px solid var(--gray-200);border-radius:8px;
+    font-size:13px;line-height:18px;font-weight:500;color:var(--gray-700)}
 
-  /* 주간 표 — 이 화면의 본문 */
-  .week{margin:22px 24px 0;border:1px solid var(--gray-200);border-radius:16px;overflow:hidden}
-  .w{display:flex;align-items:center;gap:14px;padding:16px;box-shadow:inset 0 -1px 0 var(--gray-100)}
-  .w.on{background:var(--amber-50);box-shadow:inset 0 -1px 0 var(--amber-200)}
-  .w .d{flex:none;width:28px;font-size:15px;line-height:20px;font-weight:700;color:var(--gray-400)}
-  .w.on .d{color:var(--amber-700)}
-  .w .t{font-size:14px;line-height:20px;font-weight:400;color:var(--gray-700)}
-  .w.on .t{font-weight:700;color:var(--gray-900)}
-  .w .s{font-size:13px;line-height:18px;color:var(--gray-400);margin-top:2px}
-  .w.on .s{color:#92400E}
-  .w.off{padding:14px 16px;background:var(--gray-50);box-shadow:none}
-  .w.off .d{width:28px;font-size:13px;line-height:18px;font-weight:400;color:var(--gray-300)}
-  .w.off .t{font-size:13px;line-height:18px;font-weight:400;color:var(--gray-400)}
-
-  /* 관심 주제 확인 */
-  .topic{display:flex;align-items:center;justify-content:space-between;gap:12px;
-    margin:16px 24px 0;padding:14px 16px;border:1px solid var(--amber-200);
-    background:var(--amber-50);border-radius:14px}
-  .topic .lb{font-size:13px;line-height:18px;font-weight:600;color:var(--amber-700)}
-  .topic .nm{font-size:17px;line-height:24px;font-weight:600;color:var(--gray-900);margin-top:2px}
-  .edit{display:flex;align-items:center;gap:4px;height:32px;padding:0 12px;flex:none;
-    border:1px solid var(--amber-200);border-radius:10px;background:#fff;
-    font-size:13px;line-height:18px;font-weight:600;color:var(--amber-700);cursor:pointer;
-    -webkit-tap-highlight-color:transparent}
-  .edit svg{transition:transform .15s}
-  .edit[aria-expanded="true"] svg{transform:rotate(180deg)}
-
-  /* 주제 고르기 — 기본은 접혀 있다. 고르는 화면이 아니라 확인하는 화면이다. */
-  .pick{margin:10px 24px 0;border:1px solid var(--gray-200);border-radius:14px;padding:16px}
-  .pick h2{font-size:14px;line-height:20px;font-weight:700;color:var(--gray-900)}
-  .pick p{margin-top:6px;font-size:13px;line-height:18px;color:var(--gray-500)}
-  .topics{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
-  /* 「자동」은 트랙 하나가 아니라 **고른 주제를 지우는 자리**다. 목록과 같은 줄에 두면
-     18번째 트랙으로 읽히므로 위에 따로 세우고 아래를 선으로 가른다. */
-  .topics.auto{margin-top:12px;padding-bottom:12px;box-shadow:inset 0 -1px 0 var(--gray-100)}
-  .topics .c{border:1px solid var(--gray-200);background:#fff;color:var(--gray-600);border-radius:10px;
-    padding:8px 11px;font-size:13px;line-height:18px;font-weight:400;
-    cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;
-    transition:background .12s,border-color .12s,color .12s}
-  .topics .c:active{transform:scale(.97)}
-  .topics .c.on{background:var(--amber-50);border-color:var(--amber-500);color:var(--amber-600);font-weight:600}
-  .pick .note{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--gray-50);
-    font-size:13px;line-height:18px;color:var(--gray-500)}
-  .acts{display:flex;gap:8px;margin-top:16px}
-  .acts button{height:var(--cta-h);border-radius:var(--cta-radius);border:0;cursor:pointer;
-    font-family:inherit;font-size:var(--cta-fs);font-weight:var(--cta-fw);
-    -webkit-tap-highlight-color:transparent}
-  .acts button:active{transform:scale(.98)}
-  .acts .ghost{flex:1;border:1px solid var(--gray-200);background:#fff;color:var(--gray-600)}
-  .acts .fill{flex:1.4;background:var(--amber-500);color:#fff}
+  /* 요일 블록 — K1. 마이페이지 mypage/topics 의 같은 블록과 값이 같다. 요약 끝 → 제목 52px. */
+  .days-title{padding:52px 24px 0;font-size:15px;line-height:21px;font-weight:700;color:var(--gray-900)}
+  .days{margin:12px 24px 24px;background:var(--amber-50);border-radius:16px;padding:6px 16px}
+  .dy{display:flex;gap:12px;padding:12px 0}
+  .dy + .dy{box-shadow:inset 0 1px 0 var(--amber-100)}
+  .dy .wd{flex:none;width:46px;font-size:13px;line-height:20px;font-weight:600;color:var(--amber-700)}
+  .dy .nm{font-size:14px;line-height:20px;font-weight:700;color:var(--gray-900)}
+  .dy .ds{margin-top:2px;font-size:12px;line-height:17px;color:var(--gray-500)}
 
   .fade{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:450px;height:100px;
     background:linear-gradient(180deg,rgba(255,255,255,0),#fff 55%);pointer-events:none;z-index:9}
@@ -121,34 +86,22 @@
 
 </style></head><body>
 <div class="board">
-  <div class="hd"><a class="back" href="/onboarding/3/" aria-label="뒤로"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15.75 4.5L8.25 12l7.5 7.5" stroke="#475569" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
-  <div class="prog"><i></i><i></i><i></i></div>
-  <div class="kick"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6.5L9.5 17 4 11.5" stroke="#D97706" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>설정 완료</span></div>
-  <div class="title">한 주가 이렇게<br>도착할 거예요</div>
+  <div class="hd"><a class="back" href="/onboarding/4/" aria-label="뒤로"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15.75 4.5L8.25 12l7.5 7.5" stroke="#475569" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
+  <div class="prog"><i></i><i></i><i></i><i></i></div>
+  <div class="title">이대로 보내드릴게요</div>
 
-  <div class="sum"><b id="s-job"></b><b id="s-year"></b><b id="s-region"></b><a href="/onboarding/1/">다시 고르기</a></div>
-
-  <div class="week">
-    <div class="w on"><div class="d">월</div><div><div class="t"><span class="tk"></span> 인사이트 1편</div><div class="s" id="s-own">내 직무 이야기</div></div></div>
-    <div class="w"><div class="d">화</div><div><div class="t">일 잘하는 법 · 커리어 1편</div><div class="s">직무를 가리지 않는 이야기</div></div></div>
-    <div class="w on"><div class="d">수</div><div><div class="t"><span class="tk"></span> 인사이트 1편</div></div></div>
-    <div class="w"><div class="d">목</div><div><div class="t">최신 공고 3건 + 채용시장 지표</div><div class="s">이날은 글 대신 공고예요</div></div></div>
-    <div class="w on"><div class="d">금</div><div><div class="t"><span class="tk"></span> 인사이트 1편</div></div></div>
-    <div class="w off"><div class="d">토·일</div><div class="t">쉬어요. 공휴일도요</div></div>
+  <div class="sum">
+    <div class="it" id="s-job"><div class="hd2"><div class="k"><span>직군</span><span class="n"></span></div><a class="chg" href="/onboarding/1/">바꾸기</a></div><div class="vals"></div></div>
+    <div class="it" id="s-year"><div class="hd2"><div class="k"><span>연차</span><span class="n"></span></div><a class="chg" href="/onboarding/2/">바꾸기</a></div><div class="vals"></div></div>
+    <div class="it" id="s-region"><div class="hd2"><div class="k"><span>근무지</span><span class="n"></span></div><a class="chg" href="/onboarding/3/">바꾸기</a></div><div class="vals"></div></div>
+    <div class="it" id="s-topic"><div class="hd2"><div class="k"><span>인사이트 주제</span><span class="n"></span></div><a class="chg" href="/onboarding/4/">바꾸기</a></div><div class="vals"></div></div>
   </div>
 
-  <div class="topic">
-    <div><div class="lb">내 주제</div><div class="nm tk"></div></div>
-    <button class="edit" type="button" aria-expanded="false" aria-controls="pick">바꾸기<svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9.5l6 6 6-6" stroke="#B45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-  </div>
-
-  <div class="pick" id="pick" hidden>
-    <h2>어떤 주제로 받을까요?</h2>
-    <p>하나만 고를 수 있어요. 화요일 「일 잘하는 법 · 커리어」는 모두에게 갑니다.</p>
-    <div class="topics auto"><div class="c" data-auto="1">직군에 맞춰 자동</div></div>
-<!--roles:topics--><div class="topics"><div class="c" data-track="일 잘하는 법 · 커리어(공통)">일 잘하는 법 · 커리어(공통)</div><div class="c" data-track="개발">개발</div><div class="c" data-track="UI·UX 디자인">UI·UX 디자인</div><div class="c" data-track="디자인">디자인</div><div class="c" data-track="마케팅·그로스">마케팅·그로스</div><div class="c" data-track="프로덕트·전략">프로덕트·전략</div><div class="c" data-track="세일즈·GTM">세일즈·GTM</div><div class="c" data-track="제조·R&amp;D">제조·R&amp;D</div><div class="c" data-track="재무·회계">재무·회계</div><div class="c" data-track="조직·피플">조직·피플</div><div class="c" data-track="커머스·리테일">커머스·리테일</div><div class="c" data-track="물류·공급망">물류·공급망</div><div class="c" data-track="법률·규제">법률·규제</div><div class="c" data-track="금융·마켓">금융·마켓</div><div class="c" data-track="미디어·콘텐츠">미디어·콘텐츠</div><div class="c" data-track="고객경험·CX">고객경험·CX</div><div class="c" data-track="의료·헬스케어">의료·헬스케어</div><div class="c" data-track="건설">건설</div><div class="c" data-track="공간">공간</div><div class="c" data-track="게임">게임</div></div><!--/roles:topics-->
-    <div class="note">바꾸면 월·수·금에 오는 글이 그 주제로 바뀝니다. 공고는 고른 직군 그대로예요.</div>
-    <div class="acts"><button class="ghost" type="button">취소</button><button class="fill" type="button">이 주제로 할게요</button></div>
+  <div class="days-title">요일별로 이렇게 보내드려요</div>
+  <div class="days">
+    <div class="dy"><div class="wd">월·수·금</div><div><div class="nm" id="mine"></div><div class="ds">내 분야의 중요 트렌드·인사이트</div></div></div>
+    <div class="dy"><div class="wd">화</div><div><div class="nm">일 잘하는 법·커리어</div><div class="ds">모든 직군에 통하는 일과 커리어 이야기</div></div></div>
+    <div class="dy"><div class="wd">목</div><div><div class="nm">채용 공고 브리핑</div><div class="ds">최신 7일 공고와 채용시장 트렌드</div></div></div>
   </div>
 
 </div>
@@ -162,118 +115,54 @@
   pageView('onboarding_step', { step: 'done' });
 </script>
 <script type="module">
-  // 앞 세 화면이 모아 둔 선택값을 읽어 확인시킨다 — assets/onboarding-store.js
-  import { readState, writeState, retryPending, saveOnboarding } from '/assets/onboarding-store.js';
-  // track 은 이 모듈 블록 안에 따로 들여온다. 위 pageView 블록은 **다른 모듈**이라 스코프가 안 닿는다 —
-  // 안 들여오면 아래 track(...) 이 ReferenceError 로 터지고 그 뒤의 저장이 통째로 안 나간다.
-  import { track } from '/assets/track.js';
-
+  // 앞 네 화면이 모아 둔 선택값을 읽어 확인시킨다 — assets/onboarding-store.js.
+  // 주제 고르기는 2026-10-05 결정으로 4단계(/onboarding/4/)로 옮겨 갔다. 이 화면은 확인만 한다.
+  import { readState, retryPending } from '/assets/onboarding-store.js';
   // 직군 → 주제. 표는 tools/roles/tracks.json 이 정본이고 build.mjs 가 위 blob 을 만든다.
-  // 정본의 정본은 career-coach insights/sources.py 의 TAXONOMY_MAP 이다.
-  const MAP = JSON.parse(document.getElementById('cc-topic-map').textContent);
+  // 푸는 규칙은 발송 경로(`ops/send.py` 「트랙과_직군」)와 같다 — assets/topic-map.js 한 곳에 있다.
+  import { readTopicMap, trackFromJobs } from '/assets/topic-map.js';
 
-  /** 저장된 직군에서 주제를 푼다. **발송 경로와 같은 규칙이다** —
-   *  career-coach `ops/send.py` 의 `트랙과_직군` 이 `v_send_target.job_group_codes`
-   *  (= 고른 중분류의 **대분류**)를 정렬해 트랙이 잡히는 첫 번째를 쓴다. 여기도 같다.
-   *  대분류로 맞춘 이유: 트랙 대응표(`TAXONOMY_MAP`)가 대분류로 적혀 있어서 중분류로는
-   *  아무 트랙도 안 잡힌다. 정렬 기준이 갈리면 화면이 보여준 주제와 실제로 받는 주제가
-   *  달라지고, 그 갈림은 어디에서도 안 터진다.
-   *  예외 하나 — 대분류가 트랙 둘로 갈리는 자리(「디자인」 → 「UI·UX 디자인」)는 그 대분류 안에서
-   *  고른 중분류 중 따로 가는 것(`MAP.jobs[c][2]`)을 이름순 첫 번째로 본다. `track_for_job` 과 같다. */
-  const trackFromJobs = (jobs) => {
-    const 대분류 = [...new Set(jobs.map((c) => (MAP.jobs[c] || [])[1]).filter((i) => i != null))]
-      .sort((a, b) => (MAP.groups[a][0] < MAP.groups[b][0] ? -1 : MAP.groups[a][0] > MAP.groups[b][0] ? 1 : 0));
-    for (const gi of 대분류) {
-      const t = MAP.groups[gi][1];
-      if (t < 0) continue;
-      const 따로 = jobs.filter((c) => MAP.jobs[c] && MAP.jobs[c][1] === gi && MAP.jobs[c][2] >= 0).sort();
-      return MAP.tracks[따로.length ? MAP.jobs[따로[0]][2] : t];
-    }
-    return null;   // 아직 트랙이 없는 직군만 고른 사람 — 직접 고르게 한다
-  };
-
+  const MAP = readTopicMap();
   const state = readState();
-  const auto = trackFromJobs(state.jobs);
-  let topic = state.topic || auto;
+  // 4단계에서 직접 고른 주제가 없으면(=직군에 맞춰) 직군이 정하는 주제가 실제로 받는 주제다.
+  const topic = state.topic || trackFromJobs(MAP, state.jobs);
 
-  // ① 고른 값 요약. 없는 값은 칸을 통째로 감춘다 — 빈 칩이 남으면 고장으로 보인다.
-  // 칩 하나에 다 담지 않는다 — 「첫 항목 외 N」. 피그마 목업(955:656)이 그린 모양과 같다.
-  const label = (list) => (list.length === 1 ? list[0] : `${list[0]} 외 ${list.length - 1}`);
-  const put = (id, text) => { const el = document.getElementById(id); if (text) el.textContent = text; else el.hidden = true; };
-  put('s-job', state.jobs.length ? label(state.jobs.map((c) => (MAP.jobs[c] || [c])[0])) : '');
-  put('s-year', state.years === null ? '' : (state.yearsMax === null || state.yearsMax === state.years
-    ? `${state.years}년` : `${state.years}~${state.yearsMax}년`));
-  put('s-region', state.regions.length ? label(state.regions) : '');
-
-  // ② 주제 — 화면 곳곳의 주제 이름을 한 번에 맞춘다.
-  let draft = topic;                 // 펼친 목록에서 고르는 중인 값. 확정 전까지 topic 은 안 바뀐다.
-  const chips = [...document.querySelectorAll('.topics .c')];
-  const paint = () => {
-    for (const el of document.querySelectorAll('.tk')) el.textContent = topic || '아직 못 정했어요';
-    // 공통 트랙을 고르면 월·수·금도 직무와 무관한 글이다 — 「내 직무 이야기」가 거짓말이 된다.
-    document.getElementById('s-own').textContent =
-      MAP.common.includes(topic) ? '직무를 가리지 않는 이야기' : '내 직무 이야기';
-    // 「자동」 칩은 트랙 이름이 없다(draft === null 이 그 상태다). data-track 만 보면
-    // 자동을 골랐을 때 아무 칩도 안 켜져, 고른 것이 화면에 안 나타난다.
-    for (const c of chips) c.classList.toggle('on', c.dataset.auto === '1' ? draft === null : c.dataset.track === draft);
+  // ① 고른 값 요약 — 값 전부를 칩으로. 없는 값은 항목을 통째로 감춘다 — 빈 칸이 남으면 고장으로 보인다.
+  const esc = (t) => { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; };
+  const put = (id, values) => {
+    const el = document.getElementById(id);
+    if (!values.length) { el.hidden = true; return; }
+    el.querySelector('.n').textContent = values.length > 1 ? String(values.length) : '';
+    el.querySelector('.vals').innerHTML = values.map((v) => `<b>${esc(v)}</b>`).join('');
   };
-  paint();
+  put('s-job', state.jobs.map((c) => (MAP.jobs[c] || [c])[0]));
+  put('s-year', state.years === null ? [] : [state.yearsMax === null || state.yearsMax === state.years
+    ? `${state.years}년` : `${state.years}~${state.yearsMax}년`]);
+  put('s-region', state.regions);
+  put('s-topic', [topic || '아직 못 정했어요']);
+  // 마지막으로 보이는 항목 아래에는 선을 긋지 않는다(감춘 항목이 있어도).
+  const shown = [...document.querySelectorAll('.sum .it')].filter((el) => !el.hidden);
+  if (shown.length) shown[shown.length - 1].classList.add('last');
 
-  const pick = document.getElementById('pick');
-  const edit = document.querySelector('.edit');
-  // 주제를 못 정한 사람에게는 처음부터 펼쳐 준다(트랙이 아직 없는 직군만 고른 경우).
-  // 나머지에게는 접어 둔다 — 고르는 화면이 아니라 확인하는 화면이다.
-  const open = (on) => { pick.hidden = !on; edit.setAttribute('aria-expanded', String(on)); };
-  if (!topic) open(true);
-  const 되돌린다 = () => { draft = state.topic || null; paint(); };
-  edit.addEventListener('click', () => { 되돌린다(); open(pick.hidden); });
+  // ② 요일 블록의 월·수·금 줄 — 발송 편성 그대로. 공통 주제를 골랐으면 월·수·금도 그 트랙이다
+  //    (마이페이지 mypage/topics 와 같은 이름 규칙).
+  document.getElementById('mine').textContent = !topic ? '아직 못 정했어요'
+    : (MAP.common.includes(topic) ? '일 잘하는 법·커리어' : topic) + ' 인사이트';
 
-  // 칩은 **초안**만 바꾼다. 확정은 아래 버튼이 한다 — 잘못 눌러도 취소로 되돌아온다.
-  //   · 「직군에 맞춰 자동」 = null. 트랙 하나가 아니라 **고른 주제를 지우는** 값이다.
-  for (const c of chips) c.addEventListener('click', () => {
-    draft = c.dataset.auto === '1' ? null : c.dataset.track;
-    paint();
-  });
-
-  pick.querySelector('.ghost').addEventListener('click', () => { 되돌린다(); open(false); });
-  // 지난 저장이 실패한 채 남아 있으면 여기서 다시 보낸다.
-  // 🔴 **그 호출을 기다린 뒤에 주제를 보낸다.** onboarding-store 는 저장을 하나씩만
-  //    보내고(`inflight`) 겹치면 `busy` 로 튕기는데, 그 판은 주제를 안 싣고 있다 —
-  //    기다리지 않으면 화면은 바뀐 주제를 그렸는데 서버에는 안 간 상태가 되고,
-  //    먼저 날아간 저장이 성공하며 pending 표시까지 지워 재시도 사다리도 끊긴다.
+  // ③ 지난 저장이 실패한 채 남아 있으면 여기서 다시 보낸다.
+  // 🔴 **완료 CTA 가 이 약속을 기다린다** (2026-09-11 검사관 ①). 그냥 링크로 두면 누르는 순간
+  //    페이지가 떠나며 RPC 가 끊긴다. 결제 화면(/checkout/)은 retryPending() 을 부르지 않으므로
+  //    여기서 끊기면 재시도는 사용자가 마이페이지에 닿을 때까지 미뤄진다.
   const 재시도 = retryPending();
-
-  // 🔴 **CTA 가 이 약속을 기다린다** (2026-09-11 검사관 ①). 전에는 `완료` 가 그냥 링크라,
-  //    확정을 누른 직후에 누르면 페이지가 떠나며 RPC 가 끊겼다. `pending` 은 남지만
-  //    `retryPending()` 을 부르는 곳이 온보딩 세 화면뿐이고 온보딩은 단방향이라 —
-  //    다시 들어올 일이 거의 없다 — 그 저장은 사실상 영영 안 나갔다. 아무 표시도 없이.
-  let 저장중 = null;
   const cta = document.querySelector('.cta');
+  let 가는중 = false;
   cta.addEventListener('click', (e) => {
-    if (!저장중) return;                       // 바꾼 것이 없으면 링크 그대로
     e.preventDefault();
+    if (가는중) return;
+    가는중 = true;
     cta.setAttribute('aria-busy', 'true');
-    // 실패해도 막지 않는다 — `retryPending()` 을 부르는 곳이 마이페이지라 거기서 다시 나간다.
-    // 🔴 2026-09-15 목적지가 /checkout/ 으로 바뀌었다. 결제 화면은 그 함수를 부르지 않으므로
-    //    재시도는 사용자가 홈(마이페이지)에 닿는 순간으로 **미뤄진다** — 없어진 것이 아니라 늦어진 것이다.
-    저장중.catch(() => {}).then(() => { location.href = cta.getAttribute('href'); });
-  });
-
-  pick.querySelector('.fill').addEventListener('click', async () => {
-    open(false);
-    if (draft === (state.topic || null)) return;   // 안 바꿨으면 보낼 것이 없다
-    state.topic = draft;
-    topic = draft || auto;                         // 「자동」이면 직군이 정해 주는 값이 보인다
-    paint();
-    // 「자동」은 **비우기**다. 빈 문자열을 그 뜻으로 쓰지 않는다 — 서버가 별도 인자로 받는다
-    // (career-coach 0082 의 `p_topic_clear`). 빈 문자열을 재활용하면 「안 고름」과
-    // 「비우기」가 한 값이 되어 어느 쪽인지 서버가 못 가른다.
-    writeState({ topic: draft, topicClear: draft === null, pending: true });
-    // 주제를 실제로 몇 명이 바꾸는지 지금은 못 본다. 이름은 허용 목록에 있는 것만 통과한다.
-    track('onboarding_step', { step: 'done', topic: draft === null ? 'auto' : 'changed' });
-    저장중 = (async () => { await 재시도; await saveOnboarding(); })();
-    await 저장중;
-    // 실패해도 사용자를 막지 않는다 — pending 이 남고, 마이페이지가 그것을 다시 보낸다.
+    // 실패해도 막지 않는다 — pending 이 남고 마이페이지가 다시 보낸다.
+    재시도.catch(() => {}).then(() => { location.href = cta.getAttribute('href'); });
   });
 </script>
 </body></html>
