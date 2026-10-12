@@ -1,7 +1,6 @@
 # careercoach.my
 #
-# 색인 대상은 첫 화면(/)·랜딩과 법적 문서(/terms.html, /privacy.html)뿐이다.
-# (2026-09-24 토스페이먼츠 심사 기간: / 는 상품 목록, 랜딩은 /briefing/ 에 있다)
+# 색인 대상은 첫 화면(/ = 랜딩)과 법적 문서(/terms.html, /privacy.html)뿐이다.
 #
 # 나머지를 막는 이유
 #   /signup/       /auth/  가입·인증 흐름 중간 화면. 검색으로 들어오면 맥락 없이 폼만 본다.
