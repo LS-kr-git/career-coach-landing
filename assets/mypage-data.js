@@ -45,7 +45,6 @@ async function supa() {
    빈 상태 문구는 EMPTY 한 곳에서만 말한다 — 정적 마크업(피그마 기준 상태)의 같은 문구와
    tools/mypage-data-check.mjs 가 대조하므로 한쪽만 고치면 푸시가 막힌다. */
 export const EMPTY = {
-  insight: '받은 인사이트가 여기에 쌓여요',
   name: '내 계정',
   account: '로그인한 계정으로 이용 중이에요',
   archive: '소장한 아티클이 여기에 모여요',
@@ -115,7 +114,7 @@ export const SUNDAY_STATIC = [
 /* ── 로그인 ───────────────────────────────────────────────── */
 
 /**
- * 로그인한 사람인지 본다. 아니면 /login/ 으로 보내고 **거짓**을 돌려준다 —
+ * 로그인한 사람인지 본다. 아니면 /signup/(카카오) 으로 보내고 **거짓**을 돌려준다 —
  * 부른 화면은 그때 아무것도 그리지 않는다(잠깐 남의 것처럼 보이는 빈 화면을 안 그린다).
  * 세션 확인 자체가 실패하면 던진다 — 로그인 안 한 것과 못 물어본 것은 다르다.
  * `next` 를 주면 로그인 뒤 그리로 돌아온다(assets/return-to.js 의 허용 목록 안에서만).
@@ -126,26 +125,10 @@ export async function requireLogin(next) {
   if (error) throw error;
   if (!data.session) {
     if (next) (await import('/assets/return-to.js')).rememberNext(next);
-    location.replace('/login/');
+    location.replace('/signup/');   // 2026-10-12 /login/ 삭제(사용자 지시) — 카카오 가입 화면이 로그인도 한다
     return false;
   }
   return true;
-}
-
-/**
- * 마이페이지 첫 화면을 어느 벌로 그릴지 — PG(토스페이먼츠 카드사) 심사 계정은 심사 때 화면('old'),
- * 나머지는 새 화면('new'). 2026-10-05 사용자 지시 「심사관 계정 이외에는 이 마이페이지가 되도록」.
- * 이메일이 아니라 auth uid 로 가른다 — 공개 저장소라 심사용 아이디를 여기 적지 않는다.
- * 세션을 못 읽으면 던진다 — 부른 쪽이 심사 때 화면('old')으로 연다(2026-10-05 검사관 ①:
- * 그 실패가 'new' 로 새면 심사관에게 새 화면이 아무 신호 없이 나간다).
- */
-const REVIEW_USER_IDS = ['d2a1f389-563a-4a0c-a051-1bb511915357'];
-export async function homeSkin() {
-  const supabase = await supa();
-  const { data, error } = await supabase.auth.getSession();
-  if (error) throw error;
-  const id = data.session && data.session.user.id;
-  return REVIEW_USER_IDS.includes(id) ? 'old' : 'new';
 }
 
 /* ── 서버 조회 ─────────────────────────────────────────────── */
@@ -419,8 +402,8 @@ function monthDay(value) {
 /**
  * 01 프로필 카드 네 자리. 값이 없는 자리는 EMPTY 를 그대로 쓴다 —
  * 「null 님」 같은 것을 그리지 않고, 없는 사람을 지어내지도 않는다.
- * count 는 0 도 빈 상태다: 「0개의 인사이트를 쌓았어요」는 아직 아무것도 안 쌓인 사람에게
- * 할 말이 아니고, EMPTY.insight 가 그 사람에게 하는 말이다.
+ * 머리 숫자(받은 편 수)는 0 도 숫자로 그린다(2026-10-05 사용자 확정). 2026-10-12 에 심사 계정
+ * 전용 옛 화면을 걷으며 그 화면만 쓰던 빈 상태 문구(EMPTY.insight · insight 칸)를 지웠다.
  */
 export function profileView(p) {
   const name = (p && p.name) || null;
@@ -432,7 +415,6 @@ export function profileView(p) {
     count,
     received,
     receivedFail: p && received == null ? FAIL.line : null,
-    insight: count == null ? EMPTY.insight : null,     // 수가 있으면 화면이 숫자 꼴로 그린다
     initial: name ? name.trim()[0] : '',
     name: name ? `${name} 님` : EMPTY.name,
     account: label && p.email ? `${label} · ${p.email}` : EMPTY.account,
