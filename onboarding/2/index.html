@@ -41,19 +41,17 @@
   .back::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
     width:36px;height:36px;border-radius:10px;background:transparent;transition:background .12s}
   .back:active::before{background:var(--gray-100)}
-  /* 진행 바 — 3칸 전체가 하나의 그라디언트로 이어지도록 background-size/position 으로 잘라 쓴다 */
+  /* 진행 바 — 4칸 전체가 하나의 그라디언트로 이어지도록 background-size/position 으로 잘라 쓴다 */
   .prog{display:flex;gap:5px;padding:22px 24px 0}
   .prog i{height:3px;border-radius:99px;background-color:var(--gray-100);flex:1}
-  .prog i.on{background-image:linear-gradient(90deg,var(--amber-400) 0%,var(--amber-600) 100%);background-size:300% 100%;background-repeat:no-repeat}
+  .prog i.on{background-image:linear-gradient(90deg,var(--amber-400) 0%,var(--amber-600) 100%);background-size:400% 100%;background-repeat:no-repeat}
   .prog i:nth-child(1).on{background-position:0% 0}
-  .prog i:nth-child(2).on{background-position:50% 0}
-  .prog i:nth-child(3).on{background-position:100% 0}
+  .prog i:nth-child(2).on{background-position:33.3% 0}
+  .prog i:nth-child(3).on{background-position:66.6% 0}
+  .prog i:nth-child(4).on{background-position:100% 0}
 
-  .kick{padding:20px 24px 0;font-size:13px;line-height:18px;font-weight:600;color:var(--amber-600);
-    display:flex;align-items:center;gap:6px}
-  .kick .off{color:var(--gray-300);font-weight:600}
-  .kick i{font-style:normal;font-weight:600}
-  .title{padding:9px 24px 0;font-size:24px;line-height:32px;font-weight:700;color:var(--gray-900);letter-spacing:-0.01em}
+  /* 단계 이름 줄(.kick)은 2026-10-05 에 없앴다 — 진행 바 아래 끝 → 제목 글자 상자 위 끝 44px */
+  .title{padding:44px 24px 0;font-size:24px;line-height:32px;font-weight:700;color:var(--gray-900);letter-spacing:-0.01em}
   .desc{padding:10px 24px 0;font-size:14px;line-height:20px;color:var(--gray-500)}
   .scroll{padding:24px 24px 0}
 
@@ -120,8 +118,7 @@
 
 </style></head><body>
 <div class="board"><div class="hd"><a class="back" href="/onboarding/1/" aria-label="뒤로"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15.75 4.5L8.25 12l7.5 7.5" stroke="#475569" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
-  <div class="prog"><i class="on"></i><i class="on"></i><i></i></div>
-  <div class="kick"><span>직군</span><i>·</i><span>연차</span><i class="off">·</i><span class="off">근무지</span></div>
+  <div class="prog"><i class="on"></i><i class="on"></i><i></i><i></i></div>
   <div class="title">몇 년차 공고를<br>받아볼까요?</div>
   <div class="desc">‘경력무관’ 공고는 항상 포함돼요</div>
   <div class="scroll pre">
