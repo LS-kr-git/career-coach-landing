@@ -15,7 +15,8 @@ const VIEW=()=>({top:0,bottom:innerHeight,height:innerHeight});
 const chipHTML=(list,on)=>list.map(([k,l])=>`<button class="chip${k===on?" on":""}" data-k="${k}">${l}</button>`).join("");
 function fitLine(el,min){el.style.fontSize="";let f=parseFloat(getComputedStyle(el).fontSize);while(el.scrollWidth>el.clientWidth+0.5&&f>min){f-=0.5;el.style.fontSize=f+"px"}}
 function renderQuiz(k){$("quiz").innerHTML=QUIZ[k].map((q,i)=>`<li><span>Q${i+1}</span><span class="t">${q}</span></li>`).join("");document.querySelectorAll("#quiz li").forEach(li=>fitLine(li,11))}
-function renderSamples(k){const d=DAYS[k]||["월요일","화요일","수요일"];$("samples").innerHTML=SAMPLES[k].map(([t,l],i)=>`<div class="slide"><div class="daydiv"><span>${d[i]}</span></div><div class="msg">${AV}<div class="col"><div class="nm">커리어코치</div><div class="row"><div class="at"><div class="ah">알림톡 도착</div><div class="ab"><div class="lab">${LABEL[k]}</div><b>${t}</b><ol>${l.map(x=>`<li>${x}</li>`).join("")}</ol></div><div class="abtn">전문 보기</div></div></div></div></div></div>`).join("");$("samples").scrollLeft=0;if(window.hintUpdate)hintUpdate()}
+const samplesHTML=k=>{const d=DAYS[k]||["월요일","화요일","수요일"];return SAMPLES[k].map(([t,l],i)=>`<div class="slide"><div class="daydiv"><span>${d[i]}</span></div><div class="msg">${AV}<div class="col"><div class="nm">커리어코치</div><div class="row"><div class="at"><div class="ah">알림톡 도착</div><div class="ab"><div class="lab">${LABEL[k]}</div><b>${t}</b><ol>${l.map(x=>`<li>${x}</li>`).join("")}</ol></div><div class="abtn">전문 보기</div></div></div></div></div></div>`).join("")};
+function renderSamples(k){$("samples").innerHTML=samplesHTML(k);$("samples").scrollLeft=0;if(window.hintUpdate)hintUpdate()}
 const CHIP_ORDER=[...JOBS.map(j=>j[0]==="dev"?JOBS.find(x=>x[0]==="mkt"):j[0]==="mkt"?JOBS.find(x=>x[0]==="dev"):j),...COMMON];
 $("quizChips").innerHTML=chipHTML(CHIP_ORDER,"mkt");
 $("sampleChips").innerHTML=chipHTML(CHIP_ORDER,"mkt");
@@ -79,8 +80,8 @@ new IntersectionObserver(es=>{if(es[0].isIntersecting){rxSeen=true}},{root:null,
  new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting)run()}),{root:null,threshold:.6}).observe(rg)})();
 renderQuiz("mkt");renderSamples("mkt");
 // 직군마다 카톡 예시 줄 수가 달라 폰 높이가 최대 44px 바뀌었고, 그 아래 퀴즈 칸이 직군을 누를 때마다 덜컹였다 — 가장 긴 직군 높이로 고정한다.
-const rsRaw=renderSamples; // 아래에서 renderSamples 를 등장 애니메이션 재생으로 감싼다 — 재기만 할 때는 원본을 써서 히어로가 다시 움직이지 않게 한다
-function lockSampleH(){const b=$("samples"),k0=document.querySelector("#sampleChips .chip.on").dataset.k,sl=b.scrollLeft;b.style.minHeight="";let m=0;for(const [k] of CHIP_ORDER){rsRaw(k);m=Math.max(m,b.offsetHeight)}b.style.minHeight=m+"px";rsRaw(k0);b.scrollLeft=sl}
+// 재는 것은 화면 밖 보이지 않는 사본에서 한다 — 진짜 칸을 다시 그리면 히어로 등장 애니메이션이 다시 돌고, 높이가 오르내리며 스크롤이 밀린다.
+function lockSampleH(){const b=$("samples"),m=b.cloneNode(false);m.removeAttribute("id");m.setAttribute("aria-hidden","true");m.style.cssText=`position:absolute;visibility:hidden;pointer-events:none;left:0;top:0;width:${b.clientWidth}px`;b.parentNode.appendChild(m);let h=0;for(const [k] of CHIP_ORDER){m.innerHTML=samplesHTML(k);h=Math.max(h,m.offsetHeight)}m.remove();b.style.minHeight=h+"px"}
 lockSampleH();document.fonts&&document.fonts.ready.then(lockSampleH);{let lw=innerWidth;addEventListener("resize",()=>{if(innerWidth!==lw){lw=innerWidth;lockSampleH()}})}
 hintUpdate();
 
