@@ -293,24 +293,18 @@ const PRICE_RE = /₩\s*[0-9][0-9,]*|[0-9][0-9,]*\s*(?:[억만천]\s*)*원/g;
 /** 금액처럼 보이지만 구독가가 아닌 문구 — 파일별로 사유와 함께 적는다.
  *  사유 없는 면제는 검사를 조용히 끄는 것과 같다 (figma-tree.json 의 pageLevelAllowed 와 같은 규칙). */
 const PRICE_ALLOW = {
-  'checkout/index.html': {
-    '0원': '오늘 청구되는 금액이 0원이라는 표시다 — 구독가가 아니다. 구독가는 이 파일의 <script> 안 PRICE_KRW 한 곳에서만 말하고, 그래서 이 파일은 PRICE_OK 에 넣지 않았다(마크업 쪽 방어를 살려 둔다).',
-  },
-  // 2026-09-24 토스페이먼츠 심사 기간 동안 랜딩은 briefing/index.html 에 있고, 루트는 상품 목록이다.
-  'briefing/index.html': {
-    '4,000만원': '히어로 일러스트 alt — 이직 전후 연봉 그래프 설명이지 우리 가격이 아니다',
-    '5,000만원': '히어로 일러스트 alt — 이직 전후 연봉 그래프 설명이지 우리 가격이 아니다',
-    '3,900원': '2026-09-17 사용자 지시로 랜딩 「요금과 해지」 절에 요금을 명시했다. '
-      + 'PG·카드사 심사는 「로그인 없이 요금제가 보이는지」 를 보고, 로그인 뒤에만 있거나 '
-      + '어디에도 없으면 심사가 보류·반려된다(포트원 SaaS 정기결제 안내). '
-      + '그래서 2026-08-03 의 「금액은 결제 화면 한 곳에서만」 을 이 한 자리에서만 깬다. '
-      + '대신 아래 「랜딩 요금 ↔ 결제 화면 금액」 대조가 두 곳이 어긋나는 것을 막는다. '
-      + '2026-09-24 부터는 맨 위 상품 요약(썸네일·상품명·가격)에 있다 — 같은 심사 사유다.',
-  },
+  // 2026-10-12 PG 통과 — 랜딩(v71)이 루트로 돌아왔다. 요금제 금액·하루 금액·정가는 아래 「요금 대조」가
+  // 서버 plan 표와 맞대 본다(그래서 여기서 면제해도 사각지대가 아니다). 연봉 숫자는 우리 가격이 아니다.
   'index.html': {
-    '3,900원': '2026-09-24 토스페이먼츠 심사 기간 임시 첫 화면(상품 목록). 심사는 상품 목록에 '
-      + '상품명·가격·썸네일이 있는지를 본다. 랜딩과 같은 이유로 이 한 자리에서만 금액을 말하고, '
-      + '아래 요금 대조가 결제 화면 금액과 맞대 본다.',
+    '5,900원': '1개월권 요금 — 아래 요금 대조가 서버 plan(살아 있는 요금제)과 맞댄다',
+    '47,200원': '12개월권 요금 — 아래 요금 대조가 서버 plan 과 맞댄다',
+    '197원': '1개월권 하루 금액(5,900÷30) — 아래 요금 대조가 서버 값에서 다시 센다',
+    '129원': '12개월권 하루 금액(47,200÷365) — 아래 요금 대조가 서버 값에서 다시 센다',
+    '70,800원': '12개월권 정가(1개월권 × 12) — 아래 요금 대조가 서버 값에서 다시 센다(할인율 33% 도 같이)',
+    '300만원': '「연봉 300만원 올리기」 — 연봉 예시이지 우리 가격이 아니다(시안 v71 확정 문구)',
+    '4,000만원': '연봉 밀대의 기본값 — 사용자 연봉 예시',
+    '2천만원': '연봉 밀대 눈금 — 사용자 연봉 범위',
+    '5천만원': '연봉 밀대 눈금 「1억 5천만원」 — 사용자 연봉 범위(정규식이 「5천만원」만 뗀다)',
   },
 };
 
@@ -327,24 +321,21 @@ const PRICE_ALLOW = {
  * ⚠️ 화면 안에 금액 상수가 되살아나는 것은 tools/mypage-data-check.mjs(1.6겹)가 본다.
  *    이 검사는 <script> 를 떼고 보므로 그 자리를 못 본다. */
 {
-  // 2026-09-24 심사 기간: 금액을 보이는 마크업이 두 곳(랜딩 briefing/index.html · 상품 목록 index.html)이다.
-  //   표기는 「월 N원」 이거나 「N원 / 월」(상품 요약) — 둘 다 받는다. 두 파일 모두 결제 화면과 맞댄다.
+  /* 2026-10-12 PG 통과 — 요금제가 둘(1개월권·12개월권)이 되고 랜딩이 루트로 돌아왔다.
+     「살아 있는 요금제가 정확히 하나」를 전제하던 앞 판을 걷고, **살아 있는 요금제 전부**를 랜딩 마크업과 맞댄다:
+     ① 요금제마다 그 금액이 마크업에 있는가 ② 하루 금액(1개월 30일 · 그 밖은 달수×365/12일, 반올림 —
+     assets/mypage-data.js planCards 와 같은 자)이 있는가. 금액은 결제 화면·마이페이지가 서버에서 읽으므로
+     맞댈 곳은 랜딩 한 곳이다. */
   const markup = (f) => readFileSync(join(ROOT, f), 'utf8')
     .replace(/<!--[\s\S]*?-->/g, '').replace(/<script[\s\S]*?<\/script>/gi, '');
-  const priceOf = (h) => h.match(/월\s*([0-9][0-9,]*)원/) || h.match(/([0-9][0-9,]*)원\s*(?:<[^>]+>\s*)*\/\s*월/);
-  const SHOWN_AT = ['briefing/index.html', 'index.html'];
-  /* 🔴 **맞대는 상대가 상수에서 서버로 바뀌었다** (2026-09-21 사용자 결정 「세 곳 다 서버
-     값으로」). 앞 판은 `checkout` 의 `PRICE_KRW` 와 `mypage/billing` 의 `priceKrw` 를 읽어
-     마크업과 셋을 맞댔는데, 그 두 상수는 **이제 없다** — 두 화면이 plan 표를 읽는다.
-     그 판을 그대로 두면 「PRICE_KRW 선언을 찾지 못함」으로 항상 막힌다.
-     화면 안에 금액 상수가 되살아나는 것은 tools/mypage-data-check.mjs(1.6겹)가 본다. */
+  const SHOWN_AT = ['index.html'];
   // 접속 정보는 assets/supabase-config.js 한 곳에서 읽는다 (복구 훈련 결과 — 값을 복사하지 않는다).
   const cfg = await import(pathToFileURL(join(ROOT, 'assets', 'supabase-config.js')).href);
   const 서버요금 = await (async () => {
     const ctl = new AbortController();
     const timer = setTimeout(() => ctl.abort(), 8000);
     try {
-      const r = await fetch(`${cfg.SUPABASE_URL}/rest/v1/plan?select=code,price_krw&is_active=eq.true`,
+      const r = await fetch(`${cfg.SUPABASE_URL}/rest/v1/plan?select=code,price_krw,period_unit,period_count&is_active=eq.true`,
         { headers: { apikey: cfg.SUPABASE_ANON_KEY, Authorization: `Bearer ${cfg.SUPABASE_ANON_KEY}` },
           signal: ctl.signal });
       if (!r.ok) return { 못읽음: `HTTP ${r.status}` };
@@ -353,26 +344,35 @@ const PRICE_ALLOW = {
       return { 못읽음: e.name === 'AbortError' ? '응답 없음(8초)' : e.message };
     } finally { clearTimeout(timer); }
   })();
+  const won = (n) => n.toLocaleString('en-US') + '원';
 
   if (서버요금.못읽음) {
-    /* 🔴 **CI 에서는 막는다.** PC 는 네트워크가 없을 수 있어 경고로 두지만(막으면 --no-verify 로
-       일곱 겹이 통째로 꺼진다), CI 리눅스에서는 못 읽을 이유가 없다 — 거기서도 넘기면
-       이 대조는 어디서도 안 도는 검사가 된다. 종전 판은 상수 셋을 맞대는 결정적 관문이었다. */
+    // CI 에서는 막는다 — PC 는 네트워크가 없을 수 있어 경고로 둔다(막으면 --no-verify 로 여섯 겹이 통째로 꺼진다).
     add(process.env.CI ? 'BLOCK' : 'WARN', '요금 대조', SHOWN_AT[0],
         `서버 요금제를 못 읽었습니다 (${서버요금.못읽음})`,
         '화면 표기와 실제 청구액이 같은지 이번에는 확인하지 못했습니다 — 통과가 아니라 미확인입니다.');
-  } else if (서버요금.rows.length !== 1) {
-    add('BLOCK', '요금 대조', SHOWN_AT[0], `살아 있는 요금제가 ${서버요금.rows.length}개`,
-        'plan 표에서 is_active 를 하나만 남기세요. 0개로 보이는데 요금제가 있다면 '
-        + 'anon 이 그 표를 못 읽는 것입니다(RLS `plan_read` 정책) — 권한 없음과 요금제 없음은 '
-        + 'PostgREST 응답이 둘 다 `200 []` 라 여기서 갈리지 않습니다.');
+  } else if (!서버요금.rows.length) {
+    add('BLOCK', '요금 대조', SHOWN_AT[0], '살아 있는 요금제가 0개',
+        '요금제가 있는데 0개로 보이면 anon 이 그 표를 못 읽는 것입니다(RLS `plan_read` 정책) — '
+        + '권한 없음과 요금제 없음은 PostgREST 응답이 둘 다 `200 []` 라 여기서 갈리지 않습니다.');
   } else for (const f of SHOWN_AT) {
-    const shown = priceOf(markup(f));
-    if (!shown) add('BLOCK', '요금 대조', f, '「월 N원」·「N원 / 월」 표기를 찾지 못함',
-        '요금 표기가 사라졌습니다 — 심사가 보는 자리입니다.');
-    else if (String(서버요금.rows[0].price_krw) !== shown[1].replace(/,/g, '')) add('BLOCK', '요금 대조', f,
-        `화면 ${shown[1]}원 · 서버 ${서버요금.rows[0].price_krw}원`,
-        '표시가격과 실제 청구액이 어긋나면 심사에서 바로 반려됩니다.');
+    const h = markup(f).replace(/<[^>]+>/g, ' ');
+    // 앞뒤가 숫자·쉼표가 아닌 자리만 센다 — 부분 문자열로 보면 「15,900원」 안의 「5,900원」도 초록이 된다(2026-10-12 검사관 ②).
+    const 있나 = (값) => new RegExp(`(?<![0-9,])${값.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`).test(h);
+    const 한달 = 서버요금.rows.find((p) => p.period_count === 1);
+    for (const p of 서버요금.rows) {
+      const 날수 = p.period_count === 1 ? 30 : Math.round(p.period_count * 365 / 12);
+      const 볼것 = [['요금', won(p.price_krw)], ['하루 금액', won(Math.round(p.price_krw / 날수))]];
+      // 여러 달짜리는 정가(1개월권 × 달 수)와 할인율도 화면이 말한다 — planCards 와 같은 자.
+      if (한달 && p.period_count > 1 && 한달.price_krw * p.period_count > p.price_krw) {
+        const 정가 = 한달.price_krw * p.period_count;
+        볼것.push(['정가', won(정가)], ['할인율', `${Math.round((1 - p.price_krw / 정가) * 100)}%`]);
+      }
+      for (const [무엇, 값] of 볼것) {
+        if (!있나(값)) add('BLOCK', '요금 대조', f, `${p.code} ${무엇} ${값} 이 화면에 없음`,
+          '표시가격과 실제 청구액이 어긋나면 안 됩니다 — 서버 plan 표와 랜딩 문구를 같이 고치세요.');
+      }
+    }
   }
 }
 
@@ -399,7 +399,7 @@ for (const page of pages) {
  *   실제로 signup/auth 에는 있었고 letter/onboarding 에는 없었다.
  *   "새 HTML 을 만들었으면 색인 여부를 정해야 한다"를 파이프라인이 묻게 한다.
  */
-const INDEXABLE = new Set(['index.html', 'briefing/index.html', 'terms.html', 'privacy.html']);   // briefing = 심사 기간 랜딩 (2026-09-24)
+const INDEXABLE = new Set(['index.html', 'terms.html', 'privacy.html']);
 
 for (const page of pages) {
   if (INDEXABLE.has(page)) continue;

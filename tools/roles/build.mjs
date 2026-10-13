@@ -2,7 +2,7 @@
 /**
  * 온보딩 1단계(직군) 아코디언과 완료 화면의 주제 목록을 데이터에서 다시 만든다.
  *
- *   node tools/roles/build.mjs          # onboarding/1 의 .scroll · onboarding/done 의 표식 두 곳을 갱신
+ *   node tools/roles/build.mjs          # onboarding/1 의 .scroll · onboarding/4 의 표식 두 곳 · done 의 직군→주제 표를 갱신
  *   node tools/roles/build.mjs --check  # 갱신 없이 다르면 종료코드 1 (훅·CI 용)
  *
  * 세 가지를 한다.
@@ -32,6 +32,9 @@ const PAGE = join(ROOT, 'onboarding', '1', 'index.html');
  *  마크업이 다른 것은 화면 디자인이 다르기 때문이고, **데이터·순서·문구는 같은 자리에서 나온다.** */
 const PAGE_MYPAGE = join(ROOT, 'mypage', 'jobs', 'index.html');
 const DONE = join(ROOT, 'onboarding', 'done', 'index.html');
+/** 주제 고르기는 2026-10-05 결정으로 완료 화면에서 온보딩 4단계로 옮겼다(프로젝트 문서 「결정-2026-10-05-온보딩-4단계-분리-정본」).
+ *  4단계에는 주제 칩과 직군→주제 표(추천)를, 완료 화면에는 표만(직군 표시 이름·추천 주제를 그리는 데) 심는다. */
+const STEP4 = join(ROOT, 'onboarding', '4', 'index.html');
 /** 마이페이지 「인사이트 받을 주제」도 「내 직군 추천」을 그리려면 같은 직군→주제 표가 필요하다 (2026-10-05).
  *  표가 두 벌이 되면 두 화면의 추천이 갈리므로 같은 생성기가 같은 값을 심는다. */
 const TOPICS_PAGE = join(ROOT, 'mypage', 'topics', 'index.html');
@@ -78,7 +81,7 @@ for (const t of TRK.tracks) {
 // 고를 수 있는 주제 = 직군 트랙 전부 + 고른 사람에게 더 나가는 공통 트랙(2026-10-03 「일 잘하는 법 · 커리어(공통)」).
 // 정본은 career-coach `sources.고를_수_있는_트랙` — 직군 트랙이 하나라도 빠지면 그 주제를 못 고른다.
 const CHOICES = TRK.choices ?? [];
-for (const t of TRK.tracks) if (!CHOICES.includes(t)) bad.push(`트랙 "${t}" 가 choices 에 없다 — 완료 화면에서 못 고른다`);
+for (const t of TRK.tracks) if (!CHOICES.includes(t)) bad.push(`트랙 "${t}" 가 choices 에 없다 — 온보딩 4단계에서 못 고른다`);
 if (bad.length) {
   console.error('❌ 직무 표기·실측 검증 실패\n   ' + bad.join('\n   '));
   console.error("\n   규칙: code = sourceLabel.replace('·','_'). 화면 표기를 바꾸려면 label 만 고치세요.");
@@ -137,14 +140,16 @@ const buildMypage = () =>
     })
     .join('') +
   '</div>';
-// ── 4. 완료 화면 (onboarding/done) — 주제 칩과 직군→주제 표 ─────
+// ── 4. 온보딩 4단계 (onboarding/4) — 주제 칩 · 4단계와 완료 화면 — 직군→주제 표 ─────
 /** 완료 화면은 정적 HTML 인데 "고른 직군이면 이 주제" 를 보여줘야 한다. 대응표는 발송 시점에
  *  파이썬이 푸는 것이 정본이고 DB 에는 두지 않기로 돼 있으므로(insights/sources.py 의
  *  track_for_job 위 주석), 브라우저가 닿을 수 있는 형태로 여기서 같이 만들어 심는다.
  *  화면에 보이는 중분류만 넣는다 — 못 고르는 코드는 저장될 일이 없다. */
+// 칩 모양은 마이페이지 「인사이트 받을 주제」(mypage/topics, 사용자 확정 M2)와 같다. 4단계 화면이 추천 칩 하나를
+// 「내 직군 추천」 묶음으로 옮기고 딱지를 붙인다 — 여기서는 전부 「다른 주제」 묶음에 안 눌린 채로 찍는다.
 const topicsHtml = () =>
-  '<div class="topics">' +
-  CHOICES.map((t) => `<div class="c" data-track="${esc(t)}">${esc(t)}</div>`).join('') +
+  '<div class="topics" id="rest">' +
+  CHOICES.map((t) => `<button class="chip" type="button" aria-pressed="false" data-topic="${esc(t)}">${esc(t)}</button>`).join('') +
   '</div>';
 
 const jobMapHtml = () => {
@@ -219,7 +224,9 @@ if (missing.length || values.size > 1) {
   process.exit(2);
 }
 const doneHtml = readFileSync(DONE, 'utf8');
-const doneNext = patch(patch(doneHtml, 'topics', topicsHtml()), 'jobmap', jobMapHtml());
+const doneNext = patch(doneHtml, 'jobmap', jobMapHtml());
+const step4Html = readFileSync(STEP4, 'utf8');
+const step4Next = patch(patch(step4Html, 'topics', topicsHtml(), 'onboarding/4/index.html'), 'jobmap', jobMapHtml(), 'onboarding/4/index.html');
 const topicsPageHtml = readFileSync(TOPICS_PAGE, 'utf8');
 const topicsPageNext = patch(topicsPageHtml, 'jobmap', jobMapHtml(), 'mypage/topics/index.html');
 const homePageHtml = readFileSync(HOME_PAGE, 'utf8');
@@ -229,11 +236,12 @@ if (process.argv.includes('--check')) {
   const stale = [
     next !== html && '온보딩 1단계 직군 목록',
     next2 !== html2 && '마이페이지 직군 목록',
-    doneNext !== doneHtml && '완료 화면 주제 목록',
+    doneNext !== doneHtml && '완료 화면 직군→주제 표',
+    step4Next !== step4Html && '온보딩 4단계 주제 목록·직군→주제 표',
     topicsPageNext !== topicsPageHtml && '마이페이지 주제 화면 직군→주제 표',
     homePageNext !== homePageHtml && '마이페이지 첫 화면 직군→주제 표',
   ].filter(Boolean);
-  if (!stale.length) { console.log('✅ 직군·주제 목록이 taxonomy.json + volume.json + tracks.json 과 일치합니다 (온보딩 1단계 · 마이페이지 · 완료 화면).'); process.exit(0); }
+  if (!stale.length) { console.log('✅ 직군·주제 목록이 taxonomy.json + volume.json + tracks.json 과 일치합니다 (온보딩 1·4단계 · 마이페이지 · 완료 화면).'); process.exit(0); }
   console.error(`❌ ${stale.join(' · ')} 이(가) 기준과 다릅니다 — node tools/roles/build.mjs 를 돌리세요.`);
   process.exit(1);
 }
@@ -241,9 +249,10 @@ if (process.argv.includes('--check')) {
 writeFileSync(PAGE, next);
 writeFileSync(PAGE_MYPAGE, next2);
 writeFileSync(DONE, doneNext);
+writeFileSync(STEP4, step4Next);
 writeFileSync(TOPICS_PAGE, topicsPageNext);
 writeFileSync(HOME_PAGE, homePageNext);
 const shown = visible.reduce((a, g) => a + g.children.length, 0);
 const all = TAX.groups.reduce((a, g) => a + g.children.length, 0);
 console.log(`✅ 온보딩 1단계 · 마이페이지 직군 · 완료 화면 주제 갱신 — 대분류 ${visible.length}/${TAX.groups.length} · 중분류 ${shown}/${all}`);
-console.log(`✅ 완료 화면 갱신 — 주제 ${CHOICES.length}개 · 대분류 ${visible.length}개 · 중분류 ${shown}건`);
+console.log(`✅ 4단계·완료 화면 갱신 — 주제 ${CHOICES.length}개 · 대분류 ${visible.length}개 · 중분류 ${shown}건`);

@@ -9,9 +9,9 @@
 <style>
   :root{
     color-scheme: only light;   /* meta 와 같은 값 — CSS 로도 선언해 확실히 적용한다 */
-    --amber-50:#FFFBEB;--amber-200:#FDE68A;--amber-500:#F59E0B;--amber-600:#D97706;--amber-700:#B45309;
+    --amber-50:#FFFBEB;--amber-100:#FEF3C7;--amber-200:#FDE68A;--amber-500:#F59E0B;--amber-600:#D97706;--amber-700:#B45309;
     --navy-900:#1E3A8A;
-    --gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;--gray-400:#94A3B8;
+    --gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;--gray-300:#CBD5E1;--gray-400:#94A3B8;
     --gray-500:#64748B;--gray-600:#475569;--gray-700:#334155;--gray-800:#1E293B;--gray-900:#0F172A;
     --error-600:#DC2626;
     --pad-x:24px; --card-max:450px;
@@ -22,8 +22,9 @@
   html{background:var(--gray-100)}
   body{font-family:'Pretendard Variable',Pretendard,'Noto Sans CJK KR',-apple-system,'Apple SD Gothic Neo',sans-serif;
     background:#fff;color:var(--gray-800);line-height:1.6;-webkit-font-smoothing:antialiased}
+  /* 아래 여백 = 하단 버튼 바 높이(14 + 54 + 20) + 여유 — 바 바탕이 투명이라 맨 아래 글자가 버튼에 가리지 않게 (26판 「교체 때 지킬 것」) */
   .page{width:100%;max-width:var(--card-max);margin:0 auto;background:#fff;
-    min-height:100vh;min-height:100svh;padding-bottom:148px;position:relative}
+    min-height:100vh;min-height:100svh;padding-bottom:116px;position:relative}
 
   /* 헤더 — 뒤로가기 하나. 헤더 안에 글씨를 넣지 않는다 (CLAUDE.md 표준값) */
   .hd{position:sticky;top:0;z-index:20;display:flex;align-items:center;
@@ -35,71 +36,116 @@
     width:36px;height:36px;border-radius:10px;background:transparent;transition:background .12s}
   .back:active::before{background:var(--gray-100)}
 
-  main{padding:8px var(--pad-x) 0}
-  h1{font-size:28px;line-height:36px;font-weight:800;letter-spacing:-0.01em;color:var(--navy-900)}
-  .lead{font-size:15px;line-height:23px;color:var(--gray-600);margin-top:8px}
+  /* ── 26판 (피그마 2369:1325 · 2026-10-05 사용자 확정) ─────────────────────── */
+  .pick{padding:8px var(--pad-x) 0}
+  .t-title{font-size:19px;line-height:27px;font-weight:700;color:var(--gray-900)}
+  /* 요금 카드 — 마이페이지 「멤버십·결제」(mypage/billing)의 카드와 같은 값이다. 한쪽을 고치면 같이 고친다 */
+  .plans{display:flex;flex-direction:column;gap:12px;padding-top:6px;margin-top:20px}
+  .pc{position:relative;display:flex;flex-direction:column;gap:10px;padding:16px 18px;border-radius:14px;
+    background:var(--gray-50);border:1.5px solid var(--gray-50);text-align:left;font:inherit;color:inherit;
+    cursor:pointer;-webkit-tap-highlight-color:transparent;width:100%}
+  .pc[aria-checked="true"]{background:#fff;border-color:var(--amber-500);box-shadow:0 6px 18px rgba(15,23,42,.08)}
+  .pc .chip{position:absolute;left:16px;top:-11px;background:var(--amber-500);color:#fff;border-radius:9999px;
+    padding:4px 9px;font-size:11px;line-height:14px;font-weight:800}
+  .pc .top{display:flex;align-items:center;gap:8px;font-size:16px;line-height:24px;font-weight:700;color:var(--gray-900)}
+  .pc .radio{width:20px;height:20px;border-radius:50%;border:1.6px solid var(--gray-300);background:#fff;flex:none;
+    display:flex;align-items:center;justify-content:center}
+  .pc[aria-checked="true"] .radio{border-color:var(--amber-500)}
+  .pc[aria-checked="true"] .radio::after{content:'';width:10px;height:10px;border-radius:50%;background:var(--amber-500)}
+  .pc .tiers{display:flex;flex-direction:column;gap:4px;padding-left:28px}
+  .pc .day{display:flex;align-items:baseline;gap:6px}
+  .pc .day span{font-size:14px;line-height:20px;font-weight:500;color:var(--gray-500)}
+  .pc .day b{font-size:26px;line-height:34px;font-weight:700;color:var(--gray-900)}
+  .pc[aria-checked="true"] .day b{color:var(--amber-600)}
+  .pc .amt{display:flex;align-items:baseline;gap:6px;font-size:14px;line-height:22px}
+  .pc .amt s{color:var(--gray-400)}
+  .pc .amt .pct{font-weight:700;color:var(--error-600)}
+  .pc .amt .won{font-size:16px;font-weight:500;color:var(--gray-800)}
+  .pc .amt .per{font-size:13px;color:var(--gray-500);margin-left:-5px}
+  /* 요금을 못 읽었을 때 — 카드 자리에 실패 문구(mypage-data.js FAIL) · 버튼 잠김 */
+  .plans-fail{margin-top:20px;padding-top:6px;font-size:14px;line-height:21px;color:var(--error-600)}
 
-  /* 주문 내용 */
-  .card{margin-top:20px;border:1px solid var(--gray-200);border-radius:14px;overflow:hidden;
-    box-shadow:0 1px 3px rgba(15,23,42,.05)}
-  .card-hd{background:var(--gray-50);padding:12px 18px;font-size:14px;line-height:21px;
-    font-weight:600;color:var(--gray-800);border-bottom:1px solid var(--gray-200)}
-  .spec{padding:14px 18px;display:grid;grid-template-columns:84px 1fr;gap:9px 12px}
-  .lbl{color:var(--gray-400);font-size:13px;line-height:20px}
-  .val{color:var(--gray-700);font-size:13px;line-height:20px}
-  .val b{color:var(--gray-800);font-size:15px}
-  .total{border-top:1px solid var(--gray-200);padding:14px 18px;
-    display:flex;align-items:center;justify-content:space-between}
-  .total-l{font-size:14px;font-weight:600;color:var(--gray-800)}
-  .total-v{font-size:20px;line-height:28px;font-weight:800;color:var(--navy-900)}
+  /* 요일 블록 — 위 52(= main 간격 20 + 32) · 아래 36 (25판 2번 확정) */
+  .week{margin-top:32px;padding:20px 0 36px;display:flex;flex-direction:column;gap:14px}
+  .week-box{background:var(--gray-50);border-radius:16px;padding:16px 12px;display:flex;flex-direction:column;gap:14px}
+  .wrow{display:flex;gap:6px;align-items:flex-start}
+  .wrow .sq{width:10px;height:10px;border-radius:3px;margin-top:6px;flex:none}
+  .wrow .dd{width:56px;flex:none;font-size:14px;line-height:22px;font-weight:700;color:var(--gray-900)}
+  .wrow .nm{display:flex;flex-direction:column}
+  .wrow .nm b{font-size:15px;line-height:22px;font-weight:700;color:var(--gray-900)}
+  .wrow .nm span{font-size:12.5px;line-height:18px;color:var(--gray-500)}
 
-  /* 결제 결과 한 줄 — 보임/숨김·색은 login/index.html 의 .err 와 같은 패턴이다 */
-  .note{display:none;width:100%;max-width:var(--cta-max);margin:0 auto 10px;
-    font-size:13px;line-height:18px;color:var(--gray-600)}
-  .note.on{display:block}
-  .note.bad{color:var(--error-600)}
+  .band{height:12px;background:var(--gray-100)}
 
-  /* 유의사항 — 접기·펼치기. 기본은 **펼침** (2026-09-15 사용자 확정) */
+  /* 시계 — 상자 없음 · 가운데 (23판 2번) · 위 24 아래 40 (26판). 다음 평일 08:00 KST 까지 */
+  .clock{display:flex;flex-direction:column;align-items:center;gap:4px;padding:24px 0 40px;text-align:center}
+  .clock-l{font-size:13px;line-height:19px;font-weight:600;color:var(--gray-600)}
+  .clock-v{font-size:40px;line-height:46px;font-weight:800;color:var(--gray-900);font-variant-numeric:tabular-nums}
+  .clock-n{font-size:13px;line-height:20px;font-weight:600;color:var(--gray-800)}
+  .clock-n b{color:var(--amber-600);font-weight:800}
+
+  /* ── 카드 변경 (/checkout/?mode=change) — 2026-10-12 사용자 확정 새 시안: 마이페이지 「멤버십·결제」와 같은 부품.
+     값은 mypage/billing/index.html 의 같은 이름 클래스와 같다(한쪽을 고치면 같이 고친다). 피그마 「결제 신청 — 카드 변경 (새판)」 */
+  .change .title{padding:20px var(--pad-x) 9px}
+  .change .t-display{font-size:28px;line-height:36px;font-weight:800;letter-spacing:-.02em;color:var(--gray-900)}
+  .change .desc{padding:10px var(--pad-x);color:var(--gray-500);font-size:14px;line-height:20px;word-break:keep-all}
+  .change .bill{padding:30px var(--pad-x) 0;display:flex;flex-direction:column;gap:44px}
+  .change .sec{display:flex;flex-direction:column;gap:14px}
+  .change .t-h4{font-size:15px;line-height:22px;font-weight:600;color:var(--gray-800)}
+  .change .pcard{border:1px solid var(--gray-200);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:16px}
+  .change .prow{display:flex;align-items:center;gap:14px}
+  .change .art{width:56px;height:36px;border-radius:6px;background:var(--amber-600);flex:none;position:relative;overflow:hidden}
+  .change .art::before{content:'';position:absolute;left:0;right:0;top:9px;height:7px;background:rgba(120,53,15,.55)}
+  .change .art::after{content:'';position:absolute;left:7px;bottom:7px;width:11px;height:8px;border-radius:2px;background:#FED7AA}
+  .change .pcol{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+  .change .card-name{font-size:16px;line-height:23px;color:var(--gray-800)}
+  .change .masked{font-size:13px;line-height:18px;color:var(--gray-500);letter-spacing:.06em}
+  .change .kv{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--gray-600);font-size:14px;line-height:20px}
+  .change .kv b{font-weight:600;color:var(--gray-800);text-align:right}
+
+  /* 유의사항 — 접기·펼치기. 기본은 **펼침** (2026-09-15 사용자 확정). 26판에서는 CTA 아래(화면 맨 아래)에 둔다 — 법정 고지 */
+  .notes{padding:0 var(--pad-x)}
   .acc{margin-top:24px;padding-top:24px;display:flex;flex-direction:column;gap:24px}
   .acc-row{display:flex;align-items:center;justify-content:space-between;cursor:pointer;
     color:var(--gray-400);background:none;border:0;padding:0;width:100%;font:inherit}
   .acc-title{font-size:14px;line-height:20px;font-weight:700;color:var(--gray-400)}
   .acc-row svg{transition:transform .18s}
-  /* 셰브론은 **펼쳤을 때 위**를 본다 — 접힘이 ▼(펼치기) 펼침이 ▲(접기) 라는 관례다.
-     2026-09-17 까지 웹만 거꾸로여서 펼친 절이 ▼ 를 달고 있었다. 피그마가 기준이다
-     (CLAUDE.md 「어긋나면 웹을 고친다」) — 피그마 2010:674(펼침) 180° · 2014:2900(접힘) 0°. */
+  /* 셰브론은 **펼쳤을 때 위**를 본다 — 접힘이 ▼(펼치기) 펼침이 ▲(접기). */
   .acc:not(.closed) .acc-row svg{transform:rotate(180deg)}
   .acc.closed .acc-body{display:none}
   .acc-body{display:flex;flex-direction:column;gap:6px;list-style:none}
-  /* 글자 크기·색은 주문 내용의 라벨(.lbl 「상품명」)과 같은 값이다 — 13/20 · gray-400
-     (2026-09-15 사용자 확정). 두 곳이 갈리면 이 주석을 보고 같이 고친다. */
   .acc-body li{font-size:13px;line-height:20px;color:var(--gray-400);
     margin-left:8px;padding-left:14px;position:relative}
-  /* 불릿의 top 은 첫 줄 가운데 = (line-height 20 − 점 4) ÷ 2 = 8. 글자 크기를 바꾸면 같이 바뀐다 */
+  /* 불릿의 top 은 첫 줄 가운데 = (line-height 20 − 점 4) ÷ 2 = 8 */
   .acc-body li::before{content:'';position:absolute;left:0;top:8px;
     width:4px;height:4px;border-radius:2px;background:var(--gray-400)}
   .divider{height:1px;width:100%;background:var(--gray-200);margin-top:24px}
 
-
-  /* 동의 — 하단 CTA 바 안에 함께 붙어 따라온다 */
+  /* 동의 — 카드 변경 화면에서만 (새 카드에 대한 자동 결제 동의) */
   .agree{display:flex;align-items:flex-start;gap:10px;
-    width:100%;max-width:var(--cta-max);margin:0 auto 10px}
+    width:100%;max-width:var(--cta-max);margin:0 auto 10px;pointer-events:auto}
   .box{width:20px;height:20px;border-radius:6px;border:1.6px solid var(--amber-500);
     background:var(--amber-500);display:flex;align-items:center;justify-content:center;
     margin-top:1px;flex-shrink:0}
   .agree-t{font-size:13px;line-height:20px;color:var(--gray-600)}
   .agree-t b{color:var(--gray-700)}
+  .note{display:none;width:100%;max-width:var(--cta-max);margin:0 auto 10px;padding:8px 12px;border-radius:10px;
+    background:#fff;font-size:13px;line-height:18px;color:var(--gray-600);pointer-events:auto}
+  .note.on{display:block}
+  .note.bad{color:var(--error-600)}
 
+  /* 하단 바 — 26판: 바탕 투명 · 그림자 없음. 버튼 자체의 앰버 그림자는 유지 */
   .bar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:var(--card-max);
-    padding:14px 20px calc(20px + env(safe-area-inset-bottom));background:#fff;
-    box-shadow:0 -8px 24px rgba(15,23,42,.06)}
+    padding:14px 20px calc(20px + env(safe-area-inset-bottom));background:transparent;pointer-events:none;z-index:30}
+  .page.changing{padding-bottom:150px}
+  .page.changing .bar{background:#fff;box-shadow:0 -8px 24px rgba(15,23,42,.06);pointer-events:auto}
   .cta{display:flex;align-items:center;justify-content:center;width:100%;max-width:var(--cta-max);
     margin:0 auto;height:var(--cta-h);border:0;cursor:pointer;background:var(--amber-500);color:#fff;
     font-family:inherit;font-weight:var(--cta-fw);font-size:var(--cta-fs);border-radius:var(--cta-radius);
-    box-shadow:0 12px 32px rgba(217,119,6,.28)}
+    box-shadow:0 12px 32px rgba(217,119,6,.28);pointer-events:auto}
   .cta:active{transform:scale(.98)}
-  /* 요금을 못 읽어 잠긴 버튼 — 회색 (2026-09-24 사용자 확정 A안) */
   [hidden]{display:none!important}
+  /* 요금을 못 읽어 잠긴 버튼 — 회색 (2026-09-24 사용자 확정 A안) */
   .cta.locked{background:var(--gray-200);color:var(--gray-400);box-shadow:none;cursor:default;transform:none}
 
   @media (min-width:451px){
@@ -110,32 +156,59 @@
 </style>
 </head>
 <body>
-<div class="page">
+<div class="page" id="page">
 
   <div class="hd">
     <button class="back" id="back" type="button" aria-label="뒤로"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15.75 4.5L8.25 12l7.5 7.5" stroke="#475569" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   </div>
 
-  <main>
-    <h1>구독 신청</h1>
-    <p class="lead">아래 내용으로 정기결제를 신청합니다.</p>
+  <!-- 구독 신청 (기본) — 피그마 2369:1325. 요금 카드는 서버 plan 표의 살아 있는 요금제로 스크립트가 그린다 -->
+  <div id="pickView">
+    <main class="pick">
+      <h1 class="t-title">구독권을 골라 주세요</h1>
+      <div class="plans" id="plans" role="radiogroup" aria-label="구독권"></div>
+      <p class="plans-fail" id="plansFail" hidden></p>
 
-    <section class="card">
-      <div class="card-hd">주문 내용</div>
-      <div class="spec">
-        <div class="lbl">상품명</div><div class="val">커리어코치 직군 브리핑 월 구독</div>
-        <div class="lbl">이용 요금</div><div class="val" id="fee"></div>
-        <div class="lbl">제공 방식</div><div class="val">카카오 알림톡으로 본인이 선택한 직군 관련 주제에 대한 인사이트 글 5줄 요약을 평일에 매일 받아보는 구독형 뉴스레터 서비스입니다.</div>
-        <div class="lbl">제공 주기</div><div class="val">영업일 매일 아침 8시</div>
-        <div class="lbl">이용 기간</div><div class="val">결제일부터 1개월, 매월 자동 갱신</div>
-        <div class="lbl">첫 결제일</div><div class="val" id="firstCharge"></div>
-      </div>
-      <div class="total">
-        <div class="total-l">오늘 결제 금액</div>
-        <div class="total-v" id="todayTotal"></div>
-      </div>
-    </section>
+      <section class="week" aria-labelledby="weekTitle">
+        <h2 class="t-title" id="weekTitle">요일별로 이렇게 보내드려요</h2>
+        <div class="week-box">
+          <div class="wrow"><i class="sq" style="background:#FEF3C7" aria-hidden="true"></i><span class="dd">월·수·금</span><span class="nm"><b>내 직무 인사이트</b><span>내 분야의 중요 트렌드·인사이트</span></span></div>
+          <div class="wrow"><i class="sq" style="background:#DBEAFE" aria-hidden="true"></i><span class="dd">화</span><span class="nm"><b>일 잘하는 법·커리어</b><span>모든 직군에 통하는 일과 커리어 이야기</span></span></div>
+          <div class="wrow"><i class="sq" style="background:#D1FAE5" aria-hidden="true"></i><span class="dd">목</span><span class="nm"><b>채용 공고 브리핑</b><span>최신 7일 공고와 채용시장 트렌드</span></span></div>
+        </div>
+      </section>
+    </main>
 
+    <div class="band" aria-hidden="true"></div>
+
+    <!-- 시계 — 「13,205명」은 2026-10-12 사용자 지시로 디자인 그대로 둔다(나중에 DB 실제 값으로 바꾼다) -->
+    <div class="clock">
+      <div class="clock-l">다음 브리핑 발송까지</div>
+      <div class="clock-v" id="clock" aria-live="off"></div>
+      <p class="clock-n"><b>13,205명</b>이 이 시각에 같이 받아요.<br>같이 앞서 나가기 시작하세요.</p>
+    </div>
+  </div>
+
+  <!-- 카드 변경 — 구독 중인 사람이 멤버십·결제의 「변경」으로 들어온다. 값은 구독자 서버 값으로 스크립트가 채운다 -->
+  <main class="change" id="changeView" hidden>
+    <div class="title"><h1 class="t-display">결제수단 변경</h1></div>
+    <p class="desc">다음 결제부터 새 카드로 결제돼요.</p>
+    <div class="bill">
+      <section class="sec"><h2 class="t-h4">지금 결제수단</h2>
+        <div class="pcard"><div class="prow"><span class="art" aria-hidden="true"></span>
+          <span class="pcol"><span class="card-name" id="cardName"></span><span class="masked" id="cardSub"></span></span></div></div>
+      </section>
+      <section class="sec"><h2 class="t-h4">이용 중인 요금제</h2>
+        <div class="pcard">
+          <div class="kv"><span>요금제</span><b id="planLabel"></b></div>
+          <div class="kv"><span>결제 금액</span><b id="price"></b></div>
+          <div class="kv"><span id="nextLabel">다음 결제일</span><b id="next"></b></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="notes">
     <section class="acc" id="accRefund">
       <button class="acc-row" type="button" aria-expanded="true" aria-controls="accRefundBody">
         <span class="acc-title">교환 및 반품 안내</span>
@@ -159,109 +232,148 @@
         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18" width="20" height="20" aria-hidden="true"><path d="M3.606 7.442c0-.201.082-.394.247-.532a.696.696 0 0 1 .973.092l3.725 4.532 3.725-4.532a.687.687 0 0 1 .972-.092c.294.239.34.68.092.973l-4.257 5.174a.68.68 0 0 1-.532.248.68.68 0 0 1-.532-.248L3.762 7.883a.68.68 0 0 1-.156-.441Z"/></svg>
       </button>
       <ul class="acc-body" id="accBody">
-        <li>신청 즉시 첫 달 요금이 결제되고, 이후 매월 같은 날에 자동으로 결제됩니다.</li>
+        <li id="noteFirst">신청 즉시 고른 구독권 금액이 결제되고, 이용 기간(1개월권 1개월 · 12개월권 12개월)이 끝나는 날 같은 금액으로 자동 결제됩니다.</li>
         <li>구독 관리 화면에서 언제든 해지할 수 있습니다.</li>
         <li>해지 시 다음 결제 주기부터 발송과 청구가 중단됩니다.</li>
         <li>만 14세 미만은 서비스에 가입할 수 없습니다.</li>
       </ul>
     </section>
     <div class="divider"></div>
-  </main>
-
+  </div>
 
   <div class="bar">
-    <div class="agree">
+    <div class="agree" id="agree" hidden>
       <div class="box" aria-hidden="true">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div class="agree-t" id="agreeText"></div>
     </div>
     <p class="note" id="note" role="status"></p>
-    <button class="cta" id="submit" type="button">결제수단 등록하고 결제하기</button>
+    <button class="cta" id="submit" type="button">결제하기</button>
   </div>
 </div>
 
 <script type="module">
   import { metaEvent } from '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
-  import { getPlan, getSubscription, billingView, priceText, wonText, saveBillingKey, billingCustomerId, requireLogin, FAIL } from '/assets/mypage-data.js';
+  import { getPlans, planCards, getSubscription, billingView, saveBillingKey, billingCustomerId, requireLogin, FAIL, firstSendDay } from '/assets/mypage-data.js';
 
   var $ = function (id) { return document.getElementById(id); };
 
-  /* 로그인부터 본다 (2026-10-03 사용자 확정 「3번」). 전문 페이지의 구독 버튼처럼 로그인 없이
-     여기 닿는 길이 있다 — 그대로 두면 카드를 다 넣은 뒤 마지막 보관 단계에서야 막힌다.
-     로그인 화면에서 돌아오면 다시 이 화면이다. 세션을 못 물어봤으면 막지 않는다 —
+  /* 로그인부터 본다 (2026-10-03 사용자 확정 「3번」). 로그인 화면에서 돌아오면 다시 이 화면이다
+     (고른 요금제 `?plan=` 도 주소에 실려 같이 돌아온다). 세션을 못 물어봤으면 막지 않는다 —
      보관 단계가 어차피 다시 본다. */
   if (!(await requireLogin(location.pathname + location.search).catch(function () { return true; }))) {
     await new Promise(function () {});   // 이동하는 동안 아래가 그려지거나 결제창이 열리지 않게 여기서 멈춘다
   }
 
-  /* 체험 기간은 없다 — 신청 즉시 첫 달이 결제되고 매월 같은 날 갱신된다
-     (2026-09-15 사용자 확정). 날짜를 화면에 박아 두면 하루 만에 틀린 값이 되므로 그릴 때 센다.
-     🔴 배선할 때는 이 계산을 지우고 plan 응답이 확정한 날짜로 두 칸을 채운다 —
-        서버가 결제 시각의 기준이고, 이 값은 사용자 기기 시계를 믿는 어림값이다. */
-  var today = new Date();
-  var fmt = function (d) { return d.getFullYear() + '년 ' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일'; };
-  $('firstCharge').textContent = fmt(today);
+  /* ── 시계: 다음 발송(영업일 08:00 서울)까지 — 영업일 판정은 결제 완료 화면과 같은 firstSendDay(공휴일 포함)를 쓴다
+     (2026-10-12 검사관 ⑥: 따로 세면 공휴일 전날 밤에 안 나가는 아침을 센다). */
+  function 다음발송(now) {
+    return Date.parse(firstSendDay(new Date(now)) + 'T08:00:00+09:00');
+  }
+  var 두자리 = function (n) { return String(n).padStart(2, '0'); };
+  function 시계() {
+    var now = Date.now(), s = Math.max(0, Math.floor((다음발송(now) - now) / 1000));
+    $('clock').textContent = 두자리(Math.floor(s / 3600)) + ':' + 두자리(Math.floor(s / 60) % 60) + ':' + 두자리(s % 60);
+  }
+  시계(); setInterval(시계, 1000);
 
-  /* 🔴 금액은 **서버(plan 표)에서 읽는다** (2026-09-21 사용자 결정 「세 곳 다 서버 값으로」).
-     상수를 두면 화면에 적힌 금액과 실제 청구액이 갈릴 수 있고, 그 자리가 심사에서 먼저 보인다.
-     정기결제 고지 — 체험이 없어졌으므로 전자상거래법 제21조의2 「숨은 갱신」(무료·할인에서
-     유료로 넘어갈 때의 사전 고지)은 해당이 없다. 대신 자동결제라는 사실·금액·주기를
-     결제 버튼 옆에서 말한다. 국내 구독 서비스가 공통으로 쓰는 형태다.
-     한 줄에 들어가야 하므로 「해지할 때까지 계속」 은 유의사항 첫 두 줄이 맡는다.
-     ⚠️ 금액을 못 읽으면 **신청 버튼을 막는다** — 얼마가 빠져나가는지 모르는 채로 동의시키지 않는다. */
-  /* 카드 변경 모드 — 멤버십·결제의 「변경」으로 들어온 구독자 (2026-09-25 사용자 확정 시안).
-     구독 중이면 서버가 새 카드만 보관하고 걷지 않으므로(`이미구독`) 「오늘 결제 금액」과
-     「첫 달 즉시 결제」 안내를 숨긴다. 피그마 상태 프레임 「결제 신청 — 카드 변경」이 기준이다. */
-  const CHANGE = {
-    title: '결제수단 변경',
-    lead: '다음 결제부터 새 카드로 결제돼요.',
-    cta: '새 카드 등록하기',
-  };
+  /* ── 카드 변경 모드 ────────────────────────────────────────────────────────
+     멤버십·결제의 「변경」으로 들어온 구독자. 구독 중이면 서버가 새 카드만 보관하고 걷지 않는다(`이미구독`).
+     🔴 주소만 믿지 않는다 — 구독 중이 아닌 사람이 이 주소로 오면 서버는 첫 결제를 **바로 걷는다**.
+        그 사람에게 요금 카드를 숨기면 안내 없이 결제된다(검사관 ①). 구독 중인지는 멤버십·결제 화면과
+        같은 판정(billingView 의 live)으로 본다. 못 읽으면 평소(구독 신청) 화면이다. */
+  const CHANGE = { cta: '새 카드 등록하기' };
   var 변경 = false;
-  /* 🔴 주소만 믿지 않는다 — 구독 중이 아닌 사람이 이 주소로 오면 서버는 첫 달을 **바로 걷는다**.
-     그 사람에게 「오늘 결제 금액」과 즉시 결제 안내를 숨기면 안내 없이 결제된다(검사관 ①).
-     구독 중인지는 멤버십·결제 화면과 같은 판정(billingView 의 live)으로 본다. 못 읽으면 평소 화면이다. */
-  function 변경모드() {
+  function 변경모드(v) {
     변경 = true;
-    document.querySelector('main h1').textContent = CHANGE.title;
-    document.querySelector('main .lead').textContent = CHANGE.lead;
-    $('firstCharge').hidden = true;
-    $('firstCharge').previousElementSibling.hidden = true;
-    document.querySelector('.total').hidden = true;
-    document.querySelector('#accBody li').hidden = true;      // 「신청 즉시 첫 달 요금이 결제되고…」
+    $('page').classList.add('changing');
+    $('pickView').hidden = true;
+    $('changeView').hidden = false;
+    $('noteFirst').hidden = true;      // 「신청 즉시 … 결제되고」 — 카드 변경은 걷지 않는다
+    $('cardName').textContent = v.card;          // 「현대카드 VISA」 — 마이페이지 billingView 와 같은 값
+    $('cardSub').textContent = v.cardSub;        // 「•••• 4417」
+    $('planLabel').textContent = v.planLabel;    // 「12개월권(8+4개월)」
+    $('price').textContent = v.price;            // 「47,200원」
+    $('nextLabel').textContent = v.nextLabel;    // 해지 예약된 사람은 「이용 종료일」
+    $('next').textContent = v.next;
+    $('agreeText').innerHTML = '새 카드로 <b>' + 결제문구(v) + ' 자동 결제</b>에 동의합니다.';
+    $('agree').hidden = false;
     $('submit').textContent = CHANGE.cta;
+  }
+  // 「매월 5,900원」 · 「12개월마다 47,200원」 — 구독자에게 매달린 요금제(billingView)에서 센다.
+  var 구독행 = null;
+  function 결제문구(v) {
+    var n = 구독행 && 구독행.period_count;
+    return n && n > 1 ? n + '개월마다 ' + v.price : '매월 ' + v.price;
+  }
+
+  /* ── 요금 카드 ─────────────────────────────────────────────────────────────
+     🔴 금액은 **서버(plan 표)에서 읽는다** (2026-09-21 사용자 결정). 하루 금액·정가·할인율도 서버 값에서 센다
+        (mypage-data.js planCards — 마이페이지 「멤버십·결제」와 같은 함수).
+     `?plan=<code>` 가 있으면 그 카드를 미리 고른다 — 마이페이지가 고른 요금제를 이 질의로 넘기고,
+     모바일 결제창에서 돌아올 때도 이 질의로 고른 요금제를 되찾는다. 고를 때마다 주소의 plan 을 바꿔 둔다.
+     ⚠️ 금액을 못 읽으면 **결제 버튼을 막는다** — 얼마가 빠져나가는지 모르는 채로 결제시키지 않는다. */
+  var 주소 = new URLSearchParams(location.search);
+  var 고른 = null, 카드들 = [], 요금제 = {};
+
+  function 고르기(c) {
+    고른 = c;
+    카드들.forEach(function (x) { x.el.setAttribute('aria-checked', String(x === c)); });
+    if (!변경) $('submit').textContent = c.cta;
+    var q = new URLSearchParams(location.search);
+    q.set('plan', c.code);
+    history.replaceState(null, '', location.pathname + '?' + q.toString());
+  }
+  function 카드그리기(cards) {
+    var box = $('plans');
+    box.textContent = '';
+    카드들 = cards;
+    cards.forEach(function (c) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'pc'; b.setAttribute('role', 'radio');
+      // 「기간 한정 특가」 — 2026-10-12 사용자 지시로 시안 그대로 둔다(종료일은 나중에 정한다).
+      b.innerHTML = (c.rec ? '<span class="chip">추천 · 기간 한정 특가</span>' : '') +
+        '<span class="top"><span class="radio" aria-hidden="true"></span><span></span></span>' +
+        '<span class="tiers"><span class="day"><span>하루</span><b></b></span><span class="amt"></span></span>';
+      b.querySelector('.top span:last-child').textContent = c.name;
+      b.querySelector('.day b').textContent = c.day;
+      var amt = b.querySelector('.amt');
+      if (c.strike) {
+        var s = document.createElement('s'); s.textContent = c.strike; amt.appendChild(s);
+        var p = document.createElement('span'); p.className = 'pct'; p.textContent = c.pct; amt.appendChild(p);
+      }
+      var w = document.createElement('span'); w.className = 'won'; w.textContent = c.price; amt.appendChild(w);
+      if (c.per) { var per = document.createElement('span'); per.className = 'per'; per.textContent = c.per; amt.appendChild(per); }
+      b.addEventListener('click', function () { 고르기(c); });
+      c.el = b;
+      box.appendChild(b);
+    });
+    var 원함 = 주소.get('plan');
+    고르기(cards.find(function (c) { return c.code === 원함; }) || cards.find(function (c) { return c.on; }) || cards[0]);
   }
 
   $('submit').disabled = true;
-  var 변경요청 = new URLSearchParams(location.search).get('mode') === 'change';
+  var 변경요청 = 주소.get('mode') === 'change';
   var 구독 = 변경요청 ? getSubscription().catch(function () { return null; }) : Promise.resolve(null);
-  var 준비 = Promise.all([getPlan(), 구독]).then(function (r) {
-    var plan = r[0];
-    var 내것 = r[1] && billingView(r[1], plan);
-    if (내것 && 내것.live) 변경모드();
-    // 카드 변경이면 그 사람 구독에 매달린 요금이다 — 지금 켜진 요금제가 아니다(mypage-data.js billingView).
-    var 요금 = 변경 ? 내것.amount : priceText(plan);   // 「월 3,900원」
-    $('fee').textContent = 요금 + ' (부가세 포함)';
-    $('todayTotal').textContent = wonText(plan.price_krw);
-    $('agreeText').innerHTML = 변경
-      ? '새 카드로 <b>매' + 요금 + ' 자동 결제</b>에 동의합니다.'
-      : '<b>매' + 요금 + ' 자동 결제</b>되는 정기결제에 동의합니다.';
-    $('submit').disabled = false;
-    if (!변경) metaEvent('InitiateCheckout', { value: plan.price_krw, currency: 'KRW' });
-  }).catch(function () {
-    // 못 읽은 금액 자리는 비우지 않고 「—」 로 둔다 (2026-09-24 사용자 확정 A안).
-    $('submit').classList.add('locked');
-    ['fee', 'todayTotal'].forEach(function (id) {
-      $(id).textContent = '—';
-      $(id).style.color = 'var(--gray-400)';
+  var 준비 = 구독.then(function (s) {
+    var v = s && billingView(s);
+    if (v && v.live) { 구독행 = s; 변경모드(v); $('submit').disabled = false; return; }
+    return getPlans().then(function (plans) {
+      plans.forEach(function (p) { 요금제[p.code] = p; });
+      카드그리기(planCards(plans));
+      $('submit').disabled = false;
+      metaEvent('InitiateCheckout', { value: 요금제[고른.code].price_krw, currency: 'KRW' });
     });
-    note(FAIL.line + ' ' + FAIL.hint, true);
+  }).catch(function () {
+    $('submit').classList.add('locked');
+    // 카드 자리에 실패 문구 한 줄 — 피그마 2616:3276 「결제 신청 — 요금 못 읽음 (26판)」
+    $('plans').hidden = true;
+    $('plansFail').textContent = FAIL.line + ' ' + FAIL.hint;
+    $('plansFail').hidden = false;
   });
 
-  // 토글이 둘이다 — 각 버튼이 자기 section 만 접는다.
-  // 절을 id 로 집는다: 하나라도 없으면 여기서 터진다. 셀렉터로 훑으면 0개를 맞혀도
-  // 아무 신호 없이 두 토글이 다 죽는다.
+  // 토글이 둘이다 — 각 버튼이 자기 section 만 접는다. 절을 id 로 집는다(하나라도 없으면 여기서 터진다).
   ['accRefund', 'acc'].forEach(function (id) {
     var sec = $(id), btn = sec.querySelector('.acc-row');
     btn.addEventListener('click', function () {
@@ -274,27 +386,14 @@
   });
 
   /* ── 빌링 결제창 ───────────────────────────────────────────────────────────
-     🔴 2026-10-03 — **실결제 채널로 바꿨다**(사용자 지시). 토스페이먼츠 정기결제 실상점
-     MID bill_im_can15j(9/29 계약 완료). 이제 이 화면에서 등록한 카드는 **실제로 걷힌다.**
-     그 전(2026-09-17~)에는 테스트 채널(공용 MID iamporttest_4)이었다 — 서버(career-coach
-     portone-6r2k9tvq/billing-key)는 이제 테스트 채널 키를 받지 않는다.
-
-     두 값은 **공개 값이다** — 브라우저에 그대로 내려가도 되는 것만 둔다
-     (assets/supabase-config.js 와 같은 판단). 시크릿 키는 여기에 절대 두지 않는다.
-     실연동 채널이 열리면 바꾸는 것은 이 두 줄뿐이다.
-
-     career-coach 의 payments/client.js 에 같은 일을 하는 startBillingKeyIssue() 가 있지만
-     **여기서 부를 수 없다** — 그 저장소는 careercoach.my 로 배포되지 않는 비공개 저장소이고,
-     이 사이트에는 번들러가 없어 import 할 경로가 없다. 그래서 그 파일의 포트원 갈래만 여기에
-     옮겨 적었다. 둘 중 한쪽을 고치면 다른 쪽도 고친다 (지금은 이 파일이 유일한 실사용처다).
-
-     ✅ 2026-09-24 — 발급된 빌링키를 서버가 조회해 진짜인지 확인하고 보관한다
-        (`saveBillingKey` → 엣지 함수 `portone-6r2k9tvq/billing-key`). 서버는 보관한 그 자리에서
-        첫 달을 걷고 `charged` 로 결과를 돌려준다(career-coach 0091). `개시` 일 때만
-        결제 완료 화면(/checkout/done/)으로 넘긴다. 청구의 customerId 는 서버가 회원 id 로 넣는다 —
-        아래 issueId 는 발급용이다.
-     ✅ 2026-10-03 — 발급의 customerId 도 회원 번호(로그인 계정 id)로 싣는다. 앞 판은 issueId 를
-        넣어, 보관이 실패해 포트원에만 남은 카드가 누구 것인지 알 길이 없었다(career-coach 결제사 대조). */
+     🔴 2026-10-03 — **실결제 채널**(토스페이먼츠 정기결제 실상점 MID bill_im_can15j). 이 화면에서 등록한 카드는 실제로 걷힌다.
+     두 값은 **공개 값이다** — 브라우저에 그대로 내려가도 되는 것만 둔다. 시크릿 키는 여기에 절대 두지 않는다.
+     career-coach 의 payments/client.js 의 startBillingKeyIssue() 와 같은 일을 한다(이 사이트에는 번들러가 없어
+     import 할 수 없다). 둘 중 한쪽을 고치면 다른 쪽도 고친다.
+     ✅ 발급된 빌링키는 서버가 포트원에 되물어 보관하고 그 자리에서 첫 결제를 걷는다(`saveBillingKey` →
+        엣지 함수 portone-6r2k9tvq/billing-key, career-coach 0091). 🔴 **고른 요금제 코드(plan.code)를 같이 넘긴다**
+        (career-coach 0126 · 2026-10-09) — 요금제가 둘 켜진 뒤에는 안 넘기면 서버가 어느 것으로 걸지 몰라 거절한다.
+     ✅ 발급의 customerId 는 회원 번호(로그인 계정 id)다(career-coach 결제사 대조). */
   var PORTONE_STORE_ID = 'store-a4b087e3-89d3-4369-8558-02d158bf6564';
   var PORTONE_CHANNEL_KEY = 'channel-key-10f48f35-76db-4560-8a2f-b2bcdbadf850';
 
@@ -318,21 +417,17 @@
     return sdk;
   }
 
-  /* 결과 한 줄. PC(결제창이 겹창)와 모바일(결제창으로 페이지가 넘어갔다 돌아옴)이 같은 길을 탄다. */
-  function 보관하고_알린다(billingKey) {
+  /* 결과 한 줄. PC(결제창이 겹창)와 모바일(결제창으로 페이지가 넘어갔다 돌아옴)이 같은 길을 탄다.
+     planCode — 카드 변경이면 보내지 않는다(서버가 그 사람 구독의 요금제를 안다). */
+  function 보관하고_알린다(billingKey, planCode) {
     // 🔴 여기서 끝내지 않는다. 서버가 포트원에 되물어 보관해야 구독이 열린다.
-    //    보관이 실패했는데 「등록되었습니다」를 그리면 사용자는 결제될 줄 알고 기다린다.
-    return saveBillingKey(billingKey).then(function (r) {
-      // 「완료」는 첫 달이 실제로 걷혔을 때(`개시`)만 말한다 (2026-09-24 사용자 지시).
-      // 카드사가 첫 청구를 거절했으면 카드만 보관된 것이다 — 결제된 줄 알고 기다리지 않게 그 자리에서 말한다.
+    return saveBillingKey(billingKey, 변경 ? undefined : planCode).then(function (r) {
+      // 「완료」는 첫 결제가 실제로 걷혔을 때(`개시`)만 말한다 (2026-09-24 사용자 지시).
       // `청구실패`(우리 쪽 고장)는 카드 탓이 아니라 따로 말한다 — 다시 누르면 같은 주문번호로 다시 걷는다(0091).
-      // 그대로 두어도 매일 새벽 청구 회차가 3일 동안 같은 주문번호로 다시 걷는다(career-coach 0105 · 2026-09-26 사용자 확정 안 B).
-      // 카드 변경(`이미구독`)은 변경 완료 화면으로 간다 — replace 라 뒤로가기가 이 양식으로 안 돌아온다.
+      // 그대로 두어도 매일 새벽 청구 회차가 3일 동안 같은 주문번호로 다시 걷는다(career-coach 0105).
       var charged = r && r.charged;
-      // 첫 달이 걷혔으면 결제 완료 화면으로 간다 (2026-10-03 사용자 컨펌 「3번」).
       if (charged === '개시') location.href = '/checkout/done/';
       else if (변경 && charged === '이미구독') {
-        // 완료 화면은 이 표식이 있을 때만 「바뀌었어요」를 말한다 — 주소로 바로 들어온 사람에게는 근거가 없다.
         try { sessionStorage.setItem('cc_card_changed', '1'); } catch (e) { /* 못 적으면 완료 화면이 멤버십·결제 화면으로 돌려보낸다 */ }
         location.replace('/checkout/changed/');
       }
@@ -347,31 +442,32 @@
     note((e && e.message) || '결제수단 등록에 실패했습니다. 다시 시도해 주세요.', true);
   }
 
-  /* 모바일 — 결제창이 겹창이 아니라 **페이지째 넘어갔다가** redirectUrl 로 돌아온다 (2026-10-03).
-     포트원 V2 는 모바일에서 redirectUrl 이 없으면 결과를 돌려줄 길이 없다 — 앞 판은 그 칸이 없어
-     휴대폰으로 카드를 등록하면 돌아올 곳도 결과도 없었다. 돌아온 주소에는 포트원이
-     `billingKey`(성공) 또는 `code`·`message`(실패·취소)를 붙인다. 돌아온 뒤에는 그 칸을 주소에서
-     지운다 — 새로고침이 같은 빌링키를 다시 보내지 않게(서버는 같은 키를 두 번 받아도 한 번만 걷지만,
-     화면이 결과를 두 번 말하지 않게). 금액·변경 모드가 그려진 뒤(`준비`)에 처리한다. */
-  var 돌아옴 = new URLSearchParams(location.search);
-  if (돌아옴.has('billingKey') || 돌아옴.has('code')) {
-    var 키 = 돌아옴.get('billingKey'), 코드 = 돌아옴.get('code'), 말 = 돌아옴.get('message');
-    ['billingKey', 'code', 'message', 'transactionType', 'pgCode', 'pgMessage'].forEach(function (k) { 돌아옴.delete(k); });
-    var 남은 = 돌아옴.toString();
+  /* 모바일 — 결제창이 **페이지째 넘어갔다가** redirectUrl 로 돌아온다 (2026-10-03). 돌아온 주소에는 포트원이
+     `billingKey`(성공) 또는 `code`·`message`(실패·취소)를 붙인다. 고른 요금제는 `?plan=` 에 실려 같이 돌아온다.
+     돌아온 뒤에는 그 칸을 주소에서 지운다 — 새로고침이 같은 빌링키를 다시 보내지 않게. */
+  if (주소.has('billingKey') || 주소.has('code')) {
+    var 키 = 주소.get('billingKey'), 코드 = 주소.get('code'), 말 = 주소.get('message'), 돌아온요금제 = 주소.get('plan');
+    var 남김 = new URLSearchParams(location.search);
+    ['billingKey', 'code', 'message', 'transactionType', 'pgCode', 'pgMessage'].forEach(function (k) { 남김.delete(k); });
+    var 남은 = 남김.toString();
     history.replaceState(null, '', location.pathname + (남은 ? '?' + 남은 : ''));
     준비.then(function () {
       var 전 = $('submit').disabled;      // 금액을 못 읽어 잠긴 버튼을 여기서 풀지 않는다
       $('submit').disabled = true;
       var 끝 = 코드 != null || !키 ? Promise.resolve(실패(new Error(말 || '')))
-                                   : 보관하고_알린다(키).catch(실패);
+                                   : 보관하고_알린다(키, 돌아온요금제).catch(실패);
       return 끝.then(function () { $('submit').disabled = 전; });
     });
   }
 
   $('submit').addEventListener('click', function () {
     var btn = this;
+    if (btn.classList.contains('locked')) return;
+    if (!변경 && !고른) return;
     btn.disabled = true;
     note('');
+    var planCode = 고른 && 고른.code;
+    var 상품명 = 변경 ? '커리어코치 결제수단 변경' : ((요금제[planCode] && 요금제[planCode].name) || '커리어코치 구독');
     // 발급 건 식별자. 같은 값으로 두 번 부르면 포트원이 중복으로 본다.
     var issueId = 'cc-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
     Promise.all([loadPortOne(), billingCustomerId()]).then(function (둘) {
@@ -381,17 +477,16 @@
         channelKey: PORTONE_CHANNEL_KEY,
         billingKeyMethod: 'CARD',
         issueId: issueId,
-        issueName: '커리어코치 직군 브리핑 월 구독',
+        issueName: 상품명,
         customer: { customerId: 둘[1] },
-        // 모바일은 이 주소로 돌아온다(위 「돌아옴」). 지금 주소의 질의(카드 변경 `mode=change`)를 그대로 싣는다.
+        // 모바일은 이 주소로 돌아온다(위 「돌아옴」). 지금 주소의 질의(`plan`·카드 변경 `mode=change`)를 그대로 싣는다.
         redirectUrl: location.origin + location.pathname + location.search,
       });
     }).then(function (res) {
       // 포트원은 실패를 throw 하지 않고 code 를 채워 돌려준다 (사용자가 창을 닫은 경우 포함).
       if (res && res.code != null) throw new Error(res.message);
-      // billingKey 가 없으면 등록된 것이 아니다 — code 만 비어 있는 응답을 성공으로 읽지 않는다.
       if (!res || !res.billingKey) throw new Error('');
-      return 보관하고_알린다(res.billingKey);
+      return 보관하고_알린다(res.billingKey, planCode);
     }).catch(실패).then(function () { btn.disabled = false; });
   });
 </script>

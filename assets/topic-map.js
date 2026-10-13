@@ -1,7 +1,7 @@
 /* 직군 → 인사이트 주제. 표(`#cc-topic-map`)는 tools/roles/build.mjs 가 tracks.json 에서 페이지에 심는다.
  * 정본의 정본은 career-coach insights/sources.py 의 TAXONOMY_MAP 이다.
- * 쓰는 곳: mypage/topics (2026-10-05). onboarding/done 은 같은 함수를 아직 안에 따로 갖고 있다 —
- * PG 심사 뒤 온보딩 4단계 분리 배포 때 이 파일로 옮긴다(프로젝트 문서 「결정-2026-10-05-온보딩-4단계-분리-정본」). */
+ * 쓰는 곳: mypage/topics · onboarding/4 (추천) · onboarding/done (확인). 온보딩 4단계 분리 때 done 안의 사본을 이 파일로 합쳤다
+ * (프로젝트 문서 「결정-2026-10-05-온보딩-4단계-분리-정본」). */
 
 /** 페이지에 심어 둔 표를 읽는다. 표가 빠지면 build.mjs --check 가 먼저 멈춘다. */
 export function readTopicMap() {

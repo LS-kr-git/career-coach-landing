@@ -22,11 +22,11 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
 const outPath = process.argv[2] || join(ROOT, '..', '미리보기-랜딩.html');
 
-let html = readFileSync(join(ROOT, 'briefing', 'index.html'), 'utf8');   // 2026-09-24 심사 기간: 랜딩은 briefing/ 에 있다
+let html = readFileSync(join(ROOT, 'index.html'), 'utf8');
 const mime = (f) => f.endsWith('.svg') ? 'image/svg+xml' : f.endsWith('.png') ? 'image/png' : 'application/octet-stream';
 
 let inlined = 0, bytes = 0, missing = [];
-html = html.replace(/(src|href)="(?:\.\.\/)?(assets\/[^"]+)"/g, (m, attr, path) => {
+html = html.replace(/(src|href)="(?:\.\.\/|\/)?(assets\/[^"]+)"/g, (m, attr, path) => {
   try {
     const buf = readFileSync(join(ROOT, path));
     inlined++; bytes += buf.length;

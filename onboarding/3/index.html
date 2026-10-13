@@ -41,19 +41,17 @@
   .back::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
     width:36px;height:36px;border-radius:10px;background:transparent;transition:background .12s}
   .back:active::before{background:var(--gray-100)}
-  /* 진행 바 — 3칸 전체가 하나의 그라디언트로 이어지도록 background-size/position 으로 잘라 쓴다 */
+  /* 진행 바 — 4칸 전체가 하나의 그라디언트로 이어지도록 background-size/position 으로 잘라 쓴다 */
   .prog{display:flex;gap:5px;padding:22px 24px 0}
   .prog i{height:3px;border-radius:99px;background-color:var(--gray-100);flex:1}
-  .prog i.on{background-image:linear-gradient(90deg,var(--amber-400) 0%,var(--amber-600) 100%);background-size:300% 100%;background-repeat:no-repeat}
+  .prog i.on{background-image:linear-gradient(90deg,var(--amber-400) 0%,var(--amber-600) 100%);background-size:400% 100%;background-repeat:no-repeat}
   .prog i:nth-child(1).on{background-position:0% 0}
-  .prog i:nth-child(2).on{background-position:50% 0}
-  .prog i:nth-child(3).on{background-position:100% 0}
+  .prog i:nth-child(2).on{background-position:33.3% 0}
+  .prog i:nth-child(3).on{background-position:66.6% 0}
+  .prog i:nth-child(4).on{background-position:100% 0}
 
-  .kick{padding:20px 24px 0;font-size:13px;line-height:18px;font-weight:600;color:var(--amber-600);
-    display:flex;align-items:center;gap:6px}
-  .kick .off{color:var(--gray-300);font-weight:600}
-  .kick i{font-style:normal;font-weight:600}
-  .title{padding:9px 24px 0;font-size:24px;line-height:32px;font-weight:700;color:var(--gray-900);letter-spacing:-0.01em}
+  /* 단계 이름 줄(.kick)은 2026-10-05 에 없앴다 — 진행 바 아래 끝 → 제목 글자 상자 위 끝 44px */
+  .title{padding:44px 24px 0;font-size:24px;line-height:32px;font-weight:700;color:var(--gray-900);letter-spacing:-0.01em}
   .desc{padding:10px 24px 0;font-size:14px;line-height:20px;color:var(--gray-500)}
   .scroll{padding:24px 24px 0}
 
@@ -96,8 +94,7 @@
 
 </style></head><body>
 <div class="board"><div class="hd"><a class="back" href="/onboarding/2/" aria-label="뒤로"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15.75 4.5L8.25 12l7.5 7.5" stroke="#475569" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
-  <div class="prog"><i class="on"></i><i class="on"></i><i class="on"></i></div>
-  <div class="kick"><span>직군</span><i>·</i><span>연차</span><i>·</i><span>근무지</span></div>
+  <div class="prog"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>
   <div class="title">어디에서<br>일하고 싶으세요?</div>
   <div class="desc">최대 3개 지역까지 함께 고를 수 있어요</div>
   <div class="scroll"><div class="grp"><div class="ghead"><h3>수도권</h3></div><div class="chips"><div class="c">서울</div><div class="c">경기</div><div class="c">인천</div></div></div><div class="grp"><div class="ghead"><h3>충청·강원</h3></div><div class="chips"><div class="c">대전</div><div class="c">세종</div><div class="c">충북</div><div class="c">충남</div><div class="c">강원</div></div></div><div class="grp"><div class="ghead"><h3>영남</h3></div><div class="chips"><div class="c">부산</div><div class="c">대구</div><div class="c">울산</div><div class="c">경북</div><div class="c">경남</div></div></div><div class="grp"><div class="ghead"><h3>호남·제주</h3></div><div class="chips"><div class="c">광주</div><div class="c">전북</div><div class="c">전남</div><div class="c">제주</div></div></div><div class="grp"><div class="ghead"><h3>기타</h3></div><div class="chips"><div class="c">재택·원격</div></div></div></div>
@@ -147,14 +144,14 @@ window.ccStep3={
   retryPending();           // 지난 저장이 실패한 채 남아 있으면 여기서 조용히 다시 보낸다
 
   // 완료 — 실패해도 사용자를 막지 않는다. pending 으로 남겨 다음 진입에서 다시 보내고,
-  // 화면은 그대로 완료 화면으로 넘긴다. 저장 실패를 이유로 세워 두면 사용자는 고칠 방법이 없다.
+  // 화면은 그대로 4단계(주제)로 넘긴다. 저장 실패를 이유로 세워 두면 사용자는 고칠 방법이 없다.
   const cta = document.querySelector('.cta');
   cta.addEventListener('click', async () => {
     if (cta.classList.contains('off')) return;
     window.ccOnChange();
     // 로그인 전이면 saveOnboarding 이 /signup/ 으로 보낸다 — 그 위에 덮어 이동하지 않는다.
     const { status } = await saveOnboarding();
-    if (status !== 'no-session') location.href = '/onboarding/done/';
+    if (status !== 'no-session') location.href = '/onboarding/4/';
   });
 </script>
 </body></html>
