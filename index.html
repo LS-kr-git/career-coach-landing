@@ -32,6 +32,14 @@
 <link rel="stylesheet" href="/assets/landing-2.css">
 <link rel="stylesheet" href="/assets/landing-3.css">
 <style>
+/* ===== 첫 화면 카톡 카드 (2026-10-13 · 아티클 폰과 같은 크기, 파란 바탕 + 흰 카드) ===== */
+#pmhero{margin-top:28px;max-height:none}
+#pmhero .sc{background:#D9E7FB;overflow:hidden}
+/* 아래 모서리 없이 폰 끝에서 마지막 줄이 반쯤 잘린다 — 말풍선이 화면 밖으로 이어지는 것처럼 (M4) */
+#pmhero .card{background:#fff;border-radius:20px 20px 0 0;margin:8px 12px -14px;padding:18px 18px 0;word-break:keep-all;color:var(--g800);font-size:13.5px;line-height:1.62}
+#pmhero .card b{display:block;font-size:16.5px;line-height:1.45;margin-bottom:10px;color:var(--g900)}
+#pmhero .card ol{padding-left:16px}
+#pmhero .card ol li+li{margin-top:7px}
 /* ===== 넓은 화면 카드 어포던스 (CLAUDE.md · 랜딩 기준값 그대로) ===== */
 @media (min-width:451px){
   body{background:var(--gray-100)}
@@ -49,21 +57,21 @@
 </svg><a class="auth" href="/signup/">시작하기</a></div>
 
 <!-- 첫 화면 -->
-<section class="gap20 s-white" id="sec1" style="padding-top:44px">
+<section class="gap20 s-white crop" id="sec1" style="padding-top:44px">
   <div>
     <h1 class="h1c"><span class="l1">하루 <span class="n1">129원</span>으로</span><br><span class="l2">연봉 <span class="n2">300만원</span> 올리기</span></h1>
     <p class="sub" style="margin-top:18px;word-break:keep-all"><span class="sub1">내 직군 최고 전문가가 엄선한</span><br><span class="ul hk" style="color:var(--g800)">인사이트·업계 트렌드 요약 카카오톡</span></p>
   </div>
-<div class="herow" id="hero" data-v="1"><i class="lkn"></i><div class="sarwb atS" id="sarwb" hidden><button class="cpv" type="button" aria-label="이전 카톡">‹</button><button class="cnx" type="button" aria-label="다음 카톡">›</button></div><div class="lkb"><b id="lkk">마케팅·그로스</b> 직군 카톡</div>
-  <div class="pm pm-hero"><div class="sc"><div class="nbn"><span class="ap"><svg width="18" height="18" viewBox="0 0 21 21"><use href="#ccmark"/></svg></span><div><b>커리어코치</b><p>오늘의 인사이트 5줄이 도착했어요</p></div><em>지금</em></div><div class="typing"><i></i><i></i><i></i></div>
-    <div class="sb"><span>8:01</span><span class="ic"><span class="sig"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:10px"></i></span>5G<span class="bat"><i></i></span></span></div>
+<div class="pm pm-art" id="pmhero"><div class="sc">
     <div class="hd"><span class="bk"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="ttl"><svg width="20" height="20" viewBox="0 0 21 21"><use href="#ccmark"/></svg>커리어코치</span><span class="ics"><svg viewBox="0 0 24 24" width="21" height="21"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 15.5l4.5 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><svg viewBox="0 0 24 24" width="21" height="21"><path d="M4 6.5h16M4 12h16M4 17.5h16" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></svg></span></div>
-        <div class="dtabs" id="dtabs"></div><div class="scrollwrap" id="sarw"><div class="body swipe" id="samples"></div><div class="hint" id="hint"><span>옆으로 밀어서 더 보기</span><b>›</b></div></div><div class="dots" id="dots"><i class="on">1</i><i>2</i><i>3</i></div>
-    <div class="inp"><span class="plus">+</span><span class="field"></span><span class="hash">#</span></div>
+    <!-- 첫 화면 카톡 예시 한 장. 요약은 4줄까지만 보인다(2026-10-13 사용자 결정). 글은 여기서 바꾼다. -->
+    <div class="card"><b>AI시대, 내 경쟁력 지키기</b><ol>
+      <li>MIT는 조사한 모든 분야에서 AI에 일을 맡긴 댓가로 일의 숙련도를 잃는 패턴이 있었다고 해요.</li>
+      <li>업무의 많은 부분이 '내가 직접 하는 것'이 아닌 '남이 해 주는 것'이 되었기 때문이에요.</li>
+      <li>예를 들어, 환자 차트를 읽고 치료 계획을 세우는 일을 AI로 한 의대생들은 실력이 더디게 성장했어요.</li>
+      <li>새로운 업무는 AI에게 시키기 전에 내가 직접 해 보는 게 결국 내 실력과 연봉을 바꿔요.</li>
+    </ol></div>
   </div></div>
-  </div>
-  <div class="chw arw" id="chw1"><span class="chint">👆 직군을 누르면 내용이 바뀌어요</span><div class="chips two" data-group="sample" id="sampleChips"></div><button class="cpv" type="button" aria-label="앞으로">‹</button><button class="cnx" type="button" aria-label="직군 더 보기">›</button><span class="fing">👆</span></div>
-  <p class="chp"><span class="cet">내 직군을 선택해 보세요</span></p>
 </section>
 
 <!-- 퀴즈 -->
