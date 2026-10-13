@@ -78,6 +78,10 @@ new IntersectionObserver(es=>{if(es[0].isIntersecting){rxSeen=true}},{root:null,
  rg.addEventListener("pointerdown",()=>clearInterval(demo));
  new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting)run()}),{root:null,threshold:.6}).observe(rg)})();
 renderQuiz("mkt");renderSamples("mkt");
+// 직군마다 카톡 예시 줄 수가 달라 폰 높이가 최대 44px 바뀌었고, 그 아래 퀴즈 칸이 직군을 누를 때마다 덜컹였다 — 가장 긴 직군 높이로 고정한다.
+const rsRaw=renderSamples; // 아래에서 renderSamples 를 등장 애니메이션 재생으로 감싼다 — 재기만 할 때는 원본을 써서 히어로가 다시 움직이지 않게 한다
+function lockSampleH(){const b=$("samples"),k0=document.querySelector("#sampleChips .chip.on").dataset.k,sl=b.scrollLeft;b.style.minHeight="";let m=0;for(const [k] of CHIP_ORDER){rsRaw(k);m=Math.max(m,b.offsetHeight)}b.style.minHeight=m+"px";rsRaw(k0);b.scrollLeft=sl}
+lockSampleH();document.fonts&&document.fonts.ready.then(lockSampleH);{let lw=innerWidth;addEventListener("resize",()=>{if(innerWidth!==lw){lw=innerWidth;lockSampleH()}})}
 hintUpdate();
 
 document.querySelectorAll(".arw").forEach(w=>{const c=w.querySelector(".chips,.hs,.rvp");
