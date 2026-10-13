@@ -269,6 +269,7 @@ section.crop{padding-bottom:0}
 #jobsec{padding-top:88px}
 #wksec{padding-bottom:120px}
 .rxw{display:inline-flex;vertical-align:top;height:1.45em;overflow:hidden}.rxw .d{display:inline-block;height:1.45em;overflow:hidden}.rxw .d i{display:block;font-style:normal;line-height:1.45em;transition:transform 1s cubic-bezier(.2,.8,.2,1)}.rxw .c{line-height:1.45em}
+.rxw .d i b{display:block;height:1.45em;font-weight:inherit}
 .screen:has(#cbg[data-v="2"]) #closing{background:radial-gradient(120% 55% at 50% 0%,rgba(245,158,11,.20),transparent 62%),#0B0D12}
 .screen:has(#cbg[data-v="3"]) #closing{background:linear-gradient(180deg,#1F2937,#0B0F17)}
 .screen:has(#cbg[data-v="4"]) #closing{background:radial-gradient(110% 50% at 50% 0%,rgba(245,158,11,.14),transparent 60%),#1A1410}
