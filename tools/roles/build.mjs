@@ -104,7 +104,7 @@ const visible = TAX.groups
   .sort(desc((g) => perWeek(g.code)));
 
 // ── 3. HTML 생성 ────────────────────────────────────────────
-/** 시작 상태 = 전부 접힘 · 아무것도 안 골라 CTA 잠김 (피그마 278:2693) */
+/** 시작 상태 = 전부 접힘 · 아무것도 안 골라 CTA 잠김 (피그마 2470:1369) */
 const build = () =>
   '<div class="scroll">' +
   visible
