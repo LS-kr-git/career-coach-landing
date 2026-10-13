@@ -9,62 +9,7 @@
   "web": {
     "html": "index.html"
   },
-  "images": [
-    {
-      "node": "123:4041",
-      "file": "assets/img-hero.png",
-      "figmaName": "image 355",
-      "rawSha256": "6ce5d369e5fd40ad7f2685af759090424bb165cc4c7bc7a0d645d2c3eb5e21bd",
-      "shaVerified": true,
-      "verifiedAt": "2026-08-01",
-      "note": "3D 소프트 뎁스 리디자인 확정본 (2026-08-01 사용자 확정, 피그마·웹 동일 파일 업로드)"
-    },
-    {
-      "node": "123:4053",
-      "file": "assets/img-apply.png",
-      "figmaName": "image 359",
-      "rawSha256": "0bfcbb9b07a07024112bf8931d6bfcb774ad22283a1684ebaed15025c6374778",
-      "shaVerified": true,
-      "verifiedAt": "2026-08-01",
-      "note": "3D 소프트 뎁스 리디자인 확정본 (2026-08-01 사용자 확정, 피그마·웹 동일 파일 업로드)"
-    },
-    {
-      "node": "123:4394",
-      "file": "assets/img-fomo.png",
-      "figmaName": "image 360",
-      "rawSha256": "4d7dfc24e728f4c778776b245c9f78e69ee1d05a34bbdfc4eda3eceab94232b1",
-      "shaVerified": true,
-      "verifiedAt": "2026-08-01",
-      "note": "3D 소프트 뎁스 리디자인 확정본 (2026-08-01 사용자 확정, 피그마·웹 동일 파일 업로드)"
-    },
-    {
-      "node": "123:4050",
-      "file": "assets/img-speed.png",
-      "figmaName": "image 358",
-      "rawSha256": "94d8bfdcad9788c0f98f19fece46ca0da5cb3dec38d5fe733a38e7ea92b83d42",
-      "shaVerified": true,
-      "verifiedAt": "2026-08-01",
-      "note": "3D A안 보정본 (2026-08-01: personal 중앙선 6px·3연결, speed 뒤 서류 농도 상향)"
-    },
-    {
-      "node": "123:4047",
-      "file": "assets/img-save.png",
-      "figmaName": "image 357",
-      "rawSha256": "3fe40f74ca34aba3659fc58af5ea12c7b936a02e89e102703ae18ed681e28e26",
-      "shaVerified": true,
-      "verifiedAt": "2026-08-01",
-      "note": "3D 소프트 뎁스 리디자인 확정본 (2026-08-01 사용자 확정, 피그마·웹 동일 파일 업로드)"
-    },
-    {
-      "node": "123:4044",
-      "file": "assets/img-personal.png",
-      "figmaName": "image 356",
-      "rawSha256": "67251319d2f865bb43326fd6d297a801a71215ac7aef68ccfcabb4eee551e751",
-      "shaVerified": true,
-      "verifiedAt": "2026-08-01",
-      "note": "3D A안 보정본 (2026-08-01: personal 중앙선 6px·3연결, speed 뒤 서류 농도 상향)"
-    }
-  ],
+  "images": [],
   "_lock설명": "세션 간에 확정된 값. 되돌아가면 즉시 FAIL. 결정이 바뀌면 여기와 피그마를 함께 고칠 것.",
   "lockedStyles": [
     {

@@ -8,6 +8,8 @@ const EXPERTS=[["개발", "김○○", "현 네이버 백엔드 개발자 · 12�
 const REVIEWS=[["김○근님", "마케터", 5, "출근길에 간단하게 한번 보면 되니까 마음이 편합니다"], ["이○현님", "개발자", 5, "뉴스레터는 잘 안 보게 됐었는데 카톡으로 오니까 자연스럽게 보게 돼요"], ["박○은님", "디자이너", 4, "내가 트렌드를 잘 따라가고 있나 불안했었는데 적어도 그런 불안은 확실히 줄어든듯"], ["정○우님", "인사담당", 5, "생각보다 좋은 글들이 많아서 직장에서 추천했습니다."], ["최○진님", "취업 준비", 4, "취준생 커뮤니티에서 보고 구독했는데 면접 준비에 생각보다 도움 많이 되네요"], ["윤○서님", "PM", 5, "채용공고 브리핑 매주 받으니까 채용사이트 뒤지는 부담 줄어들어서 좋아요"]];
 const AV='<svg class="av" viewBox="0 0 42 42"><circle cx="21" cy="21" r="21" fill="#fff"/><use href="#ccmark" transform="translate(5.1 5.4) scale(1.31)"/></svg>';
 const $=id=>document.getElementById(id);
+// 금액은 가격 블록 마크업(#ps·#ppr)이 정본 — page-audit 요금 대조가 그 마크업을 서버 plan 과 맞댄다.
+const won=id=>+$(id).textContent.replace(/\D/g,"");
 // 시안은 폰 안 .screen 이 스크롤했다. 실제 페이지는 문서가 스크롤하므로 기준 사각형은 뷰포트다.
 const VIEW=()=>({top:0,bottom:innerHeight,height:innerHeight});
 const chipHTML=(list,on)=>list.map(([k,l])=>`<button class="chip${k===on?" on":""}" data-k="${k}">${l}</button>`).join("");
@@ -59,7 +61,7 @@ let rxT=0,rxSeen=false;const rxRoll=t=>{const el=$("rx");el.innerHTML=[...t].map
 const rxSet=t=>{$("rx").dataset.t=t;clearTimeout(rxT);if(!rxSeen){$("rx").textContent=t;return}rxT=setTimeout(()=>rxRoll(t),220)};
 new IntersectionObserver(es=>{if(es[0].isIntersecting){rxSeen=true}},{root:null,threshold:.8}).observe($("rx"));
 
-(()=>{const SUB=4.72,f=n=>(Math.round(n*10)/10).toLocaleString("ko-KR")+"만원";
+(()=>{const SUB=won("ppr")/1e4,f=n=>(Math.round(n*10)/10).toLocaleString("ko-KR")+"만원";
  const set=v=>{v=Math.max(1000,Math.min(30000,+v||0));const p1=v*.01,p2=v*.02,mx=Math.max(p2,SUB);
   document.querySelectorAll("#sal .sv").forEach(i=>{if(document.activeElement!==i)i.value=v});
   document.querySelectorAll("#sal .pc button").forEach(b=>b.classList.toggle("on",+b.dataset.s===v));
@@ -154,7 +156,7 @@ new IntersectionObserver(es=>es.forEach(e=>{const w=$("stw");if(e.isIntersecting
  let seen=false;new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.5&&!seen){seen=true;play()}else if(e.intersectionRatio===0){seen=false;g.classList.remove("in")}}),{root:null,threshold:[0,.5]}).observe(g);})();
 
 
-(()=>{const sec=$("pricing"),pr=$("ppr");let t=0;const play=()=>{sec.classList.remove("in");void sec.offsetWidth;clearInterval(t);pr.textContent="47,200원";setTimeout(()=>{sec.classList.add("in");if($("pa").dataset.v==="4"){const t0=performance.now();t=setInterval(()=>{const k=Math.min(1,(performance.now()-t0)/1000),v=Math.round(70800-(70800-47200)*(1-Math.pow(1-k,3)));pr.textContent=v.toLocaleString("ko-KR")+"원";if(k>=1)clearInterval(t)},30)}},60)};
+(()=>{const sec=$("pricing"),pr=$("ppr"),FROM=won("ps"),TO=won("ppr");let t=0;const play=()=>{sec.classList.remove("in");void sec.offsetWidth;clearInterval(t);pr.textContent=TO.toLocaleString("ko-KR")+"원";setTimeout(()=>{sec.classList.add("in");if($("pa").dataset.v==="4"){const t0=performance.now();t=setInterval(()=>{const k=Math.min(1,(performance.now()-t0)/1000),v=Math.round(FROM-(FROM-TO)*(1-Math.pow(1-k,3)));pr.textContent=v.toLocaleString("ko-KR")+"원";if(k>=1)clearInterval(t)},30)}},60)};
  let seen=false;new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3&&!seen){seen=true;play()}else if(e.intersectionRatio===0){seen=false;sec.classList.remove("in")}}),{root:null,threshold:[0,.3]}).observe(sec.querySelector(".plan.best"));})();
 
 document.querySelectorAll(".chips").forEach(c=>c.addEventListener("wheel",e=>{if(Math.abs(e.deltaX)>Math.abs(e.deltaY))e.preventDefault()},{passive:false}));
