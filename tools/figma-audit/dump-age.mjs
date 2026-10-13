@@ -1,4 +1,5 @@
-/* 덤프 나이 판정 — audit.mjs 와 tree-audit.mjs 가 **같은 값**을 쓰게 한다.
+/* 덤프 나이 판정 — 처음엔 audit.mjs 와 tree-audit.mjs 가 **같은 값**을 쓰게 하려고 뺐다.
+ * (audit.mjs 는 2026-10-13 삭제 — 지금 쓰는 곳은 tree-audit.mjs 하나다.)
  *
  * 두 파일이 각자 구현하고 있었고, 그래서 판정이 갈렸다(2026-08-20 검사관 지적):
  *   · tree-audit 은 `Number.isFinite(self)`, audit 은 `self ? … : -Infinity` 였다

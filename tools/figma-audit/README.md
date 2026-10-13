@@ -1,216 +1,19 @@
 # figma-audit — 피그마↔웹 자동 검수
 
-피그마를 **단일 기준(Source of Truth)** 으로 두고, `index.html`이 거기서 어긋났는지 기계로 대조한다.
-2026-07-31에 눈으로 2시간 걸려 찾은 11건이 이 스크립트로는 1분 안에 나온다.
+피그마를 기준으로 두고 웹이 거기서 어긋났는지 기계로 대조한다. 지금 도는 것은 셋이다.
 
-## 무엇을 검사하나
-
-| 항목 | 내용 | 등급 |
+| 도구 | 언제 | 무엇 |
 |---|---|---|
-| 문구 | 기준 섹션의 모든 text 노드가 웹에 있는가 (공백 무시 비교) | ❌ 차이 |
-| 문장부호 | 글자는 같고 따옴표·말줄임표만 다른가 | ⚠️ 부호 |
-| 역방향 | 웹에만 있는 문구가 있는가 | ℹ️ 웹전용 |
-| 부분 일치 | 포함은 되는데 정확히 같은 줄이 없는가 (웹에 마침표 등이 더 붙은 경우) | 🔎 부분일치 |
-| 확정값 | `map.json`의 `lockedStyles` 결정이 유지되는가 | 🔒 확정값 |
-| 이미지 | `assets/*.png` sha256이 기준값과 같은가 | ❌ 차이 |
-| **타이포** | **글자 크기·굵기·행간·자간이 피그마와 같은가** | 🅰️ 타이포 |
-| **시각 스타일** | **색·보더·반경·그림자가 피그마와 같은가** (`getComputedStyle` 실측) | 🎨 스타일 |
-| **여백·간격** | **패딩·마진·gap 이 피그마와 같은가** (`getComputedStyle` 실측) | 🎨 스타일 |
-| **반응형 폭** | **모바일/데스크톱에서 실제로 몇 px 로 그려지나** (뷰포트별 실측) | 🎨 스타일 |
-| **반응형 연속성** | **폭을 1px 씩 늘릴 때 튀는 지점이 있는가** (`flow-audit.mjs`) | 📐 반응형 |
+| `page-audit.mjs` | 모든 푸시 · CI | 모든 페이지의 링크·머리·자리표시자, 그리고 피그마 짝이 등록돼 있는가 |
+| `tree-audit.mjs` | 모든 푸시 | 피그마 트리의 고아 노드 · 기준 프레임의 소속 |
+| `docs-audit.mjs` | html 이 바뀐 푸시 · CI | 피그마가 기준인 화면(약관·개인정보·가입·온보딩·마이페이지·결제 등)의 문구 |
 
-`❌`/`🔒`/`🅰️`/`🎨`가 하나라도 있으면 종료코드 1.
+손으로 돌리는 것: `flow-audit.mjs`(반응형 연속성) · `live-plan.mjs`(라이브 대조 계획).
 
-### 여백은 왜 `lockedStyles` 가 아니라 `figma-style.json` 인가
-
-`lockedStyles` 는 **소스 문자열을 정규식으로** 본다. 그래서 뒤에 붙은 규칙이 값을 덮어도 통과한다.
-2026-08-02 에 `.chips` 의 `padding:50px 0` 뒤에 다른 세션의 `padding-top:4px;…margin-top:-4px` 가
-남아 있었는데, 소스에는 `padding:50px 0` 이 그대로 있으니 검수는 "차이 없음" 이었다. 실제 계산값은 4px.
-
-`figma-style.json` 항목은 헤드리스 크로미움의 **`getComputedStyle`** 을 본다. 무엇이 덮든 최종 결과가 잡힌다.
-**여백·크기를 잠글 때는 반드시 이쪽에 넣는다.** 상쇄용 음수 마진까지 막으려면 `margin-top`/`margin-bottom` 도
-같이 `0px` 로 잠근다 (`spacing-chips-50` 이 그렇게 돼 있다).
-
-현재 잠긴 여백 항목:
-
-| id | 선택자 | 잠근 값 | 피그마 근거 |
-|---|---|---|---|
-| `spacing-chips-50` | `.chips` | padding 위아래 50px, margin 위아래 0 | `6:248` 높이 257.8 (= 칩 157.8 + 50·2) |
-| `spacing-chips-rows-16` | `.chips` | row-gap 16px | `6:249` itemSpacing 16 |
-| `spacing-section-100` | `section` | padding 100/24, row-gap 20px | `6:168` pad [100,24,100,24] · gap 20 |
-
-네 방향 모두 확인됨: ① 웹 값이 덮이면 잡힘 ② 웹 값이 틀리면 잡힘 ③ 피그마가 바뀌면 "스냅샷 낡음" 으로 잡힘 ④ 일치하면 통과.
-
-### 뷰포트별 폭 잠금 (2026-08-02)
-
-항목에 `"viewport": 1280` 을 주면 그 항목만 해당 폭으로 잰다(기본 390 = 모바일).
-**데스크톱 전용 `@media` 규칙은 390px 에서 적용조차 안 되므로, 폭 항목에는 반드시 `viewport` 를 준다.**
-`"width"` 키는 `getComputedStyle` 이 아니라 `getBoundingClientRect().width` — `max-width` 선언이 아니라
-"결과적으로 몇 px 로 그려졌나" 를 본다.
-
-| id | 뷰포트 | 잠근 값 |
-|---|---|---|
-| `width-desk-card-512` | 1280 | `.page` 512px |
-| `width-desk-content-464` | 1280 | `section > .head-group` 464px |
-| `width-desk-chips-512` | 1280 | `.chips` 512px |
-| `width-mobile-content-352` | 430 | `section > .head-group` 352px (모바일 회귀 방지) |
-| `width-mobile-card-full` | 430 | `.page` 430px = 기기 폭 (좌우 회색 노출 방지) |
-
-이 값들에는 **피그마 근거 노드가 없다.** 피그마 프레임은 360px 고정이고 데스크톱 폭은 웹 전용 반응형 결정이기 때문이다.
-
-세 방향 확인됨: ① 데스크톱 폭을 400 으로 되돌림 → 잡힘 ② 모바일까지 딸려 넓어짐 → 잡힘
-③ **데스크톱 `@media` 블록을 기본 규칙보다 위에 둬서 조용히 무시되는 상황 → 잡힘** (작업 중 실제로 겪은 실수다).
-
-## 쓰는 법 (Cowork 세션 안에서)
-
-> 🗄 **2026-10-06 은퇴** — 랜딩 프레임(6:148)이 피그마 레거시 페이지로 옮겨져 `audit.mjs` 대조는 훅에서도 안 돈다. 이 절은 기록으로만 읽는다.
-
-1. **피그마 메타데이터 받기** — Figma MCP 호출:
-   `get_metadata(fileKey="LnT8TgFVBxky0bVyaF6Tob", nodeId="6:148")`
-   `audit.mjs` 가 보는 것은 랜딩 프레임 하나뿐이므로 **프레임 id 를 준다.** 페이지 id(`0:1`)를 주면
-   운영 페이지의 섹션 전부가 XML 로 딸려 와서 축약하다 `<text>` 줄을 흘리기 쉽다 — 그러면 웹 문구가
-   전부 `ℹ️ 웹전용` 으로 빠지면서 "조치 필요 0건" 으로 통과한다.
-   프레임 id 는 `page-figma-map.json` 의 `index.html` 항목에서 읽는다.
-   결과가 크면 툴이 파일로 떨궈 주므로, 그 파일의 `text` 필드를 이어붙여 `figma_meta.xml`로 저장한다.
-2. **검수 실행**
-   ```
-   node tools/figma-audit/audit.mjs figma_meta.xml
-   node tools/figma-audit/audit.mjs figma_meta.xml --json   # 기계 판독용
-   ```
-3. 나온 차이를 **피그마 쪽으로 맞춰** 고친다. 웹이 맞다고 판단되면 **피그마도 같은 세션에서 고친다.**
-
-**인자 두 개를 모두 주는 것이 정상 사용법이다:**
-```
-node tools/figma-audit/audit.mjs figma_meta.xml figma_type.json
-```
-두 번째 인자(`figma_type.json`)는 이번 세션에 피그마에서 새로 뽑은 **타이포 원본 덤프**다.
-빼면 "🅰️ 신선도 미확인" 이 조치 필요 항목으로 뜬다 — 스냅샷이 낡았는지 확인도 안 하고 통과로 착각하는 걸 막기 위한 장치다. (정말 건너뛰려면 `--skip-type-freshness`)
-
-`audit.mjs` 가 타이포 검수(`type-audit.mjs`)를 자동으로 함께 돌린다. 따로 실행하려면:
-```
-node tools/figma-audit/type-audit.mjs
-```
-
-## 조용히 통과하던 자리 넷을 막았다 (2026-08-20)
-
-`audit.mjs` 는 준비물이 갖춰져야 도는 검수라, **준비물이 반쯤 빠진 채로도 초록이 뜨는** 자리가 넷 있었다.
-넷 다 종료코드 0 이고 화면에 아무 표시가 없어서, 사람이 훑으면 "차이 없음" 과 구분되지 않았다.
-
-| 무엇이 조용했나 | 지금 |
-|---|---|
-| **빈 스타일 덤프** `[]` 를 주면 "피그마 노드 0개와 대조 (차이 0건)" 으로 통과 (같은 조건의 타이포 덤프는 exit 1 이라 두 경로가 비대칭이었다) | 대조한 양을 **속성 단위**로 세어 `속성 P/Q · 항목 N/M` 으로 늘 찍고, **하나도 못 봤으면** 🎨 조치 필요 |
-| **메타 XML 을 줄이다 `<text>` 줄을 흘리면** 문구 대조가 아무것도 안 돌면서 웹 문구가 전부 `ℹ️ 웹전용` 으로 빠진다 (실측 "총 87건 · 조치 필요 0건") | `figma-type.json` 이 아는 텍스트 노드와 대조해 **커버리지**를 찍고, 70% 미만이면 「메타 XML 축약 의심」 으로 막는다 |
-| **덤프 신선도가 `mtime` 만** 봐서 `cp`·`touch`·checkout 으로 시각만 새로 찍힌 낡은 덤프가 통과 | 타이포·스타일 덤프는 `{ dumpedAt, nodes }` 형태로 뽑고, **mtime 과 dumpedAt 중 더 낡은 쪽**을 나이로 쓴다. `dumpedAt` 이 없으면 그 사실을 조치 필요로 올린다 |
-| **`CC_META_MAX_AGE`** 로 한도를 늘리거나 숫자가 아닌 값을 넣으면 45분 관문이 흔적 없이 꺼진다 (`ageMin > NaN` 은 항상 거짓) | 한도와 그 출처를 **항상 출력에 찍고**, 기본값보다 크거나 양수가 아니면 조치 필요로 올린다 |
-
-한도·나이 판정은 `dump-age.mjs` 한 곳에 있고 `audit.mjs`·`tree-audit.mjs` 가 같이 쓴다.
-앞 판은 두 파일이 각자 구현해서 `dumpedAt` 파싱 조건이 달랐고, 45분이 양쪽에 따로 박혀 있어
-`CC_META_MAX_AGE` 가 `audit` 만 움직였다.
-
-### 왜 "부분 미대조" 는 막지 않나
-
-스타일 덤프 스니펫이 만드는 키는 `fill·textFill·stroke·sw·radius·shadow·pad·gap·h` 뿐인데,
-`figma-style.json` 이 쓰는 키에는 `indent`·`w`·`segment` 처럼 **그 스니펫이 만들 수 없는 것**도 있다.
-그래서 **정상 덤프로도 전부 대조되지는 않는다** — 2026-08-20 실측으로 `속성 41/48 · 항목 21/25` 다.
-여기서 부분 누락까지 막으면 `index.html` 을 고친 **모든 푸시가 정상 덤프로도 선다.**
-막는 대신 **비율을 늘 찍는다.** 그 숫자가 정상값(41/48)에서 내려가면 사람이 §6 표에서 본다.
-
-### 메타 XML 커버리지의 기준값은 어디서 오나
-
-숫자를 박으면 낡으므로 `figma-type.json` 의 `groups[].figmaNodes` 를 쓴다. 인스턴스 내부(`I…` id)는
-`get_metadata` 가 원래 펼치지 않으므로 빼고, `ignoreNodes` 도 뺀다. 세는 것은 **문구가 실린 노드**다 —
-id 만 세면 `name=""` 으로 문구만 비운 XML 이 100% 로 통과한다(실측).
-**2026-08-20 실측: 정상 XML 은 79/81 = 98%** 라 한도 70% 는 크게 벌어져 있다.
-`figma-type.json` 이 없거나 `groups` 가 비면 **판정 불가로 막는다** — 기준이 없으면 어떤 XML 이든 통과하므로.
-
-열 방향 확인됨(2026-08-20). ①②③은 **CLAUDE.md 의 스니펫을 피그마에서 그대로 돌린 실제 덤프**로 쟀다.
-
-| 준 것 | 나온 것 |
-|---|---|
-| ① 정상 XML + 실제 스니펫 덤프 | 커버리지 98% · `속성 41/48 · 항목 21/25` · 조치 신호 없음 |
-| ② 20줄로 줄인 XML | 커버리지 25% → ❌ 축약 의심 |
-| ③ id 는 그대로 두고 `name=""` 으로 문구만 비운 XML | 커버리지 0% → ❌ 축약 의심 |
-| ④ 빈 스타일 덤프 | `속성 0/48` → 🎨 신선도 대조 못 함 |
-| ⑤ `dumpedAt` 없는 덤프 | 🕰️ 「dumpedAt 이 없음」 (mtime 만 봤다는 사실이 남는다) |
-| ⑥ `dumpedAt` 을 3시간 전으로 적고 파일은 방금 `touch` | 🕰️ 「180분 전 덤프」 (mtime 만 봤다면 통과했을 것) |
-| ⑦ 같은 덤프를 `.json` 이 **아닌** 이름으로 저장 (훅이 `FIGMA_TREE`·`FIGMA_STYLE` 로 임의 경로를 받는다) | 「180분 전 덤프」 — 이름이 아니라 **JSON 으로 파싱되는가**로 가른다 |
-| ⑧ 메타 XML 을 `.txt` 이름으로 저장 | 「(mtime만)」 — 없는 `dumpedAt` 을 트집잡지 않는다 (⑦의 반대 방향) |
-| ⑨ 없는 40자 sha 를 `live-plan` 기준으로 줌 | ❌ exit 2 + `git fetch` 안내 (맨 `rev-parse` 는 없는 객체도 그대로 돌려준다) |
-| ⑩ `tree-audit` 을 `--strikt` 로 오타 | ❌ exit 2 「모르는 인자입니다」 — 조용히 옛 동작으로 돌아가지 않는다 |
-
-`tree-audit` 머리말은 **`모드 strict` / `모드 기본` 을 늘 찍는다.** 유일한 호출자가 저장소 밖이라
-grep 으로 확인이 안 되므로, 출력에 남지 않으면 "돌렸는데 깨끗한 것" 과 "관문이 꺼진 것" 이 구분되지 않는다.
-
-**이 저장소에는 `audit.mjs` 를 도는 자동 테스트가 없다** — 위 열 가지는 손으로 만든 입력과 실제 덤프로 확인한 것이다.
-
-## 타이포 검수 (2026-08-01 추가)
-
-`get_metadata` XML 에는 **글자 크기 정보가 없다.** 그래서 타이포는 다른 방식으로 검사한다:
-
-- 피그마 값은 `figma-type.json` 에 **스냅샷으로 커밋**해 둔다 (그룹별 size/weight/line-height/letter-spacing + 그 값이 나온 피그마 노드 id).
-- 웹 값은 **headless Chromium 으로 `index.html` 을 열어 `getComputedStyle` 로 실측**한다. CSS 를 정적 파싱하지 않으므로 상속·미디어쿼리·인라인 스타일까지 반영된 "실제 적용값" 을 본다.
-- `playwright` 가 없거나 `figma-type.json` 이 없으면 **조용히 건너뛴다**(종료코드 0). 검수 헤더에 건너뛴 사유가 찍힌다.
-
-폰트 파일은 필요 없다 — 크기·굵기·행간·자간은 폰트 로딩과 무관하게 계산된다.
-(줄바꿈 폭까지 보려면 Pretendard 설치가 필요하지만 그건 이 스크립트 범위 밖이다.)
-
-### 타이포 스냅샷은 어떻게 최신으로 유지되나
-
-`figma-type.json` 은 커밋된 값이라 피그마가 바뀌면 저절로 낡는다. 그래서 두 겹으로 막는다.
-
-1. **낡았는지 자동 감지** — `audit.mjs` 에 이번 세션의 타이포 덤프(`figma_type.json`)를 주면, 스냅샷의 각 그룹을 피그마 실제 값과 대조해 *"피그마가 바뀌었는데 스냅샷이 안 따라옴"* 을 잡는다. 스냅샷에 없는 새 노드, 사라진 노드도 함께 보고한다.
-2. **갱신은 자동 생성** — 손으로 JSON 을 고치지 않는다:
-   ```
-   node tools/figma-audit/build-type-snapshot.mjs figma_type.json          # 미리보기
-   node tools/figma-audit/build-type-snapshot.mjs figma_type.json --write  # 반영
-   ```
-   같은 (크기/굵기/행간/자간) 조합끼리 자동으로 묶고, **기존 웹 선택자(`sels`)를 조합 키로 이어받는다.**
-   사람이 채울 것은 **새로 생긴 조합의 선택자뿐**이며, 어떤 조합이 비었는지 스크립트가 알려 준다.
-   덤프에 안 나온 그룹(서식이 섞인 문단 등)은 버리지 않고 이전 값을 유지한다.
-
-한 타이포 조합에 웹 선택자가 여러 개 붙을 수 있다(예: 13/600/18 = 히어로 배지·칩·프로필명·목업 CTA·푸터 상호). `sels` 배열에 전부 넣으면 모두 검사한다.
-`ignoreNodes` 에 적은 노드는 대조에서 빠진다(상태바 시계처럼 웹에 대응 요소가 없는 것).
-
-### 타이포 원본 덤프 뽑는 코드
-
-Figma MCP `use_figma` 로 아래를 실행하고 결과를 `figma_type.json` 으로 저장한다:
-
-**항상 CLAUDE.md 의 최신 스크립트를 쓴다** (2026-08-01부터 세그먼트 단위 버전). 요지:
-
-```js
-// 노드당 1줄이 아니라 "스타일 조합당 1줄" — 혼합 서식 노드는 6:365#0, 6:365#1 처럼 쪼개진다.
-const frame = await figma.getNodeByIdAsync('6:148');
-const out = [];
-for (const n of frame.findAllWithCriteria({ types: ['TEXT'] })) {
-  const segs = n.getStyledTextSegments(['fontSize','fontName','lineHeight','letterSpacing']) || [];
-  const keyOf = s => `${s.fontSize}/${s.fontName && s.fontName.style}/${s.lineHeight && s.lineHeight.unit === 'PIXELS' ? s.lineHeight.value : null}/${s.letterSpacing && typeof s.letterSpacing.value === 'number' ? s.letterSpacing.value : 0}`;
-  const uniq = [];
-  for (const s of segs) {
-    const k = keyOf(s);
-    const hit = uniq.find(u => u.k === k);
-    if (hit) hit.chars += ' ' + s.characters; else uniq.push({ k, s, chars: s.characters });
-  }
-  uniq.forEach((u, i) => out.push({
-    id: uniq.length > 1 ? `${n.id}#${i}` : n.id,
-    t: u.chars.replace(/\s+/g, ' ').trim().slice(0, 20),
-    size: u.s.fontSize,
-    weight: u.s.fontName && u.s.fontName.style,
-    lh: u.s.lineHeight && u.s.lineHeight.unit === 'PIXELS' ? u.s.lineHeight.value : null,
-    ls: u.s.letterSpacing && typeof u.s.letterSpacing.value === 'number' ? u.s.letterSpacing.value : 0,
-  }));
-}
-return { dumpedAt: new Date().toISOString(), nodes: out };   // dumpedAt 필수 — 없으면 audit.mjs 가 mtime 만 보고 '자기신고 없음' 으로 막는다
-```
-
-세그먼트 단위인 이유: 이전 버전(첫 세그먼트만 기록)은 혼합 서식 노드의 나머지 구간이 검수 사각지대였고,
-실제로 6:365 의 SemiBold 구간 굵기 드리프트가 이 구멍으로 통과했다 (2026-08-01). 지금은 어느 구간이
-바뀌어도 새 스타일 조합으로 감지된다.
-
-### 왜 확정값(lockedStyles)과 중복되나
-
-타이포 일부는 `lockedStyles` 로도 잠겨 있어 어긋나면 **두 번 보고된다**. 의도한 것이다 —
-`lockedStyles` 는 CSS 텍스트를 정규식으로 보므로 playwright 가 없는 환경에서도 동작하는 **1차 방어선**이고,
-타이포 검수는 실제 렌더값을 보므로 **선택자가 바뀌거나 다른 규칙이 덮어써도 잡아내는** 2차 방어선이다.
+> 🗄 **2026-10-13 삭제** — 랜딩 피그마 대조 `audit.mjs` 와 그것만 쓰던 부속
+> (`type-audit.mjs` · `style-audit.mjs` · `build-type-snapshot.mjs` · `map.json` · `figma-type.json` ·
+> `figma-style.json`)을 지웠다. 랜딩·상품목록 프레임이 2026-10-06 레퍼런스 페이지로 옮겨진 뒤
+> 어디서도 돌지 않았다. 옛 설명과 파일은 git 기록에 있다(이 삭제 커밋의 부모).
 
 ## 공백 무시 비교를 쓰는 이유
 
@@ -218,13 +21,7 @@ return { dumpedAt: new Date().toISOString(), nodes: out };   // dumpedAt 필수 
 웹은 `<br>`·`white-space:pre-line`으로 줄을 나눈다. 둘 다 실제 문구는 같으므로, **공백을 전부 제거한 문자열**로 비교해 이 잡음을 없앴다.
 따옴표·말줄임표 차이는 지워버리지 않고 `⚠️ 부호` 등급으로 따로 보고한다.
 
-## 기준 섹션이 바뀌면
-
-`map.json`의 `figma.canonicalSectionId`를 새 섹션 id로 바꾼다. (2026-07-31 기준 `6:147` = `PROD`)
-검수 대상은 랜딩 섹션 안의 `PROD` 하나뿐이다.
-다음 개편 때도 새 버전을 만들면 옛 `PROD`를 `vN_archive`로 내리고 새 것을 `PROD`로 올린다 — 이름이 곧 기준이므로 헷갈릴 일이 없다.
-
-### 파일은 페이지가 둘이다 (2026-08-20)
+## 피그마 파일의 페이지
 
 | 페이지 | id | 무엇이 있나 |
 |---|---|---|
@@ -244,43 +41,11 @@ return { dumpedAt: new Date().toISOString(), nodes: out };   // dumpedAt 필수 
 
 둘째 줄이 이 검사를 만든 이유다. 옮기기 전에 그 HTML 이 정말 죽은 것인지부터 본다.
 
-## 이미지 기준 해시 세우기 (파일당 1회)
-
-1. Figma MCP `download_assets(fileKey, nodeId)` → `rawImages[0].url`
-2. 그 파일을 `assets/<이름>.png`로 저장하고 눈으로 확인
-3. `sha256sum assets/<이름>.png` 값을 `map.json`의 해당 항목 `rawSha256`에 넣고 `shaVerified: true`
-
-> ⚠️ 이 클라우드 샌드박스는 **figma.com 전 도메인이 차단**돼 있어 에셋 URL을 `curl`로 못 받는다.
-> 우회: Claude in Chrome로 URL을 fetch → `<a download="파일명">`으로 다운로드 폴더에 저장 → `device_stage_files`로 컨테이너에 올림.
-> 근본 해결은 데스크톱 앱에 작업 폴더를 상시 연결하거나 태스크를 "내 컴퓨터에서 실행"으로 시작하는 것.
-
-## lockedStyles — 확정값 잠금
-
-세션 간에 합의된 값(예: 하이라이트 v8.9 = Amber200 65% 스트립·첫 줄만)을 정규식으로 못 박아 둔다.
-나중에 누가 되돌리면 즉시 🔒로 잡힌다. **결정이 실제로 바뀌면 `map.json`과 피그마를 함께 고칠 것.**
-
-## 이미지 검사가 실제로 잡아내는 것
-
-`rawSha256`은 **"이 날짜에 피그마와 눈으로 대조해 일치를 확인한 파일"** 의 지문이다.
-따라서 이 검사는 *저장소 쪽 파일이 몰래 바뀐 것*을 잡는다. 피그마 쪽 그림이 바뀐 경우는 잡지 못하므로,
-**디자인을 고쳤으면 해당 이미지를 다시 대조하고 `rawSha256`·`verifiedAt`을 갱신**해야 한다.
-(피그마 export는 렌더링할 때마다 안티에일리어싱이 1px씩 달라져 바이트가 일치하지 않는다 —
-그래서 자동 재-export 비교 대신 "확인한 날짜 + 지문" 방식을 쓴다.)
-
-2026-07-31 기준 6개 이미지 전부 피그마와 대조 완료.
-
-## 알려진 예외
-
-- 피그마 노드 `6:325`만 곧은 따옴표 `'UI Designer'`, 웹과 피그마의 다른 노드는 둥근 따옴표 `‘UI Designer’`.
-  피그마 텍스트 수정은 편집 환경에 `Pretendard Variable` 폰트가 없어 불가 → 웹(둥근 쪽)을 유지하고 `map.json`의 `acceptedPunctDiffs`에 예외로 기록했다.
-  나중에 피그마에서 직접 고치면 예외 항목을 지우면 된다.
-
 ---
 
 ## page-audit.mjs — 결과물 공통 점검 (모든 페이지)
 
-`audit.mjs` 는 피그마 기준 프레임이 있는 `index.html` 만 본다.
-기준 프레임이 없는 나머지 결과물(`letter/signup/terms/privacy.html`, `CNAME`, `assets`)은 이쪽이 본다.
+저장소의 모든 결과물(`*.html`, `CNAME`, `assets`)을 본다.
 
 ```
 node tools/figma-audit/page-audit.mjs
@@ -323,7 +88,10 @@ node tools/figma-audit/page-audit.mjs --json
 
 ### 🚫 못 돈 검수는 통과가 아니다 — 2026-08-08 신설
 
-타이포(`type-audit.mjs`) · 시각 스타일(`style-audit.mjs`) · 반응형(`flow-audit.mjs`) 은
+> 🗄 아래는 2026-10-13 지운 `audit.mjs` 묶음 시절의 기록이다. 원칙(확인 안 한 것은 통과가 아니다)은
+> 지금 도는 `tree-audit`·`docs-audit` 에도 그대로 걸려 있다.
+
+타이포·시각 스타일·반응형(`flow-audit.mjs`)은
 브라우저 실측이라 **playwright 가 없으면 스스로 건너뛴다.** 예전에는 건너뛴 사실이
 `findings` 에 안 올라가서, 화면에는 "건너뜀" 이라고 찍히면서도 집계는 `조치 필요 0건`,
 종료코드는 0이었다. **pre-push 가 그대로 통과시켰다.**
@@ -573,8 +341,7 @@ node tools/figma-audit/live-plan.mjs "$BASE" HEAD     # ← 따옴표 필수
 
 ## docs-audit.mjs — 약관·개인정보 화면 문구 동기화 (2026-08-02)
 
-`audit.mjs` 는 랜딩(index.html ↔ 프레임 6:148)만 본다. 이 스크립트는 **피그마 화면이 기준인 문서 페이지** —
-이용약관·개인정보처리방침 — 을 본다.
+이 스크립트는 **피그마 화면이 기준인 페이지**의 문구를 본다(처음엔 이용약관·개인정보처리방침이었다).
 
 ```
 node tools/figma-audit/docs-audit.mjs

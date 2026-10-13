@@ -133,8 +133,8 @@ git fetch --unshallow          # 얕게 클론됐다면. 이미 깊으면 아무
 | 1.2 | `tools/figma-audit/tree-audit.mjs` | 모든 푸시 (node 있을 때) | 섹션 밖으로 나간 고아 노드 |
 | 1.5 | `tools/roles/build.mjs --check` | 모든 푸시 (node 있을 때) | 온보딩 직군 목록 ↔ `taxonomy.json` |
 | 1.6 | `tools/mypage-data-check.mjs` | 모든 푸시 (node 있을 때) | 마이페이지 데이터 층(`assets/mypage-data.js`) ↔ 정적 마크업 (docs-audit 이 못 보는 JS 렌더 값). CI 에는 아직 없다 |
-| 2a | `tools/figma-audit/docs-audit.mjs` | **`*.html` 이 하나라도 바뀐 푸시** | 약관·개인정보·브리핑·가입·로그인·온보딩 (커밋된 스냅샷 대조, 라이브 덤프 불필요) |
-| 2b | ~~`tools/figma-audit/audit.mjs`~~ | **2026-10-06 은퇴** | 랜딩 피그마 프레임이 레거시로 옮겨져 대조하지 않는다 |
+| 2a | `tools/figma-audit/docs-audit.mjs` | **`*.html` 이 하나라도 바뀐 푸시** | 약관·개인정보·가입·온보딩·마이페이지·결제 등 피그마가 기준인 화면 (커밋된 스냅샷 대조, 라이브 덤프 불필요) |
+| 2b | ~~`tools/figma-audit/audit.mjs`~~ | **2026-10-06 은퇴 · 10-13 삭제** | 랜딩 피그마 프레임이 레거시로 옮겨져 대조하지 않는다 |
 
 ### 🔴 node 가 없는 PC 에서는 1~2겹이 안 돈다 — 막지는 않는다 (2026-08-13)
 
@@ -161,7 +161,7 @@ git fetch --unshallow          # 얕게 클론됐다면. 이미 깊으면 아무
 
 | 검사 | 왜 CI 에 없나 |
 |---|---|
-| ~~2겹b `audit.mjs` (랜딩 피그마 대조)~~ | **2026-10-06 은퇴** — 훅에서도 안 돈다 |
+| ~~2겹b `audit.mjs` (랜딩 피그마 대조)~~ | **2026-10-06 은퇴 · 10-13 삭제** |
 | 1.2겹 `tree-audit.mjs` (고아 노드) | 덤프 없이 부르면 `🚫 검수 미실행` 을 찍고 **종료코드 0** — CI 에 넣으면 항상 초록이라 뺐다 |
 
 (2026-10-06 — 2겹b 가 은퇴해 「node 있는 곳에서 랜딩을 한 번 대조하고 밀라」는 권고도 없앴다.)
@@ -186,13 +186,8 @@ CC_PUSH_COOLDOWN=0    git push origin main   # 쿨다운만 끄기 — 검수 1�
 (여기에 "준비물이 없어 어떤 세션에서든 무조건 돈다" 고 적혀 있었다 — **틀렸다. node 가 필요하다.** 위 절 참조.)
 보는 것: 깨진 링크·경로 대소문자·`DOCTYPE`/`lang`/`charset`/`viewport`/`title` 누락·자리표시자(`YOUR_*`, Lorem, example.com)·`http://` 리소스·`github.io` 하드코딩·블록 태그 불균형·CNAME 형식·색인 정책(noindex)·**피그마 대응**. `❌ 막힘` 이 있으면 푸시가 멈추고, `⚠️ 경고` 는 알려만 준다.
 
-🗄 (2026-10-06 은퇴 — 아래 문단은 기록) 2겹b 는 피그마 덤프 **3개**(메타·타이포·스타일)가 있어야 한다. 훅이 직접 막는 것은 `figma_meta.xml`
-하나지만, 나머지 둘이 없으면 `audit.mjs` 가 `TYPE`·`STYLE` 등급을 올려 **종료코드 1 로 막는다.**
-"없어도 경고만" 이 아니다 (2026-08-13 정정 — 여기가 "2개" 라고 적고 있었다).
-
-⚠️ 덤프 세 개는 **저장소 밖**에서 찾는다 — `$FIGMA_*` → 저장소 루트 → 상위 디렉터리 → `$HOME`.
-샌드박스에서는 `/home/claude` 에 있어서 통과하는데 PC 에서는 없어서 막힐 수 있다.
-**같은 커밋이 환경에 따라 다르게 판정되는 유일한 자리다.** (`FIGMA_TREE` 도 같은 방식으로 쓰인다 — 문서에 없던 환경변수다.)
+⚠️ 1.2겹의 피그마 트리 덤프는 **저장소 밖**에서 찾는다 — `$FIGMA_TREE` → 저장소 루트 → 상위 디렉터리 → `$HOME`.
+샌드박스와 PC 에서 판정이 다를 수 있는 자리다.
 
 급할 때만 `git push --no-verify`. 🔴 **이 저장소에는 부분 우회(`CC_SKIP_HOOK`)가 없다** —
 career-coach 훅에는 10곳 있지만 여기는 0곳이라 `--no-verify` 는 **훅 전체(지금 여섯 겹)를 통째로** 끈다.
@@ -231,7 +226,7 @@ git clone https://github.com/LS-kr-git/career-coach.git   # 비공개 — PAT �
 > 사용자가 랜딩 프레임(옛 `6:148`)과 상품목록 프레임(옛 `2143:3144`)을 운영 페이지(SSOT)에서
 > 「레퍼런스, 기타 자료들」 페이지로 옮겼다(섹션 `2498:4769`·`2498:4439`, 프레임 `2498:6407`·`2498:6710`).
 > **더는 운영 기준이 아니다.** `briefing/index.html`·`index.html` 은 `page-figma-map.json` 의 `exempt` 로 옮겼고,
-> 훅 2겹b(`audit.mjs`)는 은퇴했다 — 덤프 3종도 요구하지 않는다. 아래 6:148 을 기준으로 적은 절
+> 훅 2겹b(`audit.mjs`)는 은퇴했다(2026-10-13 도구도 삭제) — 덤프 3종도 요구하지 않는다. 아래 6:148 을 기준으로 적은 절
 > (이 절 · 「랜딩을 건드렸다면」 · CTA 규칙의 랜딩 예외)은 **기록**으로만 읽는다. 다른 화면의 기준은 그대로 피그마다.
 
 - 피그마 파일 `LnT8TgFVBxky0bVyaF6Tob`, 프레임 **`6:148` "랜딩페이지_커리어코치"** (가로 360px)
@@ -676,152 +671,18 @@ await t.setTextStyleIdAsync(styleId);
 글자가 고정이거나 아예 없는 요소(진행바·단계 표기·상단바)만 인스턴스로 쓴다.
 Pretendard 가 실제로 보이는 환경에서 작업한다면 이 제약은 사라진다.
 
-## 랜딩을 건드렸다면 — 푸시 전에 반드시
+## 랜딩을 건드렸다면
 
-> 🗄 **2026-10-06 은퇴** — 랜딩 피그마 프레임이 레거시 페이지로 옮겨져 이 절차는 더 돌지 않는다(위 「기준」 절). 기록으로만 읽는다.
+> 🗄 **2026-10-13 삭제** — 랜딩 피그마 대조 절차(`audit.mjs` · 타이포·스타일 스냅샷 · `map.json`)는
+> 2026-10-06 은퇴 뒤 도구까지 지웠다. 랜딩은 피그마 대조 없이 웹을 바로 고친다(위 「기준」 절).
+> 옛 절차는 git 기록에 있다.
 
-### 1. 피그마에서 두 가지를 뽑는다 (Figma MCP)
-
-**(a) 구조·문구 메타데이터**
-```
-get_metadata(fileKey="LnT8TgFVBxky0bVyaF6Tob", nodeId="6:148")
-```
-랜딩 **프레임** id 다. 페이지 id(`0:1`)를 주면 운영 페이지의 섹션 전부가 딸려 와 축약하다
-`<text>` 줄을 흘리기 쉽고, 그러면 검수가 "조치 필요 0건" 으로 통과한다.
-결과가 크면 툴이 파일로 떨궈 준다. 그 파일의 `text` 필드를 이어붙여 `figma_meta.xml` 로 저장.
-
-**(b) 타이포 원본 덤프** — `use_figma` 로 아래를 그대로 실행하고 결과를 `figma_type.json` 으로 저장:
-```js
-// 세그먼트 단위 덤프 — 한 텍스트 노드 안에 서식이 섞여 있어도(예: 6:365 의
-// "이용약관|개인정보처리방침") 스타일 조합별로 모두 기록된다. 읽기 전용이라 폰트 로드 불필요.
-const frame = await figma.getNodeByIdAsync('6:148');
-const out = [];
-for (const n of frame.findAllWithCriteria({ types: ['TEXT'] })) {
-  const segs = n.getStyledTextSegments(['fontSize','fontName','lineHeight','letterSpacing']) || [];
-  const keyOf = s => `${s.fontSize}/${s.fontName && s.fontName.style}/${s.lineHeight && s.lineHeight.unit === 'PIXELS' ? s.lineHeight.value : null}/${s.letterSpacing && typeof s.letterSpacing.value === 'number' ? s.letterSpacing.value : 0}`;
-  const uniq = [];
-  for (const s of segs) {
-    const k = keyOf(s);
-    const hit = uniq.find(u => u.k === k);
-    if (hit) hit.chars += ' ' + s.characters; else uniq.push({ k, s, chars: s.characters });
-  }
-  uniq.forEach((u, i) => out.push({
-    id: uniq.length > 1 ? `${n.id}#${i}` : n.id,
-    t: u.chars.replace(/\s+/g, ' ').trim().slice(0, 20),
-    size: u.s.fontSize,
-    weight: u.s.fontName && u.s.fontName.style,
-    lh: u.s.lineHeight && u.s.lineHeight.unit === 'PIXELS' ? u.s.lineHeight.value : null,
-    ls: u.s.letterSpacing && typeof u.s.letterSpacing.value === 'number' ? u.s.letterSpacing.value : 0,
-  }));
-}
-return { dumpedAt: new Date().toISOString(), nodes: out };   // dumpedAt 필수 — 없으면 audit.mjs 가 mtime 만 보고 '자기신고 없음' 으로 막는다
-```
-> **세그먼트 단위인 이유** (2026-08-01): 이전 스크립트는 노드당 첫 세그먼트만 기록해서, 혼합 서식 노드의
-> 나머지 구간(예: 6:365 의 SemiBold "개인정보처리방침")이 검수 사각지대였다 — 실제로 굵기 드리프트가
-> 이 구멍으로 통과했다. 지금은 서식이 섞인 노드가 `6:365#0`, `6:365#1` 처럼 스타일 조합별로 쪼개져
-> 나오고, 어느 구간이 바뀌어도 build-type-snapshot 이 "새 조합" 으로 잡아낸다.
-
-**(c) 스타일 원본 덤프** — `use_figma` 로 아래를 실행하고 결과를 `figma_style.json` 으로 저장:
-```js
-const IDS = require_ids; // ← tools/figma-audit/figma-style.json 의 items[].node 값들을 배열로 넣는다
-const hex = c => c ? '#'+[c.r,c.g,c.b].map(v=>Math.round(v*255).toString(16).padStart(2,'0')).join('') : null;
-const solid = n => (n && 'fills' in n && n.fills !== figma.mixed && n.fills[0] && n.fills[0].type === 'SOLID') ? hex(n.fills[0].color) : null;
-const out = [];
-for (const id of IDS) {
-  const n = await figma.getNodeByIdAsync(id);
-  if (!n) { out.push({ id, missing: true }); continue; }
-  const o = { id };
-  if (n.type === 'TEXT') o.textFill = solid(n);
-  else {
-    const f = solid(n); if (f) o.fill = f;
-    const t = ('findAllWithCriteria' in n) ? n.findAllWithCriteria({ types: ['TEXT'] })[0] : null;
-    if (t) o.textFill = solid(t);
-  }
-  if ('strokes' in n && n.strokes.length && n.strokes[0].type === 'SOLID') { o.stroke = hex(n.strokes[0].color); o.sw = n.strokeWeight; }
-  if ('cornerRadius' in n && n.cornerRadius !== figma.mixed) o.radius = n.cornerRadius;
-  if ('effects' in n) o.shadow = n.effects.some(e => e.type === 'DROP_SHADOW' && e.visible !== false);
-  if ('paddingTop' in n && n.layoutMode && n.layoutMode !== 'NONE') {
-    o.pad = [n.paddingTop, n.paddingRight, n.paddingBottom, n.paddingLeft].map(v => Math.round(v * 10) / 10);
-    o.gap = Math.round(n.itemSpacing * 10) / 10;   // 섹션 내부 간격 — 여백 잠금이 이 값을 쓴다
-  }
-  o.h = Math.round(n.height * 10) / 10;
-  out.push(o);
-}
-return { dumpedAt: new Date().toISOString(), nodes: out };   // dumpedAt 필수 — 없으면 audit.mjs 가 mtime 만 보고 '자기신고 없음' 으로 막는다
-```
-> **왜 필요한가**: `get_metadata` XML 에는 **색·보더·반경·패딩·그림자가 아예 없다.** 2026-08-01 검수에서 이 구멍 때문에 12건(말풍선 들여쓰기, 구분선 누락, 프로필명 색, 카드 그림자, 배지 보더 …)이 "차이 없음" 을 통과한 채 눈으로만 달라 보였다.
-
-### 2. 검수를 돌린다 — **인자 두 개를 모두 준다**
-```
-node tools/figma-audit/audit.mjs figma_meta.xml figma_type.json figma_style.json
-```
-- 두 번째/세 번째 인자를 빼면 "🅰️ / 🎨 신선도 미확인" 이 조치 필요 항목으로 뜬다. **확인 안 한 걸 통과로 착각하지 않기 위한 장치**이니 `--skip-type-freshness` 로 덮지 말 것.
-- **`npm i playwright` 를 먼저 한다. 새 컨테이너에서는 준비물이 없다.** 타이포·시각 스타일·반응형
-  세 검수는 브라우저 실측이라 playwright 가 없으면 스스로 건너뛴다. 2026-08-08 까지는 **건너뛴 사실이
-  조치 필요로 안 올라가서** 4겹 중 문구 1겹만 돌고도 "조치 필요 0건" 이 뜨고 종료코드 0으로
-  pre-push 를 통과했다 — 목록에 없으면 검사가 없고, 검사가 없으니 통과였던 그 유형이다.
-  지금은 `🚫 검수 미실행` 로 **막힌다**(신선도 미확인과 같은 원칙). 일부러 건너뛰는 플래그는 두지 않았다.
-- "차이 없음" 이 나와야 푸시한다.
-- **덤프를 재사용하지 않는다. 세션마다 다시 뽑는다.** 2026-08-02 에 08:24 덤프로 검수해 "차이 없음" 이
-  나왔는데, 그 사이 피그마 푸터(6:364)에 문의·전화번호가 들어가 있었다. **옛 피그마 vs 새 웹**을
-  비교한 것이라 통과한 것이지 실제로 같아서가 아니었다. 지금은 `🕰️ 덤프 낡음` 이 이걸 막는다 —
-  **덤프 나이 45분 초과면 차단, 15분 초과면 경고.**
-  🔴 `CC_META_MAX_AGE` 로 **늘릴 수 없다** (2026-08-20). 45분보다 큰 값이나 숫자가 아닌 값은
-  그 자체가 조치 필요로 올라온다 — 그 변수로 관문이 흔적 없이 꺼지던 자리였다. 줄이는 것만 된다.
-  **세 덤프(meta·type·style) 모두**에 적용된다 — 같은 날 meta 만 갱신하고 `figma_type.json` 을
-  90분짜리로 두는 바람에, 그 사이 바뀐 파랑 칩(254:2405) 타이포가 옛 값으로 남아 병렬 세션의
-  올바른 스냅샷과 충돌해서야 드러났다. `figma_style.json` 은 237분짜리였고 노드 3개가 빠져 있었다.
-  순서(덤프 vs `index.html` 수정시각)로는 판별할 수 없다. 정상 작업 순서가 [덤프 → 웹 수정 → 검수]
-  라서 덤프는 **항상** `index.html` 보다 오래되기 때문이다 — 처음엔 이렇게 만들었다가 되돌렸다.
-  덤프가 진짜 최신인지 싸게 확인하려면 노드별 해시를 비교한다(전문을 다시 받을 필요가 없다):
-  ```js
-  // use_figma (읽기 전용) — 결과를 기존 덤프에서 뽑은 해시와 대조
-  const frame = await figma.getNodeByIdAsync('6:148');
-  const h = s => { let x = 5381; for (const c of s) x = ((x*33) ^ c.codePointAt(0)) >>> 0; return x.toString(36); };
-  const out = {}; for (const n of frame.findAllWithCriteria({ types: ['TEXT'] })) out[n.id] = h(n.characters.replace(/\s+/g,''));
-  return out;
-  ```
-
-### 2-2. 검수가 보는 것 (2026-08-01 확장)
-| 검사 | 무엇을 보나 | 근거 파일 |
-|---|---|---|
-| 문구 | 텍스트 노드 vs 웹 블록 | `figma_meta.xml` |
-| 확정값 | `lockedStyles` 정규식 | `map.json` |
-| 이미지 | `assets/*.png` sha256 | `map.json` |
-| 타이포 | 크기·굵기·행간·자간 실측 | `figma-type.json` |
-| **시각 스타일** | **색·보더·반경·패딩·그림자·태그명 실측** | **`figma-style.json`** |
-| **반응형 연속성** | **320~700px 를 1px 씩 훑어 레이아웃 점프·가로스크롤·이미지 비율** | (기준 파일 없음 — 렌더만 본다) |
-
-**여백·크기를 바꿨으면 `lockedStyles`(정규식)가 아니라 `figma-style.json` 에 넣는다.**
-`lockedStyles` 는 소스 문자열만 보므로 뒤에 붙은 규칙이 값을 덮어도 통과한다 — 2026-08-02 에 `.chips` 의
-`padding:50px 0` 이 나중 줄의 4px 보정에 덮여 계산값이 4px 이었는데 검수는 "차이 없음" 이었다.
-`figma-style.json` 쪽은 브라우저 `getComputedStyle` 을 보므로 무엇이 덮든 실제 결과가 잡힌다.
-현재 잠긴 여백: `spacing-chips-50` · `spacing-chips-rows-16` · `spacing-section-100`.
-상쇄용 음수 마진을 막으려면 `margin-top`/`margin-bottom` 도 함께 `0px` 로 잠근다.
-
-시각 요소(색/보더/간격/구조)를 바꿨다면 **`figma-style.json` 에 항목이 있는지 먼저 확인**하고, 없으면 추가한다.
-항목 하나는 `{ id, label, sel, node, figma:{피그마 원본값}, css:{기대 computed style} }` 형태다.
-`css` 의 특수 키:
-- `"shadow": "있음"|"없음"` — box-shadow 유무
-- `"tag": "SPAN"` — 링크가 아니어야 하는 요소를 잠근다
-- `"width": "540px"` — 선언이 아니라 `getBoundingClientRect().width` 실측
-- `"aspect": "정상"` — 선택자에 걸리는 이미지 **전부**의 렌더 비율이 원본 비율과 같은지
-- 항목별 `"viewport": 1280` — 그 항목만 해당 폭으로 잰다(기본 390). **데스크톱 전용 `@media` 는 390 에서 적용조차 안 되므로 폭·패딩 항목엔 반드시 준다.**
-
-### 2-3. 반응형만 따로 볼 때
+반응형 연속성만 손으로 볼 때:
 ```
 node tools/figma-audit/flow-audit.mjs                      # 320~700px, 1px 간격
 node tools/figma-audit/flow-audit.mjs --from 320 --to 1400 --step 4
 ```
 `📐 반응형 레이아웃 점프` 가 나오면 그 폭에 브레이크포인트가 있다는 뜻이다. `clamp()`/`min()` 으로 바꾼다.
-
-### 3. 피그마 타이포가 바뀌었다는 결과가 나오면
-```
-node tools/figma-audit/build-type-snapshot.mjs figma_type.json          # 미리보기
-node tools/figma-audit/build-type-snapshot.mjs figma_type.json --write  # 반영
-```
-스냅샷은 **자동 생성**된다. 사람이 손댈 것은 새로 생긴 타이포 조합의 `sels`(웹 선택자)뿐이고, 스크립트가 어떤 조합에 선택자가 비었는지 알려 준다.
-그다음 **웹 CSS도 새 피그마 값으로 고친다** — 스냅샷만 갱신하고 끝내면 안 된다.
 
 ## 약관·개인정보·브리핑 화면 — 피그마↔웹 동기화 (2026-08-02 신설)
 
@@ -1025,11 +886,10 @@ node tools/roles/build.mjs --check   # 훅이 부르는 드리프트 검사 (1.5
 ## 하지 말 것
 - **글자 크기를 줄여서 줄바꿈을 맞추지 않는다.** 문구가 안 들어가면 UXW(문구)를 줄인다. (2026-08-01 사용자 결정)
   단, 웹이 피그마보다 큰 값을 쓰고 있어서 생긴 문제라면 그건 보정이 아니라 **정정**이니 피그마 값으로 되돌린다.
-- `map.json` 의 `lockedStyles` 를 통과시키려고 값을 바꾸지 않는다. **결정이 실제로 바뀌었으면 피그마·웹·잠금값을 함께** 고친다.
 - **폭·여백에 브레이크포인트를 쓰지 않는다.** `:root` 의 세 변수 한 곳에서만 관리한다:
   `--pad-x`(24 고정, 피그마 6:168 값) · `--card-max`(450) · `--content-max`(402).
   실제 콘텐츠 폭 = `min(화면폭 − 48, 402)` 이라 **처음부터 끝까지 연속**이다.
-- **텍스트 문단의 폭은 피그마 고정폭을 `max-width` 로 그대로 잠근다.** 명시 줄바꿈이 없는 문단은 폭이 곧 줄바꿈이다 — 웹 폭이 `--content-max` 를 따라 넓어지면 넓은 화면에서만 줄이 다르게 꺾이고, 360px 기준 검수로는 안 잡힌다. (2026-08-02 리드 '수백/개' 드리프트로 실제 발생) 문단 폭을 정하면 `figma-style.json` 에 `viewport: 1280` 항목으로도 잠근다. (현재: 리드 344 · 본문 330 · 스텝 312)
+- **텍스트 문단의 폭은 피그마 고정폭을 `max-width` 로 그대로 잠근다.** 명시 줄바꿈이 없는 문단은 폭이 곧 줄바꿈이다 — 웹 폭이 `--content-max` 를 따라 넓어지면 넓은 화면에서만 줄이 다르게 꺾이고, 360px 기준 검수로는 안 잡힌다. (2026-08-02 리드 '수백/개' 드리프트로 실제 발생) (현재: 리드 344 · 본문 330 · 스텝 312. 이 폭을 잠그던 `figma-style.json` 은 2026-10-13 삭제)
   `@media` 로 폭을 키우면 그 지점에서 한 번에 튄다 — 2026-08-02 에 520px 에서 콘텐츠가 **352→448(96px)**
   튀는 것을 사용자가 창을 늘리다 발견했다. `flow-audit.mjs` 가 1px 씩 훑어 이걸 잡는다.
   남은 `@media (min-width:520px)` 는 **회색 바탕 + 카드 그림자**(시각 표현)뿐이고 값이 튀지 않는다.
@@ -1049,9 +909,7 @@ node tools/roles/build.mjs --check   # 훅이 부르는 드리프트 검사 (1.5
 - **`width:100%` 로 늘어나는 `<img>` 에는 `height:auto` 를 반드시 같이 준다.**
   마크업의 `height="224"` 속성이 살아 있으면 폭만 늘어나 **가로로 눌린다.** 352px 시절엔 원본 344 와
   비슷해 티가 안 났고, 데스크톱 확장에서 처음 드러났다 (2026-08-02).
-  `figma-style.json` 의 `illust-aspect-desk`/`illust-aspect-mobile` 이 렌더 비율 vs 원본 비율로 잡는다.
 - 모바일(520px 미만) 렌더는 데스크톱을 넓힐 때 **같이 넓어지면 안 된다.**
-  `width-mobile-content-352` · `width-mobile-card-full` 이 430px 뷰포트에서 회귀를 잡는다.
 - **OG 이미지를 같은 파일명으로 내용만 바꾸지 않는다.** 카카오·메타는 스크랩 정보(제목·설명)와
   썸네일 이미지를 **따로**, 그것도 이미지는 URL 기준으로 캐싱한다. 파일명이 그대로면 스크랩 캐시를
   지워도 옛 썸네일이 계속 나간다. 2026-08-01 에 `og-logo.png` 를 확정 로고로 교체했는데 파일명이

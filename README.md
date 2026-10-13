@@ -6,12 +6,12 @@
 
 ## ⚠️ 이 저장소를 건드리기 전에 — 3줄 요약
 
-1. **피그마가 기준이다.** 파일 `LnT8TgFVBxky0bVyaF6Tob` / 프레임 `6:148` "랜딩페이지_커리어코치"(360px). 웹은 파생물.
-2. **푸시 전 검수는 필수다.** 피그마에서 덤프 3개를 뽑아 `node tools/figma-audit/audit.mjs figma_meta.xml figma_type.json figma_style.json` → "차이 없음" 이어야 한다. (문구·확정값·이미지·타이포·**시각 스타일**)
+1. **피그마가 기준이다** — 파일 `LnT8TgFVBxky0bVyaF6Tob`. 단 랜딩(`index.html`)은 2026-10-06 부터 피그마 대조에서 빠져 웹을 바로 고친다.
+2. **검수는 훅이 돈다** — 아래 3번으로 훅을 켜 두면 푸시마다 자동이다.
 3. **클론 직후 훅을 켠다:** `git config core.hooksPath tools/hooks`
    → 직전 푸시로부터 **15분**이 안 지났으면 막는다 (Pages 배포가 취소되는 걸 방지 — `CC_PUSH_COOLDOWN` 으로 조절),
    → **모든 푸시**가 결과물 공통 점검(모든 페이지·CNAME·assets)을 통과해야 하고,
-   → 랜딩이 바뀐 푸시는 추가로 피그마 대조·반응형 연속성까지 통과해야 나간다.
+   → html 이 바뀐 푸시는 피그마가 기준인 화면의 문구 대조까지 통과해야 나간다.
 
 **전체 절차와 금지사항은 [`CLAUDE.md`](CLAUDE.md) 에 있다. 작업 시작 전에 반드시 읽을 것.**
 
@@ -26,7 +26,7 @@
 | `auth/callback/index.html` | 카카오 로그인 콜백 착지 (`/auth/callback/`) |
 | `terms.html` · `privacy.html` | 이용약관 · 개인정보처리방침 |
 | `assets/` | 일러스트 6종(투명 PNG 2x) + 로고 SVG |
-| `tools/figma-audit/audit.mjs` | 피그마↔웹 대조 (랜딩 전용, [README](tools/figma-audit/README.md)) |
+| `tools/figma-audit/docs-audit.mjs` | 피그마↔웹 문구 대조 ([README](tools/figma-audit/README.md)) |
 | `tools/figma-audit/page-audit.mjs` | 결과물 공통 점검 (모든 페이지) |
 | `tools/figma-audit/flow-audit.mjs` | 반응형 연속성 (1px 씩 훑어 튀는 지점 검출) |
 | `tools/make-preview.mjs` | 배포 대기 없이 볼 수 있는 단일 HTML 미리보기 생성 |
@@ -37,7 +37,7 @@
 
 **모든 페이지 (`page-audit.mjs`)** — 깨진 링크 · 경로 대소문자 · head 필수 태그 · 자리표시자 · `http://` 리소스 · `github.io` 하드코딩 · 블록 태그 균형 · CNAME 형식
 
-**랜딩만 (`audit.mjs`)** — 문구 · 역방향(웹 전용 문구) · 부분 일치 · 확정값 21건 · 이미지 sha256 6종 · 타이포(12조합 / 18선택자) · 타이포 스냅샷 신선도
+**피그마가 기준인 화면 (`docs-audit.mjs`)** — 커밋된 피그마 문구 스냅샷과 웹 문구 대조 · 스냅샷 신선도
 
 자세한 내용은 [`tools/figma-audit/README.md`](tools/figma-audit/README.md).
 

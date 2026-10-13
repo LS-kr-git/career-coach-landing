@@ -275,7 +275,7 @@ fi
 # 2겹 — 피그마 대조
 #   (a) 약관·개인정보 화면 (docs-audit.mjs) — terms/privacy.html 또는 스냅샷이 바뀐 푸시.
 #       커밋된 스냅샷(figma-docs-text.json)과 문구를 대조하므로 라이브 피그마 덤프가 필요 없다.
-#   (b) 랜딩 (audit.mjs) — 2026-10-06 은퇴. 아래 (b) 주석 참조.
+#   (b) 랜딩 (audit.mjs) — 2026-10-06 은퇴, 10-13 파일 삭제. 아래 (b) 주석 참조.
 # ───────────────────────────────────────────────────
 RANGE_BASE="$(git rev-parse --verify -q origin/main 2>/dev/null || echo '')"
 diff_names() {
@@ -305,6 +305,6 @@ fi
 # (b) 랜딩 피그마 대조 — 2026-10-06 은퇴.
 # 사용자 지시로 랜딩(6:148)·상품목록(2143:3144) 프레임이 운영 페이지에서 「레퍼런스, 기타 자료들」
 # 페이지로 옮겨져 더는 기준이 아니다. 두 페이지는 page-figma-map.json 의 exempt 에 있다.
-# audit.mjs 와 덤프 3종(figma_meta/type/style)은 더 이상 요구하지 않는다.
+# audit.mjs(2026-10-13 삭제)와 덤프 3종(figma_meta/type/style)은 더 이상 요구하지 않는다.
 echo "${DONE_MSG}"
 exit 0

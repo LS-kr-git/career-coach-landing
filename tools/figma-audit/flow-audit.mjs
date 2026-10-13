@@ -19,7 +19,7 @@
  *
  * playwright 가 없으면 조용히 건너뛴다(종료코드 0, skipped=true).
  */
-import { readFileSync, existsSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -51,8 +51,7 @@ const TRACK = [
   { key: 'padX', label: '섹션 좌우 패딩', sel: 'section', prop: 'paddingLeft' },
 ];
 
-const map = JSON.parse(readFileSync(join(HERE, 'map.json'), 'utf8'));
-const htmlPath = join(ROOT, map.web.html);
+const htmlPath = join(ROOT, 'index.html');
 
 const bail = (reason) => {
   const payload = { skipped: true, reason, findings: [] };
