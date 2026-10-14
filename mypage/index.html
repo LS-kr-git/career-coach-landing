@@ -89,9 +89,19 @@
      걷고 한 벌로 합쳤다. 아래 규칙은 위 기본값을 덮는 새 화면 값이다(순서가 우선순위다). */
   :root{--paper:#FEEAC1;--ink:#111111;--line:#F5EAD6;--edge:#F9D99A;--muted:#8A7A62;--caret-new:#B9A989}
   .page,.mp-main{background:var(--paper)}
-  /* 끝까지 내려 더 당겨도 바탕이 이어지게 — 랜딩과 같은 방식: html·body 바탕을 페이지 맨 아래 색과 같게
-     (랜딩은 footer 와 같은 --g100). 넓은 화면은 위 블록의 회색 바탕이 그대로 쓰인다 (2026-10-14 사용자 지시) */
-  @media (max-width:450px){html,body{background:var(--paper)}}
+  /* 끝에서 더 당겨도 바탕이 이어지게 — 랜딩이 쓰던 방식 그대로(v71 이전 index.html, 2026-08-02) (2026-10-14 사용자 지시)
+     ① 아래: html·body 바탕 = 페이지 맨 아래 색. 넓은 화면은 위 블록의 회색 바탕 그대로.
+     ② 위: 카드 자신의 바탕을 문서 위로 100vh 덧대고(padding-top + margin-top 음수), 덧댄 자리만 헤더 색으로 칠한다.
+        위쪽 넘침은 스크롤 영역을 늘리지 않는다. iOS 크롬은 absolute 덧댐을 문서 위에 안 그려서 이 방식이 주력이고,
+        body::before 는 같은 판을 한 겹 더 깐 것이다. 넓은 화면에서는 카드 좌우 회색까지 검게 덮으므로 휴대폰 폭에만 둔다.
+     min-height 는 덧댄 100vh 를 더해야 화면 채우기(svh)가 그대로 걸린다. */
+  @media (max-width:450px){
+    html,body{background:var(--paper)}
+    body{position:relative}
+    body::before{content:'';position:absolute;left:0;right:0;bottom:100%;height:100vh;background:var(--ink)}
+  }
+  .page{padding-top:100vh;margin-top:-100vh;min-height:200vh;min-height:calc(100vh + 100svh);
+    background:linear-gradient(var(--ink) 100vh,var(--paper) 100vh)}
   .hd{background:var(--ink)}
   .back path{stroke:#fff}
   .back:active::before{background:#2a2a2a}
