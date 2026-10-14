@@ -5,7 +5,7 @@
 <meta name="format-detection" content="telephone=no">
 <meta name="robots" content="noindex,nofollow"><title>구독 신청 — 커리어코치</title>
 <link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
 <script src="/assets/steady.js"></script>
 <style>
   :root{
@@ -181,7 +181,7 @@
   <div id="pickView">
     <main class="pick">
       <h1 class="t-title">구독권을 골라 주세요</h1>
-      <div class="plans" id="plans" role="radiogroup" aria-label="구독권"></div>
+      <div class="plans" id="plans" role="radiogroup" aria-label="구독권" data-sk="box" style="--skh:112px;--sk2:block"></div>
       <p class="plans-fail" id="plansFail" hidden></p>
 
       <section class="week" aria-labelledby="weekTitle">
@@ -199,7 +199,7 @@
     <!-- 시계 — 「13,205명」은 2026-10-12 사용자 지시로 디자인 그대로 둔다(나중에 DB 실제 값으로 바꾼다) -->
     <div class="clock">
       <div class="clock-l">다음 브리핑 발송까지</div>
-      <div class="clock-v" id="clock" aria-live="off"></div>
+      <div class="clock-v" id="clock" aria-live="off" data-sk style="--skw:4.6em"></div>
       <p class="clock-n"><b>13,205명</b>이 이 시각에 같이 받아요.<br>같이 앞서 나가기 시작하세요.</p>
     </div>
 
@@ -265,7 +265,7 @@
       <div class="agree-t" id="agreeText"></div>
     </div>
     <p class="note" id="note" role="status"></p>
-    <button class="cta" id="submit" type="button">결제하기</button>
+    <button class="cta" id="submit" type="button" data-sk>결제하기</button>
   </div>
 </div>
 

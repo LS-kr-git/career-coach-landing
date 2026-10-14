@@ -96,7 +96,13 @@ function browserMark() {
  * @param {object} props  개인정보를 넣지 말 것
  * @param {string|null} accessToken  로그인 상태면 넘긴다. 그래야 사람 단위로 묶인다
  */
+// 다음 화면을 미리 그려 두는 중(Speculation Rules prerender)이면 사람이 아직 안 본 것이다 —
+// 실제로 그 화면으로 넘어온 순간에 보낸다. 안 넘어오면 아무것도 안 보낸다.
+const 보일때 = (fn) => (typeof document !== 'undefined' && document.prerendering)
+  ? document.addEventListener('prerenderingchange', fn, { once: true }) : fn();
+
 export function track(name, props = {}, accessToken = null) {
+  if (typeof document !== 'undefined' && document.prerendering) return 보일때(() => track(name, props, accessToken));
   try {
     // 운영 주소에서만 보낸다. 2026-10-03 에 localhost 에서 돈 자동 시험(헤드리스 크롬)이
     // 운영 원장에 onboarding_done 4건·「저장 실패」 1건을 남겼다 — 로그인을 안 하니
@@ -170,10 +176,11 @@ export function metaCookies() {
 }
 
 export function metaEvent(name, props = {}, eventID) {
+  if (document.prerendering) return 보일때(() => metaEvent(name, props, eventID));
   try { if (window.fbq) window.fbq('track', name, props, eventID ? { eventID } : undefined); } catch { /* 무시 */ }
 }
 
-if (typeof window !== 'undefined') { try { loadPixel(); } catch { /* 픽셀 때문에 화면이 깨지면 안 된다 */ } }
+if (typeof window !== 'undefined') 보일때(() => { try { loadPixel(); } catch { /* 픽셀 때문에 화면이 깨지면 안 된다 */ } });
 
 /** 대부분의 페이지가 쓰는 형태: 유입 저장 + 진입 이벤트 1건. */
 export function pageView(name, props = {}, accessToken = null) {
@@ -181,6 +188,7 @@ export function pageView(name, props = {}, accessToken = null) {
   // 온보딩 단계마다 어디서 그만두는지 메타에서도 보이게(2026-10-03 사용자 요청). 표준 이벤트에
   // 맞는 이름이 없어 맞춤 이벤트이고, 광고 관리자에서 단계별로 바로 고를 수 있게 이름을 나눈다.
   if (name === 'onboarding_step') {
+    if (document.prerendering) return 보일때(() => pageView(name, props, accessToken));
     try { if (window.fbq) window.fbq('trackCustom', props.step === 'done' ? 'OnboardingDone' : 'OnboardingStep' + props.step); } catch { /* 무시 */ }
   }
   track(name, props, accessToken);

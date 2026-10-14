@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-keep>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +9,7 @@
 <meta name="description" content="커리어코치 마이페이지 — 구독 정보와 소장한 아티클을 확인합니다.">
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
 <script src="/assets/steady.js"></script>
 <link rel="stylesheet" href="/assets/toast.css">
 <style>
@@ -167,21 +167,21 @@
   <section class="hero">
     <h1 class="t-display">남들보다 앞서가는<br>커리어 경쟁력 쌓이는 중</h1>
     <!-- 숫자는 소장 편수이고 0 도 그대로 보인다(2026-10-05 사용자 확정 — 빈 상태 문구로 바꾸지 않는다) -->
-    <p class="t-body-l hero-sub" id="heroNew">지금까지<span class="slot" id="slot">0</span>개의 인사이트를 쌓았어요</p>
+    <p class="t-body-l hero-sub" id="heroNew">지금까지<span class="slot" id="slot" data-sk>0</span>개의 인사이트를 쌓았어요</p>
   </section>
 
   <!-- 내 계정 + 아티클 저장소 + 일요일 배너 -->
   <section class="card card-me">
     <div class="prof">
-      <div class="avatar"></div>
+      <div class="avatar" data-sk style="--skw:.9em"></div>
       <div class="col">
-        <span class="t-h3" id="profName">내 계정</span>
-        <span class="t-caption sub" id="profAccount">로그인한 계정으로 이용 중이에요</span>
+        <span class="t-h3" id="profName" data-sk>내 계정</span>
+        <span class="t-caption sub" id="profAccount" data-sk>로그인한 계정으로 이용 중이에요</span>
       </div>
     </div>
     <div class="arch">
       <a class="row" href="/mypage/archive/">
-        <span class="col"><span class="t-body-l">내 아티클 저장소</span><span class="t-caption sub" id="savedLine">소장한 아티클 <span class="am" id="savedCount">0편</span></span></span>
+        <span class="col"><span class="t-body-l">내 아티클 저장소</span><span class="t-caption sub" id="savedLine">소장한 아티클 <span class="am" id="savedCount" data-sk>0편</span></span></span>
         <span class="caret" aria-hidden="true">›</span>
       </a>
 
@@ -206,7 +206,7 @@
   <section class="card card-week">
     <div class="w-title">요일별 알림톡</div>
     <div>
-      <div class="dy"><div class="wd">월·수·금</div><div><div class="nm" id="mwf">디자인 인사이트</div><div class="ds">내 분야의 중요 트렌드·인사이트</div></div></div>
+      <div class="dy"><div class="wd">월·수·금</div><div><div class="nm" id="mwf" data-sk>디자인 인사이트</div><div class="ds">내 분야의 중요 트렌드·인사이트</div></div></div>
       <div class="dy"><div class="wd">화</div><div><div class="nm">일 잘하는 법·커리어</div><div class="ds">모든 직군에 통하는 일과 커리어 이야기</div></div></div>
       <div class="dy"><div class="wd">목</div><div><div class="nm">채용 공고 브리핑</div><div class="ds">최신 7일 공고와 채용시장 트렌드</div></div></div>
     </div>

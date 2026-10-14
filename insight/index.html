@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-keep>
 <head>
 <meta charset="UTF-8">
 <!-- ★ 리퍼러 차단은 <head> 의 맨 앞이어야 한다.
@@ -13,7 +13,7 @@
 <meta name="robots" content="noindex,nofollow">
 <title>인사이트 — 커리어코치</title>
 <link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
 <script src="/assets/steady.js"></script>
 <style>
   /* 커리어코치 디자인 시스템 — terms.html 과 같은 토큰·폭·헤더를 쓴다.
@@ -214,13 +214,13 @@
   </header>
 
   <main class="brief">
-    <p class="notice t-body" id="notice" role="status">불러오는 중이에요…</p>
+    <p class="notice t-body" id="notice" role="status" data-sk-hide>불러오는 중이에요…</p>
     <div class="notice-card" id="noticeCard" role="status" hidden><img src="/assets/logo-circle.svg" width="56" height="56" alt=""><h1 id="noticeT"></h1><p id="noticeB"></p><p id="noticeAsk"></p></div>
 
-    <article id="letter" hidden>
-      <h1 class="t-h2" id="title"></h1>
-      <p class="meta t-caption" id="meta" hidden>
-        <span class="meta-i" id="metaTrack"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span id="track"></span></span>
+    <article id="letter" hidden data-sk-show>
+      <h1 class="t-h2" id="title" data-sk="lines" style="--skh:3.3em"></h1>
+      <p class="meta t-caption" id="meta" hidden data-sk-show>
+        <span class="meta-i" id="metaTrack"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span id="track" data-sk style="--skw:5em"></span></span>
         <span class="meta-i" id="metaMins" hidden><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="mins"></span></span>
       </p>
       <p class="t-body blocked" id="blocked" hidden></p>
@@ -233,7 +233,7 @@
         <p class="lock-pill t-caption-strong"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span id="lockMsg"></span></p>
       </section>
 
-      <div class="body" id="body" hidden></div>
+      <div class="body" id="body" hidden data-sk="lines" data-sk-show style="--skh:16em"></div>
       <p class="src t-caption" id="src" hidden></p>
 
       <!-- 열린 글에만 선다. 잠긴 글에는 「도움이 됐나요」를 물을 수 없다(서버도 막는다 — 0102). -->
@@ -372,9 +372,10 @@
     $('logoHd').hidden = true;
   }
 
-  const notice = (text) => { $('notice').textContent = text; $('notice').hidden = false; $('noticeCard').hidden = true; $('letter').hidden = true; };
+  const notice = (text) => { window.ccNoKeep?.(); $('notice').textContent = text; $('notice').hidden = false; $('noticeCard').hidden = true; $('letter').hidden = true; };
   /** 안내 카드 — 제목 · (설명) · 문의 줄. 피그마 2070:823·2070:847 */
   const card = (t, b) => {
+    window.ccNoKeep?.();   // 안내·실패 화면은 「지난 값」으로 적지 않는다(assets/steady.js)
     $('noticeT').textContent = t; $('noticeB').textContent = b || ''; $('noticeB').hidden = !b; $('noticeAsk').textContent = MSG.ask;
     $('noticeCard').hidden = false; $('notice').hidden = true; $('letter').hidden = true;
   };

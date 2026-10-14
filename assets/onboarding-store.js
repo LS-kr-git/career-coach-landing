@@ -306,6 +306,9 @@ export async function saveThenGo(재시도, href) {
  * 보낼 것이 없으면 supabase-js 를 부르지도 않는다 — 평상시 비용이 0 이다.
  */
 export async function retryPending() {
+  // 다음 단계는 앞 화면이 떠 있는 동안 미리 그려진다(speculationrules, 2026-10-15). 그때 보내면 앞 화면의
+  // 재시도와 겹쳐 같은 저장이 두 번 나간다 — 실제로 화면에 나온 뒤에 본다.
+  if (document.prerendering) await new Promise((r) => document.addEventListener('prerenderingchange', r, { once: true }));
   const state = readState();
   if (!state.pending || inflight) return { status: 'idle' };
   if (!complete(state)) { writeState({ pending: false }); return { status: 'incomplete' }; }

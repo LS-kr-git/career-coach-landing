@@ -123,7 +123,7 @@ export async function requireLogin(next) {
   const { client, liveSession } = await import('/assets/onboarding-store.js');
   if (!(await liveSession(await client()))) {   // 탈퇴·삭제돼 서버가 모르는 세션도 로그인 안 한 것으로 본다
     if (next) (await import('/assets/return-to.js')).rememberNext(next);
-    window.ccHold?.(new Promise(() => {}));   // 떠나는 중이다 — 이 화면을 내보이지 않는다(assets/steady.js)
+    window.ccLeave?.();   // 떠나는 중이다 — 이 화면을 내보이지 않는다(assets/steady.js)
     location.replace((await import('/assets/supabase-config.js')).KAKAO_LOGIN);   // 가입·로그인 공통 입구
     return false;
   }
@@ -139,11 +139,16 @@ export async function requireLogin(next) {
  * 화면이 그것을 빈 상태로 그려 결제한 사람에게 「등록된 결제수단 없음」을 보여 준다.
  */
 async function rpc(name, one, args) {
-  const supabase = await supa();
-  const { data, error } = await supabase.rpc(name, args);
-  if (error) throw error;
-  if (one && !(data && data[0])) throw new Error(`${name}: 행이 오지 않았습니다`);
-  return one ? data[0] : (data || []);
+  try {
+    const supabase = await supa();
+    const { data, error } = await supabase.rpc(name, args);
+    if (error) throw error;
+    if (one && !(data && data[0])) throw new Error(`${name}: 행이 오지 않았습니다`);
+    return one ? data[0] : (data || []);
+  } catch (e) {
+    window.ccNoKeep?.();   // 실패 화면을 「지난 값」으로 적어 두지 않는다(assets/steady.js)
+    throw e;
+  }
 }
 
 /** 프로필 — { name, provider, email, saved_count, received_count }. 회원 행이 없으면 서버가 예외를 던진다. */
@@ -172,7 +177,7 @@ export async function onboardingDone() {
 export async function requireOnboarded() {
   if (!(await requireLogin())) return false;
   if (await onboardingDone()) return true;
-  window.ccHold?.(new Promise(() => {}));   // 떠나는 중이다 — 이 화면을 내보이지 않는다(assets/steady.js)
+  window.ccLeave?.();   // 떠나는 중이다 — 이 화면을 내보이지 않는다(assets/steady.js)
   location.replace('/onboarding/1/');
   return false;
 }

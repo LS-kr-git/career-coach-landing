@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-keep>
 <head>
 <meta charset="UTF-8">
 <!-- ★ 리퍼러 차단은 <head> 맨 앞이어야 한다 — 주소에 열람 토큰이 실린다(insight/index.html 과 같은 이유). -->
@@ -10,7 +10,7 @@
 <meta name="robots" content="noindex,nofollow">
 <title>내 조건의 새 공고 — 커리어코치</title>
 <link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
 <script src="/assets/steady.js"></script>
 <style>
   /* 목요일 알림톡 「전체 공고 확인」 버튼이 여는 화면 (2026-09-25 사용자 컨펌 — 캔버스 C-1 · N2 · S2 · Y5).
@@ -135,18 +135,18 @@
     </a>
   </header>
 
-  <div class="center" id="loading"><svg class="ld-art" viewBox="0 0 50 50" aria-hidden="true"><circle cx="25" cy="25" r="20"/></svg><span class="sr" role="status">불러오는 중이에요…</span></div>
+  <div class="center" id="loading" data-sk-hide><svg class="ld-art" viewBox="0 0 50 50" aria-hidden="true"><circle cx="25" cy="25" r="20"/></svg><span class="sr" role="status">불러오는 중이에요…</span></div>
   <div class="center" id="notice" hidden><div class="msg" role="status"><img src="/assets/logo-circle.svg" width="56" height="56" alt=""><h1 id="notice-t"></h1><p id="notice-b"></p><p id="notice-ask"></p></div></div>
 
-  <main id="open" hidden>
+  <main id="open" hidden data-sk-show>
     <div class="eyebrow" id="eyebrow" hidden></div>
     <div class="head"><h1 class="t-display">내 조건의 새 공고</h1></div>
     <div id="tiles">
-      <div class="when" id="when"></div>
+      <div class="when" id="when" data-sk style="--skw:5em"></div>
       <div class="nums">
-        <div><div class="l">새 공고</div><div class="v" id="v1"></div><div class="d" id="d1"></div></div>
-        <div><div class="l">채용중 회사</div><div class="v" id="v2"></div><div class="d" id="d2"></div></div>
-        <div><div class="l" id="l3"></div><div class="v" id="v3"></div><div class="d" id="d3"></div></div>
+        <div><div class="l">새 공고</div><div class="v" id="v1" data-sk style="--skw:2.2em"></div><div class="d" id="d1" data-sk style="--skw:3em"></div></div>
+        <div><div class="l">채용중 회사</div><div class="v" id="v2" data-sk style="--skw:2.2em"></div><div class="d" id="d2" data-sk style="--skw:3em"></div></div>
+        <div><div class="l" id="l3" data-sk style="--skw:4em"></div><div class="v" id="v3" data-sk style="--skw:2.2em"></div><div class="d" id="d3" data-sk style="--skw:3em"></div></div>
       </div>
     </div>
     <div class="band" id="band"></div>
@@ -160,7 +160,7 @@
       </div>
     </div>
     </div>
-    <div class="list" id="list"></div>
+    <div class="list" id="list" data-sk="lines" style="--skh:18em"></div>
     <div class="pg" id="pg"></div>
   </main>
 
@@ -206,6 +206,7 @@
   let 공고 = [], q = '', page = 1, 정렬 = '기본';
 
   const notice = (t, b, ask) => {
+    window.ccNoKeep?.();   // 안내·실패 화면은 「지난 값」으로 적지 않는다(assets/steady.js)
     $('notice-t').textContent = t; $('notice-b').textContent = b || ''; $('notice-b').hidden = !b; $('notice-ask').textContent = ask;
     $('loading').hidden = true; $('notice').hidden = false; $('open').hidden = true; $('closed').hidden = true;
   };

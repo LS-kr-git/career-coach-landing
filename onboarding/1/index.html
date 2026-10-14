@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex,nofollow">
 <link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
 <title>직군 선택 — 커리어코치</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
 <script src="/assets/steady.js"></script>
 <style>
   :root{
@@ -165,4 +165,7 @@ document.querySelector('.cta').addEventListener('click',()=>{
   // 확인 화면 「바꾸기」로 왔으면 3단계까지 가지 않고 여기서 저장해 확인 화면으로 돌아간다.
   if (fromDone()) window.ccNext = () => { window.ccOnChange(); saveThenGo(재시도, DONE); };
 </script>
+<!-- 다음 단계를 미리 그려 둔다 — 「다음」을 누르면 기다림 없이 넘어간다(크롬·안드로이드. 2026-10-15 사용자 지시).
+     미리 그리는 동안 추적은 보내지 않는다(assets/track.js). 완료 화면은 4단계에서 고른 주제를 읽으므로 미리 그리지 않는다. -->
+<script type="speculationrules">{"prerender":[{"source":"list","urls":["/onboarding/2/"]}]}</script>
 </body></html>
