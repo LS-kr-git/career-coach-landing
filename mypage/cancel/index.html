@@ -170,7 +170,7 @@
 </div>
 <script type="module">
   import '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
-  import { requireLogin, getSubscription, cancelSubscription, dayText, FAIL } from '/assets/mypage-data.js';
+  import { requireLogin, getSubscription, cancelSubscription, dayText, closeText, FAIL } from '/assets/mypage-data.js';
   import { 오류안내 } from '/assets/toast.js';
   const $ = (id) => document.getElementById(id);
   const go = $('go'), lab = $('lab'), agree = $('agree');
@@ -219,13 +219,14 @@
       refresh();
     }
   });
-  /* 미납(past_due) — 해지하면 다음 새벽 정리에서 바로 끝난다(0092). 날짜 대신 「하루 안」이라고 말한다(2026-10-14 할일 6). */
+  /* 미납(past_due) — 해지하면 다음 새벽 청구 회차가 바로 닫는다(0092). 그 날을 서버가 준다(0141 · 2026-10-15). */
   let 미납 = false;
-  function 미납으로() {
+  function 미납으로(s) {
     미납 = true;
-    $('keepA').textContent = '결제가 밀려 있어 해지하면 하루 안에 멤버십이 끝나요.';
-    $('keepB').textContent = '멤버십이 하루 안에 끝나요.';
-    $('payStop').textContent = '밀린 결제를 더 시도하지 않아요.';
+    const 끝 = closeText(s);
+    $('keepA').textContent = `결제가 되지 않은 상태라, 해지하면 ${끝}에 멤버십이 끝나요.`;
+    $('keepB').textContent = `${끝}에 멤버십이 끝나요.`;
+    $('payStop').textContent = '해지하면 결제를 더 시도하지 않아요.';
   }
   refresh();
   /* 해지할 구독이 없거나 이미 예약돼 있으면 이 화면에 머물 이유가 없다 — 멤버십·결제로 돌려보낸다 */
@@ -234,7 +235,7 @@
     if (!s || !['trialing', 'active', 'past_due'].includes(s.status) || s.cancel_at_period_end) {
       location.replace('/mypage/billing/'); return;
     }
-    if (s.status === 'past_due') 미납으로();      // 기간 끝이 이미 지났다 — 지난 날짜를 「이용 종료일」로 말하지 않는다
+    if (s.status === 'past_due') 미납으로(s);      // 기간 끝이 이미 지났다 — 지난 날짜를 「이용 종료일」로 말하지 않는다
     else $('endA').textContent = `(${dayText(s.current_period_end)})`;
     막힘 = false; refresh();
   }, () => { 실패 = true; refresh(); }));
