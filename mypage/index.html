@@ -103,7 +103,8 @@
   }
   .page{padding-top:100vh;margin-top:-100vh;min-height:200vh;min-height:calc(100vh + 100svh);
     background:linear-gradient(var(--ink) 100vh,var(--paper) 100vh)}
-  .hd{background:var(--ink)}
+  /* 헤더는 따라다니지 않고 늘 제목 바로 위에 둔다 — 스크롤하면 함께 올라간다 (2026-10-15 사용자 지시) */
+  .hd{background:var(--ink);position:static}
   .back path{stroke:#fff}
   .back:active::before{background:#2a2a2a}
   .mp-main{padding-top:0}
@@ -332,5 +333,28 @@
   });
 </script>
 </div>
+<script>
+  /* 끝에서 더 당긴 자리 색 — 랜딩이 쓰던 캔버스색 스위칭 그대로(84b9b99, 2026-08-02) (2026-10-15 사용자 지시).
+     iOS 웹킷은 그 자리를 위아래 구분 없이 html 바탕 한 색으로만 칠하고, 위 CSS 의 덧댄 판·그라데이션은 안 그린다.
+     그래서 스크롤 위치로 그 한 색을 바꿔친다: 위쪽 절반=헤더 색(--ink), 아래쪽 절반=페이지 바닥 색(--paper).
+     바꿔치는 것은 카드(.page) 뒤라 눈에 안 보인다. 카드보다 넓은 화면은 양옆 회색이 보이므로 건드리지 않는다. */
+  (function () {
+    var root = document.documentElement, cs = getComputedStyle(root);
+    var top = cs.getPropertyValue('--ink').trim(), bottom = cs.getPropertyValue('--paper').trim();
+    var mq = matchMedia('(max-width: 450px)');   // 위 CSS 의 휴대폰 폭 바탕 규칙과 같은 경계
+    var cur = null;
+    function apply() {
+      // steady.js 가 본문을 숨겨 둔 동안(cc-wait)은 바탕만 보이므로 바꾸지 않는다 — 빈 화면이 검게 번쩍이지 않게
+      if (root.classList.contains('cc-wait')) return;
+      // <= : 스크롤할 거리가 없는 큰 화면에서도 맨 위(헤더 쪽)를 따른다
+      var c = !mq.matches ? '' : scrollY <= (root.scrollHeight - innerHeight) / 2 ? top : bottom;
+      if (c !== cur) { cur = c; root.style.backgroundColor = c; document.body.style.backgroundColor = c; }
+    }
+    addEventListener('scroll', apply, { passive: true });
+    addEventListener('resize', apply, { passive: true });
+    new MutationObserver(apply).observe(root, { attributes: true, attributeFilter: ['class'] });
+    apply();
+  })();
+</script>
 </body>
 </html>
