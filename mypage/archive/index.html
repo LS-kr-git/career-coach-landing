@@ -10,6 +10,8 @@
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
 <link rel="stylesheet" href="/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
+<link rel="stylesheet" href="/assets/toast.css">
+<link rel="stylesheet" href="/assets/skeleton.css">
 <script src="/assets/steady.js"></script>
 <style>
   :root{
@@ -99,8 +101,9 @@
     body{background:var(--gray-100)}
     .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
   }
-  /* 조회 실패 — 값 자리의 글자를 빨갛게 (2026-09-24 사용자 확정 A안). */
-  .fail{color:var(--error-600)!important}
+  /* 목록을 못 읽었을 때 — 줄 자리 스켈레톤(2026-10-15 「오류 대체 화면」 S23) */
+  .art.sk{pointer-events:none}
+  .art.sk .col{gap:8px}
 </style>
 </head>
 <body>
@@ -170,12 +173,15 @@
     </div>
   </div>
 </main>
+<p class="cc-toast float" id="errToast" role="alert" hidden></p>
 <script type="module">
   import '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
   /* 목록은 서버에서 온다 (career-coach 0086 `mypage_archive`). 정적 HTML 의 달 칩·목록은
      피그마 기준 프레임(908:640) 상태이고, 자료를 받으면 여기서 전부 다시 그린다 —
      칩도 같이 그린다. 소장한 달만 칩으로 서야 고른 달에 글이 있다. */
   import { requireLogin, getArchive, archiveView, monthChips, getInsightToken, insightHref, EMPTY, FAIL } from '/assets/mypage-data.js';
+  import { 오류안내 } from '/assets/toast.js';
+  import { 막대 } from '/assets/skeleton.js';
   /* placeholder 는 속성이라 문구 대조(docs-audit)에 안 잡힌다. 그래서 문구의 정본은
      화면에 있는 sr-only label 하나로 두고, placeholder 는 그걸 복사해 쓴다 —
      두 곳에 같은 글자를 적어 두면 보이는 쪽만 고쳐도 검사가 초록이 된다. */
@@ -202,10 +208,9 @@
     return on ? on.dataset.month : null;
   }
   function esc(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
-  function note(title, hint, bad) {
-    var c = bad ? ' fail' : '';
-    listBox.innerHTML = '<div class="empty"><span class="t-body-s' + c + '">' + esc(title) + '</span>'
-      + '<span class="t-caption' + c + '">' + esc(hint) + '</span></div>';
+  function note(title, hint) {
+    listBox.innerHTML = '<div class="empty"><span class="t-body-s">' + esc(title) + '</span>'
+      + '<span class="t-caption">' + esc(hint) + '</span></div>';
   }
   function paintMonths() {
     var chips = monthChips(ARCHIVE);
@@ -249,7 +254,7 @@
   });
   /* 줄을 누르면 그 편 전문 페이지로 간다 (2026-10-03 사용자 컨펌 「1번」). 전문 페이지는 토큰으로만
      열리므로 그 사람의 토큰을 받아 주소를 만든다(0115). 받는 것은 처음 한 번뿐이다.
-     토큰을 못 받으면 목록 자리에 실패를 말한다 — 눌렀는데 아무 일도 없는 것으로 두지 않는다. */
+     토큰을 못 받으면 하단 안내로 실패를 말한다 — 눌렀는데 아무 일도 없는 것으로 두지 않는다(목록은 그대로). */
   var 토큰 = null;
   listBox.addEventListener('click', function (e) {
     var row = e.target.closest('.art[data-id]');
@@ -258,7 +263,7 @@
     (토큰 ? Promise.resolve(토큰) : getInsightToken()).then(function (t) {
       토큰 = t;
       location.href = insightHref(t, row.dataset.id, 'archive');
-    }, function () { note(FAIL.line, FAIL.hint, true); });
+    }, function () { 오류안내(document.getElementById('errToast'), FAIL.line); });
   });
   var clearq = document.getElementById('clearq');
   clearq.addEventListener('click', function () { q.value = ''; clearq.hidden = true; render(); });
@@ -273,10 +278,14 @@
     ARCHIVE = archiveView(rows);
     paintMonths();
     render();
-  }, function () {
-    /* 실패는 「아직 없음」과 다른 글자로 그린다. 칩은 지운다 — 못 읽은 목록의 달을 고를 수 없다. */
+  }, function 목록실패() {
+    /* 실패는 「아직 없음」으로 그리지 않는다 — 줄 자리를 스켈레톤으로 두고 하단 안내로 말한다(2026-10-15 S23).
+       칩은 지운다 — 못 읽은 목록의 달을 고를 수 없다. */
     months.innerHTML = '';
-    note(FAIL.list, FAIL.hint, true);
+    var 줄 = '<div class="art sk" aria-hidden="true"><span class="col"><span class="meta">' + 막대('44px', 16) + 막대('40px', 14)
+      + '</span>' + 막대('85%', 18) + '</span></div>';
+    listBox.innerHTML = '<div class="list-group">' + 줄 + 줄 + 줄 + 줄 + 줄 + '</div>';
+    오류안내(document.getElementById('errToast'), FAIL.line);
   }));
 </script>
 </div>

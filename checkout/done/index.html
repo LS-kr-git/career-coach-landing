@@ -6,6 +6,7 @@
 <meta name="robots" content="noindex,nofollow"><title>구독 시작 — 커리어코치</title>
 <link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
 <link rel="stylesheet" href="/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
+<link rel="stylesheet" href="/assets/toast.css">
 <script src="/assets/steady.js"></script>
 <style>
   :root{
@@ -50,6 +51,8 @@
   .tip svg{flex:none;margin-top:1px}
   .tip b{color:var(--amber-200);font-weight:700}
 
+  /* 조회 실패 안내 — 버튼 바로 위 10px 에 공용 하단 안내 (2026-10-15 「오류 대체 화면」) */
+  #errToast{position:absolute;left:0;right:0;bottom:calc(84px + env(safe-area-inset-bottom));z-index:2}
   .bar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:var(--card-max);
     padding:14px 20px calc(20px + env(safe-area-inset-bottom));background:#fff;
     box-shadow:0 -8px 24px rgba(15,23,42,.06)}
@@ -97,6 +100,7 @@
   </main>
 
   <div class="bar">
+    <p class="cc-toast" id="errToast" role="alert" hidden></p>
     <label class="agree"><input type="checkbox" id="agree"><span>알림톡이 오지 않으면 카카오톡 설정에서 알림톡 수신이 켜져 있는지 확인해야 함을 이해했어요</span></label>
     <a class="cta" id="next" href="/mypage/" aria-disabled="true">다음</a>
   </div>
@@ -117,6 +121,7 @@
 <script type="module">
   import { metaEvent } from '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
   import { requireLogin, getSubscription, firstSendDay } from '/assets/mypage-data.js';
+  import { 오류안내 } from '/assets/toast.js';
   var $ = function (id) { return document.getElementById(id); };
   $('firstDay').textContent = '일월화수목금토'[new Date(firstSendDay() + 'T00:00:00Z').getUTCDay()] + '요일 아침 8시';
 
@@ -137,6 +142,9 @@
     var 처음 = true;
     try { 처음 = localStorage.getItem('cc_px_buy') !== 결제키; localStorage.setItem('cc_px_buy', 결제키); } catch (e) { /* 못 적으면 eventID 에 맡긴다 */ }
     if (처음) metaEvent('Purchase', { value: s.price_krw, currency: 'KRW' }, 결제키);
+  }, function () {
+    // 구독을 못 읽었다 — 결제는 끝났으니 화면은 두고, 확인할 곳을 알린다 (2026-10-15 「오류 대체 화면」 D4)
+    오류안내($('errToast'), '구독 정보를 불러오지 못했어요.\n마이페이지에서 다시 확인해 주세요.');
   });
 </script>
 </body>

@@ -167,7 +167,7 @@ for (const [html, 노드, 문구들] of [
 for (const [rel, 값갈래, 실패갈래] of [
   ['mypage/index.html', 'getProfile', 'profileFail'],
   ['mypage/billing/index.html', 'getSubscription', 'billingFail'],
-  ['mypage/archive/index.html', 'getArchive', 'FAIL.list'],
+  ['mypage/archive/index.html', 'getArchive', '목록실패'],   // 2026-10-15 — FAIL.line 은 토큰 실패 갈래도 불러 목록 실패를 못 가른다
   ['mypage/topics/index.html', 'pullFromServer', 'FAIL.line'],
   ['mypage/jobs/index.html', 'pullFromServer', 'FAIL.line'],
   ['checkout/index.html', 'getPlans', 'FAIL.line'],

@@ -10,6 +10,8 @@
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
 <link rel="stylesheet" href="/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
+<link rel="stylesheet" href="/assets/toast.css">
+<link rel="stylesheet" href="/assets/skeleton.css">
 <script src="/assets/steady.js"></script>
 <style>
   :root{
@@ -50,7 +52,11 @@
   .t-micro{font-size:11px;line-height:14px;font-weight:500}
   /* 하단 플로팅 CTA — 320×54, 좌우 20 (피그마와 같은 값) */
   .cta-dock{position:sticky;bottom:0;padding:12px 0 20px;background:#fff;
-    display:flex;justify-content:center}
+    display:flex;flex-direction:column;align-items:center}
+  /* 못 읽었을 때 — 버튼 위 하단 안내 · 목록 자리 스켈레톤 (2026-10-15 「오류 대체 화면」 S24) */
+  #errToast{margin-bottom:10px}
+  .item.sk{pointer-events:none}
+  .item.sk .col{flex:1;display:flex;flex-direction:column;gap:8px}
   /* 폭은 저장소 정본을 따른다 — CLAUDE.md 「CTA 규칙」: 플로팅은 calc(100% - 40px) · max 410.
      피그마 프레임이 320 인 것은 360 기준이라 그런 것이고, 웹 폭(카드 450)과 다른 것이 의도된 상태다
      (career-coach docs/기획/피그마-웹-동기화.md 「폭에 관한 확정 사항」). */
@@ -167,6 +173,7 @@
   </div>
 </main>
 <div class="cta-dock">
+  <p class="cc-toast" id="errToast" role="alert" hidden></p>
   <button class="cta" type="button" id="open" disabled>
     <span id="lab-idle">아티클을 하나 골라주세요</span><span id="lab-pick" hidden>이 아티클 전문 열기</span>
   </button>
@@ -176,12 +183,15 @@
   /* 목록은 **서버에서** 온다 (2026-09-24 · 0089 `mypage_received`). 마크업의 5편은 피그마
      기준 프레임 상태(대조용)이고, 여기서 그 자리를 실제 기록으로 다시 채운다. */
   import { requireLogin, getThisWeek, getSunday, useSunday, FAIL } from '/assets/mypage-data.js';
+  import { 오류안내 } from '/assets/toast.js';
+  import { 막대 } from '/assets/skeleton.js';
+  var 실패안내 = function () { 오류안내(document.getElementById('errToast'), FAIL.line); };
 
   var btn = document.getElementById('open');
   var idle = document.getElementById('lab-idle');
   /* 로그인한 사람만 보는 화면이다.
      세션을 **못 물어본** 것과 로그인 안 한 것은 다르다 — 삼키지 않고 버튼 라벨로 드러낸다. */
-  requireLogin().catch(function () { btn.disabled = true; idle.textContent = FAIL.line; });
+  requireLogin().catch(function () { btn.disabled = true; 실패안내(); });
   var pick = document.getElementById('lab-pick');
   var 다씀 = false;   // 이번 주 기회를 썼거나 그걸 못 물어봤다 — 고르기를 막는다
   var secs = document.querySelectorAll('.sec .items');
@@ -206,10 +216,13 @@
         + '<span class="t-micro kept">✓ 소장 완료</span></div>';
     }).join('');
   }, function () {
-    secs[0].innerHTML = '<p class="t-body-s">' + esc(FAIL.list) + '</p>';
-    secs[1].innerHTML = '';
+    /* 줄 자리를 스켈레톤으로 두고 실패는 하단 안내로 — 버튼은 잠긴 채 원래 문구 */
+    var 줄 = '<div class="item sk" aria-hidden="true"><span class="col"><span class="meta">' + 막대('44px', 16) + 막대('56px', 14)
+      + '</span>' + 막대('80%', 18) + '</span>' + 막대('22px', 22, '50%') + '</div>';
+    secs[0].innerHTML = 줄 + 줄 + 줄;
+    secs[1].innerHTML = 줄 + 줄;
     btn.disabled = true;
-    idle.textContent = FAIL.hint;
+    실패안내();
   }));
 
   document.querySelector('.lists').addEventListener('click', function (e) {
@@ -233,8 +246,8 @@
   }, function () {
     btn.disabled = true;
     idle.hidden = false; pick.hidden = true;
-    idle.textContent = FAIL.hint;
-    quota.textContent = FAIL.line;
+    quota.innerHTML = 막대('64px', 20);
+    실패안내();
     다씀 = true;   // 못 물어봤으면 고를 수 없게 둔다 — 고르는 순간 아래 클릭이 버튼을 다시 열지 않게
   }));
 

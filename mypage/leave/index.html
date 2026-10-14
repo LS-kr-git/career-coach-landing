@@ -11,6 +11,7 @@
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
 <link rel="stylesheet" href="/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
+<link rel="stylesheet" href="/assets/toast.css">
 <script src="/assets/steady.js"></script>
 <style>
   :root{
@@ -123,7 +124,8 @@
   /* 탈퇴 버튼은 앰버가 아니라 짙은 회색 — 권하는 행동이 아니다 */
   .cta.danger{background:var(--gray-800);box-shadow:none}
   .cta.danger[disabled]{background:var(--gray-100);color:var(--gray-400)}
-  .err{color:var(--error-600);font-size:13px;line-height:18px;text-align:center;margin-top:16px}
+  /* 탈퇴 실패 — 버튼 바로 위 10px 에 하단 안내(동의 줄 위에 겹쳐 뜬다 · 2026-10-15 「오류 대체 화면」) */
+  #err{position:absolute;left:0;right:0;bottom:84px;z-index:2}
   /* 탈퇴 완료 — 체크·제목·문구 묶음을 「화면 맨 위 ~ 떠 있는 CTA 버튼 윗변」 사이의 정가운데에 (2026-10-03 사용자 지시).
      CTA 윗변 = 화면높이 − 74(버튼 54 + 바닥 20). main 은 헤더(48) 아래에서 시작하므로 아래 여백을 74+48 = 122 로 두면
      main 의 가운데가 그 영역의 가운데와 겹친다. .cta-dock 은 safe-area 를 안 더하므로 여기도 안 더한다. 피그마 09-C 프레임 아래 여백 122 와 같은 값 */
@@ -161,7 +163,6 @@
       <div class="rs" id="rs" role="group" aria-label="떠나시는 이유"><button class="r" type="button" role="checkbox" aria-checked="false"><span class="box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>알림이 너무 자주 와요</span></button><button class="r" type="button" role="checkbox" aria-checked="false"><span class="box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>내용이 도움이 안 돼요</span></button><button class="r" type="button" role="checkbox" aria-checked="false"><span class="box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>읽을 시간이 없어요</span></button><button class="r" type="button" role="checkbox" aria-checked="false"><span class="box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>가격이 부담돼요</span></button><button class="r" type="button" role="checkbox" aria-checked="false"><span class="box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>이직을 마쳤어요</span></button><button class="r" type="button" role="checkbox" aria-checked="false" id="etc"><span class="box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>기타</span></button></div>
       <div class="other" id="other" hidden><textarea id="otherText" maxlength="2000" rows="3" placeholder="떠나시는 이유를 자유롭게 적어 주세요" aria-label="기타 이유"></textarea><span class="t-caption cnt" id="cnt">0/2,000</span></div>
     </div>
-    <p class="err" id="err" role="status" hidden></p>
   </div>
 </main>
 <main id="bye" hidden>
@@ -181,12 +182,14 @@
   </div>
 </div>
 <div class="cta-dock leave" id="dock">
+  <p class="cc-toast" id="err" role="alert" hidden></p>
   <button class="agree" id="agree" type="button" role="checkbox" aria-checked="false"><span class="box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
     <span class="agree-t">위 내용을 전부 꼼꼼히 확인했어요</span></button>
   <button class="cta danger" type="button" id="go" disabled><span id="lab">탈퇴하기</span></button>
 </div>
 <script type="module">
   import { requireLogin, getSubscription, dayText, withdraw, FAIL } from '/assets/mypage-data.js';
+  import { 오류안내 } from '/assets/toast.js';
   import { client, forgetLocal } from '/assets/onboarding-store.js';
   const $ = (id) => document.getElementById(id);
   const go = $('go'), lab = $('lab'), agree = $('agree');
@@ -233,7 +236,7 @@
   let 끝남 = false;   // 완료 뒤 「처음 화면으로」는 go.onclick 이 맡는다 — 탈퇴를 다시 부르지 않는다
   go.addEventListener('click', async () => {
     if (go.disabled || 끝남) return;
-    go.disabled = true; $('err').hidden = true;
+    go.disabled = true; $('err').hidden = true; $('err').classList.remove('in', 'out');
     try {
       const r = await withdraw(reasonText() || null);
       /* 서버가 멤버십을 다시 본다 — 화면을 연 뒤에 결제가 걸렸으면 여기서 막힌다 */
@@ -247,7 +250,7 @@
       go.onclick = () => { location.href = '/'; };
     } catch (e) {
       console.error('탈퇴 실패', e);
-      $('err').textContent = '탈퇴하지 못했어요. 잠시 뒤 다시 시도해 주세요.'; $('err').hidden = false;
+      오류안내($('err'), '탈퇴하지 못했어요. 잠시 뒤 다시 시도해 주세요.');
       refresh();
     }
   });

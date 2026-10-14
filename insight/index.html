@@ -14,6 +14,8 @@
 <title>인사이트 — 커리어코치</title>
 <link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
 <link rel="stylesheet" href="/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
+<link rel="stylesheet" href="/assets/toast.css">
+<link rel="stylesheet" href="/assets/skeleton.css">
 <script src="/assets/steady.js"></script>
 <style>
   /* 커리어코치 디자인 시스템 — terms.html 과 같은 토큰·폭·헤더를 쓴다.
@@ -69,8 +71,6 @@
 
   /* 판정표(LOCKED)에 없는 상태 — 요약·잠김 상자 대신 이 한 줄만 선다 (피그마 2279:1307, 2026-10-04 사용자 지시) */
   /* 피그마 2279:1307 의 2418:1329 — 13/20 · 가운데 · 머리(제목·분야) 아래 24 + 98 지점 (2026-10-08 사용자 지시 「피그마로 맞춰 줘」) */
-  .blocked{color:var(--ink-500);margin-top:122px;white-space:pre-line;text-align:center;font-size:13px;line-height:20px}
-  .blocked[hidden]{display:none}
 
   /* 전문 */
   .body{margin-top:36px}
@@ -223,7 +223,6 @@
         <span class="meta-i" id="metaTrack"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span id="track" data-sk style="--skw:5em"></span></span>
         <span class="meta-i" id="metaMins" hidden><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="mins"></span></span>
       </p>
-      <p class="t-body blocked" id="blocked" hidden></p>
 
       <section class="lock" id="lock" hidden>
         <div class="ghost" aria-hidden="true">
@@ -256,6 +255,7 @@
       <a class="saved-all t-caption" id="savedAll" href="/mypage/archive/"></a>
     </section>
   </main>
+  <p class="cc-toast float" id="errToast" role="alert" hidden></p>
 
   <div class="dock" id="dock">
     <button class="cta" id="makeup" type="button" hidden>이 편 열기</button>
@@ -275,6 +275,9 @@
   import '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
   // 접속 정보는 /assets/supabase-config.js 한 곳에만 둔다 (2026-08-06 복구 훈련 결과).
   import { SUPABASE_URL, SUPABASE_ANON_KEY } from '/assets/supabase-config.js';
+  import { 오류안내 } from '/assets/toast.js';
+  import { 막대 } from '/assets/skeleton.js';
+  import { FAIL } from '/assets/mypage-data.js';
 
   // supabase-js 를 부르지 않는다. 여기서 하는 일은 RPC POST 한두 번이고,
   // 그것 때문에 SDK 수백 KB 를 내려보낼 이유가 없다 (assets/track.js 와 같은 판단).
@@ -336,6 +339,15 @@
      이 글자를 그대로 띄우면 피그마 2070:823 과 다른 화면이 된다. 이 머리로 시작하면 「없는 글」 카드로 바꾼다.
      전체 일치가 아니라 머리만 보는 것은 서버 쪽 마침표·어미가 바뀌어도 날것의 서버 문구로 조용히 새지 않게 하려는 것이다(검사관 ①). */
   const SERVER_NOT_FOUND = '없는 글';
+  /* 그 밖의 실패도 서버 문장·회색 글 대신 같은 안내 카드로 (2026-10-15 사용자 확정 「오류 대체 화면」 S5·S6·S7).
+     만료 문구는 /jobs/ 의 같은 상황 문구와 같다. 서버의 만료 예외(insight_letter 0129)는 머리로 가른다 — SERVER_NOT_FOUND 와 같은 이유. */
+  const SERVER_EXPIRED = '유효하지 않거나 만료된';
+  const ERR_CARD = {
+    expired:    '링크 사용 기간이 지났어요',
+    expiredSub: '가장 최근에 받은 알림톡에서 다시 열어 주세요.',
+    blocked:    '지금은 전문을 열 수 없어요',
+    react:      '반응을 저장하지 못했어요. 다시 눌러 주세요',
+  };
 
   /* 구독 CTA 의 목적지 — 결제 화면(2026-10-03 실결제 채널). 결제 화면이 로그인을 먼저 보고,
      로그인 뒤 다시 결제 화면으로 데려온다(assets/return-to.js). 전문 페이지는 토큰으로만 열려
@@ -372,7 +384,6 @@
     $('logoHd').hidden = true;
   }
 
-  const notice = (text) => { window.ccNoKeep?.(); $('notice').textContent = text; $('notice').hidden = false; $('noticeCard').hidden = true; $('letter').hidden = true; };
   /** 안내 카드 — 제목 · (설명) · 문의 줄. 피그마 2070:823·2070:847 */
   const card = (t, b) => {
     window.ccNoKeep?.();   // 안내·실패 화면은 「지난 값」으로 적지 않는다(assets/steady.js)
@@ -464,11 +475,10 @@
     $('fb').hidden = true;
     $('metaMins').hidden = true;
     const 잠김문구 = LOCKED[row.state];
-    $('lock').hidden = !잠김문구;
-    $('lockMsg').textContent = 잠김문구 || '';
-    $('lockMsg').parentElement.classList.toggle('multi', !!잠김문구 && 잠김문구.includes('\n'));
-    $('blocked').textContent = MSG.blocked;
-    $('blocked').hidden = !!잠김문구;
+    if (!잠김문구) throw new Error(MSG.blocked);   // 모르는 상태 — 지어내지 않고 안내 카드로(아래 catch · S7)
+    $('lock').hidden = false;
+    $('lockMsg').textContent = 잠김문구;
+    $('lockMsg').parentElement.classList.toggle('multi', 잠김문구.includes('\n'));
     $('makeup').hidden = row.state !== 'makeup_offer';
 
     const sub = $('subscribe');
@@ -531,6 +541,7 @@
         if (!res.ok) throw new Error(String(res.status));
       } catch {
         반응표시(전);
+        오류안내($('errToast'), ERR_CARD.react);   // 조용히 되돌리기만 하지 않는다 (2026-10-15 D7)
       } finally {
         반응버튼.forEach((x) => { x.disabled = false; });
       }
@@ -586,7 +597,15 @@
     let rows;
     try {
       rows = await callRows('insight_saved_recent', { p_token: token, p_exclude_id: Number(id) });
-    } catch { return; }
+    } catch {
+      // 못 읽었으면 목록 자리를 스켈레톤으로 두고 하단 안내로 말한다 (2026-10-15 D8)
+      const 줄 = '<div class="idx-row" aria-hidden="true">' + 막대('20px', 18) + 막대('80%', 18) + '</div>';
+      $('savedList').innerHTML = 줄 + 줄 + 줄;
+      $('savedAll').hidden = true;
+      $('saved').hidden = false;
+      오류안내($('errToast'), FAIL.line);
+      return;
+    }
     if (!rows.length) return;
 
     const list = $('savedList');
@@ -621,13 +640,15 @@
   } else {
     try {
       render(await call('insight_letter'));
-      // ★ 전문이 선 뒤에만 부른다. `notice()` 는 #letter 만 감추므로, 실패한 화면에서
+      // ★ 전문이 선 뒤에만 부른다. `card()` 는 #letter 만 감추므로, 실패한 화면에서
       //   이것을 부르면 「없는 글이에요」 안내문 아래에 소장 목록이 따라 서게 된다.
       await loadSaved();
       진행();
     } catch (err) {
-      if (err.message === MSG.notFound || String(err.message).startsWith(SERVER_NOT_FOUND)) card(MSG.notFound);
-      else notice(err.message);
+      const 말 = String(err.message);
+      if (말 === MSG.notFound || 말.startsWith(SERVER_NOT_FOUND)) card(MSG.notFound);
+      else if (말.startsWith(SERVER_EXPIRED)) card(ERR_CARD.expired, ERR_CARD.expiredSub);
+      else card(ERR_CARD.blocked);
     }
   }
   다그림();

@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
 <script src="/assets/steady.js"></script>
 <link rel="stylesheet" href="/assets/toast.css">
+<link rel="stylesheet" href="/assets/skeleton.css">
 <style>
   :root{
     color-scheme: only light;
@@ -89,7 +90,6 @@
   /* 아래 고정 버튼 위 안내 한 줄 */
   .cta-dock.resume{flex-direction:column;align-items:center;gap:10px}
   .dock-note{font-size:13px;line-height:18px;color:var(--gray-600);text-align:center;padding:0 20px;word-break:keep-all}
-  .dock-note.fail{color:var(--error-600)}
   .page.has-dock.resume main{padding-bottom:124px}
 
   /* 구독권 고르기 — 결제 화면 26판(피그마 2369:1325)의 요금 카드와 같은 값.
@@ -136,8 +136,6 @@
     body{background:var(--gray-100)}
     .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
   }
-  /* 조회 실패 — 값 자리의 글자를 빨갛게 (2026-09-24 사용자 확정 A안). */
-  .fail{color:var(--error-600)!important}
 </style>
 </head>
 <body>
@@ -191,11 +189,13 @@
   </div>
 </main>
 <div class="cta-dock" id="dock" hidden><button class="cta" type="button" id="cta"></button></div>
-<div class="cta-dock resume" id="resumeDock" hidden><span class="dock-note" id="resumeNote"></span><button class="cta" type="button" id="resume">해지 취소하기</button></div>
+<div class="cta-dock resume" id="resumeDock" hidden><p class="cc-toast" id="resumeErr" role="alert" hidden></p><span class="dock-note" id="resumeNote"></span><button class="cta" type="button" id="resume">해지 취소하기</button></div>
 <p class="cc-toast float" id="toast" role="status" hidden>해지를 취소했어요. 멤버십이 이어져요</p>
+<p class="cc-toast float" id="errToast" role="alert" hidden></p>
 <script type="module">
   import '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
-  import { 하단안내 } from '/assets/toast.js';
+  import { 하단안내, 오류안내 } from '/assets/toast.js';
+  import { 막대로 } from '/assets/skeleton.js';
   /* 값은 전부 서버에서 온다 (career-coach 0086 `mypage_subscription` · `plan` 표).
      🔴 금액 상수를 여기 두지 않는다 (2026-09-21 사용자 결정 「세 곳 다 서버 값으로」) —
         화면에 적힌 금액과 실제 청구액이 갈리는 자리가 하나도 없어야 한다.
@@ -254,15 +254,14 @@
     $('dock').hidden = !고를곳;
     $('resumeDock').hidden = !v.canResume;
     $('resumeNote').textContent = v.resumeNote;
-    $('resumeNote').classList.remove('fail');
     page.classList.toggle('has-dock', !!고를곳 || v.canResume);
     page.classList.toggle('resume', v.canResume);
     $('member').hidden = 고를곳;
     $('payLabel').textContent = 고를곳 ? '결제수단' : '결제';
     $('mine').hidden = !v.subscribed;
-    [card, cardSub].forEach(function (el) { el.classList.toggle('fail', !!bad); });
-    card.textContent = v.card;
-    cardSub.textContent = v.cardSub;
+    /* 못 읽었으면 카드 이름 두 줄을 스켈레톤으로, 실패는 하단 안내로 (2026-10-15 「오류 대체 화면」 S21) */
+    if (bad) { 막대로(card, '92px', 20); 막대로(cardSub, '70px', 14); 오류안내($('errToast'), v.card); }
+    else { card.textContent = v.card; cardSub.textContent = v.cardSub; }
     link.textContent = v.hasCard || bad ? '변경' : '등록';
     live.hidden = !v.live;
     if (v.live) live.lastChild.textContent = v.live;
@@ -315,7 +314,7 @@
   $('resume').addEventListener('click', 되돌리기);
 
   /* 해지 취소 — 확인 창 없이 바로 되돌리고 「구독 중」으로 다시 그린다 (2026-10-05 사용자 지시).
-     실패하면 화면은 해지 예약 그대로 두고 안내 자리에 빨간 글씨로 알린다. */
+     실패하면 화면은 해지 예약 그대로 두고 버튼 위 하단 안내로 알린다(안내 줄은 종료일 안내 그대로 — 2026-10-15 S22). */
   var 되돌리는중 = false;
   function 되돌리기() {
     if (되돌리는중) return;
@@ -324,8 +323,7 @@
       paint(billingView(r[0]), false, r[1]);
       하단안내($('toast'));   // 해지 취소 뒤 안내 — 공용 「하단 안내」(5초)
     }, function () {
-      $('resumeNote').textContent = '해지를 취소하지 못했어요. 잠시 후 다시 눌러 주세요';
-      $('resumeNote').classList.add('fail');
+      오류안내($('resumeErr'), '해지를 취소하지 못했어요. 잠시 후 다시 눌러 주세요');
     }).then(function () { 되돌리는중 = false; });
   }
 </script>

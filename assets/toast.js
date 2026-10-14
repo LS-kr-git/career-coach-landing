@@ -32,3 +32,19 @@ export function 하단안내(el, 머묾 = 보이는시간) {
     }, 들어옴 + 머묾));
   });
 }
+
+/** 오류 안내의 머묾 — 1.5초 + 글자 1개당 0.13초(띄어쓰기·줄바꿈은 안 센다).
+ *  2026-10-15 사용자 결정(글자당 0.07·0.1·0.15·0.2초 시뮬레이터 비교 뒤 0.13초). 「오류 대체 화면 제안 v5」. */
+export function 글자머묾(문구) {
+  return 1500 + String(문구).replace(/\s/g, '').length * 130;
+}
+
+/** 오류 안내 — el 에 문구를 넣고 글자 수만큼 머문 뒤 거둔다. 실패 문구는 화면 자리에 쓰지 않고 이것 하나로 말한다
+ *  (「오류 대체 화면」 2026-10-15 사용자 확정 — 빨간 글 대신 이 알약). 세 줄부터는 .multi(모서리 18). */
+export function 오류안내(el, 문구) {
+  window.ccNoKeep?.();   // 실패를 알린 화면(막대가 깔린 화면)을 「지난 값」으로 적지 않는다 — assets/steady.js
+  el.textContent = 문구;
+  el.hidden = false;
+  el.classList.toggle('multi', el.offsetHeight > 60);   // 세 줄부터(두 줄은 54px)
+  하단안내(el, 글자머묾(문구));
+}

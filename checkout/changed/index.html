@@ -6,6 +6,8 @@
 <meta name="robots" content="noindex,nofollow"><title>결제수단 변경 완료 — 커리어코치</title>
 <link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
 <link rel="stylesheet" href="/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
+<link rel="stylesheet" href="/assets/toast.css">
+<link rel="stylesheet" href="/assets/skeleton.css">
 <script src="/assets/steady.js"></script>
 <style>
   :root{
@@ -45,6 +47,8 @@
   .kv{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--gray-600)}
   .kv b{font-weight:600;color:var(--gray-800);text-align:right}
 
+  /* 조회 실패 안내 — 버튼 바로 위 10px 에 공용 하단 안내 (2026-10-15 「오류 대체 화면」) */
+  #errToast{position:absolute;left:0;right:0;bottom:calc(84px + env(safe-area-inset-bottom));z-index:2}
   .bar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:var(--card-max);
     padding:14px 20px calc(20px + env(safe-area-inset-bottom));background:transparent}   /* 바 바탕 투명 — 2026-10-05 사용자 지시 */
   .cta{display:flex;text-decoration:none;align-items:center;justify-content:center;width:100%;max-width:var(--cta-max);
@@ -78,17 +82,19 @@
     </div>
   </main>
 
-  <div class="bar"><a class="cta" href="/mypage/billing/">확인</a></div>
+  <div class="bar"><p class="cc-toast" id="errToast" role="alert" hidden></p><a class="cta" href="/mypage/billing/">확인</a></div>
 </div>
 
 <script type="module">
   import '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
-  import { requireLogin, getSubscription, billingView } from '/assets/mypage-data.js';
+  import { requireLogin, getSubscription, billingView, FAIL } from '/assets/mypage-data.js';
+  import { 오류안내 } from '/assets/toast.js';
+  import { 막대로 } from '/assets/skeleton.js';
   var $ = function (id) { return document.getElementById(id); };
 
   /* 결제 화면이 카드 변경(`이미구독`)을 받은 뒤에만 여기로 보낸다. 값은 전부 서버에서 다시 읽는다 —
      주소로 카드 번호를 넘기지 않는다. 구독 중이 아니면 「바뀌었어요」를 말할 근거가 없으므로 돌려보낸다.
-     조회가 실패하면 제목·안내만 둔다(표식이 있으면 변경 자체는 서버가 이미 끝냈다). */
+     조회가 실패하면 요약 상자를 스켈레톤으로 두고 하단 안내로 말한다(표식이 있으면 변경 자체는 서버가 이미 끝냈다 · 2026-10-15 D5). */
   var 방금바꿈 = false;
   try { 방금바꿈 = sessionStorage.getItem('cc_card_changed') === '1'; sessionStorage.removeItem('cc_card_changed'); } catch (e) { /* 못 읽으면 근거 없음으로 본다 */ }
   if (!방금바꿈) location.replace('/mypage/billing/');
@@ -106,7 +112,13 @@
     $('amount').textContent = v.price;
     $('amountRow').hidden = Boolean(s.cancel_at_period_end);
     $('sum').hidden = false;
-  }, function () { /* 조회 실패 — 요약 상자를 안 그린다 */ }));
+  }, function () {
+    [['card', '92px', 20], ['cardSub', '70px', 14], ['nextLabel', '64px', 14], ['next', '84px', 14], ['amount', '64px', 14]]
+      .forEach(function (x) { 막대로($(x[0]), x[1], x[2]); });
+    막대로($('amountRow').firstElementChild, '56px', 14);
+    $('sum').hidden = false;
+    오류안내($('errToast'), FAIL.line);
+  }));
 </script>
 </body>
 </html>

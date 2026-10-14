@@ -7,6 +7,7 @@
 <link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
 <title>직군 선택 — 커리어코치</title>
 <link rel="stylesheet" href="/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
+<link rel="stylesheet" href="/assets/toast.css">
 <script src="/assets/steady.js"></script>
 <style>
   :root{
@@ -84,6 +85,8 @@
      width calc(100% - 40px) / max 410 / bottom 20 / 가운데 정렬.
      높이·라운드·글자는 제품 공통 토큰(--cta-h 54 / --cta-radius 14 / 15·700)이고,
      랜딩만 60 을 쓰는 의도된 예외다 (CLAUDE.md "CTA 규칙"). 색·그림자색은 온보딩 값. */
+  /* 오류 안내 — 버튼 바로 위 10px 에 공용 하단 안내 (2026-10-15 「오류 대체 화면」) */
+  #errToast{bottom:calc(84px + env(safe-area-inset-bottom));z-index:30}
   .fade{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:450px;height:100px;
     background:linear-gradient(180deg,rgba(255,255,255,0),#fff 55%);pointer-events:none;z-index:9}
   .cta{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
@@ -106,6 +109,7 @@
 </div>
 <div class="fade"></div>
 <div class="cta">다음</div>
+<p class="cc-toast float" id="errToast" role="alert" hidden></p>
 <script>
 // 상한 7개. 화면 문구(desc)·onboarding-store 의 MAX_JOBS·save_onboarding 의 검증이 같은 수를 본다.
 const MAX=7;
@@ -151,7 +155,16 @@ document.querySelector('.cta').addEventListener('click',()=>{
 </script>
 <script type="module">
   import { pageView } from '/assets/track.js';
+  import { 오류안내 } from '/assets/toast.js';
   pageView('onboarding_step', { step: 1 });
+  // 로그인 처리 화면이 「이미 마친 사람인가」를 못 물어보고 여기로 보냈으면 알린다 (2026-10-15 「오류 대체 화면」 D3).
+  // 새로고침에 다시 뜨지 않게 그 칸을 주소에서 지운다.
+  const 주소 = new URLSearchParams(location.search);
+  if (주소.get('dest') === 'unknown') {
+    주소.delete('dest');
+    history.replaceState(null, '', location.pathname + (주소.toString() ? '?' + 주소 : '') + location.hash);
+    오류안내(document.getElementById('errToast'), '설정을 불러오지 못해 처음 화면을 열었어요');
+  }
 </script>
 <script type="module">
   // 고른 직무를 들고 간다. 실제 저장(RPC)은 3단계에서 한 번만 한다 — assets/onboarding-store.js

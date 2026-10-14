@@ -204,12 +204,13 @@
   // 사람)은 온보딩 1단계를 다시 밟지 않고 마이페이지로 간다(2026-10-14 사용자 지시 「퍼널을 최대한 간결하게」).
   // 서버에 직군이 저장돼 있으면 마친 사람이다 — 랜딩 index.html 의 「로그인한 사람의 행선지」와 같은 기준(직군이 있는가).
   // 세션이 선 뒤에 묻는다(그 전에는 RLS 가 빈 답을 준다). 1.5초 안에 답이 없으면 온보딩으로 간다.
+  // 못 물어봤으면(오류·시간 초과) null — 온보딩 1단계가 「설정을 불러오지 못해 처음 화면을 열었어요」를 띄운다(2026-10-15 D3).
   let 답옴 = false;
   const 마쳤나 = () => Promise.race([
     supabase.from('user_preference_job').select('job_code').limit(1)
       .then(({ data, error }) => { 답옴 = true; if (error) throw error; return data.length > 0; })
-      .catch((e) => { track('client_error', { msg: 'callback_dest:' + String(e?.message || e).slice(0, 80) }); return false; }),
-    new Promise((r) => setTimeout(() => { if (!답옴) track('client_error', { msg: 'callback_dest:timeout' }); r(false); }, 1500)),
+      .catch((e) => { track('client_error', { msg: 'callback_dest:' + String(e?.message || e).slice(0, 80) }); return null; }),
+    new Promise((r) => setTimeout(() => { if (!답옴) track('client_error', { msg: 'callback_dest:timeout' }); r(null); }, 1500)),
   ]);
   let 성공중 = false;   // 이벤트·폴백·3초 판정 세 경로가 겹쳐도 한 번만 묻는다
   const 성공 = async () => {
@@ -218,7 +219,10 @@
     window.ccAlive();
     // 공용 기기 — 다른 계정이 고른 온보딩 값이 남아 있으면 지운다(앞 사람의 직무가 이 사람 화면에 보이고 저장되지 않게).
     forgetIfOtherOwner((await supabase.auth.getSession()).data.session?.user?.id);
-    const 갈곳 = takeNext(null) ?? ((await 마쳤나()) ? '/mypage/' : '/onboarding/1/');
+    const 갈곳 = takeNext(null) ?? await (async () => {
+      const 마침 = await 마쳤나();
+      return 마침 ? '/mypage/' : 마침 === null ? '/onboarding/1/?dest=unknown' : '/onboarding/1/';
+    })();
     await window.ccDone();
     go(갈곳);
   };

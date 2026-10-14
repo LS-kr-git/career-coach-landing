@@ -259,6 +259,24 @@ function reportError(msg, src, line, col) {
   } catch { /* 오류를 남기다 또 터지면 조용히 접는다 — 화면을 막지 않는다 */ }
 }
 
+/* 우리 파일에서 난 화면 오류는 사람에게도 한 번 말한다 (2026-10-15 사용자 확정 「오류 대체 화면」 D10).
+   바깥 스크립트(광고·카카오 SDK)에서 난 오류에는 띄우지 않는다 — 멀쩡한 화면에 알약이 뜨게 된다. */
+let 화면오류안내 = false;
+function 화면오류(src) {
+  if (화면오류안내) return;
+  try { if (new URL(src).origin !== location.origin) return; } catch { return; }
+  화면오류안내 = true;
+  import('/assets/toast.js').then(({ 오류안내 }) => {
+    if (!document.querySelector('link[href="/assets/toast.css"]')) {
+      const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = '/assets/toast.css'; document.head.appendChild(l);
+    }
+    const p = document.createElement('p');
+    p.className = 'cc-toast float'; p.setAttribute('role', 'alert'); p.hidden = true;
+    document.body.appendChild(p);
+    오류안내(p, '화면을 그리다 문제가 생겼어요. 새로고침해 주세요');
+  }).catch(() => {});
+}
+
 // import 시점에 한 번만 건다. 여러 모듈이 같은 파일을 import 해도 ES 모듈은 한 번만 평가된다.
 if (typeof window !== 'undefined') {
   window.addEventListener('error', (e) => {
@@ -270,6 +288,7 @@ if (typeof window !== 'undefined') {
       return;
     }
     reportError(e.message, e.filename, e.lineno, e.colno);
+    화면오류(e.filename);
   }, true);                            // 캡처 단계 — 리소스 오류는 버블링하지 않는다
 
   window.addEventListener('unhandledrejection', (e) => {
