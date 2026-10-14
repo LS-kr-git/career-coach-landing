@@ -14,6 +14,7 @@
 <title>인사이트 — 커리어코치</title>
 <link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<script src="/assets/steady.js"></script>
 <style>
   /* 커리어코치 디자인 시스템 — terms.html 과 같은 토큰·폭·헤더를 쓴다.
      이 페이지에서 새로 둔 값은 --amber-800(잠김 알약 글자색, 2026-10-04)과 --ink-*(아래)다. */
@@ -612,6 +613,8 @@
     진행();
   }
 
+  // 글이 그려진 뒤에 화면을 내보인다 — 「불러오는 중」이 보였다 바뀌며 덜컹이지 않게(assets/steady.js)
+  let 다그림; window.ccHold?.(new Promise((r) => { 다그림 = r; }));
   if (!wellFormed) {
     card(MSG.badLink, MSG.badLinkSub);
   } else {
@@ -626,6 +629,7 @@
       else notice(err.message);
     }
   }
+  다그림();
 </script>
 </body>
 </html>

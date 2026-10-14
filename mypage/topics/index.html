@@ -10,6 +10,7 @@
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<script src="/assets/steady.js"></script>
 <style>
   :root{
     color-scheme: only light;
@@ -161,7 +162,7 @@
   /* 서버에 저장된 주제를 이 브라우저로 받아 온다 — 기기를 바꿔도 고른 것이 보여야 한다.
      실패 처리기는 **조회 실패만** 받는다(`.then(성공, 실패)`) — 그리다 난 오류까지 받으면
      「못 읽었다」와 「그리다 터졌다」가 같은 화면이 된다. */
-  requireOnboarded().then(function (ok) {
+  window.ccHold?.(requireOnboarded().then(function (ok) {
     return ok ? pullFromServer().then(getTopics) : null;
   }).then(function (topics) {
     if (!topics) return;
@@ -184,7 +185,7 @@
     /* 🔴 못 읽었으면 남의 값일 수도 있는 것을 저장하게 두지 않는다 — 고르기를 막고 실패를 말한다. */
     cta.disabled = true;
     cta.textContent = FAIL.line;
-  });
+  }));
 
   document.querySelector('main').addEventListener('click', function (e) {
     var chip = e.target.closest('.topics .chip');

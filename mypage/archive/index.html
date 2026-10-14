@@ -10,6 +10,7 @@
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<script src="/assets/steady.js"></script>
 <style>
   :root{
     color-scheme: only light;
@@ -262,7 +263,7 @@
 
   /* 🔴 실패 처리기는 **조회 실패만** 받는다 (`.then(성공, 실패)`). `.catch` 로 뒤에 달면
      그리다 난 오류까지 받아 실패 갈래가 또 터지고, 마크업의 기준 상태가 그대로 남는다. */
-  requireLogin().then(function (ok) {
+  window.ccHold?.(requireLogin().then(function (ok) {
     return ok ? getArchive() : null;
   }).then(function (rows) {
     if (!rows) return;
@@ -273,7 +274,7 @@
     /* 실패는 「아직 없음」과 다른 글자로 그린다. 칩은 지운다 — 못 읽은 목록의 달을 고를 수 없다. */
     months.innerHTML = '';
     note(FAIL.list, FAIL.hint, true);
-  });
+  }));
 </script>
 </div>
 </body>

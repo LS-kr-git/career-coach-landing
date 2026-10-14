@@ -6,6 +6,7 @@
 <meta name="robots" content="noindex,nofollow"><title>구독 신청 — 커리어코치</title>
 <link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<script src="/assets/steady.js"></script>
 <style>
   :root{
     color-scheme: only light;   /* meta 와 같은 값 — CSS 로도 선언해 확실히 적용한다 */
@@ -258,6 +259,8 @@
   import { getPlans, planCards, getSubscription, billingView, saveBillingKey, billingCustomerId, requireLogin, FAIL, firstSendDay, onboardingDone } from '/assets/mypage-data.js';
 
   var $ = function (id) { return document.getElementById(id); };
+  // 요금 카드까지 그린 뒤에 화면을 내보인다 — 빈 칸이 보였다 채워지며 덜컹이지 않게(assets/steady.js)
+  var 다그림; window.ccHold?.(new Promise(function (r) { 다그림 = r; }));
 
   /* 로그인부터 본다 (2026-10-03 사용자 확정 「3번」). 로그인 화면에서 돌아오면 다시 이 화면이다
      (고른 요금제 `?plan=` 도 주소에 실려 같이 돌아온다). 세션을 못 물어봤으면 막지 않는다 —
@@ -400,6 +403,7 @@
     $('plansFail').textContent = FAIL.line + ' ' + FAIL.hint;
     $('plansFail').hidden = false;
   });
+  준비.then(다그림);
 
   // 토글이 둘이다 — 각 버튼이 자기 section 만 접는다. 절을 id 로 집는다(하나라도 없으면 여기서 터진다).
   ['accRefund', 'acc'].forEach(function (id) {

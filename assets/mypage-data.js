@@ -123,6 +123,7 @@ export async function requireLogin(next) {
   const { client, liveSession } = await import('/assets/onboarding-store.js');
   if (!(await liveSession(await client()))) {   // 탈퇴·삭제돼 서버가 모르는 세션도 로그인 안 한 것으로 본다
     if (next) (await import('/assets/return-to.js')).rememberNext(next);
+    window.ccHold?.(new Promise(() => {}));   // 떠나는 중이다 — 이 화면을 내보이지 않는다(assets/steady.js)
     location.replace((await import('/assets/supabase-config.js')).KAKAO_LOGIN);   // 가입·로그인 공통 입구
     return false;
   }
@@ -171,6 +172,7 @@ export async function onboardingDone() {
 export async function requireOnboarded() {
   if (!(await requireLogin())) return false;
   if (await onboardingDone()) return true;
+  window.ccHold?.(new Promise(() => {}));   // 떠나는 중이다 — 이 화면을 내보이지 않는다(assets/steady.js)
   location.replace('/onboarding/1/');
   return false;
 }

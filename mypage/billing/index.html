@@ -10,6 +10,7 @@
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<script src="/assets/steady.js"></script>
 <style>
   :root{
     color-scheme: only light;
@@ -281,14 +282,14 @@
       return getPlans().then(function (plans) { return [s, planCards(plans)]; });
     });
   }
-  requireLogin().then(function (ok) {
+  window.ccHold?.(requireLogin().then(function (ok) {
     return ok ? 다시읽는다() : null;
   }).then(function (r) {
     if (r) paint(billingView(r[0]), false, r[1]);
   }, function () {
     /* 실패를 빈 상태로 그리면 결제한 사람이 「등록된 결제수단 없음」을 본다. */
     paint(billingFail(), true, null);
-  });
+  }));
 
   /* 결제 버튼 — 고른 요금제를 결제 화면에 넘긴다. */
   function 결제로() {

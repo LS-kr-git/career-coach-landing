@@ -10,6 +10,7 @@
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<script src="/assets/steady.js"></script>
 <style>
   :root{
     color-scheme: only light;
@@ -191,14 +192,14 @@
     }
     /* 🔴 서버에 저장된 값을 먼저 받아 온다 (2026-09-21 배선 5). 안 받으면 기기를 바꾼 사람에게
        0개로 보이고, 여기서 고른 직군을 저장할 때 연차·근무지가 없어 서버로 아무것도 안 나갔다. */
-    requireOnboarded().then(function (ok) {
+    window.ccHold?.(requireOnboarded().then(function (ok) {
       if (!ok) return;
       return pullFromServer().then(hydrate);
     }).catch(function () {
       /* 못 읽은 채로 저장하면 서버에 있는 직군을 빈 목록으로 덮는다 — 저장을 막고 실패를 말한다. */
       읽기실패 = true;
       hydrate();
-    });
+    }));
   })();
 </script>
 </div>

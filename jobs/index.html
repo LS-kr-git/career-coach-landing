@@ -11,6 +11,7 @@
 <title>내 조건의 새 공고 — 커리어코치</title>
 <link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<script src="/assets/steady.js"></script>
 <style>
   /* 목요일 알림톡 「전체 공고 확인」 버튼이 여는 화면 (2026-09-25 사용자 컨펌 — 캔버스 C-1 · N2 · S2 · Y5).
      피그마: 섹션 「전체 공고 보기 (/jobs/)」 · 프레임 2167:1008(열림) · 2167:1176(구독필요).
@@ -321,7 +322,8 @@
   });
   $('q').addEventListener('input', (e) => { q = e.target.value.trim(); page = 1; 그리기(); });
 
-  (async () => {
+  // 공고가 그려진 뒤에 화면을 내보인다 — 「불러오는 중」이 보였다 바뀌며 덜컹이지 않게(assets/steady.js)
+  window.ccHold?.((async () => {
     if (!wellFormed) return notice(MSG.badLink, MSG.badLinkSub, MSG.ask);
     try {
       const d = await load();
@@ -341,7 +343,7 @@
       if (err && err.code === 'P0001') return notice(MSG.expired, MSG.expiredSub, MSG.ask);
       notice(MSG.blocked, '', MSG.askBlocked);
     }
-  })();
+  })());
 </script>
 </body>
 </html>
