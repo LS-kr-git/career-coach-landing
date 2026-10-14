@@ -365,11 +365,21 @@
   // 가입·로그인 입구 — 두 버튼 모두 카카오로 바로 간다 (2026-10-14 /signup/ 화면 삭제, 사용자 지시).
   // 마크업의 /signup/ 은 이 모듈이 못 돌 때만 쓰이는 길이다(그 주소는 카카오로 넘겨주기만 한다).
   // 이미 로그인한 사람은 카카오를 건너뛴다 — 세션은 supabase-js 기본 저장 이름에서 본다(CDN 을 기다리지 않게).
-  const 저장됨 = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
-  const 로그인됨 = !!저장됨('sb-' + new URL(SUPABASE_URL).hostname.split('.')[0] + '-auth-token');
-  const 온보딩함 = (() => { try { return (JSON.parse(저장됨('cc_onboarding')) || {}).jobs?.length > 0; } catch { return false; } })();
-  for (const a of document.querySelectorAll('.top .auth, #ctaBtn')) {
-    a.href = 로그인됨 ? (온보딩함 ? '/mypage/' : '/onboarding/1/') : KAKAO_LOGIN;
+  const 로그인됨 = (() => { try { return !!localStorage.getItem('sb-' + new URL(SUPABASE_URL).hostname.split('.')[0] + '-auth-token'); } catch { return false; } })();
+  const 버튼 = document.querySelectorAll('.top .auth, #ctaBtn');
+  // 로그인한 사람의 행선지 — 누를 때 **서버에 물어** 정한다. 다른 기기에서 온보딩을 마친 사람도
+  // 마이페이지로 가게(2026-10-14 사용자 지시). 물음은 페이지를 열 때 미리 던져 두고, 누르면 그 답을
+  // 기다린다(최대 3초). 서버가 답을 못 하면 이 브라우저에 남은 값으로 정하고 실패를 남긴다.
+  const 실패 = (e) => track('client_error', { msg: 'landing_dest:' + String(e?.message || e).slice(0, 80) });
+  let 상점 = null;
+  const 물음 = 로그인됨 && import('/assets/onboarding-store.js').then((s) => { 상점 = s; return s.pullFromServer(); }).catch(실패);
+  if (물음) for (const a of 버튼) a.addEventListener('click', async (e) => {
+    e.preventDefault();
+    await Promise.race([물음, new Promise((r) => setTimeout(r, 3000))]);
+    location.href = 상점?.readState().jobs.length > 0 ? '/mypage/' : '/onboarding/1/';
+  });
+  for (const a of 버튼) {
+    a.href = 로그인됨 ? '/onboarding/1/' : KAKAO_LOGIN;
     // 여기와 login 사이의 차이가 카카오 동의 화면 이탈률이다(어드민 「카카오 로그인이 실패하고 있나」).
     if (!로그인됨) a.addEventListener('click', () => track('signup_start'), { once: true });
   }
