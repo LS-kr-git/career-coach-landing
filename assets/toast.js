@@ -16,8 +16,7 @@ function 보인뒤(fn) {
 }
 
 /** el 을 띄우고 보이는시간 뒤에 거둔다. 떠 있는 중에 다시 부르면 처음부터 다시 센다. */
-export function 하단안내(el, 문구) {
-  if (문구 != null) el.textContent = 문구;
+export function 하단안내(el) {
   clearTimeout(타이머.get(el));
   el.classList.remove('in', 'out');
   el.hidden = false;
