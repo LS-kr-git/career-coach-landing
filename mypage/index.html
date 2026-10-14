@@ -89,7 +89,8 @@
   /* ── 마이페이지 첫 화면 (2026-10-05 사용자 확정 B1 · 피그마 908:538·908:555·908:572·2157:941) ──
      2026-10-12 사용자 지시 「심사 계정에도 새 마이페이지 보이게」 — 심사 계정 전용 옛 화면(2456:1327)을
      걷고 한 벌로 합쳤다. 아래 규칙은 위 기본값을 덮는 새 화면 값이다(순서가 우선순위다). */
-  :root{--paper:#FEEAC1;--ink:#111111;--line:#F5EAD6;--edge:#F9D99A;--muted:#8A7A62;--caret-new:#B9A989}
+  :root{--paper:#FEEAC1;--ink:#111111;--line:#F5EAD6;--edge:#F9D99A;--muted:#8A7A62;--caret-new:#B9A989;
+    --overscroll-top:var(--ink)}  /* 맨 위에서 당긴 자리 = 헤더 색 (assets/overscroll-top.js) */
   .page,.mp-main{background:var(--paper)}
   /* 끝에서 더 당겨도 바탕이 이어지게 — 랜딩이 쓰던 방식 그대로(v71 이전 index.html, 2026-08-02) (2026-10-14 사용자 지시)
      ① 아래: html·body 바탕 = 페이지 맨 아래 색. 넓은 화면은 위 블록의 회색 바탕 그대로.
@@ -361,28 +362,6 @@
   });
 </script>
 </div>
-<script>
-  /* 끝에서 더 당긴 자리 색 — 랜딩이 쓰던 캔버스색 스위칭 그대로(84b9b99, 2026-08-02) (2026-10-15 사용자 지시).
-     iOS 웹킷은 그 자리를 위아래 구분 없이 html 바탕 한 색으로만 칠하고, 위 CSS 의 덧댄 판·그라데이션은 안 그린다.
-     그래서 스크롤 위치로 그 한 색을 바꿔친다: 위쪽 절반=헤더 색(--ink), 아래쪽 절반=페이지 바닥 색(--paper).
-     바꿔치는 것은 카드(.page) 뒤라 눈에 안 보인다. 카드보다 넓은 화면은 양옆 회색이 보이므로 건드리지 않는다. */
-  (function () {
-    var root = document.documentElement, cs = getComputedStyle(root);
-    var top = cs.getPropertyValue('--ink').trim(), bottom = cs.getPropertyValue('--paper').trim();
-    var mq = matchMedia('(max-width: 450px)');   // 위 CSS 의 휴대폰 폭 바탕 규칙과 같은 경계
-    var cur = null;
-    function apply() {
-      // steady.js 가 본문을 숨겨 둔 동안(cc-wait)은 바탕만 보이므로 바꾸지 않는다 — 빈 화면이 검게 번쩍이지 않게
-      if (root.classList.contains('cc-wait')) return;
-      // <= : 스크롤할 거리가 없는 큰 화면에서도 맨 위(헤더 쪽)를 따른다
-      var c = !mq.matches ? '' : scrollY <= (root.scrollHeight - innerHeight) / 2 ? top : bottom;
-      if (c !== cur) { cur = c; root.style.backgroundColor = c; document.body.style.backgroundColor = c; }
-    }
-    addEventListener('scroll', apply, { passive: true });
-    addEventListener('resize', apply, { passive: true });
-    new MutationObserver(apply).observe(root, { attributes: true, attributeFilter: ['class'] });
-    apply();
-  })();
-</script>
+<script src="/assets/overscroll-top.js"></script>
 </body>
 </html>
