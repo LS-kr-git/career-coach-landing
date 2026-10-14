@@ -425,10 +425,10 @@ function monthDay(value) {
   return `${Number(m)}월 ${Number(d)}일`;
 }
 
-/** 미납 구독을 해지하면(했으면) 끝나는 때 — 「10월 16일 새벽」. 다음 청구 회차(새벽)가 닫는다(career-coach 0141).
- *  서버가 날을 못 주면 날짜를 지어내지 않는다. */
+/** 미납 구독을 해지하면(했으면) 끝나는 때 — 「10월 16일 새벽에」(조사까지). 다음 청구 회차(새벽)가 닫는다(career-coach 0141).
+ *  서버가 날을 못 주면 날짜를 지어내지 않고 「곧」이라 한다 — 조사를 붙여 두는 것은 「곧에」를 막으려는 것이다. */
 export function closeText(s) {
-  return s && s.close_on ? `${monthDay(s.close_on)} 새벽` : '곧';
+  return s && s.close_on ? `${monthDay(s.close_on)} 새벽에` : '곧';
 }
 
 /**
@@ -478,14 +478,14 @@ export function billingView(s, plan) {
     planLabel: 구독중 ? planLabel(s) : '',
     price: 구독중 ? wonText(s.price_krw) : '',
     nextLabel: 해지예약 ? '이용 종료일' : (미납 ? '다음 결제 시도일' : '다음 결제일'),
-    next: !구독중 ? '' : 미납 ? (해지예약 ? closeText(s) : (s.next_try_on ? dayText(s.next_try_on) : '곧 다시 시도해요'))
+    next: !구독중 ? '' : 미납 ? (해지예약 ? (s.close_on ? `${monthDay(s.close_on)} 새벽` : '곧 끝나요') : (s.next_try_on ? dayText(s.next_try_on) : '곧 다시 시도해요'))
       : dayText(s.current_period_end),
     amount: 구독중 ? priceText(s) : (plan ? priceText(plan) : ''),
     // 해지할 것이 없거나 이미 예약된 사람에게는 누를 것을 주지 않는다.
     canCancel: Boolean(구독중 && !해지예약),
     // 해지 예약된 사람에게만 「해지 취소하기」 (2026-10-05 사용자 컨펌 「해지 취소 v6」).
     canResume: 해지예약,
-    resumeNote: !해지예약 ? '' : 미납 ? `결제가 되지 않아 ${closeText(s)}에 멤버십이 끝나요. 해지를 취소하면 결제를 다시 시도해요.`
+    resumeNote: !해지예약 ? '' : 미납 ? `결제가 되지 않아 ${closeText(s)} 멤버십이 끝나요. 해지를 취소하면 결제를 다시 시도해요.`
       : `${monthDay(s.current_period_end)}에 멤버십이 끝나요. 지금 취소하면 끝나지 않아요.`,
   };
 }
