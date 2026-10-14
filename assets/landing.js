@@ -150,3 +150,7 @@ document.querySelectorAll(".chips").forEach(c=>c.addEventListener("wheel",e=>{if
 (()=>{const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.9)e.target.classList.add("on");else if(!e.isIntersecting)e.target.classList.remove("on")}),{root:null,rootMargin:"0px 0px -90px 0px",threshold:[0,.9]});document.querySelectorAll(".draw").forEach(x=>io.observe(x));
  document.querySelectorAll(".chips").forEach(c=>c.addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;$("qhk").textContent=b.textContent.trim()}));
  const on=document.querySelector("#quizChips .chip.on");if(on)$("qhk").textContent=on.textContent.trim()})();
+/* 맨 위에서 더 당긴 자리 = 흰 머리줄 색 (2026-10-15 사용자 지시) — 공용 assets/overscroll-top.js 를 붙인다.
+   맨 아래는 html·body 바탕(--g100, footer 와 같은 색) 그대로. */
+document.documentElement.style.setProperty("--overscroll-top", "#fff");
+document.body.appendChild(document.createElement("script")).src = "/assets/overscroll-top.js";
