@@ -456,7 +456,7 @@ export function billingView(s, plan) {
   const 구독중 = Boolean(s && s.status && ['trialing', 'active', 'past_due'].includes(s.status));
   const 해지예약 = Boolean(구독중 && s.cancel_at_period_end);
   /* 미납(past_due)이면 `current_period_end` 는 이미 지난 날이다 — 그대로 「다음 결제일」로 그리면 어제를 말한다.
-     다음 시도일은 서버가 청구 배치와 같은 식으로 준다(career-coach 0139 `next_try_on`). 해지하면 다음 새벽 정리에서
+     다음 시도일은 서버가 청구 배치와 같은 식으로 준다(career-coach 0140 `next_try_on`). 해지하면 다음 새벽 정리에서
      바로 끝난다(0092 `billing_close_ended`) — 날짜를 지어내지 않고 「하루 안」이라고 말한다. (2026-10-14 할일 6) */
   const 미납 = Boolean(구독중 && s.status === 'past_due');
   const card = s && s.card_last4;
