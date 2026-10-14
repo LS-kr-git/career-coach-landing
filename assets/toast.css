@@ -1,0 +1,12 @@
+/* 공용 「하단 안내」 (2026-10-15 사용자 지시 — 랜딩 로그인 실패 안내를 기준으로 디자인 시스템화)
+   반투명 남색 알약 + 흰 글씨. 떠오름(.24s) → 머묾(assets/toast.js 의 보이는시간) → 가라앉음(.26s).
+   쓰는 법: <p class="cc-toast" role="status" hidden>문구</p> 를 두고 toast.js 의 하단안내(el) 를 부른다.
+   자리: 기본은 흐름 안(버튼 바로 위 등 놓인 자리). 화면 바닥에 띄우려면 .float 를 더한다.
+   어드민의 같은 부품(career-coach lib/ui.ts 의 toast)도 이 값을 따른다 — 한쪽을 바꾸면 다른 쪽도 바꾼다. */
+.cc-toast{width:fit-content;max-width:100%;box-sizing:border-box;margin:0 auto;background:rgba(15,23,42,.88);color:#fff;
+  font-size:13px;line-height:19px;border-radius:999px;padding:8px 14px;text-align:center;word-break:keep-all;
+  opacity:0;transform:translateY(12px);transition:transform .24s cubic-bezier(.2,.8,.2,1),opacity .24s ease-out}
+.cc-toast.in{opacity:1;transform:none}
+.cc-toast.out{opacity:0;transform:translateY(12px);transition:transform .26s cubic-bezier(.4,0,1,1),opacity .26s ease-in}
+.cc-toast.float{position:fixed;left:0;right:0;bottom:calc(28px + env(safe-area-inset-bottom));z-index:30;max-width:calc(100% - 32px)}
+@media (prefers-reduced-motion:reduce){.cc-toast,.cc-toast.out{transform:none}}
