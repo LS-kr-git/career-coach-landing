@@ -118,10 +118,11 @@
 </script>
 
 <script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/+esm';
   // 접속 정보는 /assets/supabase-config.js 한 곳에만 둔다 (2026-08-06 복구 훈련 결과).
   import { SUPABASE_URL, SUPABASE_ANON_KEY } from '/assets/supabase-config.js';
   import { takeNext } from '/assets/return-to.js';
+  import { forgetIfOtherOwner } from '/assets/onboarding-store.js';
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   window.ccAlive();   // CDN 로딩이 끝났다 — 위 하드 폴백의 8초를 여기서부터 다시 잰다
@@ -220,6 +221,8 @@
     성공중 = true;
     window.ccStep(3);
     window.ccAlive();
+    // 공용 기기 — 다른 계정이 고른 온보딩 값이 남아 있으면 지운다(앞 사람의 직무가 이 사람 화면에 보이고 저장되지 않게).
+    forgetIfOtherOwner((await supabase.auth.getSession()).data.session?.user?.id);
     go(takeNext(null) ?? ((await 마쳤나()) ? '/mypage/' : '/onboarding/1/'));
   };
 

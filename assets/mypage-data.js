@@ -167,6 +167,16 @@ export async function onboardingDone() {
   return Boolean(pref.data) && jobs.data.length > 0;
 }
 
+/** 수정 화면(직군·연차·근무지·주제)의 입구 — 로그인했고 온보딩을 서버에 마친 사람만 들인다.
+ *  안 마친 사람이 여기서 하나만 고쳐 저장하면, 이 기기에 남은 다른 값과 섞인 「완성된」 선호가 저장된다.
+ *  마치지 않았으면 온보딩으로 보내고 false. 조회가 실패하면 예외 — 부르는 쪽의 읽기 실패 처리로 간다. */
+export async function requireOnboarded() {
+  if (!(await requireLogin())) return false;
+  if (await onboardingDone()) return true;
+  location.replace('/onboarding/1/');
+  return false;
+}
+
 /** 구독·결제수단. 서버가 **항상 한 행**을 준다 — 없는 값은 null 이다. */
 export async function getSubscription() { return rpc('mypage_subscription', true); }
 

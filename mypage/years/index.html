@@ -126,7 +126,7 @@
   /* 고른 연차는 온보딩 2단계와 **같은 값**이다 — 저장·복원·서버 전송은 assets/onboarding-store.js 를 그대로 쓴다.
      슬라이더 동작은 onboarding/2/index.html 의 것을 옮겼다(눈금 0~15 · 밴드 4칸). 한쪽을 고치면 다른 쪽도 고친다. */
   import { readState, writeState, retryPending, pullFromServer } from '/assets/onboarding-store.js';
-  import { requireLogin, FAIL, yearsText, savePrefs } from '/assets/mypage-data.js';
+  import { requireOnboarded, FAIL, yearsText, savePrefs } from '/assets/mypage-data.js';
   retryPending();
   const MAX = 15;
   const $ = (s) => document.querySelector(s);
@@ -194,7 +194,7 @@
   }
   render();
   /* 서버 값을 먼저 받는다 — 못 읽었으면 저장을 막는다(직군 화면과 같은 이유: 빈 값으로 덮지 않게) */
-  requireLogin().then((ok) => { if (ok) return pullFromServer().then(hydrate); })
+  requireOnboarded().then((ok) => { if (ok) return pullFromServer().then(hydrate); })
     .catch(() => { 읽기실패 = true; hydrate(); });
 </script>
 </div>

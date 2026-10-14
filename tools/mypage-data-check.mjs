@@ -188,8 +188,9 @@ for (const [rel, 값갈래, 실패갈래] of [
 for (const rel of ['mypage/index.html', 'mypage/billing/index.html', 'mypage/archive/index.html',
                    'mypage/topics/index.html', 'mypage/jobs/index.html', 'mypage/sunday/index.html',
                    'mypage/years/index.html', 'mypage/regions/index.html', 'mypage/leave/index.html', 'checkout/done/index.html']) {
-  if (!scriptOnly(rel).includes('requireLogin')) {
-    problems.push(`${rel}: 로그인 확인(requireLogin)을 부르지 않습니다`);
+  // requireOnboarded 는 requireLogin 을 먼저 부르고 온보딩까지 본다(수정 화면 입구 — 2026-10-14).
+  if (!/\brequire(Login|Onboarded)\(/.test(scriptOnly(rel))) {
+    problems.push(`${rel}: 로그인 확인(requireLogin·requireOnboarded)을 부르지 않습니다`);
   }
 }
 

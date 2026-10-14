@@ -105,7 +105,7 @@
   /* 고른 근무지는 온보딩 3단계와 **같은 값**이다 — 칩 글자가 곧 지역 코드다(save_onboarding 계약).
      저장·복원·서버 전송은 assets/onboarding-store.js 를 그대로 쓴다. */
   import { readState, writeState, retryPending, pullFromServer } from '/assets/onboarding-store.js';
-  import { requireLogin, FAIL, savePrefs } from '/assets/mypage-data.js';
+  import { requireOnboarded, FAIL, savePrefs } from '/assets/mypage-data.js';
   retryPending();
   /* 🔴 상한 3. 온보딩 3단계·onboarding-store 의 MAX_REGIONS·save_onboarding 검증과 같은 수다 */
   const MAX = 3;
@@ -142,7 +142,7 @@
     refresh();
   }
   refresh();
-  requireLogin().then((ok) => { if (ok) return pullFromServer().then(hydrate); })
+  requireOnboarded().then((ok) => { if (ok) return pullFromServer().then(hydrate); })
     .catch(() => { 읽기실패 = true; hydrate(); });
 </script>
 </div>

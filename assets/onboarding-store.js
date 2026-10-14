@@ -151,6 +151,16 @@ export function forgetLocal() {
   try { localStorage.removeItem(KEY); localStorage.removeItem('cc_next'); } catch { /* 무시 */ }
 }
 
+/** 로그인 직후 부른다 — 이 기기에 다른 계정이 고른 값이 남아 있으면 통째로 지운다(공용 기기에서
+ *  앞 사람의 직무가 뒤 사람 화면에 보이고 그대로 저장되는 것을 막는다). 로그인 전에 고른 값(owner 없음)은 둔다.
+ *  `cc_next` 는 지우지 않는다 — 결제 화면에서 로그인하러 온 그 사람의 갈 곳이다. */
+export function forgetIfOtherOwner(userId) {
+  const owner = readState().owner;
+  if (owner && userId && owner !== userId) {
+    try { localStorage.removeItem(KEY); } catch { /* 무시 */ }
+  }
+}
+
 async function commit(state, supabase, session, retry) {
   // 연차는 **구간**이다. 위끝이 없으면 아래끝과 같은 값으로 폭 0 구간을 보낸다 —
   // 서버 제약이 "한쪽만" 을 거부하므로 null 을 섞어 보내면 저장이 통째로 실패한다.
