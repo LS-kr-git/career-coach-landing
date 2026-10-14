@@ -148,12 +148,15 @@
   .logout,.leave{color:var(--muted)}
   .sep.bar{font-size:12px;color:#D6C9B0}
   /* 문의 메일 — 로그아웃·탈퇴 줄 아래 한 줄. 누르면 주소가 복사되고 공용 「하단 안내」가 뜬다
-     (2026-10-15 사용자 확정 A1 · 글자 14 · 복사 그림 15 · 간격 5). 밑줄은 「이동」으로 읽혀 넣지 않는다. */
+     (2026-10-15 사용자 확정 A1 · 글자 14 · 복사 그림 15 · 간격 5). 밑줄은 「이동」으로 읽혀 넣지 않는다.
+     움직임(2026-10-15 사용자 결정, 목업 비교 뒤): 눌림 바탕은 떼는 순간 0.05초에 풀리고, 안내는 1초 머문 뒤 0.3초에 사라진다
+     — 공용 안내(5초 · 0.26초)보다 짧은 것은 이 화면만이다. 누를 때 바탕이 깔리는 속도는 그대로 .12s 다. */
   .foot{align-self:flex-end;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
   .mail{display:flex;align-items:center;gap:5px;padding:6px 18px 6px 8px;margin:-6px 0;border:0;border-radius:8px;background:none;
-    font:inherit;font-size:14px;line-height:20px;color:var(--muted);cursor:pointer;transition:background .12s}
-  .mail:active{background:rgba(138,122,98,.14)}
+    font:inherit;font-size:14px;line-height:20px;color:var(--muted);cursor:pointer;transition:background .05s}
+  .mail:active{background:rgba(138,122,98,.14);transition:background .12s}
   .mail svg{flex:none;width:15px;height:15px}
+  #toast.out{transition-duration:.3s}
 </style>
 </head>
 <body>
@@ -357,7 +360,7 @@
   }
   document.getElementById('mail').addEventListener('click', function () {
     (navigator.clipboard ? navigator.clipboard.writeText(MAIL).then(function () { return true; }, 옛복사) : Promise.resolve(옛복사()))
-      .then(function (ok) { if (ok) 하단안내(document.getElementById('toast')); else location.href = 'mailto:' + MAIL; });
+      .then(function (ok) { if (ok) 하단안내(document.getElementById('toast'), 1000); else location.href = 'mailto:' + MAIL; });
   });
 </script>
 </div>

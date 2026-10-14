@@ -15,8 +15,10 @@ function 보인뒤(fn) {
   mo.observe(root, { attributes: true, attributeFilter: ['class'] });
 }
 
-/** el 을 띄우고 보이는시간 뒤에 거둔다. 떠 있는 중에 다시 부르면 처음부터 다시 센다. */
-export function 하단안내(el) {
+/** el 을 띄우고 머묾(ms) 뒤에 거둔다. 떠 있는 중에 다시 부르면 처음부터 다시 센다.
+ *  가라앉는 시간은 그 화면 CSS 의 .out 전환 시간을 그대로 읽는다 — 값을 CSS 한 곳에만 둔다
+ *  (마이페이지 문의 메일 복사가 1초 · 0.3초로 짧다 — 2026-10-15 사용자 결정). */
+export function 하단안내(el, 머묾 = 보이는시간) {
   clearTimeout(타이머.get(el));
   el.classList.remove('in', 'out');
   el.hidden = false;
@@ -25,7 +27,8 @@ export function 하단안내(el) {
     requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('in')));
     타이머.set(el, setTimeout(() => {
       el.classList.add('out');
-      타이머.set(el, setTimeout(() => { el.hidden = true; el.classList.remove('in', 'out'); }, 나감));
-    }, 들어옴 + 보이는시간));
+      const 사라짐 = parseFloat(getComputedStyle(el).transitionDuration) * 1000 || 나감;
+      타이머.set(el, setTimeout(() => { el.hidden = true; el.classList.remove('in', 'out'); }, 사라짐));
+    }, 들어옴 + 머묾));
   });
 }
