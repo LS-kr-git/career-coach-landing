@@ -100,6 +100,7 @@
   //   사람**을 실패 화면으로 보냈다. 8초를 키워 봐야 더 느린 기기에서 같은 일이 난다.
   //   그래서 시간이 아니라 **진척**을 본다 — 모듈이 한 걸음 나아갈 때마다 ccAlive() 로 이 타이머를
   //   다시 잰다. 8초 동안 아무 진척이 없을 때만 실패로 넘긴다. (2026-08-09)
+  //   단, 파일을 받느라 진척 신호를 낼 수 없는 첫 구간만 20초다 — 아래 ccAlive(20000) 주석 (2026-10-15).
   //   인증에 성공한 경우는 모듈이 곧바로 go() 를 불러 done 이 서므로 여기서 다시 보지 않는다.
   // 실패하면 랜딩으로 돌려보내며 **어디서 끊겼나**를 주소에 싣는다 — 랜딩이 짧은 안내를 띄우고 그것을 `login_fail` 로
   // 남기고 어드민 「카카오 로그인이 실패하고 있나」가 센다 (2026-10-03, career-coach 마이그레이션 *_kakao_login_watch).
@@ -117,11 +118,14 @@
     ? '/?login=fail&why=provider&code=' + 받은오류
     : '/?login=fail&why=' + why);
   let timer;
-  window.ccAlive = () => {
+  window.ccAlive = (ms = 8000) => {
     clearTimeout(timer);
-    timer = setTimeout(() => window.ccFail('stalled'), 8000);
+    timer = setTimeout(() => window.ccFail('stalled'), ms);
   };
-  window.ccAlive();
+  // 첫 구간만 20초 — 이 페이지와 파일 여러 장(supabase-js 9개 등)을 받는 동안에는 진척 신호를 낼 수가 없다.
+  // 아주 느린 망(약 0.5Mbps·지연 0.6초)에서 이 구간이 8.2초 걸려, 8초였을 때는 인증에 성공한 사람을
+  // 실패 화면으로 보낼 수 있었다(2026-10-15 실측). 랜딩에서 미리 받아 둔 사람은 0.1초 안에 지난다.
+  window.ccAlive(20000);
 </script>
 
 <script type="module">
@@ -130,6 +134,7 @@
   import { takeNext } from '/assets/return-to.js';
   import { forgetIfOtherOwner } from '/assets/onboarding-store.js';
   // 주소는 설정 파일 한 곳에 — 랜딩이 같은 주소를 미리 받아 둔다(index.html 「미리 받아 두기」).
+  window.ccAlive(20000);   // 여기까지 왔다 — supabase-js(가장 큰 파일 묶음)를 받는 동안 다시 넉넉히 잰다
   const { createClient } = await import(SUPABASE_JS);
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
