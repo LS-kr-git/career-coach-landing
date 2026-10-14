@@ -255,7 +255,7 @@
 
 <script type="module">
   import { metaEvent } from '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
-  import { getPlans, planCards, getSubscription, billingView, saveBillingKey, billingCustomerId, requireLogin, FAIL, firstSendDay } from '/assets/mypage-data.js';
+  import { getPlans, planCards, getSubscription, billingView, saveBillingKey, billingCustomerId, requireLogin, FAIL, firstSendDay, onboardingDone } from '/assets/mypage-data.js';
 
   var $ = function (id) { return document.getElementById(id); };
 
@@ -264,6 +264,33 @@
      보관 단계가 어차피 다시 본다. */
   if (!(await requireLogin(location.pathname + location.search).catch(function () { return true; }))) {
     await new Promise(function () {});   // 이동하는 동안 아래가 그려지거나 결제창이 열리지 않게 여기서 멈춘다
+  }
+
+  /* 🔴 결제를 열기 전에 두 가지를 본다 (2026-10-14 출시 전 점검). 카드 변경(`?mode=change`)과
+     결제창에서 돌아온 길(`billingKey`·`code`)은 빼고 본다 — 그 둘은 이미 이 화면의 일을 하는 중이다.
+     ① **이미 구독 중이면 마이페이지로.** 앞 판은 구독자에게도 「신청 즉시 결제」와 요금 카드를 보였고,
+        카드를 넣으면 결제 없이 등록 카드만 바뀐 채 「결제수단이 등록되었습니다」만 떴다.
+        기간이 끝난 해지 예약은 구독 중으로 치지 않는다 — 서버가 결제할 때 그 자리에서 닫는다(career-coach 0136).
+     ② **온보딩을 서버에 마치지 않았으면 결제를 열지 않는다.** 전문 페이지 → 결제 → 로그인으로 온 사람은
+        온보딩을 건너뛰고 여기로 돌아온다. 그대로 결제하면 발송 대상(v_send_target)에 없어 돈을 내고도
+        알림톡을 한 통도 못 받는다. 이 기기에서 고른 값이 저장만 못 된 것이면 온보딩으로 돌려보내지 않고
+        다시 보내 본 뒤, 그래도 안 되면 결제 버튼을 막고 말한다(아래 `저장안됨`).
+     못 물어봤으면 막지 않는다 — 서버(portone 첫청구)가 온보딩을 다시 보고 걷지 않는다. */
+  var 저장안됨 = false;
+  var 들어온주소 = new URLSearchParams(location.search);
+  if (들어온주소.get('mode') !== 'change' && !들어온주소.has('billingKey') && !들어온주소.has('code')) {
+    var 갈곳 = await (async function () {
+      var store = await import('/assets/onboarding-store.js');
+      await store.retryPending().catch(function () {});
+      var 답 = await Promise.all([getSubscription(), onboardingDone()]);
+      var s = 답[0], 마침 = 답[1];
+      var 끝난해지 = s && s.cancel_at_period_end && Date.parse(s.current_period_end) <= Date.now();
+      if (billingView(s).live && !끝난해지) return '/mypage/';
+      if (마침) return null;
+      return store.readState().pending ? '저장안됨' : '/onboarding/1/';
+    })().catch(function () { return null; });
+    if (갈곳 === '저장안됨') 저장안됨 = true;
+    else if (갈곳) { location.replace(갈곳); await new Promise(function () {}); }
   }
 
   /* ── 시계: 다음 발송(영업일 08:00 서울)까지 — 영업일 판정은 결제 완료 화면과 같은 firstSendDay(공휴일 포함)를 쓴다
@@ -362,7 +389,8 @@
     return getPlans().then(function (plans) {
       plans.forEach(function (p) { 요금제[p.code] = p; });
       카드그리기(planCards(plans));
-      $('submit').disabled = false;
+      $('submit').disabled = 저장안됨;
+      if (저장안됨) note('고르신 직무·근무지가 아직 저장되지 않았어요. 잠시 후 이 화면을 다시 열어 주세요.', true);
       metaEvent('InitiateCheckout', { value: 요금제[고른.code].price_krw, currency: 'KRW' });
     });
   }).catch(function () {
@@ -435,6 +463,13 @@
         note('카드는 등록됐지만 결제가 되지 않았어요. 카드 한도나 잔액을 확인해 주세요.', true);
       else if (charged === '청구실패')
         note('결제 연결이 잠시 불안정했어요. 3일 안에 등록하신 카드로 자동으로 다시 결제해요. 지금 다시 결제하셔도 두 번 결제되지 않아요.', true);
+      // 아래 넷은 결제가 **안 됐고 저절로 다시 되지도 않는** 경우다(2026-10-14 출시 전 점검) — 「등록되었습니다」로 덮지 않는다.
+      else if (charged === '이미구독') location.replace('/mypage/');
+      else if (charged === '온보딩미완료') location.replace('/onboarding/1/');
+      else if (charged === '다른요금제진행중')
+        note('앞서 고르신 요금제의 결제 결과를 확인하고 있어요. 확인이 끝나면(최대 3일) 다시 골라 주세요. 카드는 등록됐어요.', true);
+      else if (charged === '요금제없음')
+        note('고르신 요금제를 지금은 신청할 수 없어요. 화면을 새로 열어 다시 골라 주세요. 카드는 등록됐어요.', true);
       else note('결제수단이 등록되었습니다.');
     });
   }

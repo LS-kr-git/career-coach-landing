@@ -150,6 +150,23 @@ async function rpc(name, one, args) {
 /** 프로필 — { name, provider, email, saved_count, received_count }. 회원 행이 없으면 서버가 예외를 던진다. */
 export async function getProfile() { return rpc('mypage_profile', true); }
 
+/**
+ * 온보딩을 **서버에** 마쳤나 — 선호 행과 직군이 하나 이상 있으면 참.
+ * 발송은 이 둘이 다 있어야 나간다 — 선호 행은 career-coach `v_send_target` 이 inner join 하고, 직군이 없으면
+ * `ops/send.한명` 이 「직군없음」으로 안 보낸다. 서버 결제 함수(portone 첫청구)도 같은 둘을 본다. 못 마친 채 결제하면 돈을 내고도
+ * 알림톡을 한 통도 못 받고 전문도 잠긴다(2026-10-14 출시 전 점검). 브라우저의 값이 아니라 서버를 본다 —
+ * 온보딩 중간에 나간 사람은 브라우저에만 직군이 있다. 못 물어봤으면 던진다.
+ */
+export async function onboardingDone() {
+  const supabase = await supa();
+  const [pref, jobs] = await Promise.all([
+    supabase.from('user_preference').select('user_id').maybeSingle(),
+    supabase.from('user_preference_job').select('job_code').limit(1),
+  ]);
+  for (const r of [pref, jobs]) if (r.error) throw r.error;
+  return Boolean(pref.data) && jobs.data.length > 0;
+}
+
 /** 구독·결제수단. 서버가 **항상 한 행**을 준다 — 없는 값은 null 이다. */
 export async function getSubscription() { return rpc('mypage_subscription', true); }
 

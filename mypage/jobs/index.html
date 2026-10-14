@@ -111,7 +111,7 @@
   /* 고른 직군은 온보딩 1단계와 **같은 값**이다 — 저장·복원·서버 전송(RPC·재시도) 전부
      assets/onboarding-store.js 를 그대로 쓴다. 따로 두면 한 사람의 직군이 두 곳으로 갈린다. */
   import { readState, writeState, saveOnboarding, retryPending, pullFromServer } from '/assets/onboarding-store.js';
-  import { requireLogin, FAIL } from '/assets/mypage-data.js';
+  import { requireLogin, FAIL, savePrefs } from '/assets/mypage-data.js';
   retryPending();     // 지난 저장이 실패한 채 남아 있으면 온보딩 화면과 같이 여기서도 다시 보낸다
   (function () {
     /* 🔴 상한 7. 온보딩(assets/onboarding-store.js 의 MAX_JOBS)·서버(0024_job_cap_7.sql)와 같은 수다.
@@ -168,14 +168,17 @@
       acc.parentNode.querySelector('.chips').hidden = open;
     });
     save.addEventListener('click', function () {
+      var before = { jobs: readState().jobs };
       writeState({ jobs: picked().map(function (c) { return c.dataset.d2; }) });
-      /* 통신 실패('error')는 store 가 pending 으로 남기고 다음 진입(위 retryPending)에서 다시 보낸다.
-         'incomplete' 는 연차·근무지가 브라우저에 없는 경우 — 직군만은 저장됐고 서버 전송은 온보딩을
-         다시 밟을 때 함께 나간다. 둘 다 사용자를 여기 잡아 둘 이유가 없어 01 로 돌아간다.
-         'no-session' 만은 store 가 카카오 로그인 으로 보냈으므로 여기서 이동하지 않는다. */
-      saveOnboarding().then(function (r) {
-        if (r.status !== 'no-session') location.href = '/mypage/';
-      });
+      /* 🔴 저장된 것만 저장됐다고 말한다 — 연차·근무지 화면(mypage/years)과 같은 처리 (2026-10-14 출시 전 점검).
+         앞 판은 실패('error')·보낼 것 없음('incomplete')에도 말없이 01 로 돌아가, 사용자는 저장된 줄 알았다.
+         'no-session' 은 store 가 카카오 로그인으로 보냈으므로 여기서 아무것도 안 한다. */
+      save.disabled = true;
+      savePrefs(before).then(function (st) {
+        if (st === 'no-session') return;
+        if (st !== 'ok') { lab.textContent = FAIL.line; save.disabled = false; return; }
+        location.href = '/mypage/';
+      }, function () { lab.textContent = FAIL.line; save.disabled = false; });
     });
     /* 저장된 직군이 있으면 그 칩을 눌러 둔다. 없으면 마크업 상태(피그마 기준 · 0개) 그대로다.
        화면 칩은 taxonomy.json 전량이라, 건너뛰는 것은 taxonomy 에 없는 코드(이름이 바뀐 옛 코드)뿐이다 */

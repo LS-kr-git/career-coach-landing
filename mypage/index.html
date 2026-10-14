@@ -278,13 +278,24 @@
      그것을 다시 보내는 곳이 **온보딩 세 화면뿐**이었다. 온보딩은 단방향이라 다시 들어올
      일이 거의 없어서, 그 사람은 자기가 고른 주제를 영영 못 받는다 — 아무 표시도 없이.
      `retryPending()` 은 보낼 것이 없거나 로그인 전이면 조용히 아무것도 안 한다. */
-  import { retryPending, pullFromServer, readState, client } from '/assets/onboarding-store.js';
-  import { requireLogin, getTopics, COMMON_TOPIC } from '/assets/mypage-data.js';
+  import { retryPending, pullFromServer, readState, client, forgetLocal } from '/assets/onboarding-store.js';
+  import { requireLogin, getTopics, COMMON_TOPIC, onboardingDone } from '/assets/mypage-data.js';
   import { readTopicMap, trackFromJobs } from '/assets/topic-map.js';
-  retryPending();
+  var 재전송 = retryPending();
+
+  /* 🔴 온보딩을 서버에 마치지 않은 사람은 온보딩으로 보낸다 (2026-10-14 출시 전 점검).
+     온보딩 2단계에서 나간 사람이 랜딩 버튼을 다시 누르면 브라우저에 남은 직군만 보고 이 화면으로 왔다 —
+     연차·근무지가 서버에 없어 레터가 0건인데 아무 안내도 없었다. 못 물어봤으면 보내지 않는다(아래 실패 처리). */
+  var 마친사람 = function (ok) {
+    if (!ok) return false;
+    return 재전송.then(function () { return onboardingDone(); }).then(function (done) {
+      if (!done) { location.replace('/onboarding/1/'); return new Promise(function () {}); }
+      return true;
+    });
+  };
 
   /* 월·수·금 줄 — 고치는 화면(mypage/topics)이 읽는 것과 같은 서버 값이다 */
-  requireLogin().then(function (ok) { return ok ? pullFromServer() : null; }).then(function (r) {
+  requireLogin().then(마친사람).then(function (ok) { return ok ? pullFromServer() : null; }).then(function (r) {
     if (r === null) return;
     var s = readState();
     /* 월·수·금 줄 — 주제 화면과 같은 규칙: 저장한 주제, 없으면 직군 추천. 둘 다 없으면 지어내지 않고 「내 직무」로 둔다 */
@@ -300,6 +311,8 @@
 
   /* 로그아웃 — 이 버튼은 2026-10-03 까지 아무 동작도 걸려 있지 않았다 */
   document.querySelector('.logout').addEventListener('click', function () {
+    // 이 기기에 남은 온보딩 값·갈 곳도 지운다 — 같은 브라우저를 쓰는 다음 사람 계정에 저장되지 않게(2026-10-14)
+    forgetLocal();
     client().then(function (c) { return c.auth.signOut(); }).finally(function () { location.href = '/'; });
   });
 </script>

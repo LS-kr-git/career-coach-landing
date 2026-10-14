@@ -39,7 +39,7 @@ const MAX_REGIONS = 3;
  *    ⚠️ topic:null 과 다르다 — null 은 「한 번도 안 골랐다」이고, 서버는 그때 기존 값을
  *    유지한다(재온보딩이 주제를 지우면 안 되므로). 「지운다」를 말하려면 인자가 따로
  *    필요하고 그게 p_topic_clear 다. 두 상태를 한 값으로 접으면 서버가 못 가른다. */
-const EMPTY = { jobs: [], years: null, yearsMax: null, regions: [], topic: null, topicClear: false, pending: false };
+const EMPTY = { jobs: [], years: null, yearsMax: null, regions: [], topic: null, topicClear: false, pending: false, owner: null };
 
 const strings = (v) => (Array.isArray(v) ? v.filter((s) => typeof s === 'string' && s) : []);
 const intOrNull = (v) => (Number.isInteger(v) ? v : null);
@@ -61,6 +61,9 @@ export function readState() {
       topic: typeof s.topic === 'string' && s.topic ? s.topic : null,
       topicClear: s.topicClear === true,
       pending: s.pending === true,
+      // 이 값을 고른 로그인 계정(auth uid). 같은 브라우저를 다른 사람이 쓰면 남의 값을 자기 계정에
+      // 저장하거나 화면에 미리 체크된 채로 보게 된다(2026-10-14 출시 전 점검). 옛 저장분은 null 이다.
+      owner: typeof s.owner === 'string' && s.owner ? s.owner : null,
     };
   } catch {
     return { ...EMPTY };   // 사파리 프라이빗 모드 등
@@ -117,7 +120,9 @@ export function client() {
   if (!clientPromise) {
     clientPromise = (async () => {
       const [{ createClient }, cfg] = await Promise.all([
-        import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'),
+        // 판을 고정한다 — `@2` 면 상위 릴리스 하나가 우리 배포 없이 로그인·마이페이지 전체를 바꾼다
+        // (2026-10-14 출시 전 점검. 그날 `@2` 가 풀리던 판 그대로다). 올릴 때는 일부러 올린다.
+        import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/+esm'),
         // 접속 정보는 /assets/supabase-config.js 한 곳에만 둔다 (2026-08-06 복구 훈련 결과).
         import('/assets/supabase-config.js'),
       ]);
@@ -129,6 +134,22 @@ export function client() {
 
 // 완료 버튼과 자동 재시도가 겹쳐 같은 값을 두 번 보내지 않게 한다.
 let inflight = false;
+
+/** 이 브라우저의 선택값이 **다른 계정** 것이면 그 계정의 「못 보낸 저장」 표시를 내린다. 내렸으면 참.
+ *  값 자체는 지우지 않는다 — 지금 사람이 로그인 전에 1·2단계에서 고른 값이 같은 칸에 있을 수 있다(검사관
+ *  2026-10-14 ①). 남의 값이 이 사람 계정으로 **저절로** 저장되는 것(pending 재전송)만 막는다. 로그아웃·탈퇴는
+ *  `forgetLocal` 이 칸을 통째로 지운다. */
+function 남의것이면_버린다(session) {
+  const owner = readState().owner;
+  if (!owner || !session || owner === session.user.id) return false;
+  writeState({ pending: false, owner: null });
+  return true;
+}
+
+/** 로그아웃·탈퇴 때 부른다 — 이 기기에 남은 온보딩 값과 로그인 뒤 갈 곳을 지운다(공용 기기). */
+export function forgetLocal() {
+  try { localStorage.removeItem(KEY); localStorage.removeItem('cc_next'); } catch { /* 무시 */ }
+}
 
 async function commit(state, supabase, session, retry) {
   // 연차는 **구간**이다. 위끝이 없으면 아래끝과 같은 값으로 폭 0 구간을 보낸다 —
@@ -196,6 +217,8 @@ export async function saveOnboarding() {
     const supabase = await client();
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) { location.href = (await import('/assets/supabase-config.js')).KAKAO_LOGIN; return { status: 'no-session' }; }
+    // 지금 로그인한 사람이 이 화면에서 직접 고르고 누른 값이다 — 그 사람 것으로 표시한다.
+    writeState({ owner: session.user.id });
     return await commit(state, supabase, session, false);
   } catch {
     writeState({ pending: true });      // CDN 이 막혔거나 네트워크가 끊긴 경우
@@ -220,6 +243,7 @@ export async function retryPending() {
     // 아직 로그인 전이면 표시를 그대로 둔다. 여기서 화면을 옮기지는 않는다 —
     // 1·2 단계는 로그인 없이도 볼 수 있는 화면이다.
     if (!session) return { status: 'no-session' };
+    if (남의것이면_버린다(session)) return { status: 'idle' };
     return await commit(state, supabase, session, true);
   } catch {
     return { status: 'error' };
@@ -240,9 +264,11 @@ export async function retryPending() {
  * 실패는 삼키지 않는다 — 던져서 부른 화면이 실패를 그리게 한다(빈 상태와 가른다).
  */
 export async function pullFromServer() {
+  const supabase = await client();
+  const { data: { session } } = await supabase.auth.getSession();
+  남의것이면_버린다(session);   // 같은 브라우저의 다른 계정 값을 이 사람 화면에 깔지 않는다
   // 아직 못 보낸 변경이 사용자가 마지막으로 고른 값이다. 덮지 않고 그대로 둔다.
   if (readState().pending) return;
-  const supabase = await client();
   const [pref, jobs, regions] = await Promise.all([
     supabase.from('user_preference').select('years_min, years_max, insight_track').maybeSingle(),
     supabase.from('user_preference_job').select('job_code'),
@@ -258,5 +284,6 @@ export async function pullFromServer() {
     topic: pref.data.insight_track,
     topicClear: false,
     pending: false,
+    owner: session?.user?.id ?? null,
   });
 }

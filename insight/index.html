@@ -382,6 +382,7 @@
       args 는 함수마다 다르다. PostgREST 는 **모르는 인자를 404 로 거절**하므로
       편 하나를 묻지 않는 함수에 p_insight_id 를 딸려 보내면 안 된다. */
   async function callRows(fn, args) {
+    // 네트워크가 끊기면 fetch 가 「Failed to fetch」(영어)를 던진다 — 그대로 본문 자리에 떴다(2026-10-14 출시 전 점검).
     const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
       method: 'POST',
       headers: {
@@ -390,11 +391,12 @@
         Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
       },
       body: JSON.stringify(args || { p_token: token, p_insight_id: Number(id) }),
-    });
+    }).catch(() => { throw new Error(MSG.blocked); });
     const data = await res.json().catch(() => null);
-    // 없는 글·만료 링크는 RPC 가 예외로 올린다. 그 메시지를 그대로 보여준다
+    // 없는 글·만료 링크는 RPC 가 예외로 올린다(4xx). 그 메시지를 그대로 보여준다
     // (사람이 읽으라고 쓴 한국어이고, 우리가 옮겨 적으면 두 곳이 갈린다).
-    if (!res.ok) throw new Error((data && data.message) || MSG.blocked);
+    // 🔴 서버 고장(5xx)의 메시지는 사람에게 쓴 말이 아니다 — 우리 문구로 바꾼다.
+    if (!res.ok) throw new Error((res.status < 500 && data && data.message) || MSG.blocked);
     // returns table(...) 은 행 배열로 온다.
     if (!Array.isArray(data)) throw new Error(MSG.notFound);
     return data;
