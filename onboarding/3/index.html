@@ -19,6 +19,9 @@
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html{background:#fff}
+  /* 내용이 화면에 다 들어오면 끌어도 페이지가 위아래로 안 움직이게 — 끝 튕김(바운스)을 위아래만 끈다
+     (2026-10-15 사용자 확정 · 2단계와 같다). 넘치는 화면은 그대로 스크롤된다(overflow:hidden 금지 — CLAUDE.md svh 절). */
+  html,body{overscroll-behavior-y:none}
   body{font-family:'Pretendard Variable',Pretendard,'Pretendard','Noto Sans CJK KR',-apple-system,sans-serif;
     background:#fff;color:var(--gray-800);-webkit-font-smoothing:antialiased}
   /* 화면 채우기용 높이는 svh 로 고정한다. 100vh 는 '주소창이 숨겨진 큰 화면' 기준이라
@@ -72,6 +75,8 @@
   .acc:last-of-type{box-shadow:inset 0 1px 0 var(--gray-100),inset 0 -1px 0 var(--gray-100)}
 
   .grp{margin-bottom:24px}
+  /* 마지막 묶음 아래 24px 는 board 의 padding-bottom(100, CTA 자리)과 겹쳐 쓸데없는 스크롤만 만든다 */
+  .grp:last-child{margin-bottom:0}
   .ghead{display:flex;align-items:center;margin-bottom:10px}
   .ghead h3{font-size:13px;line-height:18px;font-weight:600;color:var(--gray-500)}
 
