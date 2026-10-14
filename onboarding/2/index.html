@@ -19,6 +19,10 @@
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html{background:#fff}
+  /* 내용이 화면에 다 들어오면 손으로 끌어도 페이지가 위아래로 움직이지 않게 한다(2026-10-15 사용자 지시).
+     문서 높이는 이미 화면과 같다 — 움직임의 정체는 끝에서 튕기는 효과(아이폰 바운스·안드로이드 늘어남)다.
+     overflow:hidden 은 쓰지 않는다(CLAUDE.md svh 절) — 가로 모드처럼 넘치는 화면은 그대로 스크롤된다. */
+  html,body{overscroll-behavior:none}
   body{font-family:'Pretendard Variable',Pretendard,'Pretendard','Noto Sans CJK KR',-apple-system,sans-serif;
     background:#fff;color:var(--gray-800);-webkit-font-smoothing:antialiased}
   /* 화면 채우기용 높이는 svh 로 고정한다. 100vh 는 '주소창이 숨겨진 큰 화면' 기준이라
