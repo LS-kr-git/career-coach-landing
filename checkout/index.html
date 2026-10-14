@@ -275,7 +275,11 @@
   <p class="wait-s">창을 닫지 말고 잠시만 기다려 주세요</p>
 </div>
 <!-- 모바일은 결제창에서 이 화면으로 페이지째 돌아온다 — 결제 화면을 한 번도 보이지 않고 덮개부터 그린다 -->
-<script>if (/[?&]billingKey=/.test(location.search)) document.getElementById('wait').hidden = false;</script>
+<!-- 카드 변경(?mode=change)은 돈을 걷지 않으므로 덮개를 쓰지 않는다. 완료 화면에서 뒤로 오면 뒤로가기 캐시가 덮개 그대로 되살리므로 걷는다 -->
+<script>
+  if (/[?&]billingKey=/.test(location.search) && !/[?&]mode=change(&|$)/.test(location.search)) document.getElementById('wait').hidden = false;
+  addEventListener('pageshow', function (e) { if (e.persisted) document.getElementById('wait').hidden = true; });
+</script>
 
 <script type="module">
   import { metaEvent } from '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
@@ -477,7 +481,7 @@
      planCode — 카드 변경이면 보내지 않는다(서버가 그 사람 구독의 요금제를 안다). */
   function 보관하고_알린다(billingKey, planCode) {
     // 🔴 여기서 끝내지 않는다. 서버가 포트원에 되물어 보관해야 구독이 열린다.
-    $('wait').hidden = false;
+    if (!변경) $('wait').hidden = false;
     return saveBillingKey(billingKey, 변경 ? undefined : planCode).then(function (r) {
       // 「완료」는 첫 결제가 실제로 걷혔을 때(`개시`)만 말한다 (2026-09-24 사용자 지시).
       // `청구실패`(우리 쪽 고장)는 카드 탓이 아니라 따로 말한다 — 다시 누르면 같은 주문번호로 다시 걷는다(0091).
