@@ -89,6 +89,9 @@
      걷고 한 벌로 합쳤다. 아래 규칙은 위 기본값을 덮는 새 화면 값이다(순서가 우선순위다). */
   :root{--paper:#FEEAC1;--ink:#111111;--line:#F5EAD6;--edge:#F9D99A;--muted:#8A7A62;--caret-new:#B9A989}
   .page,.mp-main{background:var(--paper)}
+  /* 끝까지 내려 더 당겨도 바탕이 이어지게 — 랜딩과 같은 방식: html·body 바탕을 페이지 맨 아래 색과 같게
+     (랜딩은 footer 와 같은 --g100). 넓은 화면은 위 블록의 회색 바탕이 그대로 쓰인다 (2026-10-14 사용자 지시) */
+  @media (max-width:450px){html,body{background:var(--paper)}}
   .hd{background:var(--ink)}
   .back path{stroke:#fff}
   .back:active::before{background:#2a2a2a}
