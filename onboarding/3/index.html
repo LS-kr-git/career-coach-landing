@@ -149,7 +149,7 @@ window.ccStep3={
   cta.addEventListener('click', async () => {
     if (cta.classList.contains('off')) return;
     window.ccOnChange();
-    // 로그인 전이면 saveOnboarding 이 /signup/ 으로 보낸다 — 그 위에 덮어 이동하지 않는다.
+    // 로그인 전이면 saveOnboarding 이 카카오 로그인으로 보낸다 — 그 위에 덮어 이동하지 않는다.
     const { status } = await saveOnboarding();
     if (status !== 'no-session') location.href = '/onboarding/4/';
   });

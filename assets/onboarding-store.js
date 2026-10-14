@@ -22,7 +22,7 @@
  *
  * supabase-js 를 언제 부르나
  *   보낼 것이 실제로 있을 때만 동적 import 한다. 1·2 단계는 CDN 을 아예 건드리지 않아
- *   화면이 그만큼 빨리 뜬다. (signup/index.html 이 쓰는 방식과 같은 CDN·같은 설정 파일)
+ *   화면이 그만큼 빨리 뜬다. (auth/callback/index.html 이 쓰는 방식과 같은 CDN·같은 설정 파일)
  */
 import { track } from '/assets/track.js';
 
@@ -173,7 +173,7 @@ async function commit(state, supabase, session, retry) {
 
 /**
  * 3단계 완료 버튼이 부른다. 값 세 벌을 한 번에 보낸다.
- * 세션이 없으면 RPC 를 부르지 않고 /signup/ 으로 보낸다 (로그인 없이 들어온 경우).
+ * 세션이 없으면 RPC 를 부르지 않고 카카오 로그인으로 보낸다 (로그인 없이 들어온 경우).
  */
 export async function saveOnboarding() {
   if (inflight) return { status: 'busy' };
@@ -195,7 +195,7 @@ export async function saveOnboarding() {
     }
     const supabase = await client();
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { location.href = '/signup/'; return { status: 'no-session' }; }
+    if (!session) { location.href = (await import('/assets/supabase-config.js')).KAKAO_LOGIN; return { status: 'no-session' }; }
     return await commit(state, supabase, session, false);
   } catch {
     writeState({ pending: true });      // CDN 이 막혔거나 네트워크가 끊긴 경우

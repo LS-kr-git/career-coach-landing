@@ -22,7 +22,7 @@
 | 파일 | 내용 |
 |---|---|
 | `index.html` | 랜딩 본문 (CSS 인라인) |
-| `signup/index.html` | 시작하기 — 카카오 로그인 (`/signup/`) |
+| `signup/index.html` | 화면 없음 — 옛 주소를 카카오 로그인으로 넘긴다 (2026-10-14 가입 화면 삭제) |
 | `auth/callback/index.html` | 카카오 로그인 콜백 착지 (`/auth/callback/`) |
 | `terms.html` · `privacy.html` | 이용약관 · 개인정보처리방침 |
 | `assets/` | 일러스트 6종(투명 PNG 2x) + 로고 SVG |

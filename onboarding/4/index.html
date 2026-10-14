@@ -173,9 +173,9 @@
     //    「CTA 가 저장을 기다린다」, 2026-09-11 검사관 ①). 실패해도 막지 않는다 — pending 이 남고,
     //    최종 확인 화면·마이페이지가 다시 보낸다.
     const r = await 저장중.catch(() => null);
-    // 로그인이 풀렸으면 가입(카카오) 화면으로 — saveOnboarding 은 스스로 보내지만 retryPending 은 화면을 안 옮긴다
+    // 로그인이 풀렸으면 카카오 로그인으로 — saveOnboarding 은 스스로 보내지만 retryPending 은 화면을 안 옮긴다
     // (2026-10-12 검사관 ①: 주제를 안 바꾼 채 누르면 retryPending 결과라 버튼이 아무 말 없이 멈췄다).
-    if (r && r.status === 'no-session') { location.href = '/signup/'; return; }
+    if (r && r.status === 'no-session') { location.href = (await import('/assets/supabase-config.js')).KAKAO_LOGIN; return; }
     location.href = '/onboarding/done/';
   });
 </script>

@@ -33,6 +33,8 @@
 <link rel="stylesheet" href="/assets/landing-3.css">
 <style>
 /* ===== 첫 화면 카톡 카드 (2026-10-13 · 아티클 폰과 같은 크기, 파란 바탕 + 흰 카드) ===== */
+/* 카카오 로그인 실패로 돌아왔을 때 버튼 위 짧은 안내 (2026-10-14 · auth/callback 이 /?login=fail 로 보낸다) */
+.lfail{margin:0 auto 10px;width:fit-content;max-width:100%;background:rgba(15,23,42,.88);color:#fff;font-size:13px;line-height:19px;border-radius:999px;padding:8px 14px;text-align:center;word-break:keep-all}
 #pmhero{margin-top:28px;max-height:none}
 #pmhero .sc{background:#D9E7FB;overflow:hidden}
 /* 아래 모서리 없이 폰 끝에서 마지막 줄이 반쯤 잘린다 — 말풍선이 화면 밖으로 이어지는 것처럼 (M4) */
@@ -341,7 +343,7 @@
   <p class="cdn">*돌아오는 영업일 오전 8시부터 발송</p>
 </section>
 
-<div class="sticky" id="sticky"><a class="btn" id="ctaBtn" href="/signup/"><span><svg class="kk" viewBox="0 0 24 24" aria-hidden="true"><path fill="#191919" d="M12 3.2C6.6 3.2 2.3 6.7 2.3 11c0 2.8 1.8 5.2 4.6 6.6l-.9 3.4c-.1.3.3.6.5.4l4-2.7c.5.1 1 .1 1.5.1 5.4 0 9.7-3.5 9.7-7.8S17.4 3.2 12 3.2z"/></svg>카카오로 3초만에 시작하기</span></a></div>
+<div class="sticky" id="sticky"><p class="lfail" id="lfail" role="alert" hidden>로그인이 완료되지 않았습니다. 다시 시도해 주세요.</p><a class="btn" id="ctaBtn" href="/signup/"><span><svg class="kk" viewBox="0 0 24 24" aria-hidden="true"><path fill="#191919" d="M12 3.2C6.6 3.2 2.3 6.7 2.3 11c0 2.8 1.8 5.2 4.6 6.6l-.9 3.4c-.1.3.3.6.5.4l4-2.7c.5.1 1 .1 1.5.1 5.4 0 9.7-3.5 9.7-7.8S17.4 3.2 12 3.2z"/></svg>카카오로 3초만에 시작하기</span></a></div>
 
   <footer>
     <div class="biz">
@@ -357,8 +359,29 @@
 <script src="/assets/landing.js"></script>
 <script type="module">
   // 유입 경로 기록. 실패해도 화면에 영향이 없다 (track.js 가 예외를 삼킨다).
-  import { pageView, metaEvent } from '/assets/track.js';
+  import { pageView, metaEvent, track } from '/assets/track.js';
+  import { KAKAO_LOGIN, SUPABASE_URL } from '/assets/supabase-config.js';
   pageView('visit', { p: 'landing' });
+  // 가입·로그인 입구 — 두 버튼 모두 카카오로 바로 간다 (2026-10-14 /signup/ 화면 삭제, 사용자 지시).
+  // 마크업의 /signup/ 은 이 모듈이 못 돌 때만 쓰이는 길이다(그 주소는 카카오로 넘겨주기만 한다).
+  // 이미 로그인한 사람은 카카오를 건너뛴다 — 세션은 supabase-js 기본 저장 이름에서 본다(CDN 을 기다리지 않게).
+  const 저장됨 = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+  const 로그인됨 = !!저장됨('sb-' + new URL(SUPABASE_URL).hostname.split('.')[0] + '-auth-token');
+  const 온보딩함 = (() => { try { return (JSON.parse(저장됨('cc_onboarding')) || {}).jobs?.length > 0; } catch { return false; } })();
+  for (const a of document.querySelectorAll('.top .auth, #ctaBtn')) {
+    a.href = 로그인됨 ? (온보딩함 ? '/mypage/' : '/onboarding/1/') : KAKAO_LOGIN;
+    // 여기와 login 사이의 차이가 카카오 동의 화면 이탈률이다(어드민 「카카오 로그인이 실패하고 있나」).
+    if (!로그인됨) a.addEventListener('click', () => track('signup_start'), { once: true });
+  }
+  // 카카오 로그인이 끝나지 못하고 돌아온 경우 — 안내를 띄우고 한 건 남긴다. `why`·`code` 는 콜백이 실어 보낸 것이다.
+  const 돌아옴 = new URLSearchParams(location.search);
+  if (돌아옴.get('login') === 'fail') {
+    document.getElementById('lfail').hidden = false;
+    const why = (돌아옴.get('why') || '').replace(/[^a-z_]/g, '').slice(0, 20);
+    const code = (돌아옴.get('code') || '').replace(/[^A-Za-z0-9_]/g, '').slice(0, 40);
+    track('login_fail', { ...(why && { why }), ...(code && { code }) });
+    history.replaceState(null, '', location.pathname + location.hash);   // 새로고침에 안내가 다시 뜨지 않게
+  }
   // 하단 고정 「카카오로 3초만에 시작하기」 → 메타 픽셀 전환 이벤트 (옛 랜딩의 ctaBtn 과 같은 자리).
   // 픽셀은 track.js 가 켠다 — 여기서는 metaEvent 만 부른다(픽셀이 없으면 아무 일도 안 한다).
   document.getElementById('ctaBtn').addEventListener('click', () => metaEvent('InitiateCheckout'));

@@ -131,7 +131,7 @@
     writeState({ regions: chips.filter(isOn).map((c) => c.textContent.trim()) });
     save.disabled = true;
     savePrefs(before).then((st) => {
-      if (st === 'no-session') return;          // store 가 이미 /signup/ 으로 보냈다
+      if (st === 'no-session') return;          // store 가 이미 카카오 로그인 으로 보냈다
       if (st !== 'ok') { lab.textContent = FAIL.line; save.disabled = false; return; }   // 저장된 것만 저장됐다고 말한다
       location.href = '/mypage/';
     }, () => { lab.textContent = FAIL.line; save.disabled = false; });

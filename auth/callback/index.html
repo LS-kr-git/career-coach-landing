@@ -70,7 +70,6 @@
   // ★ supabase CDN 을 쓰는 아래 모듈과 **일부러 분리**했다. CDN 이 막히면 그 모듈은 한 줄도
   //   실행되지 않아 3초 폴백조차 등록되지 못하고, getSession() 이 응답 없이 멎어도 그 뒤의
   //   setTimeout 에 닿지 못한다 — 두 경우 모두 화면이 진행 표시 첫 단계에서 영영 멈춘다.
-  //   (signup/index.html 이 동의 게이트를 분리해 둔 것과 같은 이유.)
   let done = false;
   window.ccGo = (path) => { if (!done) { done = true; location.replace(path); } };
   // 진행 표시 — 아래 모듈이 실제 진척 지점에서만 부른다(1 서버 연결 · 2 로그인 확인 · 3 이동 직전).
@@ -88,11 +87,11 @@
   //
   // ★ "3초가 먼저" 는 CDN 이 빠를 때만 성립한다. 아래 3초 타이머는 CDN 로딩이 **끝난 뒤에야**
   //   걸리므로, 느린 모바일에서 CDN 6초 + getSession 2초면 8초가 먼저 터져 **인증에 성공한
-  //   사람**을 /signup/?error=auth 로 보냈다. 8초를 키워 봐야 더 느린 기기에서 같은 일이 난다.
+  //   사람**을 실패 화면으로 보냈다. 8초를 키워 봐야 더 느린 기기에서 같은 일이 난다.
   //   그래서 시간이 아니라 **진척**을 본다 — 모듈이 한 걸음 나아갈 때마다 ccAlive() 로 이 타이머를
   //   다시 잰다. 8초 동안 아무 진척이 없을 때만 실패로 넘긴다. (2026-08-09)
   //   인증에 성공한 경우는 모듈이 곧바로 go() 를 불러 done 이 서므로 여기서 다시 보지 않는다.
-  // 실패로 돌려보낼 때 **어디서 끊겼나**를 주소에 싣는다 — 가입 화면이 그것을 `login_fail` 로
+  // 실패하면 랜딩으로 돌려보내며 **어디서 끊겼나**를 주소에 싣는다 — 랜딩이 짧은 안내를 띄우고 그것을 `login_fail` 로
   // 남기고 어드민 「카카오 로그인이 실패하고 있나」가 센다 (2026-10-03, career-coach 마이그레이션 *_kakao_login_watch).
   // 카카오·로그인 서버가 오류를 돌려줬으면 그 코드가 이 주소(?error=… 또는 #error=…)에 와 있다.
   // ★ 맨 처음에 읽는다 — supabase-js 가 주소를 정리하기 전이어야 한다.
@@ -105,8 +104,8 @@
     return c.replace(/[^A-Za-z0-9_]/g, '').slice(0, 40);
   })();
   window.ccFail = (why) => window.ccGo(받은오류
-    ? '/signup/?error=auth&why=provider&code=' + 받은오류
-    : '/signup/?error=auth&why=' + why);
+    ? '/?login=fail&why=provider&code=' + 받은오류
+    : '/?login=fail&why=' + why);
   let timer;
   window.ccAlive = () => {
     clearTimeout(timer);
@@ -189,7 +188,7 @@
 
   const go = window.ccGo;   // 이동 잠금은 위 폴백과 공유한다 — 두 경로가 겹쳐 두 번 이동하지 않게
   // 로그인 성공의 목적지. 결제 화면에서 로그인하러 온 사람은 그리로 돌아간다(assets/return-to.js).
-  // 실패 쪽(/signup/?error=auth)에서는 꺼내지 않는다 — 다시 로그인하면 그때 돌아가게.
+  // 실패 쪽(/?login=fail)에서는 꺼내지 않는다 — 다시 로그인하면 그때 돌아가게.
   const 성공 = () => { window.ccStep(3); go(takeNext('/onboarding/1/')); };
 
   // supabase-js 는 detectSessionInUrl 기본값이 true 라 이 페이지에 도착하는 순간

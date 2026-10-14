@@ -204,7 +204,7 @@
     (function 보낸다(남은기회) {
       saveOnboarding().then(function (r) {
         if (r.status === 'busy' && 남은기회 > 0) { setTimeout(function () { 보낸다(남은기회 - 1); }, 400); return; }
-        if (r.status === 'no-session') return;   // store 가 이미 /signup/ 으로 보냈다
+        if (r.status === 'no-session') return;   // store 가 이미 카카오 로그인 으로 보냈다
         /* 🔴 저장된 것만 저장됐다고 말한다. 'incomplete'(직군·연차·근무지가 이 브라우저에 없다)면
            보낼 것이 없어 재시도 대상도 아니다 — 고른 값을 **되돌려** 둔다. 안 되돌리면 다음 진입에서
            pullFromServer 가 서버에 행이 없어 아무것도 안 덮고, 안 나간 주제가 눌린 채로 보인다. */
