@@ -89,6 +89,9 @@
   .acc[data-locked]{cursor:default}
   .chips{display:flex;flex-wrap:wrap;gap:7px;padding:2px 0 16px}
 
+  /* 끝에서 더 당겨도 흰 바탕이 이어지게 — 맨 위(헤더)·맨 아래가 모두 흰색이라 바깥 바탕도 흰색 한 가지로 둔다.
+     마이페이지 첫 화면·랜딩과 같은 방식. 넓은 화면은 아래 블록의 회색 바탕 그대로 (2026-10-14 사용자 지시) */
+  @media (max-width:450px){html,body{background:#fff}}
   /* 넓은 화면 카드 어포던스 — 랜딩(index.html)의 같은 블록과 값이 같다(2026-09-24 사용자 지시 · 모든 페이지).
      page-audit.mjs 「넓은 화면 바탕」이 빠진 페이지를 막는다. */
   @media (min-width:451px){
