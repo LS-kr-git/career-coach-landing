@@ -20,8 +20,8 @@
  *   - **지난 값부터** — <html data-keep> 인 화면은 다 그려진 [data-sk…] 자리를 이 탭에 적어 두었다가
  *     다음에 오면 스크립트가 돌기 전에 그대로 깔고 바로 보여 준다. 새 값이 같으면 화면이 안 바뀐다.
  *     조회가 실패했으면(ccNoKeep) 적지 않는다. 기록 이름에 주인(로그인 사용자 id · 링크 토큰)이 들어간다.
- *   - 화면 사이 0.15초 페이드(View Transitions). 그 순간 아직 못 보여 줄 화면이면 페이드를 건너뛴다 —
- *     감춘 화면으로 넘어가면 흰 판으로 스며드는 꼴이 되기 때문이다.
+ *   - 화면 사이 0.15초 페이드(View Transitions). 그 순간 아직 못 보여 줄 화면이면 앞 화면 사진을 멈춰 세워 두고,
+ *     보여 줄 때 이어서 페이드한다 — 감춘 화면(바탕만)이 비치지 않게.
  *   - 아무리 늦어도 HOLD_MAX 에는 보여 준다. 이 파일이 못 불려 오면 숨기는 일도 없다.
  *   - 스크롤바 자리를 늘 비워 둔다(③). 어드민 셸(ops/index.html)과 같은 처방이다.
  *
@@ -53,7 +53,8 @@
     'html.cc-wait body{visibility:hidden}',
     '@view-transition{navigation:auto}',
     '::view-transition-group(root){animation-duration:.15s}',
-    '@media (prefers-reduced-motion:reduce){::view-transition-group(root){animation:none}}',
+    // 움직임 줄이기: 페이드 없이 바로 바꾼다. animation:none 이면 붙잡을 전환이 없어 숨은 화면이 비친다 — 길이만 0 에 가깝게.
+    '@media (prefers-reduced-motion:reduce){::view-transition-group(root),::view-transition-old(root),::view-transition-new(root){animation-duration:.001s}}',
     // 스켈레톤 — 글자는 투명, 같은 자리에 굵은 가로줄(text-decoration)로 막대를 그린다.
     // DOM 을 바꾸지 않으므로 페이지 스크립트가 고르는 요소·순서가 그대로다.
     '@property --skc{syntax:"<color>";inherits:true;initial-value:' + INK + '.07)}',
@@ -78,13 +79,28 @@
   document.head.appendChild(css);
   root.classList.add('cc-wait');
 
-  function show(force) { if (!shown && (!leaving || force)) { shown = true; root.classList.remove('cc-wait'); } }
+  var resume = null;   // 앞 화면을 붙잡아 둔 전환 — 보여 줄 때 이어서 돌린다(아래 pagereveal)
+  function show(force) { if (!shown && (!leaving || force)) { shown = true; root.classList.remove('cc-wait'); if (resume) resume(); } }
   // 끝까지 기다렸는데도 값이 안 왔으면 — 자리가 있는 화면은 예시 값 대신 스켈레톤으로, 없는 화면은 그대로 보여 준다
   setTimeout(function () { skelIfWaiting(true); show(); }, Math.max(0, HOLD_MAX - performance.now()));
   setTimeout(function () { show(true); }, 5000);   // 떠난다더니 5초째 그대로면(이동이 막혔으면) 그래도 보여 준다
   setTimeout(function () { wantSkel = true; skelIfWaiting(); }, Math.max(0, SKEL_AT - performance.now()));
   addEventListener('pageshow', function (e) { if (e.persisted) { leaving = false; show(); } });
-  addEventListener('pagereveal', function (e) { if (e.viewTransition && !shown) e.viewTransition.skipTransition(); });
+  // 화면 사이 전환 — 새 화면이 아직 숨어 있으면 **앞 화면 사진을 멈춰 세워 둔다.** 다 그려지면(show) 그때 0.15초로 넘긴다.
+  // 전에는 이때 전환을 건너뛰어, 숨은 새 화면(바탕만)이 한 번 비쳤다가 내용이 떴다 — 랜딩↔마이페이지에서
+  // 「앞 화면이 한 번 더 보이고 넘어간다」로 보였다(2026-10-15 사용자 지적). 붙잡는 시간은 위 HOLD_MAX 가 상한이다(다른 주소로 떠나는 중이면 그 이동이 막혔을 때의 5초).
+  addEventListener('pagereveal', function (e) {
+    var vt = e.viewTransition;
+    if (!vt || shown) return;
+    vt.ready.then(function () {
+      if (shown) return;
+      var a = root.getAnimations({ subtree: true }).filter(function (x) {
+        return x.effect && x.effect.pseudoElement && x.effect.pseudoElement.indexOf('::view-transition') === 0;
+      });
+      for (var i = 0; i < a.length; i++) a[i].pause();
+      resume = function () { resume = null; for (var j = 0; j < a.length; j++) a[j].play(); };
+    }, function () { /* 전환이 취소됐다 — 그냥 보여 준다 */ });
+  });
 
   // 진한 바탕 위 자리는 흰 막대로 — 바탕을 거슬러 올라가 처음 만나는 불투명한 색을 본다
   function dark(el) {
