@@ -73,6 +73,16 @@
     .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
   }
   :focus-visible{outline:2px solid var(--amber-500);outline-offset:2px}
+
+  /* 결제 화면에서 막 넘어왔을 때만 체크가 한 번 튀어나온다 (2026-10-15 사용자 확정 「점 세 개 → 체크」 — 체크는 이 화면 하나에서만).
+     새로고침·뒤로가기로 다시 열면 그냥 보인다. 피그마 2408:1265 프리뷰 */
+  .pop .ok{animation:cc-pop .42s cubic-bezier(.34,1.56,.64,1) both}
+  .pop .ok path{stroke-dasharray:24;animation:cc-draw .3s .18s ease-out both}
+  .pop h1,.pop .lead,.pop .tip{animation:cc-up .32s .12s ease-out both}
+  @keyframes cc-pop{from{transform:scale(.25);opacity:0}to{transform:none;opacity:1}}
+  @keyframes cc-draw{from{stroke-dashoffset:24}to{stroke-dashoffset:0}}
+  @keyframes cc-up{from{transform:translateY(6px);opacity:0}to{transform:none;opacity:1}}
+  @media (prefers-reduced-motion:reduce){.pop .ok,.pop .ok path,.pop h1,.pop .lead,.pop .tip{animation:none}}
 </style>
 </head>
 <body>
@@ -92,6 +102,18 @@
   </div>
 </div>
 
+<script>
+  /* 화면이 실제로 보이는 순간에 튀게 한다 — 그 전(assets/steady.js 가 가린 동안)에 돌면 끝난 뒤에야 보인다 */
+  try {
+    if (sessionStorage.getItem('cc_paid_pop')) {
+      sessionStorage.removeItem('cc_paid_pop');
+      var 뿌리 = document.documentElement, 튀기 = function () { document.querySelector('main').classList.add('pop'); };
+      if (!뿌리.classList.contains('cc-wait')) 튀기();
+      else new MutationObserver(function (_, o) { if (!뿌리.classList.contains('cc-wait')) { o.disconnect(); 튀기(); } })
+        .observe(뿌리, { attributes: true, attributeFilter: ['class'] });
+    }
+  } catch (e) { /* 못 읽으면 튀지 않고 그냥 보인다 */ }
+</script>
 <script type="module">
   import { metaEvent } from '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
   import { requireLogin, getSubscription, firstSendDay } from '/assets/mypage-data.js';
