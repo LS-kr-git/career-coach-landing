@@ -132,6 +132,22 @@ export function client() {
   return clientPromise;
 }
 
+/** 이 브라우저에 남은 세션이 **서버에서도** 살아 있나. 살아 있으면 세션, 아니면 null.
+ *  getSession() 은 브라우저 저장값만 본다 — 탈퇴·삭제된 계정의 세션도 「로그인됨」이라, 랜딩 → 마이페이지 →
+ *  온보딩을 돌며 저장이 계속 거절되고 카카오 로그인으로 영영 못 갔다(2026-10-14 실측, 아이폰 크롬).
+ *  서버가 그 사람을 모른다고 답하면(401·403) 이 기기의 세션과 **그 계정이 저장한** 온보딩 값을 지운다 —
+ *  로그인 전에 고른 값(owner 없음)은 두어, 다시 로그인한 뒤 처음부터 고르지 않게 한다. 네트워크 실패는 세션을 둔다. */
+export async function liveSession(supabase) {
+  const { data: { session }, error } = await supabase.auth.getSession();
+  if (error) throw error;
+  if (!session) return null;
+  const { error: 사용자 } = await supabase.auth.getUser();
+  if (사용자?.status !== 401 && 사용자?.status !== 403) return session;
+  await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+  if (readState().owner) try { localStorage.removeItem(KEY); } catch { /* 무시 */ }
+  return null;
+}
+
 // 완료 버튼과 자동 재시도가 겹쳐 같은 값을 두 번 보내지 않게 한다.
 let inflight = false;
 
@@ -225,7 +241,7 @@ export async function saveOnboarding() {
       return { status: 'incomplete' };
     }
     const supabase = await client();
-    const { data: { session } } = await supabase.auth.getSession();
+    const session = await liveSession(supabase);
     if (!session) { location.href = (await import('/assets/supabase-config.js')).KAKAO_LOGIN; return { status: 'no-session' }; }
     // 지금 로그인한 사람이 이 화면에서 직접 고르고 누른 값이다 — 그 사람 것으로 표시한다.
     writeState({ owner: session.user.id });
@@ -249,7 +265,7 @@ export async function retryPending() {
   inflight = true;
   try {
     const supabase = await client();
-    const { data: { session } } = await supabase.auth.getSession();
+    const session = await liveSession(supabase);
     // 아직 로그인 전이면 표시를 그대로 둔다. 여기서 화면을 옮기지는 않는다 —
     // 1·2 단계는 로그인 없이도 볼 수 있는 화면이다.
     if (!session) return { status: 'no-session' };
@@ -272,10 +288,12 @@ export async function retryPending() {
  * 🔴 **아직 못 보낸 변경(pending)이 있으면 덮지 않는다.** 그것이 사용자가 마지막으로 고른 값이고,
  *    서버 것으로 덮으면 retryPending() 이 보낼 것을 잃는다.
  * 실패는 삼키지 않는다 — 던져서 부른 화면이 실패를 그리게 한다(빈 상태와 가른다).
+ * 로그인돼 있지 않으면(서버가 모르는 세션 포함) 'no-session' 을 돌려준다 — 랜딩이 이 답으로 카카오 로그인 쪽으로 바꾼다.
  */
 export async function pullFromServer() {
   const supabase = await client();
-  const { data: { session } } = await supabase.auth.getSession();
+  const session = await liveSession(supabase);
+  if (!session) return 'no-session';
   남의것이면_버린다(session);   // 같은 브라우저의 다른 계정 값을 이 사람 화면에 깔지 않는다
   // 아직 못 보낸 변경이 사용자가 마지막으로 고른 값이다. 덮지 않고 그대로 둔다.
   if (readState().pending) return;

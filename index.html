@@ -371,28 +371,41 @@
   // 마이페이지로 가게(2026-10-14 사용자 지시). 물음은 페이지를 열 때 미리 던져 두고, 누르면 그 답을
   // 기다린다(최대 3초). 서버가 답을 못 하면 이 브라우저에 남은 값으로 정하고 실패를 남긴다.
   const 실패 = (e) => track('client_error', { msg: 'landing_dest:' + String(e?.message || e).slice(0, 80) });
-  let 상점 = null;
-  const 물음 = 로그인됨 && import('/assets/onboarding-store.js').then((s) => { 상점 = s; return s.pullFromServer(); }).catch(실패);
-  if (물음) for (const a of 버튼) a.addEventListener('click', async (e) => {
-    e.preventDefault();
-    await Promise.race([물음, new Promise((r) => setTimeout(r, 3000))]);
-    location.href = 상점?.readState().jobs.length > 0 ? '/mypage/' : '/onboarding/1/';
-  });
-  for (const a of 버튼) {
-    a.href = 로그인됨 ? '/onboarding/1/' : KAKAO_LOGIN;
-    // 여기와 login 사이의 차이가 카카오 동의 화면 이탈률이다(어드민 「카카오 로그인이 실패하고 있나」).
-    if (!로그인됨) a.addEventListener('click', () => track('signup_start'), { once: true });
-  }
-  // 휴대폰이면 카카오 웹 로그인 화면을 건너뛰고 카카오톡 앱으로 바로 (2026-10-14 사용자 지시 · assets/kakao-login.js).
-  // 준비가 안 됐거나 실패하면 위 a.href(웹 로그인)로 그대로 간다.
   const 앱실패 = (e) => track('client_error', { msg: 'kakao_app:' + String(e?.message || e).slice(0, 80) });
-  if (!로그인됨) import('/assets/kakao-login.js').then((k) => {
-    if (!k.앱전환) return;
-    for (const a of 버튼) a.addEventListener('click', (e) => {
-      if (k.앱으로()) e.preventDefault();
-    });
-    return k.준비(앱실패);
-  }).catch(앱실패);
+  // 로그인 안 한 사람의 길 — 카카오 로그인. 처음부터 안 한 사람과, 브라우저에만 세션이 남은(탈퇴·삭제된)
+  // 사람 둘 다 이 길이다. 뒤쪽은 서버에 물어본 뒤에야 알아서 페이지를 연 뒤에 다시 건다.
+  const 로그인전 = () => {
+    for (const a of 버튼) {
+      a.href = KAKAO_LOGIN;
+      // 여기와 login 사이의 차이가 카카오 동의 화면 이탈률이다(어드민 「카카오 로그인이 실패하고 있나」).
+      a.addEventListener('click', () => track('signup_start'), { once: true });
+    }
+    // 휴대폰이면 카카오 웹 로그인 화면을 건너뛰고 카카오톡 앱으로 바로 (2026-10-14 사용자 지시 · assets/kakao-login.js).
+    // 준비가 안 됐거나 실패하면 위 a.href(웹 로그인)로 그대로 간다.
+    import('/assets/kakao-login.js').then((k) => {
+      if (!k.앱전환) return;
+      for (const a of 버튼) a.addEventListener('click', (e) => {
+        if (k.앱으로()) e.preventDefault();
+      });
+      return k.준비(앱실패);
+    }).catch(앱실패);
+  };
+  if (!로그인됨) 로그인전();
+  else {
+    let 상점 = null;
+    const 물음 = import('/assets/onboarding-store.js').then((s) => { 상점 = s; return s.pullFromServer(); }).catch(실패);
+    const 떼기 = new AbortController();
+    for (const a of 버튼) {
+      a.href = '/onboarding/1/';
+      a.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const 답 = await Promise.race([물음, new Promise((r) => setTimeout(r, 3000))]);
+        if (답 === 'no-session') { track('signup_start'); location.href = KAKAO_LOGIN; return; }
+        location.href = 상점?.readState().jobs.length > 0 ? '/mypage/' : '/onboarding/1/';
+      }, { signal: 떼기.signal });
+    }
+    물음.then((답) => { if (답 === 'no-session') { 떼기.abort(); 로그인전(); } });
+  }
   // 미리 받아 두기 (2026-10-14 사용자 지시) — 카카오에서 돌아온 로그인 처리 화면과 온보딩 1단계가 쓰는 파일을
   // 지금 브라우저에 받아 둔다. 그 화면에서 가장 오래 걸리던 것이 supabase-js(9개 파일·약 75KB, 세 겹으로 이어 받음)다.
   // 화면을 다 그린 뒤 한가할 때만 받는다 — 랜딩이 늦게 뜨면 안 된다. 실패해도 그 화면이 평소처럼 받는다.

@@ -120,10 +120,8 @@ export const SUNDAY_STATIC = [
  * `next` 를 주면 로그인 뒤 그리로 돌아온다(assets/return-to.js 의 허용 목록 안에서만).
  */
 export async function requireLogin(next) {
-  const supabase = await supa();
-  const { data, error } = await supabase.auth.getSession();
-  if (error) throw error;
-  if (!data.session) {
+  const { client, liveSession } = await import('/assets/onboarding-store.js');
+  if (!(await liveSession(await client()))) {   // 탈퇴·삭제돼 서버가 모르는 세션도 로그인 안 한 것으로 본다
     if (next) (await import('/assets/return-to.js')).rememberNext(next);
     location.replace((await import('/assets/supabase-config.js')).KAKAO_LOGIN);   // 가입·로그인 공통 입구
     return false;

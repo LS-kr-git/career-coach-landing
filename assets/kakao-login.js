@@ -60,7 +60,19 @@ export function 앱으로() {
   if (!재료 || Date.now() - 재료.at > FRESH + 60_000 || !window.Kakao?.isInitialized()) return false;
   const { state, scope, redirect_uri } = 재료;
   재료 = null;   // 같은 state 를 두 번 쓰지 않는다 — 다시 누르면 웹 로그인으로 가고, 그 사이 새로 받는다
-  다시받기();
+  // 새로 받는 것은 **돌아왔을 때** 한다. 누른 자리에서 받으면 곧바로 페이지가 카카오로 넘어가며 요청이
+  // 끊겨, 앱 전환이 성공할 때마다 「kakao_app:Load failed」 오류가 한 건씩 쌓였다(2026-10-14 실측).
+  // 카톡에서 돌아오면 visibilitychange, 카카오 웹 화면에서 「뒤로」면 pageshow(bfcache) — 먼저 오는 하나만.
+  // 앱 열기 확인창을 취소하면 화면이 안 바뀌어 둘 다 안 온다 — 3초 뒤에도 보이고 있으면 그때 받는다.
+  const 끝 = new AbortController();
+  const 돌아옴 = () => {
+    if (끝.signal.aborted || document.visibilityState !== 'visible') return;
+    끝.abort();
+    다시받기();
+  };
+  document.addEventListener('visibilitychange', 돌아옴, { signal: 끝.signal });
+  addEventListener('pageshow', 돌아옴, { signal: 끝.signal });
+  setTimeout(돌아옴, 3000);
   window.Kakao.Auth.authorize({ redirectUri: redirect_uri, state, scope, throughTalk: true });
   return true;
 }
