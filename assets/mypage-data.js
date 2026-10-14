@@ -455,26 +455,32 @@ export function profileView(p) {
 export function billingView(s, plan) {
   const 구독중 = Boolean(s && s.status && ['trialing', 'active', 'past_due'].includes(s.status));
   const 해지예약 = Boolean(구독중 && s.cancel_at_period_end);
+  /* 미납(past_due)이면 `current_period_end` 는 이미 지난 날이다 — 그대로 「다음 결제일」로 그리면 어제를 말한다.
+     다음 시도일은 서버가 청구 배치와 같은 식으로 준다(career-coach 0139 `next_try_on`). 해지하면 다음 새벽 정리에서
+     바로 끝난다(0092 `billing_close_ended`) — 날짜를 지어내지 않고 「하루 안」이라고 말한다. (2026-10-14 할일 6) */
+  const 미납 = Boolean(구독중 && s.status === 'past_due');
   const card = s && s.card_last4;
   /* 🔴 구독 중인 사람의 요금은 **그 사람 구독에 매달린 값**이다 — 지금 살아 있는 요금제가
      아니다. 프라이싱 테스트로 새 요금제를 켜고 옛 것을 내리면, 옛 요금으로 청구되는 사람의
      화면이 새 요금을 말하게 된다. 서버가 그 값을 같은 응답에 실어 준다(0086). */
   return {
     subscribed: 구독중,
-    live: 구독중 ? (해지예약 ? '해지 예약됨' : '구독 중') : null,
+    live: 구독중 ? (해지예약 ? '해지 예약됨' : (미납 ? '결제 재시도 중' : '구독 중')) : null,
     card: card ? [s.card_issuer, s.card_brand].filter(Boolean).join(' ') || '등록된 카드' : EMPTY.card,
     cardSub: card ? `•••• ${s.card_last4}` : EMPTY.cardSub,
     hasCard: Boolean(card),
     planLabel: 구독중 ? planLabel(s) : '',
     price: 구독중 ? wonText(s.price_krw) : '',
-    nextLabel: 해지예약 ? '이용 종료일' : '다음 결제일',
-    next: 구독중 ? dayText(s.current_period_end) : '',
+    nextLabel: 해지예약 ? (미납 ? '이용 종료' : '이용 종료일') : (미납 ? '다음 결제 시도일' : '다음 결제일'),
+    next: !구독중 ? '' : 미납 ? (해지예약 ? '하루 안에 끝나요' : (s.next_try_on ? dayText(s.next_try_on) : '곧 다시 시도해요'))
+      : dayText(s.current_period_end),
     amount: 구독중 ? priceText(s) : (plan ? priceText(plan) : ''),
     // 해지할 것이 없거나 이미 예약된 사람에게는 누를 것을 주지 않는다.
     canCancel: Boolean(구독중 && !해지예약),
     // 해지 예약된 사람에게만 「해지 취소하기」 (2026-10-05 사용자 컨펌 「해지 취소 v6」).
     canResume: 해지예약,
-    resumeNote: 해지예약 ? `${monthDay(s.current_period_end)}에 멤버십이 끝나요. 지금 취소하면 끝나지 않아요.` : '',
+    resumeNote: !해지예약 ? '' : 미납 ? '결제가 밀려 있어 하루 안에 멤버십이 끝나요. 지금 취소하면 결제를 다시 시도해요.'
+      : `${monthDay(s.current_period_end)}에 멤버십이 끝나요. 지금 취소하면 끝나지 않아요.`,
   };
 }
 

@@ -143,8 +143,8 @@
   <div class="title"><h1>해지하기 전에<br>확인해 주세요</h1></div>
   <div class="lv">
     <ul class="lst">
-      <li class="t-body-s"><span class="tile"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#B45309" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2.5v3M8 10.5v3M2.5 8h3M10.5 8h3M4 4l1.8 1.8M10.2 10.2 12 12M4 12l1.8-1.8M10.2 5.8 12 4"/></svg></span><span>이용 종료일<span id="endA" data-sk style="--skw:7.5em"></span>까지는<br>지금처럼 받아요.</span></li>
-      <li class="t-body-s"><span class="tile"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#B45309" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h10v8H3zM3 6.5h10"/></svg></span><span>다음 결제일부터 결제되지 않아요.</span></li>
+      <li class="t-body-s"><span class="tile"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#B45309" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2.5v3M8 10.5v3M2.5 8h3M10.5 8h3M4 4l1.8 1.8M10.2 10.2 12 12M4 12l1.8-1.8M10.2 5.8 12 4"/></svg></span><span id="keepA">이용 종료일<span id="endA" data-sk style="--skw:7.5em"></span>까지는<br>지금처럼 받아요.</span></li>
+      <li class="t-body-s"><span class="tile"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#B45309" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h10v8H3zM3 6.5h10"/></svg></span><span id="payStop">다음 결제일부터 결제되지 않아요.</span></li>
       <li class="t-body-s"><span class="tile"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#B45309" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 2.5h7v11L8 11l-3.5 2.5z"/></svg></span><span>이용 종료일까지<br>받은 아티클은 계속 볼 수 있어요.</span></li>
       <li class="t-body-s"><span class="tile"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#B45309" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.5M13 2.5V5h-2.5"/></svg></span><span>이용 종료일 뒤에도<br>언제든 다시 구독할 수 있어요.</span></li>
     </ul>
@@ -159,7 +159,7 @@
   <div class="done">
     <span class="ok"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg></span>
     <h1 class="t-display">해지가 예약되었어요</h1>
-    <p class="t-body-s desc"><span id="endB"></span>까지는 지금처럼 받아 보실 수 있어요.<br>언제든지 다시 돌아오세요.</p>
+    <p class="t-body-s desc"><span id="keepB"><span id="endB"></span>까지는 지금처럼 받아 보실 수 있어요.</span><br>언제든지 다시 돌아오세요.</p>
   </div>
 </main>
 <div class="cta-dock leave" id="dock">
@@ -209,7 +209,7 @@
     try {
       const r = await cancelSubscription(reasonText());
       끝남 = true;
-      $('endB').textContent = dayText(r.current_period_end);
+      if (!미납) $('endB').textContent = dayText(r.current_period_end);
       $('ask').hidden = true; $('bye').hidden = false; agree.hidden = true;
       go.classList.remove('danger'); go.disabled = false; lab.textContent = '확인';
       go.onclick = () => { location.href = '/mypage/billing/'; };
@@ -219,6 +219,14 @@
       refresh();
     }
   });
+  /* 미납(past_due) — 해지하면 다음 새벽 정리에서 바로 끝난다(0092). 날짜 대신 「하루 안」이라고 말한다(2026-10-14 할일 6). */
+  let 미납 = false;
+  function 미납으로() {
+    미납 = true;
+    $('keepA').textContent = '결제가 밀려 있어 해지하면 하루 안에 멤버십이 끝나요.';
+    $('keepB').textContent = '멤버십이 하루 안에 끝나요.';
+    $('payStop').textContent = '밀린 결제를 더 시도하지 않아요.';
+  }
   refresh();
   /* 해지할 구독이 없거나 이미 예약돼 있으면 이 화면에 머물 이유가 없다 — 멤버십·결제로 돌려보낸다 */
   window.ccHold?.(requireLogin().then((ok) => ok ? getSubscription() : undefined).then((s) => {
@@ -226,7 +234,8 @@
     if (!s || !['trialing', 'active', 'past_due'].includes(s.status) || s.cancel_at_period_end) {
       location.replace('/mypage/billing/'); return;
     }
-    $('endA').textContent = `(${dayText(s.current_period_end)})`;
+    if (s.status === 'past_due') 미납으로();      // 기간 끝이 이미 지났다 — 지난 날짜를 「이용 종료일」로 말하지 않는다
+    else $('endA').textContent = `(${dayText(s.current_period_end)})`;
     막힘 = false; refresh();
   }, () => { 실패 = true; refresh(); }));
 </script>
