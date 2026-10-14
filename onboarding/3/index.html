@@ -112,7 +112,7 @@ const sync=()=>{
  chips.forEach(c=>c.classList.toggle('lock',on.length>=MAX&&!c.classList.contains('on')));
  const cta=document.querySelector('.cta');
  if(on.length===0){cta.classList.add('off');cta.textContent='지역을 1개 이상 골라주세요';}
- else{cta.classList.remove('off');cta.innerHTML='다음 <span class="s2">· '+on.length+'개 지역</span>';}
+ else{cta.classList.remove('off');cta.innerHTML=(window.ccWord||'다음')+' <span class="s2">· '+on.length+'개 지역</span>';}
  if(window.ccOnChange) window.ccOnChange();};
 chips.forEach(c=>c.addEventListener('click',()=>{
  if(c.classList.contains('lock')) return;
@@ -137,7 +137,8 @@ window.ccStep3={
 </script>
 <script type="module">
   // 세 단계에서 고른 값을 여기서 한 번에 저장한다 — assets/onboarding-store.js
-  import { readState, writeState, retryPending, saveThenGo, fromDone, DONE } from '/assets/onboarding-store.js';
+  import { readState, writeState, retryPending, saveThenGo, fromDone, DONE, markEditMode } from '/assets/onboarding-store.js';
+  markEditMode();   // 아래에서 값을 되살리며 버튼을 다시 그린다
   const saved = readState();
   if (saved.regions.length) window.ccStep3.set(saved.regions);   // 뒤로 왔을 때 체크 상태를 되살린다
   window.ccOnChange = () => writeState({ regions: window.ccStep3.get() });

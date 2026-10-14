@@ -172,7 +172,7 @@
       return;
     }
     vEl.textContent=label(lo,hi);
-    ctaMain.textContent='다음'; ctaSub.textContent=' · '+label(lo,hi);
+    ctaMain.textContent=window.ccWord||'다음'; ctaSub.textContent=' · '+label(lo,hi);
     cta.classList.remove('off');
     bands.forEach((d,i)=>{const [a,b]=BANDS[i]; d.classList.toggle('hit', !(b<lo || a>hi));});
     const on=bands.map((d,i)=>d.classList.contains('hit')?i:-1).filter(i=>i>=0);
@@ -240,7 +240,8 @@ document.querySelector('.cta').addEventListener('click',()=>{
 </script>
 <script type="module">
   // 고른 연차를 들고 간다. 실제 저장(RPC)은 3단계에서 한 번만 한다 — assets/onboarding-store.js
-  import { readState, writeState, retryPending, saveThenGo, fromDone, DONE } from '/assets/onboarding-store.js';
+  import { readState, writeState, retryPending, saveThenGo, fromDone, DONE, markEditMode } from '/assets/onboarding-store.js';
+  markEditMode();   // 아래에서 값을 되살리며 버튼을 다시 그린다
   const saved = readState();
   if (saved.years !== null) window.ccStep2.set(saved.years, saved.yearsMax ?? saved.years);
   window.ccOnChange = () => {

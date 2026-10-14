@@ -123,7 +123,7 @@ const sync=()=>{let total=0;
  allChips.forEach(c=>c.classList.toggle('lock',total>=MAX&&!c.classList.contains('on')));
  const cta=document.querySelector('.cta');
  if(total===0){cta.classList.add('off');cta.textContent='직무를 1개 이상 골라주세요';}
- else{cta.classList.remove('off');cta.innerHTML='다음 <span class="s2">· '+total+'개 선택됨</span>';}
+ else{cta.classList.remove('off');cta.innerHTML=(window.ccWord||'다음')+' <span class="s2">· '+total+'개 선택됨</span>';}
  if(window.ccOnChange) window.ccOnChange();};
 accs.forEach(a=>{const row=a.querySelector('.arow'),body=a.querySelector('.abody'),cv=a.querySelector('.cv');
  row.addEventListener('click',()=>{if(a.dataset.locked==='1')return;const o=!body.hidden;body.hidden=o;cv.textContent=o?'▼':'▲';});
@@ -155,7 +155,8 @@ document.querySelector('.cta').addEventListener('click',()=>{
 </script>
 <script type="module">
   // 고른 직무를 들고 간다. 실제 저장(RPC)은 3단계에서 한 번만 한다 — assets/onboarding-store.js
-  import { readState, writeState, retryPending, saveThenGo, fromDone, DONE } from '/assets/onboarding-store.js';
+  import { readState, writeState, retryPending, saveThenGo, fromDone, DONE, markEditMode } from '/assets/onboarding-store.js';
+  markEditMode();   // 아래에서 값을 되살리며 버튼을 다시 그린다
   const saved = readState();
   if (saved.jobs.length) window.ccStep1.set(saved.jobs);   // 뒤로 왔을 때 체크 상태를 되살린다
   window.ccOnChange = () => writeState({ jobs: window.ccStep1.get() });

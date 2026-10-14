@@ -262,7 +262,29 @@ export async function saveOnboarding() {
 export const DONE = '/onboarding/done/';
 export const fromDone = () => new URLSearchParams(location.search).get('from') === 'done';
 
-let 가는중 = false;   // 두 번 누르면 두 번째가 `busy` 를 받고 곧장 넘어가 첫 저장이 끊긴다
+/**
+ * 바꾸기로 들어온 단계면 하단 버튼 말을 「바꾸기」로, 뒤로가기(←)를 확인 화면으로 바꾼다 (2026-10-15 사용자 지시).
+ * 버튼 글자는 각 화면 스크립트가 `window.ccWord` 로 그리므로 **값을 되살리기 전에** 부른다 — 되살리며 다시 그린다.
+ */
+export function markEditMode() {
+  if (!fromDone()) return false;
+  window.ccWord = '바꾸기';
+  document.querySelector('.back').href = DONE;
+  // 「바꾸기」 버튼을 안 누르고 나가면(← · 뒤로 스와이프) 취소다. 1~3단계는 고를 때마다 이 브라우저에 바로 적어
+  // 두므로, 그대로 두면 서버에 안 간 값을 확인 화면이 저장된 것처럼 그리고, 다 해제하고 나가면 그 항목과
+  // 「바꾸기」 링크까지 사라진다(2026-10-15 검사관 ①). 들어올 때 값으로 되돌려 둔다.
+  let 처음 = readState();
+  // 「바꾸기」로 저장하고 나간 뒤 브라우저 뒤로가기로 이 화면이 복원되면, 기준은 방금 저장한 값이다 — 다시 찍는다.
+  // 안 찍으면 그다음 ← 가 저장 전 값으로 되돌려, 서버와 확인 화면이 갈리고 다음 저장이 옛 값을 다시 보낸다.
+  addEventListener('pageshow', (e) => { if (e.persisted) 처음 = readState(); });
+  addEventListener('pagehide', () => {
+    if (!가는중) writeState({ jobs: 처음.jobs, years: 처음.years, yearsMax: 처음.yearsMax, regions: 처음.regions });
+  });
+  return true;
+}
+
+// 두 번 누르면 두 번째가 `busy` 를 받고 곧장 넘어가 첫 저장이 끊긴다. 저장하러 떠나는 중이라는 표시도 겸한다(위 취소).
+let 가는중 = false;
 // 다음 화면에서 뒤로가기로 돌아오면(페이지가 그대로 복원된다) 잠긴 채라 버튼이 안 먹는다 — 풀어 준다.
 addEventListener('pageshow', (e) => { if (e.persisted) 가는중 = false; });
 
