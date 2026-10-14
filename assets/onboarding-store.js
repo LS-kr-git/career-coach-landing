@@ -122,7 +122,7 @@ export function client() {
       const [{ createClient }, cfg] = await Promise.all([
         // 판을 고정한다 — `@2` 면 상위 릴리스 하나가 우리 배포 없이 로그인·마이페이지 전체를 바꾼다
         // (2026-10-14 출시 전 점검. 그날 `@2` 가 풀리던 판 그대로다). 올릴 때는 일부러 올린다.
-        import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/+esm'),
+        import('/assets/supabase-config.js').then((c) => import(c.SUPABASE_JS)),
         // 접속 정보는 /assets/supabase-config.js 한 곳에만 둔다 (2026-08-06 복구 훈련 결과).
         import('/assets/supabase-config.js'),
       ]);

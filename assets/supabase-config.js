@@ -23,6 +23,10 @@
 export const SUPABASE_URL = 'https://sxooygwggxeplzkfdbth.supabase.co';
 export const SUPABASE_ANON_KEY = 'sb_publishable_qKgzeXLu4fX9T_xfEjbNnQ_zPH_xPUu';
 
+/** supabase-js — 판을 고정한다(올릴 때는 일부러 올린다). 랜딩이 이 주소를 미리 받아 두므로 로그인 처리 화면과
+ *  온보딩이 **같은 주소**를 써야 미리 받은 것이 쓰인다 — 그래서 여기 한 곳에만 둔다. */
+export const SUPABASE_JS = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/+esm';
+
 /**
  * 카카오 로그인 입구 — 가입도 로그인도 여기 한 주소다 (2026-10-14 /signup/ 화면 삭제, 사용자 지시).
  * 이용약관·개인정보 동의는 카카오 동의 화면(간편가입 약관 두 개)이 받는다.

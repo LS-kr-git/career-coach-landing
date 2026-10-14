@@ -118,11 +118,12 @@
 </script>
 
 <script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/+esm';
   // 접속 정보는 /assets/supabase-config.js 한 곳에만 둔다 (2026-08-06 복구 훈련 결과).
-  import { SUPABASE_URL, SUPABASE_ANON_KEY } from '/assets/supabase-config.js';
+  import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_JS } from '/assets/supabase-config.js';
   import { takeNext } from '/assets/return-to.js';
   import { forgetIfOtherOwner } from '/assets/onboarding-store.js';
+  // 주소는 설정 파일 한 곳에 — 랜딩이 같은 주소를 미리 받아 둔다(index.html 「미리 받아 두기」).
+  const { createClient } = await import(SUPABASE_JS);
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   window.ccAlive();   // CDN 로딩이 끝났다 — 위 하드 폴백의 8초를 여기서부터 다시 잰다
