@@ -137,7 +137,7 @@ window.ccStep3={
 </script>
 <script type="module">
   // 세 단계에서 고른 값을 여기서 한 번에 저장한다 — assets/onboarding-store.js
-  import { readState, writeState, retryPending, saveOnboarding } from '/assets/onboarding-store.js';
+  import { readState, writeState, retryPending, saveThenGo, fromDone, DONE } from '/assets/onboarding-store.js';
   const saved = readState();
   if (saved.regions.length) window.ccStep3.set(saved.regions);   // 뒤로 왔을 때 체크 상태를 되살린다
   window.ccOnChange = () => writeState({ regions: window.ccStep3.get() });
@@ -145,21 +145,13 @@ window.ccStep3={
   const 재시도 = retryPending();   // 지난 저장이 실패한 채 남아 있으면 여기서 조용히 다시 보낸다
 
   // 완료 — 실패해도 사용자를 막지 않는다. pending 으로 남겨 다음 진입에서 다시 보내고,
-  // 화면은 그대로 4단계(주제)로 넘긴다. 저장 실패를 이유로 세워 두면 사용자는 고칠 방법이 없다.
+  // 화면은 그대로 4단계(주제)로 넘긴다 — 확인 화면 「바꾸기」로 왔으면 확인 화면으로 돌아간다.
+  // 저장 실패를 이유로 세워 두면 사용자는 고칠 방법이 없다.
   const cta = document.querySelector('.cta');
-  let 가는중 = false;   // 두 번 누르면 두 번째가 `busy` 를 받고 곧장 넘어가 첫 저장이 끊긴다 — 4단계와 같다
-  // 4단계에서 뒤로가기로 돌아오면(페이지가 그대로 복원된다) 잠금이 걸린 채라 버튼이 안 먹는다 — 풀어 준다.
-  window.addEventListener('pageshow', (e) => { if (e.persisted) 가는중 = false; });
-  cta.addEventListener('click', async () => {
-    if (cta.classList.contains('off') || 가는중) return;
-    가는중 = true;
+  cta.addEventListener('click', () => {
+    if (cta.classList.contains('off')) return;
     window.ccOnChange();
-    // 로그인 전이면 saveOnboarding 이 카카오 로그인으로 보낸다 — 그 위에 덮어 이동하지 않는다.
-    // 진입 때 띄운 재전송이 아직 돌면 저장이 `busy` 로 튕겨 방금 바꾼 근무지가 빠진다 — 4단계와 같이
-    // 그것을 기다린 뒤 보낸다(2026-10-14 출시 전 점검).
-    await 재시도.catch(() => {});
-    const { status } = await saveOnboarding();
-    if (status !== 'no-session') location.href = '/onboarding/4/';
+    saveThenGo(재시도, fromDone() ? DONE : '/onboarding/4/');
   });
 </script>
 </body></html>

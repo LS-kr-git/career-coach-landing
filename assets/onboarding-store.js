@@ -255,6 +255,31 @@ export async function saveOnboarding() {
 }
 
 /**
+ * 최종 확인 화면(/onboarding/done/)의 「바꾸기」는 그 단계를 `?from=done` 으로 연다.
+ * 그렇게 들어온 단계의 CTA 는 다음 단계로 이어 가지 않고, 저장한 뒤 확인 화면으로 돌아간다
+ * (2026-10-15 — 1·2·3단계 「바꾸기」가 확인 화면으로 안 돌아오던 것).
+ */
+export const DONE = '/onboarding/done/';
+export const fromDone = () => new URLSearchParams(location.search).get('from') === 'done';
+
+let 가는중 = false;   // 두 번 누르면 두 번째가 `busy` 를 받고 곧장 넘어가 첫 저장이 끊긴다
+// 다음 화면에서 뒤로가기로 돌아오면(페이지가 그대로 복원된다) 잠긴 채라 버튼이 안 먹는다 — 풀어 준다.
+addEventListener('pageshow', (e) => { if (e.persisted) 가는중 = false; });
+
+/**
+ * 저장하고 href 로 간다. 진입 때 띄운 재전송(재시도)이 아직 돌면 저장이 `busy` 로 튕겨 방금 바꾼 값이
+ * 빠지므로 그것을 기다린 뒤 보낸다. 실패해도 막지 않는다 — pending 이 남아 다음 진입에서 다시 보낸다.
+ * 로그인 전이면 saveOnboarding 이 카카오 로그인으로 보낸다 — 그 위에 덮어 이동하지 않는다.
+ */
+export async function saveThenGo(재시도, href) {
+  if (가는중) return;
+  가는중 = true;
+  await 재시도.catch(() => {});
+  const { status } = await saveOnboarding();
+  if (status !== 'no-session') location.href = href;
+}
+
+/**
  * 온보딩 세 화면이 진입할 때마다 부른다. 지난 저장이 실패해 남아 있으면 다시 보낸다.
  * 보낼 것이 없으면 supabase-js 를 부르지도 않는다 — 평상시 비용이 0 이다.
  */
