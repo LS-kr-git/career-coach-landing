@@ -142,16 +142,16 @@ for (const [화면, a, b] of [['01 프로필', 빈것, 실패한것], ['03 결�
             [`${m.name}|${m.day}|${m.strike}|${m.per}|${m.on}`, '1개월|33원|null|/월|false']);
   for (const [값, 바람] of 기대) if (값 !== 바람) problems.push(`03 결제: 「${바람}」 이어야 할 자리가 「${값}」 입니다`);
 }
-if (FAIL.list === EMPTY.archive) problems.push('05 저장소: 목록 실패 문구가 빈 상태 문구와 같습니다');
 
 /* 실패 문구는 데이터 층에만 있어 docs-audit 이 못 본다(스냅샷에서 jsRenderedText 로 뺐다).
    그래서 피그마 실패 상태 프레임의 스냅샷과 여기서 맞댄다 — 한쪽만 고치면 걸린다. */
 const 스냅샷 = JSON.parse(read('tools/figma-audit/figma-docs-text.json'));
 for (const [html, 노드, 문구들] of [
-  ['mypage/index.html', '2157:941', [FAIL.line, FAIL.hint]],
-  ['mypage/billing/index.html', '2157:997', [FAIL.line, FAIL.hint]],
-  ['mypage/archive/index.html', '2157:1048', [FAIL.list, FAIL.hint]],
-  ['checkout/index.html', '2616:3276', [FAIL.line + ' ' + FAIL.hint]],
+  // 2026-10-15 「오류 대체 화면」 — 실패 자리는 스켈레톤, 문구는 하단 안내 알약 하나(FAIL.line)만 남았다
+  ['mypage/index.html', '2157:941', [FAIL.line]],
+  ['mypage/billing/index.html', '2157:997', [FAIL.line]],
+  ['mypage/archive/index.html', '2157:1048', [FAIL.line]],
+  ['checkout/index.html', '2616:3276', [FAIL.line]],
 ]) {
   const 프레임 = (스냅샷.pages.find((p) => p.html === html)?.stateFrames || []).find((f) => f.figmaNode === 노드);
   if (!프레임) { problems.push(`${html}: 실패 상태 프레임 ${노드} 가 스냅샷에 없습니다`); continue; }

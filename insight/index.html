@@ -333,7 +333,6 @@
     badLinkSub: '알림톡에서 받은 링크로 다시 열어 주세요.',
     notFound:   '없는 글이에요',
     ask:        '오류는 careercoach.my@gmail.com로 문의해 주세요.',   // 링크로 만들지 않는다 — /jobs/ 와 같은 문구(2026-09-25 사용자 지시)
-    blocked:  '지금은 전문을 열 수 없어요.\n오류는 careercoach.my@gmail.com로\n문의해 주세요.',   // 줄바꿈은 피그마 2418:1329 그대로 (.blocked 가 pre-line)
   };
   /* 서버(insight_letter)가 없는 글에 올리는 예외 문구 — career-coach 0023·0084·0102·0121 의 raise.
      이 글자를 그대로 띄우면 피그마 2070:823 과 다른 화면이 된다. 이 머리로 시작하면 「없는 글」 카드로 바꾼다.
@@ -404,12 +403,12 @@
         Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
       },
       body: JSON.stringify(args || { p_token: token, p_insight_id: Number(id) }),
-    }).catch(() => { throw new Error(MSG.blocked); });
+    }).catch(() => { throw new Error(ERR_CARD.blocked); });
     const data = await res.json().catch(() => null);
     // 없는 글·만료 링크는 RPC 가 예외로 올린다(4xx). 그 메시지를 그대로 보여준다
     // (사람이 읽으라고 쓴 한국어이고, 우리가 옮겨 적으면 두 곳이 갈린다).
     // 🔴 서버 고장(5xx)의 메시지는 사람에게 쓴 말이 아니다 — 우리 문구로 바꾼다.
-    if (!res.ok) throw new Error((res.status < 500 && data && data.message) || MSG.blocked);
+    if (!res.ok) throw new Error((res.status < 500 && data && data.message) || ERR_CARD.blocked);
     // returns table(...) 은 행 배열로 온다.
     if (!Array.isArray(data)) throw new Error(MSG.notFound);
     return data;
@@ -475,7 +474,7 @@
     $('fb').hidden = true;
     $('metaMins').hidden = true;
     const 잠김문구 = LOCKED[row.state];
-    if (!잠김문구) throw new Error(MSG.blocked);   // 모르는 상태 — 지어내지 않고 안내 카드로(아래 catch · S7)
+    if (!잠김문구) throw new Error(ERR_CARD.blocked);   // 모르는 상태 — 지어내지 않고 안내 카드로(아래 catch · S7)
     $('lock').hidden = false;
     $('lockMsg').textContent = 잠김문구;
     $('lockMsg').parentElement.classList.toggle('multi', 잠김문구.includes('\n'));
