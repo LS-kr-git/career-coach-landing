@@ -136,7 +136,8 @@ function onSite() { return /(^|\.)careercoach\.my$/.test(location.hostname); }
  * 🔴 autoConfig 를 끈다 — 켜 두면 픽셀이 버튼·입력칸을 스스로 긁어 간다(로그인 화면에 이메일 칸이 있다).
  */
 const PIXEL_ID = '1578800443456736';
-const META_OF = { signup_start: 'Lead', onboarding_done: 'CompleteRegistration' };
+// Lead 는 브라우저가 안 보낸다 — 카카오 가입을 마친 순간 서버가 보낸다(2026-10-14, career-coach 0135 report_signup_lead).
+const META_OF = { onboarding_done: 'CompleteRegistration' };
 
 function urlIsClean() {
   if (location.hash.includes('=')) return false;
@@ -161,6 +162,13 @@ function loadPixel() {
  * @param {object} props  value·currency 정도만. 개인정보를 넣지 말 것
  * @param {string} [eventID]  같은 결제가 두 번 세어지지 않게 메타가 묶는 열쇠
  */
+// 메타 전환 API 가 서버에서 보낼 때 브라우저 픽셀의 같은 사람으로 이어 붙이는 쿠키(_fbp·_fbc).
+// 픽셀이 안 떴으면 빈 값이다 — 서버는 없으면 없는 대로 보낸다. (결제 화면 · 가입 직후 콜백이 쓴다)
+export function metaCookies() {
+  const 값 = (이름) => (document.cookie.match(new RegExp('(?:^|; )' + 이름 + '=([^;]*)')) || [])[1];
+  return { fbp: 값('_fbp'), fbc: 값('_fbc') };
+}
+
 export function metaEvent(name, props = {}, eventID) {
   try { if (window.fbq) window.fbq('track', name, props, eventID ? { eventID } : undefined); } catch { /* 무시 */ }
 }

@@ -124,7 +124,7 @@
   window.ccAlive();   // CDN 로딩이 끝났다 — 위 하드 폴백의 8초를 여기서부터 다시 잰다
   window.ccStep(1);   // 서버 연결 → 「회원 정보 불러오기」
 
-  const { track } = await import('/assets/track.js');
+  const { track, metaCookies } = await import('/assets/track.js');
   window.ccAlive();   // track.js 도 별도 fetch 다 — 이 구간에 진척 신호가 없으면
                       // 앞 칸에서 잰 8초가 여기서 터져 성공한 로그인을 실패로 보낸다
 
@@ -184,6 +184,17 @@
     window.ccStep(2);   // 로그인 확인 → 「맞춤 브리핑 준비」
     track('login', {}, session.access_token);
     syncKakao(session);
+    // 메타 「Lead」 — 카카오 가입을 막 마친 사람만 서버가 보낸다(career-coach 0135, 2026-10-14 사용자 지시).
+    // 이 화면은 주소에 로그인 열쇠가 있어 픽셀을 꺼 두므로 브라우저 대신 서버가 보낸다. 재로그인이면 서버가 거른다.
+    fetch(SUPABASE_URL + '/rest/v1/rpc/report_signup_lead', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token },
+      body: JSON.stringify({ p_fbp: metaCookies().fbp ?? null, p_fbc: metaCookies().fbc ?? null }),
+      keepalive: true,
+    })
+      // 서버에 닿지 못한 실패는 서버 기록에 안 남는다 — 그 경우만 여기서 남긴다(닿았으면 private.meta_lead · error_log 가 정본).
+      .then((r) => { if (!r.ok) track('client_error', { msg: 'meta_lead:http' + r.status }, session.access_token); })
+      .catch(() => track('client_error', { msg: 'meta_lead:net' }, session.access_token));
   };
 
   const go = window.ccGo;   // 이동 잠금은 위 폴백과 공유한다 — 두 경로가 겹쳐 두 번 이동하지 않게
