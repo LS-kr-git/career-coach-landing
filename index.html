@@ -383,6 +383,16 @@
     // 여기와 login 사이의 차이가 카카오 동의 화면 이탈률이다(어드민 「카카오 로그인이 실패하고 있나」).
     if (!로그인됨) a.addEventListener('click', () => track('signup_start'), { once: true });
   }
+  // 휴대폰이면 카카오 웹 로그인 화면을 건너뛰고 카카오톡 앱으로 바로 (2026-10-14 사용자 지시 · assets/kakao-login.js).
+  // 준비가 안 됐거나 실패하면 위 a.href(웹 로그인)로 그대로 간다.
+  const 앱실패 = (e) => track('client_error', { msg: 'kakao_app:' + String(e?.message || e).slice(0, 80) });
+  if (!로그인됨) import('/assets/kakao-login.js').then((k) => {
+    if (!k.앱전환) return;
+    for (const a of 버튼) a.addEventListener('click', (e) => {
+      if (k.앱으로()) e.preventDefault();
+    });
+    return k.준비(앱실패);
+  }).catch(앱실패);
   // 카카오 로그인이 끝나지 못하고 돌아온 경우 — 안내를 띄우고 한 건 남긴다. `why`·`code` 는 콜백이 실어 보낸 것이다.
   const 돌아옴 = new URLSearchParams(location.search);
   if (돌아옴.get('login') === 'fail') {
