@@ -71,11 +71,19 @@
   //   setTimeout 에 닿지 못한다 — 두 경우 모두 화면이 점만 도는 채로 영영 멈춘다.
   let done = false;
   window.ccGo = (path) => { if (!done) { done = true; location.replace(path); } };
+  // 다시 로그인한 사람은 글자만 다르다 — 「로그인하고 있어요」 → 「로그인됐어요」 (2026-10-15 사용자 확정, 목업 v1 의 B 오른쪽).
+  // 처음 가입한 사람은 그대로다. 누구인지는 세션이 서야 알므로(ccWho) 그 전에는 이 기기에서 로그인한 적이 있는지로 먼저 고른다.
+  let 다시 = false;
+  window.ccWho = (재) => {
+    다시 = 재;
+    document.getElementById('ttl').textContent = 재 ? '로그인하고 있어요' : '가입을 마무리하고 있어요';
+  };
+  try { if (localStorage.getItem('cc_logged_in_before')) window.ccWho(true); } catch (e) { /* 못 읽으면 가입 문구로 시작한다 */ }
   // 로그인이 섰다 — 점을 체크로 바꾸고 0.6초 보인 뒤 끝나는 약속을 준다(이동은 부르는 쪽이 한다).
   // 이 블록에 두는 이유는 위와 같다 — 모듈이 죽어도 점은 마크업 기본값으로 돌고 있다.
   window.ccDone = () => {
     document.getElementById('prog').classList.add('fin');
-    document.getElementById('ttl').textContent = '가입이 완료됐어요';
+    document.getElementById('ttl').textContent = 다시 ? '로그인됐어요' : '가입이 완료됐어요';
     return new Promise((r) => setTimeout(r, 600));
   };
   // 모듈이 살아 있으면 자기 3초 폴백으로 먼저 나간다. 이건 그마저 못 도는 경우만 맡는다.
@@ -182,6 +190,10 @@
   const markLogin = (session) => {
     if (logged || !session) return;
     logged = true;
+    // 계정이 생긴 지 30분이 넘었으면 다시 로그인한 사람이다 — 서버 report_signup_lead(career-coach 0135)와 같은 기준.
+    const 생김 = Date.parse(session.user?.created_at ?? '');
+    window.ccWho(Number.isFinite(생김) && Date.now() - 생김 > 30 * 60 * 1000);
+    try { localStorage.setItem('cc_logged_in_before', '1'); } catch (e) { /* 다음에 가입 문구로 시작할 뿐이다 */ }
     track('login', {}, session.access_token);
     syncKakao(session);
     // 메타 「Lead」 — 카카오 가입을 막 마친 사람만 서버가 보낸다(career-coach 0135, 2026-10-14 사용자 지시).
