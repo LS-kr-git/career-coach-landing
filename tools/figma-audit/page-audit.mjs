@@ -23,6 +23,7 @@ import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { dirname, resolve, join, posix } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import vm from 'node:vm';
+import { 랜딩구성, 지문, 적힌지문 } from '../landing-version/fp.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..', '..');
@@ -243,6 +244,20 @@ for (const page of pages) {
         !/classList\.add\(\s*['"]cc-lazy['"]\s*\)/.test(scripts) || !켜짐('') || 켜짐('#pricing')) {
       add('BLOCK', '랜딩 로딩 속도 장치', page, '「아래 섹션 나중에 그리기」(html.cc-lazy · content-visibility:auto)가 없습니다',
           '랜딩이 바뀌어도 항상 둔다 — CLAUDE.md 「로딩 속도 장치는 항상 유지한다」');
+    }
+  }
+  /* 랜딩 버전 지문 (2026-10-15) — 어드민 「랜딩 섹션 도달률」이 이 값으로 버전을 가른다. 섹션 구성·제목·시안 값을
+     바꾸고 지문을 안 고치면 새 랜딩의 방문이 옛 버전에 섞인다. 섹션마다 이름(data-sec)이 있어야 어드민 줄 이름이 선다. */
+  if (page === 'index.html') {
+    const 구성 = 랜딩구성(raw), 적힌 = 적힌지문(raw), 값 = 지문(구성);
+    const 이름 = 구성.섹션.map((x) => x.이름);
+    if (적힌 !== 값) {
+      add('BLOCK', '랜딩 버전 지문', page, `<meta name="cc-lv"> 가 ${적힌 ?? '없음'} 인데 지금 원문은 ${값} 입니다`,
+          'node tools/landing-version/fp.mjs --write 를 돌리고 같이 커밋하세요');
+    }
+    if (이름.some((x) => !x.trim()) || new Set(이름).size !== 이름.length) {
+      add('BLOCK', '랜딩 섹션 이름', page, `#scr 의 <section> 마다 겹치지 않는 data-sec 이 있어야 합니다 (지금: ${이름.map((x) => x || '(없음)').join(' · ')})`,
+          '어드민 「랜딩 섹션 도달률」의 줄 이름이 이 값입니다');
     }
   }
   const title = live.match(/<title>([\s\S]*?)<\/title>/i);

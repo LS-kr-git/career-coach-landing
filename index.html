@@ -6,6 +6,8 @@
 <script src="/assets/no-input-zoom.js"></script>
 <meta name="color-scheme" content="only light">
 <meta name="format-detection" content="telephone=no">
+<!-- 랜딩 버전 지문 — 섹션 구성·제목·시안 값으로 만든다. 손으로 고치지 말고 `node tools/landing-version/fp.mjs --write` (page-audit 이 대조한다) -->
+<meta name="cc-lv" content="d1ff7fc034">
 <title>커리어코치</title>
 <meta name="description" content="일하는 사람들의 커리어 성장을 위해">
 <link rel="canonical" href="https://careercoach.my/">
@@ -85,7 +87,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 </svg><a class="auth" href="/signup/">시작하기</a></div>
 
 <!-- 첫 화면 -->
-<section class="gap20 s-white crop" id="sec1" style="padding-top:44px">
+<section data-sec="첫 화면 · 129원" class="gap20 s-white crop" id="sec1" style="padding-top:44px">
   <div>
     <h1 class="h1c"><span class="l1">하루 <span class="n1">129원</span>으로</span><br><span class="l2">연봉 <span class="n2">300만원</span> 올리기</span></h1>
     <p class="sub" style="margin-top:18px;word-break:keep-all"><span class="sub1">내 직군 최고 전문가가 엄선한</span><br><span class="ul hk" style="color:var(--g800)">인사이트·업계 트렌드 요약 카카오톡</span></p>
@@ -103,7 +105,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 </section>
 
 <!-- 퀴즈 -->
-<section class="gap20 s-n50" id="sec2">
+<section data-sec="직군 퀴즈" class="gap20 s-n50" id="sec2">
 <h2>당신의 전문 분야에서<br><span class="hl">몇 개의 질문에</span><br>명확하게 대답할 수 있나요?</h2>
   <p class="chp chp2 chtop"><span class="c2t">내 직군을 선택해 보세요</span></p>
   <div class="chw arw" id="chw2"><span class="chint">👆 직군을 누르면 내용이 바뀌어요</span><div class="chips two" data-group="quiz" id="quizChips"></div><button class="cpv" type="button" aria-label="앞으로">‹</button><button class="cnx" type="button" aria-label="직군 더 보기">›</button></div>
@@ -112,7 +114,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 </section>
 
 <!-- 시간 -->
-<section class="gap20 s-white" style="padding-top:104px">
+<section data-sec="하루 1시간 절약" class="gap20 s-white" style="padding-top:104px">
   <h2>이젠 하루에 1시간씩<br><span class="hl">소비할 필요 없어요</span></h2>
   <div class="tv5" id="tv5" data-v="4">
     <div class="a4"><div class="st "><span class="tx">📩 뉴스레터 여러 통</span></div><svg class="cn" viewBox="0 0 300 34" preserveAspectRatio="none"><path d="M60 0 C60 24, 240 10, 240 34" fill="none" stroke="#FCD34D" stroke-width="2" stroke-dasharray="5 5"/></svg><div class="st r"><span class="tx">💬 커뮤니티 두세 곳</span></div><svg class="cn r" viewBox="0 0 300 34" preserveAspectRatio="none"><path d="M60 0 C60 24, 240 10, 240 34" fill="none" stroke="#FCD34D" stroke-width="2" stroke-dasharray="5 5"/></svg><div class="st "><span class="tx">🌐 해외 기사</span></div><svg class="cn" viewBox="0 0 300 34" preserveAspectRatio="none"><path d="M60 0 C60 24, 240 10, 240 34" fill="none" stroke="#FCD34D" stroke-width="2" stroke-dasharray="5 5"/></svg><div class="st r"><span class="tx">🔍 포털 검색</span></div></div>
@@ -121,7 +123,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 </section>
 
 <!-- 전환 -->
-<section class="c gap12 s-a100">
+<section data-sec="걱정 마세요" class="c gap12 s-a100">
   <p class="big">중요한 건 알겠지만…<br>우리는 너무 바쁜걸요 🥺</p>
   <h2>하지만 걱정 마세요! ☺️</h2>
   <p>제일 중요한 업계 소식과 인사이트만 뽑아서,<br><b style="color:var(--g900)"><span class="hl draw">하루 1번 카카오톡 5줄 요약</span>으로<br>떠먹여 드릴게요.</b></p>
@@ -129,14 +131,14 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 </section>
 
 <!-- 전문가 -->
-<section class="gap20 s-sky">
+<section data-sec="전문가 5줄 요약" class="gap20 s-sky">
   <h2>각 분야 최고의 전문가들과<br>협업해 주제를 엄선하고,<br>5줄 요약을 작성해 드려요.</h2>
   <div class="expw arw" id="expw" data-v="3" data-step="1.6"><div class="hs exp" id="experts"></div><button class="cpv" type="button" aria-label="앞으로">‹</button><button class="cnx" type="button" aria-label="더 보기">›</button></div>
   <p class="expn">*현재 재직 중으로 본명은 가림 처리 되었습니다.</p>
 </section>
 
 <!-- 전문 보기 -->
-<section class="gap20 s-white crop" id="artsec">
+<section data-sec="아티클 전문" class="gap20 s-white crop" id="artsec">
   <div><h2>더 자세히 보고 싶은 날엔<br><span class="ul">상세 아티클 전문</span>도<br>볼 수 있어요.</h2>
   <p class="artp" style="margin-top:16px">전문 보기는 당일에만 가능해 더 자주 보게 돼요.<br><span class="ul">그만큼 내가 더 많이 성장</span>해요.</p><p style="margin-top:10px;font-size:12px;line-height:1.5;color:var(--g400);text-align:left">*당일에 전문을 열어본 경우<br>'내 아티클 저장소'에서 계속 열람 가능합니다.</p></div>
 <div class="pm pm-art" id="pmart"><div class="sc">
@@ -155,7 +157,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 </section>
 
 <!-- 환경 -->
-<section class="gap20 s-n50" id="envsec">
+<section data-sec="카톡 열람률 6배" class="gap20 s-n50" id="envsec">
   <div><h2>내 업계 지식과 인사이트가<br>무조건 늘어납니다.</h2>
   <p class="subn">꾸준함과 누적의 힘을 자동으로 만들어드려요</p></div>
 <div class="rg" id="rg" data-v="6">
@@ -172,7 +174,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 </section>
 
 <!-- 목요일 -->
-<section class="gap20 s-a100b crop" id="thusec">
+<section data-sec="목요일 채용 브리핑" class="gap20 s-a100b crop" id="thusec">
   <div><h2 class="h2d">여기에 더해, <span class="ul">일주일에 한번은</span><br>최신 채용 공고,<br>채용 시장 트렌드까지 발송</h2>
   <p style="margin-top:16px;text-align:center">이직을 준비 중이라면, 필수 기능이에요</p></div>
   <div class="pm"><div class="sc">
@@ -205,7 +207,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 </section>
 
 <!-- 맞춤 공고 -->
-<section class="gap20 s-white" id="jobsec">
+<section data-sec="조건 맞춤 공고" class="gap20 s-white" id="jobsec">
   <div><h2 class="h2d">원하는 직군·연차·지역을 선택하면<br><span class="ul">최신 채용 공고</span>를<br>매주 모아 보내줘요</h2>
 </div>
   <div class="jc" id="jc" data-v="4">
@@ -224,7 +226,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 </section>
 
 <!-- 공고 마감 -->
-<section class="c gap20 s-gauge">
+<section data-sec="기회 놓치지 마세요" class="c gap20 s-gauge">
   <h2 class="h2s h2d">이제는 관심 있는<br>회사 공고가 열린 지 모르고<br><span class="ul">기회를 놓치지 마세요.</span></h2>
   <div class="gauge" id="gauge"><svg viewBox="0 0 240 140" width="240" height="140"><defs><linearGradient id="gg" x1="0" x2="1"><stop offset="0" stop-color="#F59E0B"/><stop offset="1" stop-color="#D97706"/></linearGradient></defs>
 <path d="M24 124 A96 96 0 0 1 216 124" fill="none" stroke="#CBD5E1" stroke-width="22" stroke-linecap="round"/>
@@ -234,7 +236,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 </section>
 
 <!-- 요일별 구성 -->
-<section class="gap20 s-white" id="wksec">
+<section data-sec="요일별 발송" class="gap20 s-white" id="wksec">
   <div><h2>요일별로<br>이렇게 보내드려요</h2>
   <div class="wk" id="wk" data-v="3">
     <p class="wa1">평일 아침마다 <b>내 직무 인사이트</b>, <b>일 잘하는 법·커리어</b>, <b>채용시장 · 공고 브리핑</b>, 세 가지를 요일에 맞춰 보내드려요.</p>
@@ -257,7 +259,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 </section>
 
 <!-- 코칭 -->
-<section class="gap20 navy">
+<section data-sec="CEO 의 코치" class="gap20 navy">
   <h2 id="coh">구글·애플·아마존의<br>CEO에게도<br><span class="cok" style="color:var(--a200)">코치가 있었습니다</span></h2>
   <div id="nph" data-v="2"><div class="names vb soft" id="names" data-v="7">
     <div><img class="ph" alt="스티브 잡스" src="data:image/jpeg;base64,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"><span class="role">애플 창업자·CEO</span><span class="who">스티브 잡스</span></div>
@@ -270,7 +272,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 </section>
 
 <!-- FOMO -->
-<section class="gap20 s-n50">
+<section data-sec="저 사람은 어떻게" class="gap20 s-n50">
   <div><h2>"저 사람은 어떻게<br>다 알고 있지?"</h2>
   <p style="margin-top:16px;font-size:15px">매일 아침 카카오톡 한 통의 차이입니다.</p></div>
   <div class="yb" id="yb" data-v="3"><div class="dv" id="dv" data-v="1">
@@ -300,13 +302,13 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 </section>
 
 <!-- 신뢰 -->
-<section class="gap20 trust s-a50">
+<section data-sec="구독자 수 띠" class="gap20 trust s-a50">
   <div class="flow2"><div class="lane l1"><span class="pp"><i style="background:#D4962C"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>김○근님</small></span><span class="pp"><i style="background:#2D99CA"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>이○현님</small></span><span class="pp"><i style="background:#416DCF"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>박○은님</small></span><span class="pp"><i style="background:#D97936"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>정○우님</small></span><span class="pp"><i style="background:#697586"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>최○진님</small></span><span class="pp"><i style="background:#5588DC"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>윤○아님</small></span><span class="pp"><i style="background:#BB7524"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>장○민님</small></span><span class="pp"><i style="background:#198261"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>한○서님</small></span><span class="pp"><i style="background:#7779DD"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>오○준님</small></span><span class="pp"><i style="background:#CAA328"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>서○희님</small></span><span class="pp"><i style="background:#28A179"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>신○호님</small></span><span class="pp"><i style="background:#2BA194"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>강○린님</small></span><span class="pp"><i style="background:#D4962C"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>김○근님</small></span><span class="pp"><i style="background:#2D99CA"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>이○현님</small></span><span class="pp"><i style="background:#416DCF"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>박○은님</small></span><span class="pp"><i style="background:#D97936"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>정○우님</small></span><span class="pp"><i style="background:#697586"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>최○진님</small></span><span class="pp"><i style="background:#5588DC"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>윤○아님</small></span><span class="pp"><i style="background:#BB7524"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>장○민님</small></span><span class="pp"><i style="background:#198261"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>한○서님</small></span><span class="pp"><i style="background:#7779DD"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>오○준님</small></span><span class="pp"><i style="background:#CAA328"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>서○희님</small></span><span class="pp"><i style="background:#28A179"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>신○호님</small></span><span class="pp"><i style="background:#2BA194"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>강○린님</small></span></div><div class="lane l2"><span class="pp"><i style="background:#C63857"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>조○영님</small></span><span class="pp"><i style="background:#9372E0"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>임○수님</small></span><span class="pp"><i style="background:#23A2B7"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>황○진님</small></span><span class="pp"><i style="background:#7FB32F"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>송○아님</small></span><span class="pp"><i style="background:#DB586F"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>유○빈님</small></span><span class="pp"><i style="background:#A76CE0"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>홍○석님</small></span><span class="pp"><i style="background:#20829A"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>문○경님</small></span><span class="pp"><i style="background:#618E22"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>배○훈님</small></span><span class="pp"><i style="background:#C2407A"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>백○주님</small></span><span class="pp"><i style="background:#8353D4"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>노○현님</small></span><span class="pp"><i style="background:#208178"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>하○율님</small></span><span class="pp"><i style="background:#AE8020"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>곽○은님</small></span><span class="pp"><i style="background:#C63857"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>조○영님</small></span><span class="pp"><i style="background:#9372E0"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>임○수님</small></span><span class="pp"><i style="background:#23A2B7"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>황○진님</small></span><span class="pp"><i style="background:#7FB32F"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>송○아님</small></span><span class="pp"><i style="background:#DB586F"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>유○빈님</small></span><span class="pp"><i style="background:#A76CE0"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>홍○석님</small></span><span class="pp"><i style="background:#20829A"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>문○경님</small></span><span class="pp"><i style="background:#618E22"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>배○훈님</small></span><span class="pp"><i style="background:#C2407A"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>백○주님</small></span><span class="pp"><i style="background:#8353D4"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>노○현님</small></span><span class="pp"><i style="background:#208178"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>하○율님</small></span><span class="pp"><i style="background:#AE8020"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i><small>곽○은님</small></span></div></div>
   <div class="tvb"><b class="tn"><span class="slot" data-n="13,205" aria-label="13,205">13,205</span><em>명은</em></b><span>이미 더 앞서가는 중</span></div>
 </section>
 
 <!-- 가격 -->
-<section class="gap20 s-a50" id="pricing">
+<section data-sec="요금" class="gap20 s-a50" id="pricing">
   <h2>하루 129원 투자로<br>연봉 · 커리어를 상승시키세요</h2>
 <div class="plan">
     <div class="pn">1개월</div>
@@ -322,7 +324,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 </section>
 
 <!-- 연봉 1% -->
-<section class="gap20 s-white">
+<section data-sec="연봉 1% = 8배" class="gap20 s-white">
   <h2>연봉 협상에서<br><span class="hl">1%</span>만 추가 인상돼도<br>1년 구독료의 <span class="rxw" id="rx">8.5배</span></h2>
   <p class="rxn">*아래 연봉 기준</p>
   <div class="sal" id="sal" data-v="6">
@@ -335,7 +337,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 </section>
 
 <!-- 250개 -->
-<section class="gap20 s-a100b c" id="sec250">
+<section data-sec="1년 250개" class="gap20 s-a100b c" id="sec250">
   <div class="sal" data-v="0">
     <p class="more">1년에 <b>250개</b>의 인사이트를<br>더 쌓은 만큼 역량 상승과<br><span class="ul">연봉 추가 인상</span>은 당연하죠</p>
   </div>
@@ -343,14 +345,14 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 </section>
 
 <!-- 후기 -->
-<section class="gap20 s-n50 rvs">
+<section data-sec="구독자 후기" class="gap20 s-n50 rvs">
   <div class="score rvc"><span class="sl">평균 별점</span><b>4.8</b><span class="stw" id="stw"><span class="s0"><i>★</i><i>★</i><i>★</i><i>★</i><i>★</i></span><span class="s1">★★★★★</span></span></div>
   <h2>생생한 구독자 후기</h2>
   <div class="rvw arw" id="rvw" data-step="1"><div class="rvp" id="reviews"></div><button class="cpv" type="button" aria-label="이전 후기">‹</button><button class="cnx" type="button" aria-label="다음 후기">›</button></div>
 </section>
 
 <!-- FAQ -->
-<section class="faq s-white">
+<section data-sec="자주 묻는 질문" class="faq s-white">
   <h2 style="margin-bottom:12px">자주 묻는 질문</h2>
   <details><summary>내 직군에 맞는 인사이트를 받을 수 있나요?</summary><ul class="fq"><li>네. 기본적으로는 가입할 때 고른 직군에 맞춰지지만, 원하는 분야로 조정도 가능해요.</li></ul></details>
   <details><summary>원하는 조건으로 채용공고를 받을 수 있나요?</summary><ul class="fq"><li>네. 원하는 관심 직군·연차·지역을 선택해 주시면 돼요.</li><li>매주 목요일마다 최근 7일간 열린 공고 중 조건에 맞는 것만 모아 보내 드려요.</li><li>설정은 언제든 바꿀 수 있어요.</li></ul></details>
@@ -359,7 +361,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 </section>
 
 <!-- 마지막 -->
-<section class="c gap20 s-key" id="closing" data-v="45">
+<section data-sec="마지막 · 아침 8시" class="c gap20 s-key" id="closing" data-v="45">
   <div class="clk"><b>08:00</b><span>내일 아침</span></div>
   <div class="lock"><div class="lt">내일 오전 8:00</div><div class="nt"><span class="ap"><svg width="20" height="20" viewBox="0 0 21 21"><use href="#ccmark"/></svg></span><div><b>커리어코치</b><p>오늘의 인사이트 5줄이 도착했어요</p></div><em>지금</em></div></div>
   <h2 class="kk" id="kk" data-v="1">당장 내일부터<br>내 연봉이 올라가는 <span class="nw"><span class="hl kt"><em class="ti">TALK</em>카카오톡<sup class="bd">1</sup></span>을</span><br>아침 8시마다 받아보세요.</h2>
@@ -386,7 +388,28 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
   import { pageView, metaEvent, track } from '/assets/track.js';
   import { KAKAO_LOGIN, SUPABASE_URL } from '/assets/supabase-config.js';
   import { 오류안내 } from '/assets/toast.js';
-  pageView('visit', { p: 'landing' });
+  // 랜딩 섹션 도달률 (2026-10-15 사용자 확정) — 방문마다 버전 지문(lv)과 무작위 표(vid)를 붙이고,
+  // 더 아래 섹션에 닿을 때마다 「가장 깊이 간 섹션 번호」를 보낸다. 어드민 「가입 퍼널」이 그 방문의 가장 큰 값을 센다.
+  // 닿았다 = 섹션의 절반이 보였거나 섹션이 화면의 절반을 채웠다. 첫 섹션은 방문 자체가 도달이라 안 보낸다.
+  // 1.5초 모아 보내고(빠르게 훑으면 한 번), 화면을 떠날 때 남은 것을 보낸다. 우리 기기·자동 점검은 track.js 와 DB 가 뺀다.
+  const lv = document.querySelector('meta[name="cc-lv"]')?.content || '';
+  const vid = lv ? Array.from(crypto.getRandomValues(new Uint8Array(8)), (x) => x.toString(16).padStart(2, '0')).join('') : '';
+  pageView('visit', lv ? { p: 'landing', lv, vid } : { p: 'landing' });
+  if (lv && 'IntersectionObserver' in window) {
+    const 섹션들 = [...document.querySelectorAll('#scr > section')];
+    let 깊이 = 1, 보낸 = 1, 모음 = 0;
+    const 보내기 = () => { clearTimeout(모음); if (깊이 > 보낸) { 보낸 = 깊이; track('landing_reach', { lv, vid, s: 깊이 }); } };
+    const 지켜봄 = new IntersectionObserver((줄) => {
+      for (const e of 줄) {
+        if (!e.isIntersecting || e.intersectionRect.height < Math.min(e.boundingClientRect.height, innerHeight) / 2) continue;
+        const 번호 = 섹션들.indexOf(e.target) + 1;
+        if (번호 > 깊이) { 깊이 = 번호; clearTimeout(모음); 모음 = setTimeout(보내기, 1500); }
+      }
+    }, { threshold: Array.from({ length: 21 }, (_, k) => k / 20) });
+    섹션들.forEach((x) => 지켜봄.observe(x));
+    addEventListener('pagehide', 보내기);
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') 보내기(); });
+  }
   // 가입·로그인 입구 — 두 버튼 모두 카카오로 바로 간다 (2026-10-14 /signup/ 화면 삭제, 사용자 지시).
   // 마크업의 /signup/ 은 이 모듈이 못 돌 때만 쓰이는 길이다(그 주소는 카카오로 넘겨주기만 한다).
   // 이미 로그인한 사람은 카카오를 건너뛴다 — 세션은 supabase-js 기본 저장 이름에서 본다(CDN 을 기다리지 않게).
