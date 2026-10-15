@@ -28,6 +28,7 @@
  * 페이지 쪽 접점
  *   `window.ccHold?.(약속)` — 그 약속이 끝나야(성공·실패 무관) 다 된 화면으로 본다. 다 끝나기 전이면 언제 불러도 센다.
  *   `window.ccLeave?.()` — 다른 주소로 떠나는 중. 이 화면은 끝까지 감춘다(스켈레톤도 안 띄운다).
+ *   `window.ccMaybeLeave?.(약속)` — 떠날지 모르는 동안 ccLeave 처럼 감춘다. 약속이 거짓이면 평소대로 보여 준다.
  *   `window.ccNoKeep?.()` — 이번 화면은 실패 화면이라 「지난 값」으로 적지 않는다.
  */
 (function () {
@@ -82,7 +83,8 @@
   var resume = null;   // 앞 화면을 붙잡아 둔 전환 — 보여 줄 때 이어서 돌린다(아래 pagereveal)
   function show(force) { if (!shown && (!leaving || force)) { shown = true; root.classList.remove('cc-wait'); if (resume) resume(); } }
   // 끝까지 기다렸는데도 값이 안 왔으면 — 자리가 있는 화면은 예시 값 대신 스켈레톤으로, 없는 화면은 그대로 보여 준다
-  setTimeout(function () { skelIfWaiting(true); show(); }, Math.max(0, HOLD_MAX - performance.now()));
+  var capped = false;
+  setTimeout(function () { capped = true; skelIfWaiting(true); show(); }, Math.max(0, HOLD_MAX - performance.now()));
   setTimeout(function () { show(true); }, 5000);   // 떠난다더니 5초째 그대로면(이동이 막혔으면) 그래도 보여 준다
   setTimeout(function () { wantSkel = true; skelIfWaiting(); }, Math.max(0, SKEL_AT - performance.now()));
   addEventListener('pageshow', function (e) { if (e.persisted) { leaving = false; show(); } });
@@ -140,7 +142,19 @@
     if (!done) { pending++; Promise.resolve(p).then(settle, function (e) { settle(); throw e; }); }
     return p;
   };
-  window.ccLeave = function () { leaving = true; pending++; };
+  var 진짜떠남 = false;   // ccLeave 로 떠난 것은 ccMaybeLeave 가 「머묾」으로 되돌리지 않는다
+  window.ccLeave = function () { 진짜떠남 = leaving = true; pending++; };
+  // 떠날지 아직 모를 때 — 답이 올 때까지 떠나는 중처럼 감춘다(스켈레톤도 안 띄운다). 약속이 참이면 떠난 것이고,
+  // 거짓·실패면 평소대로 돌아간다. 상한(HOLD_MAX)이 이미 지났으면 그 자리에서 보여 준다.
+  window.ccMaybeLeave = function (p) {
+    if (done) return;
+    leaving = true; pending++;
+    var 머묾 = function () {
+      leaving = 진짜떠남; settle();
+      if (!done) { if (capped) { skelIfWaiting(true); show(); } else skelIfWaiting(); }
+    };
+    Promise.resolve(p).then(function (간다) { if (!간다) 머묾(); }, 머묾);
+  };
   window.ccNoKeep = function () { noKeep = true; try { sessionStorage.removeItem(KEY); } catch (e) { /* 막힌 저장소 */ } };
 
   // ── 지난 값부터 ── 자리 목록이 마크업 순서대로 같을 때만 쓴다(마크업이 바뀌면 옛 기록은 버린다)

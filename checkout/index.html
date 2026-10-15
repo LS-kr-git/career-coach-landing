@@ -323,7 +323,7 @@
       return store.readState().pending ? '저장안됨' : '/onboarding/1/';
     })().catch(function () { return null; });
     if (갈곳 === '저장안됨') 저장안됨 = true;
-    else if (갈곳) { location.replace(갈곳); await new Promise(function () {}); }
+    else if (갈곳) { window.ccLeave?.(); location.replace(갈곳); await new Promise(function () {}); }   // 떠나는 중 — 이 화면을 비추지 않는다(assets/steady.js)
   }
 
   /* ── 시계: 다음 발송(영업일 08:00 서울)까지 — 영업일 판정은 결제 완료 화면과 같은 firstSendDay(공휴일 포함)를 쓴다

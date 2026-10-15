@@ -328,7 +328,7 @@
      그것을 다시 보내는 곳이 **온보딩 세 화면뿐**이었다. 온보딩은 단방향이라 다시 들어올
      일이 거의 없어서, 그 사람은 자기가 고른 주제를 영영 못 받는다 — 아무 표시도 없이.
      `retryPending()` 은 보낼 것이 없거나 로그인 전이면 조용히 아무것도 안 한다. */
-  import { retryPending, pullFromServer, readState, client, forgetLocal } from '/assets/onboarding-store.js';
+  import { retryPending, pullFromServer, readState, complete, client, forgetLocal } from '/assets/onboarding-store.js';
   import { requireLogin, getTopics, COMMON_TOPIC, onboardingDone, FAIL } from '/assets/mypage-data.js';
   import { readTopicMap, trackFromJobs } from '/assets/topic-map.js';
   import { 하단안내, 오류안내 } from '/assets/toast.js';
@@ -341,13 +341,17 @@
   var 마친사람 = function (ok) {
     if (!ok) return false;
     return 재전송.then(function () { return onboardingDone(); }).then(function (done) {
-      if (!done) { location.replace('/onboarding/1/'); return new Promise(function () {}); }
+      if (!done) { window.ccLeave?.(); location.replace('/onboarding/1/'); return new Promise(function () {}); }   // 떠나는 중 — 이 화면(스켈레톤)을 비추지 않는다(assets/steady.js)
       return true;
     });
   };
 
   /* 월·수·금 줄 — 고치는 화면(mypage/topics)이 읽는 것과 같은 서버 값이다 */
-  window.ccHold?.(requireLogin().then(마친사람).then(function (ok) { return ok ? pullFromServer() : null; }).then(function (r) {
+  var 확인 = requireLogin().then(마친사람);
+  /* 이 기기의 선택이 다 모이지 않았으면(랜딩과 같은 기준 — onboarding-store complete) 온보딩 전일 수 있다 — 서버 답이 오기 전에 이 화면(스켈레톤)을 비추지 않는다.
+     랜딩 「시작하기」가 묻지 않고 바로 여기로 오므로(2026-10-15 B안), 안 그러면 마이페이지가 비친 뒤 1단계로 튄다. */
+  if (!complete(readState())) window.ccMaybeLeave?.(확인.then(function (ok) { return ok !== true; }));
+  window.ccHold?.(확인.then(function (ok) { return ok ? pullFromServer() : null; }).then(function (r) {
     if (r === null) return;
     var s = readState();
     /* 월·수·금 줄 — 주제 화면과 같은 규칙: 저장한 주제, 없으면 직군 추천. 둘 다 없으면 지어내지 않고 「내 직무」로 둔다 */

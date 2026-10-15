@@ -98,11 +98,11 @@
      조회가 실패하면 요약 상자를 스켈레톤으로 두고 하단 안내로 말한다(표식이 있으면 변경 자체는 서버가 이미 끝냈다 · 2026-10-15 D5). */
   var 방금바꿈 = false;
   try { 방금바꿈 = sessionStorage.getItem('cc_card_changed') === '1'; sessionStorage.removeItem('cc_card_changed'); } catch (e) { /* 못 읽으면 근거 없음으로 본다 */ }
-  if (!방금바꿈) location.replace('/mypage/billing/');
+  if (!방금바꿈) { window.ccLeave?.(); location.replace('/mypage/billing/'); }   // 떠나는 중 — 이 화면을 비추지 않는다(assets/steady.js)
   else window.ccHold?.(requireLogin().then(function (ok) { return ok ? getSubscription() : undefined; }).then(function (s) {
     if (s === undefined) return;
     var v = billingView(s);
-    if (!v.subscribed) { location.replace('/mypage/billing/'); return; }
+    if (!v.subscribed) { window.ccLeave?.(); location.replace('/mypage/billing/'); return; }
     // 미납 중이면 다음 재시도(매일 새벽, 3일)가 새 카드로 걷는다. 해지 예약이면 더 걷지 않는다.
     if (s.status === 'past_due') $('lead').textContent = '밀린 요금은 새 카드로 다시 결제돼요.';
     else if (s.cancel_at_period_end) $('lead').textContent = '해지 예약은 그대로예요.';

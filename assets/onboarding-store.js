@@ -109,7 +109,7 @@ export function writeState(patch) {
 })();
 
 /** 보낼 값이 다 모였나. 3단계까지 정상으로 온 사람은 항상 참이다. */
-function complete(s) {
+export function complete(s) {
   return s.jobs.length > 0 && s.years !== null && s.regions.length > 0;
 }
 

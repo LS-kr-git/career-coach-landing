@@ -235,7 +235,7 @@
   window.ccHold?.(requireLogin().then((ok) => ok ? getSubscription() : undefined).then((s) => {
     if (s === undefined) return;
     if (!s || !['trialing', 'active', 'past_due'].includes(s.status) || s.cancel_at_period_end) {
-      location.replace('/mypage/billing/'); return;
+      window.ccLeave?.(); location.replace('/mypage/billing/'); return;   // 떠나는 중 — 이 화면을 비추지 않는다
     }
     if (s.status === 'past_due') 미납으로(s);      // 기간 끝이 이미 지났다 — 지난 날짜를 「이용 종료일」로 말하지 않는다
     else $('endA').textContent = `(${dayText(s.current_period_end)})`;
