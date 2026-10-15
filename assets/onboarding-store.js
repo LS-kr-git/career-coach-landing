@@ -177,6 +177,15 @@ export function forgetIfOtherOwner(userId) {
   }
 }
 
+function 다시로그인해도되나() {
+  try {
+    const 앞 = Number(localStorage.getItem('cc_relogin') || 0);
+    if (Date.now() - 앞 < 10 * 60 * 1000) return false;
+    localStorage.setItem('cc_relogin', String(Date.now()));
+    return true;
+  } catch { return false; }
+}
+
 async function commit(state, supabase, session, retry) {
   // 연차는 **구간**이다. 위끝이 없으면 아래끝과 같은 값으로 폭 0 구간을 보낸다 —
   // 서버 제약이 "한쪽만" 을 거부하므로 null 을 섞어 보내면 저장이 통째로 실패한다.
@@ -204,6 +213,13 @@ async function commit(state, supabase, session, retry) {
     // onboarding_step·onboarding_done)에 있는 것만 통과한다. 실패 전용 이름이 없어
     // 단계 이벤트 + props 로 적는다. 목록은 다른 저장소(career-coach)에 있다.
     track('onboarding_step', { step: 3, save: 'failed' }, session.access_token);
+    // 로그인은 됐는데 회원 행이 없다(가입 처리가 실패한 사람). 같은 저장을 되풀이하면 영영 막힌다 —
+    // 다시 로그인하면 서버가 회원 행을 메운다(career-coach 0153). 핑퐁을 막으려고 10분에 한 번만 보낸다.
+    if (/인증된 회원이 아닙니다/.test(error.message || '') && 다시로그인해도되나()) {
+      await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+      location.href = (await import('/assets/supabase-config.js')).KAKAO_LOGIN;
+      return { status: 'no-session' };
+    }
     return { status: 'error' };
   }
   // 비우기는 **한 번만** 보낸다. 표시를 안 내리면 그 뒤의 모든 저장이 계속 비우기가 되어,

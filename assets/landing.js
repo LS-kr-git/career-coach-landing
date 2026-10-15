@@ -54,7 +54,7 @@ new IntersectionObserver(es=>{if(es[0].isIntersecting){rxSeen=true}},{root:null,
   document.querySelectorAll("#sal .pc button").forEach(b=>b.classList.toggle("on",+b.dataset.s===v));
   document.querySelector("#sal .sd").textContent=v.toLocaleString("ko-KR")+"만원";
   [[SUB,0],[p1,1],[p2,2]].forEach(([x,k])=>{$("h"+k).style.height=Math.max(3,x/mx*100)+"%";$("b"+k).textContent=(k?"+":"")+f(x)});
-  rxSet(Math.round(p1/SUB)+"배")};
+  rxSet(Math.round(p1/SUB*10)/10+"배")};
  document.querySelectorAll("#sal .sv").forEach(i=>i.addEventListener("input",()=>{if(i.value!=="")set(i.value)}));
  document.querySelector("#sal .pc").addEventListener("click",e=>{const b=e.target.closest("button");if(b)set(b.dataset.s)});
  set(4000)})();

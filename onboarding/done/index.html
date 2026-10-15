@@ -138,7 +138,7 @@
 <script type="module">
   // 앞 네 화면이 모아 둔 선택값을 읽어 확인시킨다 — assets/onboarding-store.js.
   // 주제 고르기는 2026-10-05 결정으로 4단계(/onboarding/4/)로 옮겨 갔다. 이 화면은 확인만 한다.
-  import { readState, retryPending } from '/assets/onboarding-store.js';
+  import { readState, retryPending, complete } from '/assets/onboarding-store.js';
   import { 오류안내 } from '/assets/toast.js';
   // 직군 → 주제. 표는 tools/roles/tracks.json 이 정본이고 build.mjs 가 위 blob 을 만든다.
   // 푸는 규칙은 발송 경로(`ops/send.py` 「트랙과_직군」)와 같다 — assets/topic-map.js 한 곳에 있다.
@@ -146,6 +146,9 @@
 
   const MAP = readTopicMap();
   const state = readState();
+  // 이 브라우저에 고른 값이 없으면(주소로 바로 열었거나 저장소가 비었다) 확인할 것이 없다 — 1단계로 보낸다.
+  // 그대로 두면 「아직 못 정했어요」만 보이는 채 완료 버튼이 살아 있고, 결제 화면이 다시 1단계로 돌려보낸다(2026-10-15 출시 검수).
+  if (!complete(state)) { window.ccLeave?.(); location.replace('/onboarding/1/'); }
   // 4단계에서 직접 고른 주제가 없으면(=직군에 맞춰) 직군이 정하는 주제가 실제로 받는 주제다.
   const topic = state.topic || trackFromJobs(MAP, state.jobs);
 

@@ -137,6 +137,7 @@
   try {
     if (sessionStorage.getItem('cc_paid_pop')) {
       sessionStorage.removeItem('cc_paid_pop');
+      window.ccJustPaid = true;   // 아래 Purchase 는 방금 결제하고 온 경우에만 보낸다
       var 뿌리 = document.documentElement, 튀기 = function () { document.querySelector('main').classList.add('pop'); };
       if (!뿌리.classList.contains('cc-wait')) 튀기();
       else new MutationObserver(function (_, o) { if (!뿌리.classList.contains('cc-wait')) { o.disconnect(); 튀기(); } })
@@ -167,7 +168,9 @@
     var 결제키 = 'purchase-' + s.current_period_end;
     var 처음 = true;
     try { 처음 = localStorage.getItem('cc_px_buy') !== 결제키; localStorage.setItem('cc_px_buy', 결제키); } catch (e) { /* 못 적으면 eventID 에 맡긴다 */ }
-    if (처음) metaEvent('Purchase', { value: s.price_krw, currency: 'KRW' }, 결제키);
+    // 결제 화면에서 막 넘어온 경우에만 보낸다 — 갱신 뒤 이 주소를 다시 열면 새 기간 키로 한 번 더 나갔다
+    // (2026-10-15 출시 검수). 표식을 못 적은 기기는 서버 전환 API(같은 eventID)가 대신 센다.
+    if (처음 && window.ccJustPaid) metaEvent('Purchase', { value: s.price_krw, currency: 'KRW' }, 결제키);
   }, function () {
     // 구독을 못 읽었다 — 결제는 끝났으니 화면은 두고, 확인할 곳을 알린다 (2026-10-15 「오류 대체 화면」 D4)
     오류안내($('errToast'), '구독 정보를 불러오지 못했어요.\n마이페이지에서 다시 확인해 주세요.');

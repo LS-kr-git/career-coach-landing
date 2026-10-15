@@ -53,7 +53,23 @@ function currentUtm() {
  * 최초 유입을 한 번만 저장한다. **이미 있으면 덮지 않는다.**
  * 모든 페이지에서 불러도 안전하다.
  */
+/**
+ * 광고 클릭 표식(_fbc)을 우리가 직접 적는다 (2026-10-15 출시 검수).
+ * 원래는 메타 스크립트(fbevents.js)가 늦게 받아져서야 적는데, iOS 인앱에서 바로 카카오로 넘어가거나
+ * 메타 스크립트가 막힌 브라우저는 그 전에 떠나 쿠키가 안 생긴다 — 그러면 서버가 보내는 Lead·Purchase 에
+ * 클릭 표식이 빠져 광고 성과로 안 묶인다. 형식은 메타 문서 그대로(fb.1.<ms>.<fbclid>). 이미 있으면 안 건드린다.
+ */
+function keepClickId() {
+  try {
+    const fbclid = new URLSearchParams(location.search).get('fbclid');
+    if (!fbclid || /(?:^|; )_fbc=/.test(document.cookie)) return;
+    const 도메인 = onSite() ? '; domain=.careercoach.my' : '';
+    document.cookie = `_fbc=fb.1.${Date.now()}.${encodeURIComponent(fbclid)}; path=/; max-age=7776000; SameSite=Lax${도메인}`;
+  } catch { /* 무시 */ }
+}
+
 export function captureAttribution() {
+  keepClickId();
   try {
     if (localStorage.getItem(STORE)) return;          // 최초 것을 지킨다
     const utm = currentUtm();
@@ -99,7 +115,7 @@ export function track(name, props = {}, accessToken = null) {
     // 자동화 브라우저(헤드리스·playwright 등 navigator.webdriver 가 켜진 것)는 보내지 않는다(2026-10-15).
     // 그날 우리 자동 점검이 매번 새 브라우저로 운영 주소를 열어 방문·온보딩 5건을 남겼다 — 새 브라우저라 표식으로도 안 걸러진다.
     if (navigator.webdriver) return;
-    if (META_OF[name]) metaEvent(META_OF[name]);
+    if (META_OF[name] && 처음보내나(name, props)) metaEvent(META_OF[name]);
     const mark = browserMark();
     const body = JSON.stringify({
       p_name: name,
@@ -136,9 +152,24 @@ const PIXEL_ID = '1578800443456736';
 // Lead 는 브라우저가 안 보낸다 — 카카오 가입을 마친 순간 서버가 보낸다(2026-10-14, career-coach 0135 report_signup_lead).
 const META_OF = { onboarding_done: 'CompleteRegistration' };
 
+/** 가입 완료는 사람마다 **한 번**이다 (2026-10-15 출시 검수). onboarding_done 은 저장할 때마다 남는데
+ *  — 3·4단계 · 재시도 · 마이페이지에서 직군·연차를 고칠 때까지 — 그대로 메타에 보내면 한 사람이 여러 번
+ *  「가입 완료」로 세어져 광고 학습이 흐려진다. 온보딩 화면의 첫 저장만, 이 기기에서 한 번만 보낸다. */
+function 처음보내나(name, props) {
+  if (name !== 'onboarding_done') return true;
+  if (props?.retry || !location.pathname.startsWith('/onboarding/')) return false;
+  try {
+    if (localStorage.getItem('cc_px_reg')) return false;
+    localStorage.setItem('cc_px_reg', '1');
+  } catch { /* 못 적으면 보낸다 — 빠뜨리는 것보다 낫다 */ }
+  return true;
+}
+
 function urlIsClean() {
   if (location.hash.includes('=')) return false;
-  return [...new URLSearchParams(location.search).keys()].every((k) => /^(utm_\w+|fbclid|gclid)$/.test(k));
+  return [...new URLSearchParams(location.search).keys()].every((k) => /^(utm_\w+|fbclid|gclid|plan|dest|from)$/.test(k));
+  // plan(결제 화면 요금제) · dest(로그인 뒤 행선지 못 물음) · from(온보딩 「바꾸기」) — 우리 화면이 스스로 붙이는 값이라
+  // 개인정보가 아니다. 빠져 있어 그 화면에서는 PageView 부터 통째로 안 나갔다(2026-10-15 출시 검수).
 }
 
 /**

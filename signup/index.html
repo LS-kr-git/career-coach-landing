@@ -14,9 +14,12 @@
      이 주소는 옛 광고·북마크로 들어온 사람을 카카오 로그인으로 넘겨주기만 한다. 화면이 없다. -->
 <script type="module">
   import { KAKAO_LOGIN } from '/assets/supabase-config.js';
-  import { track } from '/assets/track.js';
-  track('signup_start', { p: 'signup_redirect' });   // keepalive 라 바로 넘어가도 남는다
-  location.replace(KAKAO_LOGIN);
+  // 기록은 넘기기를 막지 않는다 — 랜딩 스크립트가 죽었을 때 오는 안전망이라, 같은 track.js 가 죽어 있으면
+  // 정적 import 로는 이 화면도 흰 화면이 됐다(2026-10-15 출시 검수 · 598b09f 때 실제로 그랬다). 0.4초까지만 기다린다.
+  Promise.race([
+    import('/assets/track.js').then((m) => m.track('signup_start', { p: 'signup_redirect' })),   // keepalive 라 바로 넘어가도 남는다
+    new Promise((r) => setTimeout(r, 400)),
+  ]).catch(() => {}).finally(() => location.replace(KAKAO_LOGIN));
 </script>
 </head>
 <body><noscript><a href="/">커리어코치 첫 화면으로</a></noscript></body>

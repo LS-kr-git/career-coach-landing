@@ -260,6 +260,10 @@ export async function saveBillingKey(billingKey, plan) {
       'content-type': 'application/json',
     },
     body: JSON.stringify({ billingKey, plan: plan || undefined, meta: (await import('/assets/track.js')).metaCookies() }),
+    // 인앱 브라우저에서 연결이 끊기면 답이 영영 안 와 「창을 닫지 말고」 덮개가 계속 돈다. 서버 쪽 청구·되묻기
+    // 상한(30초+15초)보다 넉넉히 기다린 뒤 끊는다 — 끊기면 TimeoutError 로, 화면이 「확인이 늦어진다」고 말한다.
+    // iOS 15 이하 사파리에는 AbortSignal.timeout 이 없다 — 없으면 시간 제한 없이 보낸다(결제를 막지 않는다).
+    signal: typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout(90_000) : undefined,
   });
   if (!res.ok) {
     // 🔴 상태코드는 **콘솔에만** 남기고 던지는 메시지는 비운다. 부르는 화면이 이 값을
