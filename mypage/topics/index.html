@@ -184,6 +184,7 @@
   var mine = document.getElementById('mine');
   var rec = document.getElementById('rec'), rest = document.getElementById('rest');
   var cta = document.querySelector('.cta');
+  var 추천 = null;   // 「내 직군 추천」 칩의 주제 — 저장할 때 이름 대신 「직군에 맞춰」(비우기)로 보낸다
   var 읽음 = false;   // 서버에서 읽어 칩을 다시 그렸나 — 그 전(또는 실패)에는 칩을 눌러도 저장을 풀지 않는다
   function paint(topic) {
     /* 고른 것이 없으면 월·수·금 줄을 비워 둔다 — 마크업의 「디자인 인사이트」(피그마 기준 상태)를 남기면 안 받을 주제를 말한다. */
@@ -216,6 +217,7 @@
        고른 적 없는 주제가 저장됐다(2026-10-15). 칩을 하나 누르면 풀린다. */
     var on = s.topic;
     if (topics.indexOf(on) < 0) on = r;
+    추천 = r;
     읽음 = true;
     cta.disabled = !on;
     document.getElementById('gRec').hidden = rec.hidden = document.getElementById('gRest').hidden = !r;
@@ -240,11 +242,16 @@
   /* 저장은 온보딩과 같은 통로(save_onboarding)다 — 직군·연차·근무지는 건드리지 않고 주제만 실린다.
      통신 실패는 store 가 pending 으로 남겨 다음 진입에서 다시 보낸다(온보딩 세 화면·직군 화면과 같다). */
   cta.addEventListener('click', function () {
+    /* 다 읽기 전(느린 망에서 스켈레톤이 걷힌 뒤)에는 마크업이 미리 눌러 둔 칩(피그마 기준 상태)이 저장된다 — 받지 않는다(2026-10-15 출시 검수). */
+    if (!읽음 || !current()) return;
     cta.disabled = true;
     /* 진입할 때 띄운 retryPending() 이 아직 돌고 있으면 store 가 'busy' 를 준다 — 실패가 아니라
        「지금은 못 보낸다」다. 한 번 기다렸다 다시 보낸다(그 재시도가 끝나면 자리가 빈다). */
     var 이전주제 = readState().topic;
-    writeState({ topic: current(), topicClear: false });
+    /* 추천 칩은 직군이 정하는 값이다 — 이름으로 굳히면 나중에 직군을 바꿔도 주제가 안 따라간다.
+       온보딩 4단계와 같이 「비우기」로 보낸다(onboarding/4 의 저장 의미). */
+    var 자동 = current() === 추천;
+    writeState({ topic: 자동 ? null : current(), topicClear: 자동 });
     (function 보낸다(남은기회) {
       saveOnboarding().then(function (r) {
         if (r.status === 'busy' && 남은기회 > 0) { setTimeout(function () { 보낸다(남은기회 - 1); }, 400); return; }

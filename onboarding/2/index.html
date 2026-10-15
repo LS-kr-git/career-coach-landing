@@ -229,6 +229,9 @@
   },{passive:true});
   bands.forEach((d,i)=>d.addEventListener('click',()=>{
     const [a,b]=BANDS[i]; lo=a; hi=b; choose(); render();
+    // 띠는 click 만 받는다 — touchend 의 end() 는 click 보다 먼저 와서(chosen=false) 아무것도 안 적는다.
+    // 여기서 안 적으면 연차가 빈 채 3단계 저장이 'incomplete' 로 끝나 결제 화면이 1단계로 돌려보낸다(2026-10-15 출시 검수).
+    if(window.ccOnChange) window.ccOnChange();
   }));
   window.addEventListener('mousemove',move);
   window.addEventListener('touchmove',move,{passive:false});
@@ -245,6 +248,7 @@
 document.querySelector('.cta').addEventListener('click',()=>{
   const c=document.querySelector('.cta');
   if(c.classList.contains('off'))return;
+  if(window.ccOnChange) window.ccOnChange();   // 마지막으로 고른 값을 떠나기 전에 한 번 더 적는다(어느 손짓이 빠뜨려도)
   // 확인 화면 「바꾸기」로 왔으면 저장하고 그리로 돌아간다(아래 모듈이 ccNext 를 건다).
   if(window.ccNext) window.ccNext(); else location.href='/onboarding/3/';
 });

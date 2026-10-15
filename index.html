@@ -483,13 +483,17 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
   }, { timeout: 3000 }), { once: true });
   // 카카오 로그인이 끝나지 못하고 돌아온 경우 — 안내를 띄우고 한 건 남긴다. `why`·`code` 는 콜백이 실어 보낸 것이다.
   const 돌아옴 = new URLSearchParams(location.search);
-  if (돌아옴.get('login') === 'fail') {
+  // Supabase 가 state 를 못 읽으면(만료·없음) 우리 콜백이 아니라 **이 첫 화면**으로 `?error=…&error_code=…` 를 붙여 보낸다
+  // (GoTrue 가 사이트 주소로 돌려보낸다 — 2026-10-15 출시 검수, 라이브 재현). 그것도 실패로 보고 안내·기록한다.
+  const 해시 = new URLSearchParams(location.hash.slice(1));
+  const 받은오류 = 돌아옴.get('error_code') || 돌아옴.get('error') || 해시.get('error_code') || 해시.get('error');
+  if (돌아옴.get('login') === 'fail' || 받은오류) {
     const 안내 = document.getElementById('lfail');
     오류안내(안내, 안내.textContent);   // 머묾은 글자 수로 — 오류 안내 공통 규칙 (2026-10-15 「오류 대체 화면」)
-    const why = (돌아옴.get('why') || '').replace(/[^a-z_]/g, '').slice(0, 20);
-    const code = (돌아옴.get('code') || '').replace(/[^A-Za-z0-9_]/g, '').slice(0, 40);
+    const why = (돌아옴.get('why') || (받은오류 ? 'provider' : '')).replace(/[^a-z_]/g, '').slice(0, 20);
+    const code = (돌아옴.get('code') || 받은오류 || '').replace(/[^A-Za-z0-9_]/g, '').slice(0, 40);
     track('login_fail', { ...(why && { why }), ...(code && { code }) });
-    history.replaceState(null, '', location.pathname + location.hash);   // 새로고침에 안내가 다시 뜨지 않게
+    history.replaceState(null, '', location.pathname + (받은오류 ? '' : location.hash));   // 새로고침에 안내가 다시 뜨지 않게
   }
   // 하단 고정 「카카오로 3초만에 시작하기」 → 메타 픽셀 전환 이벤트 (옛 랜딩의 ctaBtn 과 같은 자리).
   // 픽셀은 track.js 가 켠다 — 픽셀이 없으면 아무 일도 안 한다.

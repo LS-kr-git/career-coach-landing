@@ -21,7 +21,11 @@ const JS_KEY = 'b2a5af1cfa45793727755867f2dd53db';   // 공개 값 — 카카오
 const START = 'https://sxooygwggxeplzkfdbth.supabase.co/functions/v1/kakao-start-3bc341t0';
 const SDK = 'https://t1.kakaocdn.net/kakao_js_sdk/2.8.3/kakao.min.js';
 const SDK_SRI = 'sha384-oroumrnFVE0xtgqyDZJARgERibXg2C28380uaUZz2kHDS5CR7tu20eGiOU6GkTpy';
-const FRESH = 4 * 60 * 1000;   // state 를 이만큼 지나면 새로 받는다 — Supabase 쪽 유효 시간보다 넉넉히 짧게
+// 🔴 Supabase 의 state 는 **만든 때부터 300초**만 산다(GoTrue flow state 기본값). 그 300초 안에 카톡에서 로그인·동의를
+//    마쳐야 하므로, 누를 때 쓰는 state 는 젊어야 한다 — 전에는 4분마다 받고 5분 된 것까지 써서, 동의 화면에서 1분만
+//    머물러도 「OAuth state has expired」로 첫 화면에 튕겼다(2026-10-15 출시 검수, 라이브 310초 재현).
+const FRESH = 45 * 1000;        // 보이는 동안 이 간격으로 새로 받는다
+const MAX_AGE = 90 * 1000;      // 누를 때 이보다 오래된 state 는 안 쓴다(웹 로그인으로 — 그쪽은 누른 순간 새 state 를 만든다)
 
 const ua = navigator.userAgent;
 // 카톡 안 브라우저는 이미 카카오 로그인 상태라 웹 화면이 한 번에 지나간다. PC 는 앱 전환이 없다.
@@ -55,14 +59,22 @@ export function 준비(기록) {
     if (!window.Kakao.isInitialized()) window.Kakao.init(JS_KEY);
     // 열어 둔 채 오래 있다 누르는 사람을 위해 — 보이는 동안만 다시 받는다.
     setInterval(() => { if (document.visibilityState === 'visible') 받기().catch(기록); }, FRESH);
+    // 인스타 피드로 나갔다 오면 위 주기가 멈춰 있었다 — 다시 보이는 순간 낡았으면 바로 받는다.
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && (!재료 || Date.now() - 재료.at > FRESH)) 받기().catch(기록);
+    });
     다시받기 = () => 받기().catch(기록);
   })().catch((e) => { 준비중 = null; throw e; });
   return 준비중;
 }
 
 /** 버튼을 누른 그 자리에서 부른다. 앱으로 넘겼으면 true — 아니면 호출자가 웹 로그인으로 간다. */
+let 넘긴때 = 0;   // 앱으로 넘긴 시각 — 돌아오기 전의 두 번째 누름을 삼킨다
 export function 앱으로() {
-  if (!재료 || Date.now() - 재료.at > FRESH + 60_000 || !window.Kakao?.isInitialized()) return false;
+  // 빠른 두 번 누름: 앞 누름이 카톡을 여는 중이다. 여기서 false 면 웹 로그인으로 페이지가 넘어가며
+  // 카톡에서 받을 인가 코드를 기다리던 SDK 가 같이 죽는다(2026-10-15 출시 검수) — 아무것도 안 하고 삼킨다.
+  if (넘긴때 && Date.now() - 넘긴때 < 5000) return true;
+  if (!재료 || Date.now() - 재료.at > MAX_AGE || !window.Kakao?.isInitialized()) return false;
   const { state, scope, redirect_uri } = 재료;
   재료 = null;   // 같은 state 를 두 번 쓰지 않는다 — 다시 누르면 웹 로그인으로 가고, 그 사이 새로 받는다
   // 새로 받는 것은 **돌아왔을 때** 한다. 누른 자리에서 받으면 곧바로 페이지가 카카오로 넘어가며 요청이
@@ -73,11 +85,13 @@ export function 앱으로() {
   const 돌아옴 = () => {
     if (끝.signal.aborted || document.visibilityState !== 'visible') return;
     끝.abort();
+    넘긴때 = 0;
     다시받기();
   };
   document.addEventListener('visibilitychange', 돌아옴, { signal: 끝.signal });
   addEventListener('pageshow', 돌아옴, { signal: 끝.signal });
   setTimeout(돌아옴, 3000);
+  넘긴때 = Date.now();
   window.Kakao.Auth.authorize({ redirectUri: redirect_uri, state, scope, throughTalk: true });
   return true;
 }

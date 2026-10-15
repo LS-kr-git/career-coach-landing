@@ -169,6 +169,8 @@
   const 재시도 = retryPending();
 
   let 가는중 = false;
+  // 뒤로 와서 bfcache 로 되살아나면(iOS 사파리) 떠날 때 세운 표시가 그대로라 버튼이 영영 안 눌린다(2026-10-15 출시 검수).
+  addEventListener('pageshow', (e) => { if (e.persisted) { 가는중 = false; cta.removeAttribute('aria-busy'); } });
   cta.addEventListener('click', async () => {
     if (cta.classList.contains('off') || 가는중) return;
     가는중 = true;

@@ -109,6 +109,8 @@
   // 「앞 화면이 한 번 더 보이고 넘어간다」로 보였다(2026-10-15 사용자 지적). 붙잡는 시간은 위 HOLD_MAX 가 상한이다(다른 주소로 떠나는 중이면 그 이동이 막혔을 때의 5초).
   addEventListener('pagereveal', function (e) {
     var vt = e.viewTransition;
+    // 건너뛴 전환의 거절이 잡히지 않은 채 남으면 오류 기록(client_error)에 「Skipping view transition」 이 쌓인다 — 늘 받아 둔다(2026-10-15 출시 검수)
+    if (vt) { vt.ready.catch(function () {}); if (vt.finished) vt.finished.catch(function () {}); }
     if (!vt || shown) return;
     vt.ready.then(function () {
       if (shown) return;

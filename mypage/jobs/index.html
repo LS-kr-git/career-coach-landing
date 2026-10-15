@@ -160,6 +160,7 @@
     /* 서버에서 지금 값을 못 읽었으면 저장을 막는다 — 안 막으면 여기서 고른 것만 올라가
        서버에 있던 직군이 빈 목록으로 덮인다. 칩을 눌러도 안 풀려야 하므로 refresh 가 본다. */
     var 읽기실패 = false;
+    var 읽음 = false;   // 서버 값을 받아 칩을 되살렸나 — 그 전에 누른 「저장」은 빈 목록을 적고 실패만 말한다(2026-10-15 출시 검수)
 
     function picked() {
       return Array.prototype.slice.call(groups.querySelectorAll('.chip[aria-pressed="true"]'));
@@ -204,6 +205,7 @@
       acc.parentNode.querySelector('.chips').hidden = open;
     });
     save.addEventListener('click', function () {
+      if (!읽음 || save.disabled || !picked().length) return;
       var before = { jobs: readState().jobs };
       writeState({ jobs: picked().map(function (c) { return c.dataset.d2; }) });
       /* 🔴 저장된 것만 저장됐다고 말한다 — 연차·근무지 화면(mypage/years)과 같은 처리 (2026-10-14 출시 전 점검).
@@ -223,6 +225,7 @@
         var chip = groups.querySelector('.chip[data-d2="' + code + '"]');
         if (chip) chip.setAttribute('aria-pressed', 'true');
       });
+      읽음 = true;
       refresh();
     }
     /* 🔴 서버에 저장된 값을 먼저 받아 온다 (2026-09-21 배선 5). 안 받으면 기기를 바꾼 사람에게

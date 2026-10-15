@@ -181,6 +181,12 @@
   let 재시도 = retryPending();
   const cta = document.querySelector('.cta');
   let 가는중 = false;
+  // 결제 화면에서 뒤로 와 bfcache 로 되살아나면(iOS 사파리) 떠날 때 세운 표시가 그대로라 「완료」가 영영 안 눌린다(2026-10-15 출시 검수).
+  addEventListener('pageshow', (e) => {
+    if (!e.persisted) return;
+    가는중 = false; cta.removeAttribute('aria-busy');
+    재시도 = retryPending();
+  });
   // 앞 단계 저장이 실패한 채 들어왔고 여기서 다시 보낸 것도 실패했으면 「완료」를 누르기 전에 알린다
   // (2026-10-15 「오류 대체 화면」 D1 B안). 이미 「완료」를 눌렀으면 그쪽(D2)이 말한다.
   재시도.then((r) => {
