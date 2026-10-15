@@ -500,8 +500,13 @@
     try {
       render(await call('insight_use_makeup'));
     } catch (err) {
-      $('lockMsg').textContent = err.message;
-      btn.hidden = true;
+      /* 서버 문장(영어 DB 오류까지)을 잠김 알약에 그대로 쓰지 않는다 — 아래 첫 열기 실패와 같은 갈래로 가른다.
+         없는 글·만료 링크는 다시 눌러도 안 열리므로 안내 카드로, 그 밖은 잠김 안내와 버튼을 그대로 두고
+         하단 알약으로 알린다 — 다시 누르기만 하면 된다(2026-10-15 「오류 대체 화면」 일요일 열기 실패와 같은 처리). */
+      const 말 = String(err.message);
+      if (말 === MSG.notFound || 말.startsWith(SERVER_NOT_FOUND)) card(MSG.notFound);
+      else if (말.startsWith(SERVER_EXPIRED)) card(ERR_CARD.expired, ERR_CARD.expiredSub);
+      else { btn.disabled = false; 오류안내($('errToast'), ERR_CARD.blocked); }
     }
   });
 

@@ -126,6 +126,27 @@ for (const [화면, a, b] of [['01 프로필', 빈것, 실패한것], ['03 결�
     }
   }
 }
+/* 03 끝난 해지 예약 — 이용 종료일이 지난 해지 예약은 끝난 것이다. 서버(career-coach 0137 mypage_resume_subscription)가
+   그 구간의 해지 취소를 거절하므로 「해지 취소하기」를 주면 안 된다. 결제 화면 `끝난해지`(0136)와 같은 판정.
+   경계 양쪽을 둔다 — 한쪽만 두면 `<=`/`<` 를 뒤집어도 통과한다. 미납은 날짜와 상관없이 되돌릴 수 있다. */
+{
+  const 지금 = Date.parse('2026-10-15T00:00:00Z');
+  const 행 = (status, end) => ({ status, cancel_at_period_end: true, current_period_end: end,
+                                price_krw: 1000, period_unit: 'month', period_count: 1, card_last4: null });
+  const 사례 = [
+    ['종료일 1초 뒤(남음)', 행('active', '2026-10-15T00:00:01Z'), true],
+    ['종료일 그 순간(끝남)', 행('active', '2026-10-15T00:00:00Z'), false],
+    ['종료일 지남(끝남)', 행('trialing', '2026-10-14T00:00:00Z'), false],
+    ['미납·종료일 지남(되돌릴 수 있음)', 행('past_due', '2026-10-01T00:00:00Z'), true],
+  ];
+  for (const [이름, s, 살아있음] of 사례) {
+    const v = data.billingView(s, null, 지금);
+    const 바람 = 살아있음 ? 'true|true|true' : 'false|false|false';
+    const 값 = `${v.subscribed}|${v.canResume}|${Boolean(v.live)}`;
+    if (값 !== 바람) problems.push(`03 결제: 해지 예약 ${이름} — subscribed|canResume|live 가 ${값} 다 (${바람})`);
+  }
+}
+
 /* 03 요금 표기 — 금액은 아무 값이나(위와 같은 이유). 결제 화면 26판의 칸과 같은 모양이어야 한다. */
 {
   const 한달 = { code: 'm', price_krw: 1000, period_unit: 'month', period_count: 1 };

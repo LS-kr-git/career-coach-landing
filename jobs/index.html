@@ -276,8 +276,20 @@
 
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 
+  /* 공고 링크는 수집한 값 그대로라 스킴을 믿지 않는다 — http(s) 만 링크로, 메일 주소면 mailto:, 그 밖(javascript:·빈 값 등)은
+     링크 없이 그린다(2026-10-15). */
+  const 메일모양 = /^[^\s@:/<>]+@[^\s@:/<>]+\.[^\s@:/<>]+$/;
+  function 주소(링크) {
+    const v = String(링크 || '').trim();
+    if (/^https?:\/\//i.test(v)) return v;
+    const m = v.replace(/^mailto:/i, '');
+    return 메일모양.test(m) ? 'mailto:' + m : '';
+  }
+
   function 행(r) {
-    const a = el('a', 'row'); a.href = r['링크'] || '#'; a.target = '_blank'; a.rel = 'noopener noreferrer';
+    const href = 주소(r['링크']);
+    const a = el(href ? 'a' : 'div', 'row');
+    if (href) { a.href = href; if (!href.startsWith('mailto:')) { a.target = '_blank'; a.rel = 'noopener noreferrer'; } }
     const g = el('div', 'grow'), top = el('div', 'co-line');
     top.append(el('span', 'co', r['회사'] || ''));
     const 지역 = (r['지역'] || [])[0];
