@@ -30,6 +30,7 @@ import { browserMark } from '/assets/browser-mark.js';
 const API = SUPABASE_URL;
 const KEY = SUPABASE_ANON_KEY;
 const STORE = 'cc_attr';
+const CLICK = 'cc_click';
 
 const UTM = ['source', 'medium', 'campaign', 'content', 'term'];
 
@@ -67,10 +68,36 @@ function keepClickId() {
     // 새 광고 클릭이면 갈아 끼운다 — 같은 클릭(같은 fbclid)이면 처음 시각을 지킨다.
     const 있던 = (document.cookie.match(/(?:^|; )_fbc=([^;]*)/) || [])[1] || '';
     if (fbclid && !있던.endsWith('.' + encodeURIComponent(fbclid))) 적기('_fbc', `fb.1.${Date.now()}.${encodeURIComponent(fbclid)}`);
+    if (fbclid) rememberClick(fbclid);
     // 브라우저 표식(_fbp)도 메타 스크립트보다 먼저 만든다 — 같은 이유로 비면 서버 보고가 이 브라우저를 못 알아본다.
     // 형식은 메타 문서 그대로(fb.1.<ms>.<임의 숫자>). 메타 스크립트는 있는 값을 그대로 쓴다.
     if (!/(?:^|; )_fbp=/.test(document.cookie)) 적기('_fbp', `fb.1.${Date.now()}.${Math.floor(Math.random() * 1e10)}`);
   } catch { /* 무시 */ }
+}
+
+/**
+ * 광고를 **누른 시각과 그 광고의 꼬리표**를 이 브라우저에 적어 두고 이벤트마다 함께 보낸다(props.mc, 2026-10-16 사용자 지시).
+ * 어드민 PAID ROAS 가 메타처럼 「첫 결제 전 7일 안의 마지막 클릭」으로 세려면 클릭이 **언제** 있었는지가 필요한데,
+ * 이벤트의 utm 칸은 첫 유입(cc_attr)이라 다시 누른 클릭이 안 남는다. 같은 클릭(같은 fbclid)이면 처음 시각을 지킨다.
+ */
+function rememberClick(fbclid) {
+  try {
+    const 있던 = JSON.parse(localStorage.getItem(CLICK) || 'null');
+    if (있던 && 있던.f === fbclid) return;
+    const fbc = decodeURIComponent((document.cookie.match(/(?:^|; )_fbc=([^;]*)/) || [])[1] || '');
+    const m = /^fb\.\d\.(\d+)\.(.+)$/.exec(fbc);
+    const t = m && m[2] === fbclid ? Number(m[1]) : Date.now();
+    const u = currentUtm();
+    localStorage.setItem(CLICK, JSON.stringify({ f: fbclid, t, s: (u.source || '').slice(0, 40) || null, m: (u.medium || '').slice(0, 40) || null, c: (u.content || '').slice(0, 100) || null }));
+  } catch { /* 무시 */ }
+}
+
+/** 적어 둔 마지막 광고 클릭 — 보낼 때는 fbclid(f)를 뺀다. 없으면 null. */
+function lastClick() {
+  try {
+    const x = JSON.parse(localStorage.getItem(CLICK) || 'null');
+    return x && x.t ? { t: x.t, s: x.s, m: x.m, c: x.c } : null;
+  } catch { return null; }
 }
 
 /**
@@ -151,11 +178,12 @@ export function track(name, props = {}, accessToken = null) {
     if (navigator.webdriver) return;
     if (META_OF[name] && 처음보내나(name, props)) metaEvent(META_OF[name]);
     const mark = browserMark();
+    const mc = lastClick();
     const body = JSON.stringify({
       p_name: name,
       p_utm: attribution(),
       // b 는 맨 뒤에 둔다 — 부르는 쪽 props 가 같은 이름을 써도 표식이 이긴다.
-      p_props: { ...props, w: window.innerWidth, ...(mark ? { b: mark } : {}) },
+      p_props: { ...props, w: window.innerWidth, ...(mc ? { mc } : {}), ...(mark ? { b: mark } : {}) },
     });
     // keepalive — 버튼 누르고 바로 페이지가 넘어가도 요청이 살아남는다.
     fetch(API + '/rest/v1/rpc/track', {
