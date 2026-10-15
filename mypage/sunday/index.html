@@ -192,7 +192,10 @@
   var idle = document.getElementById('lab-idle');
   /* 로그인한 사람만 보는 화면이다.
      세션을 **못 물어본** 것과 로그인 안 한 것은 다르다 — 삼키지 않고 버튼 라벨로 드러낸다. */
-  requireLogin().catch(function () { btn.disabled = true; 실패안내(); });
+  /* 두 조회는 로그인이 확인된 뒤에만 보낸다 — 비로그인이면 401 두 개를 남기고 카카오로 넘어갔다(2026-10-15 점검). */
+  var 로그인 = requireLogin();
+  로그인.catch(function () { btn.disabled = true; 실패안내(); });
+  function 로그인뒤(조회) { return 로그인.then(function (ok) { return ok ? 조회() : new Promise(function () {}); }); }
   var pick = document.getElementById('lab-pick');
   var 다씀 = false;   // 이번 주 기회를 썼거나 그걸 못 물어봤다 — 고르기를 막는다
   var secs = document.querySelectorAll('.sec .items');
@@ -206,7 +209,7 @@
      뜻이고, 조회 실패는 그것과 다른 사실이다 (assets/mypage-data.js 머리말 · 6번 지시).
      실패 처리기가 paint 안의 오류까지 받아 「목록을 불러오지 못했어요」로 덮지 않게
      `.catch` 가 아니라 `.then(성공, 실패)` 로 건다. */
-  window.ccHold?.(getThisWeek().then(function (week) {
+  window.ccHold?.(로그인뒤(getThisWeek).then(function (week) {
     secs[0].innerHTML = week.filter(function (a) { return !a.read; }).map(function (a) {
       return '<button class="item" type="button" aria-pressed="false" data-id="' + esc(String(a.id)) + '">'
         + '<span class="col">' + meta(a) + '</span>'
@@ -240,7 +243,7 @@
   /* 남은 기회는 서버 기록이다(0115) — 다른 기기에서 쓴 것도 여기서 0 이 된다.
      못 물어본 것은 0 으로 그리지 않는다 — 버튼을 막고 실패 문구를 둔다. */
   var quota = document.querySelector('.quota .v');
-  window.ccHold?.(getSunday().then(function (s) {
+  window.ccHold?.(로그인뒤(getSunday).then(function (s) {
     다씀 = !!s.used;
     quota.querySelector('.n').textContent = 다씀 ? 0 : 1;
     if (다씀) btn.disabled = true;
