@@ -140,7 +140,8 @@
   <div class="center" id="notice" hidden><div class="msg" role="status"><img src="/assets/logo-circle.svg" width="56" height="56" alt=""><h1 id="notice-t"></h1><p id="notice-b"></p><p id="notice-ask"></p></div></div>
 
   <main id="open" hidden data-sk-show>
-    <div class="eyebrow" id="eyebrow" hidden></div>
+    <!-- 직군 머리글은 불러오는 동안에도 자리를 잡아 둔다 — 숨겼다 나타나면 아래가 통째로 24px 밀려 덜컹였다 (2026-10-15 사용자 지시) -->
+    <div class="eyebrow" id="eyebrow" data-sk style="--skw:18em"></div>
     <div class="head"><h1 class="t-display">내 조건의 새 공고</h1></div>
     <div id="tiles">
       <div class="when" id="when" data-sk style="--skw:5em"></div>
@@ -377,7 +378,7 @@
       숫자칸(d['지표'] || []);
       $('when').textContent = 기간(d['지표'] || []);
       const 칩 = d['칩'] || [];
-      if (칩.length) { $('eyebrow').textContent = 칩.join(' · '); $('eyebrow').hidden = false; }
+      $('eyebrow').textContent = 칩.join(' · '); $('eyebrow').hidden = !칩.length;   // 「지난 값부터」가 숨김을 되살려도 여기서 다시 정한다
       공고 = d['공고'] || [];
       $('open').hidden = false;
       그리기();
