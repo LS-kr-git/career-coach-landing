@@ -184,10 +184,15 @@ export function 온보딩마침판정(pref, jobs) {
  * 4단계(주제)는 여기서 따지지 않는다 — 결제 화면이 주제가 비면 4단계로 보낸다(checkout ③). 같은 판정을 두 곳에 두지 않는다.
  * 못 물어봤으면 던진다 — 부르는 쪽이 지금까지의 길로 간다.
  */
-export async function 이어갈곳() {
+export async function 이어갈곳({ 받음 = false } = {}) {
   const store = await import('/assets/onboarding-store.js');
-  // 서버 값(마쳤으면 선호, 하는 중이면 1·2단계 진행 기록 — 0160)을 이 기기에 먼저 깐다. 못 받으면 이 기기 값으로 간다.
-  await store.pullFromServer().catch(() => {});
+  // 서버 값(마쳤으면 선호, 하는 중이면 1·2단계 진행 기록 — 0160)을 이 기기에 먼저 깐다. 못 받으면 이 기기 값으로 가되 남긴다.
+  // 방금 받아 둔 쪽(랜딩)은 `받음` 으로 건너뛴다 — 같은 조회를 두 번 하면 3초 폴백으로 빠지기 쉽다(검사관 ⑩).
+  if (!받음) {
+    await store.pullFromServer().catch(async (e) => {
+      (await import('/assets/track.js')).track('client_error', { msg: 'resume_pull:' + String(e?.message || e).slice(0, 80) });
+    });
+  }
   const 마침 = await onboardingDone();
   return 이어갈곳판정(마침, 마침 ? await getSubscription() : null, store.readState());
 }

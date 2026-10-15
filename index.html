@@ -449,7 +449,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
     // 온보딩만 다 함 → 결제 화면, 하는 중 → 확정한 다음 단계(서버 진행 기록 0160 을 깐 뒤).
     const 물음 = import('/assets/onboarding-store.js').then((s) => s.pullFromServer().then(async (답) => {
       if (답 === 'no-session') { 로그인전(); return; }   // 탈퇴·삭제로 세션이 죽었다 — 카카오 길로
-      const 갈곳 = await (await import('/assets/mypage-data.js')).이어갈곳();
+      const 갈곳 = await (await import('/assets/mypage-data.js')).이어갈곳({ 받음: true });
       for (const a of 버튼) a.href = 갈곳;
     })).catch(실패).finally(() => { 정함 = true; });
     let 기다림 = false;
