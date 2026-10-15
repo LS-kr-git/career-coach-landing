@@ -96,6 +96,9 @@ export function track(name, props = {}, accessToken = null) {
     // 운영 원장에 onboarding_done 4건·「저장 실패」 1건을 남겼다 — 로그인을 안 하니
     // 우리 브라우저 표식(0111)으로도 안 걸러진다. 받는 쪽은 주소를 모르므로 여기서 막는다.
     if (!onSite()) return;
+    // 자동화 브라우저(헤드리스·playwright 등 navigator.webdriver 가 켜진 것)는 보내지 않는다(2026-10-15).
+    // 그날 우리 자동 점검이 매번 새 브라우저로 운영 주소를 열어 방문·온보딩 5건을 남겼다 — 새 브라우저라 표식으로도 안 걸러진다.
+    if (navigator.webdriver) return;
     if (META_OF[name]) metaEvent(META_OF[name]);
     const mark = browserMark();
     const body = JSON.stringify({
