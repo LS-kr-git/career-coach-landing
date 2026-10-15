@@ -369,7 +369,12 @@ export async function pullFromServer() {
     supabase.from('user_preference_region').select('region_code'),
   ]);
   for (const r of [pref, jobs, regions]) if (r.error) throw r.error;
-  if (!pref.data) return;      // 서버에 아직 저장된 적 없는 사람
+  if (!pref.data) {            // 서버에 아직 3단계까지 저장된 적 없는 사람 — 하는 중이면 1·2단계 진행 기록을 깐다
+    const d = await supabase.from('onboarding_draft').select('job_codes, years_min, years_max').maybeSingle();
+    if (d.error) throw d.error;
+    mergeDraft(d.data);
+    return;
+  }
   writeState({
     jobs: jobs.data.map((r) => r.job_code),
     years: pref.data.years_min,
@@ -380,4 +385,43 @@ export async function pullFromServer() {
     pending: false,
     owner: session?.user?.id ?? null,
   });
+}
+
+/**
+ * 온보딩 하는 중(1·2단계) 진행 기록 — 고른 값을 서버에도 남긴다 (2026-10-16 사용자 지시 · career-coach 0160 `onboarding_draft`).
+ * 다른 기기·지운 브라우저로 다시 와도 **확정한 다음 단계**부터 이어 하게 하려는 것이다. 3단계 저장(saveOnboarding)이 정본이고,
+ * 이 기록은 「마쳤나」 판정·발송·결제가 읽지 않는다. 그래서 실패해도 막지 않는다 — 흐름을 멈출 만큼의 값이 아니다(남기기만 한다).
+ * 부르는 곳: 1·2단계 「다음」과 2·3단계에 들어올 때(앞 단계 「다음」이 떠나며 끊겼어도 다음 화면이 다시 보낸다).
+ */
+export async function saveDraft() {
+  if (document.prerendering) await new Promise((r) => document.addEventListener('prerenderingchange', r, { once: true }));
+  const s = readState();
+  if (!s.jobs.length) return;
+  try {
+    const supabase = await client();
+    const session = await liveSession(supabase);
+    if (!session) return;
+    const lo = s.years === null ? null : Math.min(60, Math.max(0, s.years));
+    const { error } = await supabase.from('onboarding_draft').upsert({
+      auth_user_id: session.user.id,
+      job_codes: s.jobs.slice(0, MAX_JOBS),
+      years_min: lo,
+      years_max: lo === null ? null : Math.min(60, Math.max(lo, s.yearsMax ?? lo)),
+      updated_at: new Date().toISOString(),
+    });
+    if (error) throw error;
+  } catch (e) {
+    track('client_error', { msg: 'onboarding_draft:' + String(e?.message || e).slice(0, 80) });
+  }
+}
+
+/** 서버의 진행 기록을 이 기기에 깐다. **이 기기에 이미 고른 값이 있으면 그것이 이긴다** — 방금 고른 것이 더 새것이다.
+ *  owner 는 찍지 않는다 — owner 는 「서버에 저장된 값을 받았다(=마친 사람)」 표시로도 읽힌다(1단계 dest=unknown). */
+export function mergeDraft(d) {
+  if (!d) return;
+  const s = readState();
+  const 채움 = {};
+  if (!s.jobs.length && Array.isArray(d.job_codes) && d.job_codes.length) 채움.jobs = d.job_codes;
+  if (s.years === null && d.years_min !== null && d.years_min !== undefined) { 채움.years = d.years_min; 채움.yearsMax = d.years_max; }
+  if (Object.keys(채움).length) writeState(채움);
 }
