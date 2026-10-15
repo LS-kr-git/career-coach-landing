@@ -239,7 +239,9 @@
       headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token },
       body: JSON.stringify({ p_fbp: 표식.fbp ?? null, p_fbc: 표식.fbc ?? null }),
       keepalive: true,
-    }).catch(() => {});
+    })
+      .then((r) => { if (!r.ok) track('client_error', { msg: 'meta_click:http' + r.status }, session.access_token); })
+      .catch(() => track('client_error', { msg: 'meta_click:net' }, session.access_token));
   };
 
   const go = window.ccGo;   // 이동 잠금은 위 폴백과 공유한다 — 두 경로가 겹쳐 두 번 이동하지 않게
