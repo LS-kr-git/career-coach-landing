@@ -61,10 +61,15 @@ function currentUtm() {
  */
 function keepClickId() {
   try {
-    const fbclid = new URLSearchParams(location.search).get('fbclid');
-    if (!fbclid || /(?:^|; )_fbc=/.test(document.cookie)) return;
     const 도메인 = onSite() ? '; domain=.careercoach.my' : '';
-    document.cookie = `_fbc=fb.1.${Date.now()}.${encodeURIComponent(fbclid)}; path=/; max-age=7776000; SameSite=Lax${도메인}`;
+    const 적기 = (이름, 값) => { document.cookie = `${이름}=${값}; path=/; max-age=7776000; SameSite=Lax${도메인}`; };
+    const fbclid = new URLSearchParams(location.search).get('fbclid');
+    // 새 광고 클릭이면 갈아 끼운다 — 같은 클릭(같은 fbclid)이면 처음 시각을 지킨다.
+    const 있던 = (document.cookie.match(/(?:^|; )_fbc=([^;]*)/) || [])[1] || '';
+    if (fbclid && !있던.endsWith('.' + encodeURIComponent(fbclid))) 적기('_fbc', `fb.1.${Date.now()}.${encodeURIComponent(fbclid)}`);
+    // 브라우저 표식(_fbp)도 메타 스크립트보다 먼저 만든다 — 같은 이유로 비면 서버 보고가 이 브라우저를 못 알아본다.
+    // 형식은 메타 문서 그대로(fb.1.<ms>.<임의 숫자>). 메타 스크립트는 있는 값을 그대로 쓴다.
+    if (!/(?:^|; )_fbp=/.test(document.cookie)) 적기('_fbp', `fb.1.${Date.now()}.${Math.floor(Math.random() * 1e10)}`);
   } catch { /* 무시 */ }
 }
 

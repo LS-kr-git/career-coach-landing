@@ -231,6 +231,15 @@
       // 서버에 닿지 못한 실패는 서버 기록에 안 남는다 — 그 경우만 여기서 남긴다(닿았으면 private.meta_lead · error_log 가 정본).
       .then((r) => { if (!r.ok) track('client_error', { msg: 'meta_lead:http' + r.status }, session.access_token); })
       .catch(() => track('client_error', { msg: 'meta_lead:net' }, session.access_token));
+    // 광고를 누른 이 브라우저의 클릭 표식을 회원에 붙여 둔다(career-coach 0154, 2026-10-15 사용자 지시) — 결제가 카드사 앱을
+    // 거쳐 다른 브라우저로 돌아오거나 다른 기기에서 끝나도, 서버가 보내는 구매가 이 광고에 묶이게. 재로그인마다 새 값으로 갈아 끼운다.
+    const 표식 = metaCookies();
+    if (표식.fbp || 표식.fbc) fetch(SUPABASE_URL + '/rest/v1/rpc/remember_meta_click', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token },
+      body: JSON.stringify({ p_fbp: 표식.fbp ?? null, p_fbc: 표식.fbc ?? null }),
+      keepalive: true,
+    }).catch(() => {});
   };
 
   const go = window.ccGo;   // 이동 잠금은 위 폴백과 공유한다 — 두 경로가 겹쳐 두 번 이동하지 않게
