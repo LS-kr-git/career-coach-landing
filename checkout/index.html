@@ -452,7 +452,9 @@
       카드그리기(planCards(plans));
       $('submit').disabled = 저장안됨;
       if (저장안됨) note('고르신 직무·근무지가 아직 저장되지 않았어요.\n잠시 후 이 화면을 다시 열어 주세요.');
-      metaEvent('InitiateCheckout', { value: 요금제[고른.code].price_krw, currency: 'KRW' });
+      // 새로고침·뒤로가기로 다시 열려도 같은 날은 한 번으로 센다 — 같은 eventID 는 메타가 48시간 안에서 하나로 묶는다(2026-10-15 출시 검수).
+      metaEvent('InitiateCheckout', { value: 요금제[고른.code].price_krw, currency: 'KRW' },
+                'ic-' + new Date(Date.now() + 9 * 36e5).toISOString().slice(0, 10) + '-' + (function () { try { return localStorage.getItem('cc_b') || ''; } catch (e) { return ''; } })());
     });
   }).catch(function () {
     $('submit').classList.add('locked');

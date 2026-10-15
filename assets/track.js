@@ -73,8 +73,33 @@ function keepClickId() {
   } catch { /* 무시 */ }
 }
 
+/**
+ * 광고 클릭 표식을 **주소에 실어 둔다** (2026-10-15 사용자 지시 「남는 틈도 막아 줘」).
+ * 인스타·페북·카톡 앱 안 브라우저에서 「다른 브라우저로 열기」를 누르거나 주소를 복사해 사파리·크롬에
+ * 붙이면, 넘어가는 것은 **주소뿐**이다 — 쿠키·저장소는 따라가지 않는다. 랜딩 첫 주소에는 fbclid 가 있지만
+ * 온보딩으로 넘어가면 사라져, 거기서 옮긴 사람은 새 브라우저에서 광고 표식이 없었다.
+ * 그래서 로그인 전 화면(랜딩·온보딩)에서는 지금 주소에 fbclid·utm 을 다시 붙여 둔다(화면은 안 바뀐다).
+ * - 클릭한 지 7일이 지났으면 안 붙인다 — 메타가 구매를 광고에 묶는 기간(클릭 후 7일)이 지난 표식을 퍼뜨리지 않는다.
+ * - 로그인 처리·결제·마이페이지·열람 화면은 건드리지 않는다(주소에 열쇠·토큰이 있거나, 로그인 뒤라 서버가 이미 안다).
+ */
+function carryClickInUrl() {
+  try {
+    if (!/^\/(onboarding\/(\d|done)\/)?$/.test(location.pathname)) return;
+    const 주소 = new URLSearchParams(location.search);
+    if (주소.has('fbclid')) return;
+    const fbc = (document.cookie.match(/(?:^|; )_fbc=([^;]*)/) || [])[1];
+    const m = fbc && /^fb\.\d\.(\d+)\.(.+)$/.exec(decodeURIComponent(fbc));
+    if (!m || Date.now() - Number(m[1]) > 7 * 864e5) return;
+    주소.set('fbclid', m[2]);
+    const utm = attribution();
+    for (const k of ['source', 'medium', 'campaign', 'content', 'term']) if (utm[k] && !주소.has('utm_' + k)) 주소.set('utm_' + k, utm[k]);
+    history.replaceState(history.state, '', location.pathname + '?' + 주소 + location.hash);
+  } catch { /* 무시 — 주소를 못 바꿔도 화면은 그대로다 */ }
+}
+
 export function captureAttribution() {
   keepClickId();
+  carryClickInUrl();
   try {
     if (localStorage.getItem(STORE)) return;          // 최초 것을 지킨다
     const utm = currentUtm();
