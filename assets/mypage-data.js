@@ -179,13 +179,15 @@ export function 온보딩마침판정(pref, jobs) {
 /**
  * 다시 들어온 사람이 **이어서 갈 곳** (2026-10-16 사용자 지시 — 로그인 콜백·랜딩 「시작하기」가 쓴다).
  *   온보딩·결제 다 함 → 마이페이지 · 온보딩만 다 함 → 결제 화면 · 하는 중 → 그다음 단계.
- * 온보딩을 서버에 마쳤는지는 서버로 본다(`onboardingDone`). 하는 중인 단계는 이 기기 값으로 본다 — 1·2단계는
- * 서버에 안 남으니(3단계에서 한꺼번에 저장) 다른 기기에서 온 사람은 1단계부터다.
+ * 온보딩을 서버에 마쳤는지는 서버로 본다(`onboardingDone`). 하는 중인 단계는 1·2단계 진행 기록(0160 `onboarding_draft`)을
+ * 이 기기에 깐 뒤 본다 — 다른 기기에서 와도 확정한 다음 단계부터다(2026-10-16 사용자 지시).
  * 4단계(주제)는 여기서 따지지 않는다 — 결제 화면이 주제가 비면 4단계로 보낸다(checkout ③). 같은 판정을 두 곳에 두지 않는다.
  * 못 물어봤으면 던진다 — 부르는 쪽이 지금까지의 길로 간다.
  */
 export async function 이어갈곳() {
   const store = await import('/assets/onboarding-store.js');
+  // 서버 값(마쳤으면 선호, 하는 중이면 1·2단계 진행 기록 — 0160)을 이 기기에 먼저 깐다. 못 받으면 이 기기 값으로 간다.
+  await store.pullFromServer().catch(() => {});
   const 마침 = await onboardingDone();
   return 이어갈곳판정(마침, 마침 ? await getSubscription() : null, store.readState());
 }
@@ -205,7 +207,7 @@ export async function requireOnboarded() {
   if (!(await requireLogin())) return false;
   if (await onboardingDone()) return true;
   window.ccLeave?.();   // 떠나는 중이다 — 이 화면을 내보이지 않는다(assets/steady.js)
-  location.replace('/onboarding/1/');
+  location.replace(await 이어갈곳().catch(() => '/onboarding/1/'));   // 하는 중이면 그다음 단계로(2026-10-16)
   return false;
 }
 

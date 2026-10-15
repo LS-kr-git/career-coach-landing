@@ -155,13 +155,15 @@ window.ccStep3={
 </script>
 <script type="module">
   // 세 단계에서 고른 값을 여기서 한 번에 저장한다 — assets/onboarding-store.js
-  import { readState, writeState, retryPending, saveThenGo, fromDone, DONE, markEditMode } from '/assets/onboarding-store.js';
+  import { readState, writeState, retryPending, saveThenGo, fromDone, DONE, markEditMode, saveDraft } from '/assets/onboarding-store.js';
   markEditMode();   // 아래에서 값을 되살리며 버튼을 다시 그린다
   const saved = readState();
   if (saved.regions.length) window.ccStep3.set(saved.regions);   // 뒤로 왔을 때 체크 상태를 되살린다
   window.ccOnChange = () => writeState({ regions: window.ccStep3.get() });
   window.ccOnChange();      // 처음 온 사람은 화면의 기본 선택이 그대로 값이 된다
   const 재시도 = retryPending();   // 지난 저장이 실패한 채 남아 있으면 여기서 조용히 다시 보낸다
+  // 앞 단계에서 확정한 값을 서버 진행 기록에 남긴다 — 앞 화면 「다음」이 떠나며 끊겼어도 여기서 다시 보낸다(2026-10-16 사용자 지시).
+  if (!fromDone()) saveDraft();
 
   // 완료 — 실패해도 사용자를 막지 않는다. pending 으로 남겨 다음 진입에서 다시 보내고,
   // 화면은 그대로 4단계(주제)로 넘긴다 — 확인 화면 「바꾸기」로 왔으면 확인 화면으로 돌아간다.
