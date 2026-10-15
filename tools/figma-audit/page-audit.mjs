@@ -22,6 +22,7 @@
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { dirname, resolve, join, posix } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import vm from 'node:vm';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..', '..');
@@ -225,8 +226,21 @@ for (const page of pages) {
     const code = live.replace(/\/\*[\s\S]*?\*\//g, '');
     const styles = [...code.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)].map((m) => m[1]).join('');
     const scripts = [...code.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)].map((m) => m[1].replace(/^\s*\/\/.*$/gm, '')).join('');
+    /* 켜는 줄이 「있는지」가 아니라 「켜지는지」를 본다 — 첫머리에 return 을 넣거나 바로 끄게 바꿔도 글자는 남아
+       초록이었다(2026-10-15 검사관 ②). <head> 의 인라인 스크립트를 가짜 문서에서 돌려 cc-lazy 가 서는지 잰다. */
+    const head = (code.split(/<\/head>/i)[0] || '');
+    const 켜짐 = (hash) => {
+      const cls = new Set();
+      const html = { classList: { add: (c) => cls.add(c), remove: (c) => cls.delete(c), contains: (c) => cls.has(c), toggle: (c, on) => (on ?? !cls.has(c)) ? cls.add(c) : cls.delete(c) } };
+      const sandbox = { location: { hash }, document: { documentElement: html }, addEventListener() {}, setTimeout() {}, requestIdleCallback() {} };
+      sandbox.window = sandbox;
+      for (const m of head.matchAll(/<script(?![^>]*\b(?:src|type)=)[^>]*>([\s\S]*?)<\/script>/gi)) {
+        try { vm.runInNewContext(m[1], sandbox, { timeout: 200 }); } catch { /* 다른 스크립트의 오류는 여기서 보지 않는다 */ }
+      }
+      return cls.has('cc-lazy');
+    };
     if (!/html\.cc-lazy[^{]*section[^{]*\{[^}]*content-visibility\s*:\s*auto/.test(styles) ||
-        !/classList\.add\(\s*['"]cc-lazy['"]\s*\)/.test(scripts)) {
+        !/classList\.add\(\s*['"]cc-lazy['"]\s*\)/.test(scripts) || !켜짐('') || 켜짐('#pricing')) {
       add('BLOCK', '랜딩 로딩 속도 장치', page, '「아래 섹션 나중에 그리기」(html.cc-lazy · content-visibility:auto)가 없습니다',
           '랜딩이 바뀌어도 항상 둔다 — CLAUDE.md 「로딩 속도 장치는 항상 유지한다」');
     }

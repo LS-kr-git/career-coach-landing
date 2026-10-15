@@ -927,7 +927,7 @@ node tools/roles/build.mjs --check   # 훅이 부르는 드리프트 검사 (1.5
 
 | 장치 | 무엇 | 지키는 검사 |
 |---|---|---|
-| 아래 섹션 나중에 그리기 | `<head>` 의 `html.cc-lazy … section:nth-of-type(n+3){content-visibility:auto}` + `cc-lazy` 를 켜는 인라인 스크립트. 셋째 섹션부터는 화면에 가까워질 때 그린다 | `page-audit` 「랜딩 로딩 속도 장치」(훅·CI, 지우면 푸시가 막힌다) · `shift-audit` 「아래 섹션 미룸」(화면을 열어 실제로 미루는지) |
+| 아래 섹션 나중에 그리기 | `<head>` 의 `html.cc-lazy … section:nth-of-type(n+3){content-visibility:auto}` + `cc-lazy` 를 켜는 인라인 스크립트. 셋째 섹션부터는 화면에 가까워질 때 그린다 | `page-audit` 「랜딩 로딩 속도 장치」(훅·CI — 지우거나 안 켜지게 바꾸면 푸시가 막힌다. 스크립트를 가짜 문서에서 돌려 켜지는지까지 본다) · `shift-audit` 「아래 섹션 미룸」(화면을 열어 실제로 미루는지) |
 | 글꼴은 화면 글자의 조각까지 받고 보여 준다 | `assets/steady.js` 의 `afterFonts`·`chars` | `shift-audit` 「글씨체」 |
 
 - **섹션 순서로 고른다** — 특정 섹션 이름·id 에 묶지 않았다. 1섹션 디자인이 바뀌거나 섹션이 5개로 줄어도 그대로 돈다.
