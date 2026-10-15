@@ -201,7 +201,8 @@
     fetch(SUPABASE_URL + '/rest/v1/rpc/report_signup_lead', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token },
-      body: JSON.stringify({ p_fbp: metaCookies().fbp ?? null, p_fbc: metaCookies().fbc ?? null }),
+      // 브라우저 표식(track.js 의 cc_b) — 우리(운영자) 브라우저에서 만든 시험 계정이면 서버가 안 보낸다(career-coach 0142).
+      body: JSON.stringify({ p_fbp: metaCookies().fbp ?? null, p_fbc: metaCookies().fbc ?? null, p_b: (() => { try { return localStorage.getItem('cc_b'); } catch (e) { return null; } })() }),
       keepalive: true,
     })
       // 서버에 닿지 못한 실패는 서버 기록에 안 남는다 — 그 경우만 여기서 남긴다(닿았으면 private.meta_lead · error_log 가 정본).
