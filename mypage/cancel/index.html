@@ -179,7 +179,6 @@
   function refresh() {
     const ok = agree.getAttribute('aria-checked') === 'true';
     go.disabled = 막힘 || 실패 || !ok;
-    lab.textContent = 실패 ? FAIL.line : '해지하기';
   }
   /* 이유는 여러 개 고른다. 「기타」에 체크했을 때만 입력칸이 열린다 — 탈퇴 화면과 같은 동작 */
   const other = $('other'), otherText = $('otherText');
@@ -241,7 +240,7 @@
     if (s.status === 'past_due') 미납으로(s);      // 기간 끝이 이미 지났다 — 지난 날짜를 「이용 종료일」로 말하지 않는다
     else $('endA').textContent = `(${dayText(s.current_period_end)})`;
     막힘 = false; refresh();
-  }, () => { 실패 = true; refresh(); }));
+  }, () => { 실패 = true; refresh(); 오류안내($('err'), FAIL.line); }));   // 버튼은 원래 글자로 잠그고 실패는 알약으로 (A3)
 </script>
 </div>
 </body>

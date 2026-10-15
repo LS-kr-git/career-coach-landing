@@ -198,7 +198,6 @@
   function refresh() {
     const ok = agree.getAttribute('aria-checked') === 'true';
     go.disabled = 막힘 || 실패 || !ok;
-    lab.textContent = 실패 ? FAIL.line : '탈퇴하기';
   }
   /* 멤버십이 남아 있으면 — 이유·동의는 거두고 안내를 세운다. 날짜는 그 사람의 기간 끝이다 */
   function block(s) {
@@ -259,7 +258,7 @@
     if (s === undefined) return;
     if (s && ['trialing', 'active', 'past_due'].includes(s.status)) block(s);
     else { 막힘 = false; refresh(); }
-  }, () => { 실패 = true; refresh(); }));
+  }, () => { 실패 = true; refresh(); 오류안내($('err'), FAIL.line); }));   // 버튼은 원래 글자로 잠그고 실패는 알약으로 (A3)
 </script>
 </div>
 </body>

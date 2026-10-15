@@ -61,6 +61,7 @@ export const EMPTY = {
 export const FAIL = {
   line: '정보를 불러오지 못했어요',
   hint: '잠시 후 다시 열어 주세요',
+  save: '저장하지 못했어요. 다시 눌러 주세요',   // 저장 실패 — 불러오기 실패(line)와 다른 말을 한다 (2026-10-15 A2)
 };
 
 /* 🔴 **발송이 받는 트랙 이름 그대로다** (career-coach `sources.TRACK_CAREER` · 2026-10-03).

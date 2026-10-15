@@ -259,8 +259,9 @@
     var on = document.querySelector('.item[aria-pressed="true"]');
     btn.disabled = true;
     useSunday(on.dataset.id).then(function (r) { location.href = r.href; }, function () {
-      idle.hidden = false; pick.hidden = true;
-      idle.textContent = FAIL.hint;
+      /* 고른 것과 버튼은 그대로 두고 알약으로 알린다 — 다시 누르기만 하면 된다 (2026-10-15 「오류 대체 화면」 A4) */
+      btn.disabled = false;
+      오류안내(document.getElementById('errToast'), '전문을 열지 못했어요. 다시 눌러 주세요');
     });
   });
 </script>

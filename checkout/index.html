@@ -516,8 +516,14 @@
       else note('결제수단이 등록되었습니다.');
     });
   }
+  /* 결제사·서버가 준 문장은 화면에 그대로 띄우지 않는다 — 말투가 우리 것이 아니고(「~하였습니다」),
+     사용자가 창을 닫은 것도 실패처럼 보였다 (2026-10-15 「오류 대체 화면」 A5 B안 · A6).
+     취소를 알리는 전용 code 는 포트원에 없다(결제사 오류와 같은 code 로 온다) — 그래서 message·pgCode·pgMessage 에 「취소」·cancel 이
+     들었는지로 가른다. 결제사 문장 판정이라 어긋날 수 있다: 원문은 콘솔에 남긴다. 그 경우만 짧게 확인시키고, 나머지는 우리 문구 하나로 말한다. */
   function 실패(e) {
-    note((e && e.message) || '결제수단 등록에 실패했습니다. 다시 시도해 주세요.');
+    var 말 = [e && e.message, e && e.pgCode, e && e.pgMessage].filter(Boolean).join(' / ');
+    if (말) console.error('결제수단 등록 실패', (e && e.code) || '', 말);
+    note(/취소|cancel/i.test(말) ? '결제를 취소했어요' : '결제수단을 등록하지 못했어요. 다시 시도해 주세요.');
   }
   function 앞요금제이름(code) {
     var p = code && 요금제[code];
@@ -528,7 +534,7 @@
      `billingKey`(성공) 또는 `code`·`message`(실패·취소)를 붙인다. 고른 요금제는 `?plan=` 에 실려 같이 돌아온다.
      돌아온 뒤에는 그 칸을 주소에서 지운다 — 새로고침이 같은 빌링키를 다시 보내지 않게. */
   if (주소.has('billingKey') || 주소.has('code')) {
-    var 키 = 주소.get('billingKey'), 코드 = 주소.get('code'), 말 = 주소.get('message'), 돌아온요금제 = 주소.get('plan');
+    var 키 = 주소.get('billingKey'), 코드 = 주소.get('code'), 말 = 주소.get('message'), 돌아온요금제 = 주소.get('plan'), 원pgCode = 주소.get('pgCode'), 원pgMessage = 주소.get('pgMessage');
     var 남김 = new URLSearchParams(location.search);
     ['billingKey', 'code', 'message', 'transactionType', 'pgCode', 'pgMessage'].forEach(function (k) { 남김.delete(k); });
     var 남은 = 남김.toString();
@@ -536,7 +542,7 @@
     준비.then(function () {
       var 전 = $('submit').disabled;      // 금액을 못 읽어 잠긴 버튼을 여기서 풀지 않는다
       $('submit').disabled = true;
-      var 끝 = 코드 != null || !키 ? Promise.resolve(실패(new Error(말 || '')))
+      var 끝 = 코드 != null || !키 ? Promise.resolve(실패({ code: 코드, message: 말, pgCode: 원pgCode, pgMessage: 원pgMessage }))
                                    : 보관하고_알린다(키, 돌아온요금제).catch(실패);
       return 끝.then(function () { $('submit').disabled = 전; });
     });

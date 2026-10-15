@@ -11,6 +11,7 @@
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
 <link rel="stylesheet" href="/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
+<link rel="stylesheet" href="/assets/toast.css">
 <script src="/assets/steady.js"></script>
 <style>
   :root{
@@ -50,7 +51,9 @@
   /* 하단 플로팅 CTA — 온보딩 1단계(.fade + .cta)와 같은 모양: 흰 그라데이션 100px 위에 떠 있고 바닥에서 20 */
   .cta-dock{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:var(--card-max);
     padding:26px 0 20px;background:linear-gradient(180deg,rgba(255,255,255,0),#fff 55%);
-    display:flex;justify-content:center;pointer-events:none;z-index:10}
+    display:flex;flex-direction:column;align-items:center;pointer-events:none;z-index:10}
+  /* 실패 안내 — 공용 「하단 안내」를 버튼 바로 위 10px 에 (2026-10-15 「오류 대체 화면」 A1·A2) */
+  #errToast{margin-bottom:10px;pointer-events:auto}
   /* 폭은 저장소 정본을 따른다 — CLAUDE.md 「CTA 규칙」: 플로팅은 calc(100% - 40px) · max 410.
      피그마 프레임이 320 인 것은 360 기준이라 그런 것이고, 웹 폭(카드 450)과 다른 것이 의도된 상태다
      (career-coach docs/기획/피그마-웹-동기화.md 「폭에 관한 확정 사항」). */
@@ -125,6 +128,7 @@
   </div>
 </main>
 <div class="cta-dock">
+  <p class="cc-toast" id="errToast" role="alert" hidden></p>
   <button class="cta" type="button" id="save" disabled><span id="lab" data-sk>연차를 골라주세요</span></button>
 </div>
 <script type="module">
@@ -132,6 +136,7 @@
      슬라이더 동작은 onboarding/2/index.html 의 것을 옮겼다(눈금 0~15 · 밴드 4칸). 한쪽을 고치면 다른 쪽도 고친다. */
   import { readState, writeState, retryPending, pullFromServer } from '/assets/onboarding-store.js';
   import { requireOnboarded, FAIL, yearsText, savePrefs } from '/assets/mypage-data.js';
+  import { 오류안내 } from '/assets/toast.js';
   retryPending();
   const MAX = 15;
   const $ = (s) => document.querySelector(s);
@@ -148,8 +153,7 @@
     knobs[0].style.left = l + '%'; knobs[1].style.left = h + '%';
     bands.forEach((d) => d.classList.remove('hit', 'first', 'last'));
     save.disabled = 읽기실패 || !chosen;
-    if (읽기실패) lab.textContent = FAIL.line;
-    else if (!chosen) lab.textContent = '연차를 골라주세요';
+    if (!chosen) lab.textContent = '연차를 골라주세요';
     else lab.innerHTML = '저장 <span class="s2">· ' + label(lo, hi) + '</span>';
     if (!chosen) { vEl.textContent = '—'; return; }
     vEl.textContent = label(lo, hi);
@@ -186,9 +190,9 @@
     save.disabled = true;
     savePrefs(before).then((st) => {
       if (st === 'no-session') return;          // store 가 이미 카카오 로그인 으로 보냈다
-      if (st !== 'ok') { lab.textContent = FAIL.line; save.disabled = false; return; }   // 저장된 것만 저장됐다고 말한다
+      if (st !== 'ok') { render(); 오류안내(document.getElementById('errToast'), FAIL.save); return; }   // 저장된 것만 저장됐다고 말한다
       location.href = '/mypage/';
-    }, () => { lab.textContent = FAIL.line; save.disabled = false; });
+    }, () => { render(); 오류안내(document.getElementById('errToast'), FAIL.save); });
   });
   function hydrate() {
     const s = readState();
@@ -200,7 +204,7 @@
   render();
   /* 서버 값을 먼저 받는다 — 못 읽었으면 저장을 막는다(직군 화면과 같은 이유: 빈 값으로 덮지 않게) */
   window.ccHold?.(requireOnboarded().then((ok) => { if (ok) return pullFromServer().then(hydrate); })
-    .catch(() => { 읽기실패 = true; hydrate(); }));
+    .catch(() => { 읽기실패 = true; hydrate(); 오류안내(document.getElementById('errToast'), FAIL.line); }));
 </script>
 </div>
 </body>
