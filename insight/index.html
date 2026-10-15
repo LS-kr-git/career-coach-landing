@@ -196,9 +196,11 @@
   /* 안내 묶음을 「화면 맨 위 ~ 화면 바닥」 사이의 정가운데에 — 09-C(mypage/leave #bye)와 같은 방식 (2026-10-04 사용자 지시).
      이 화면은 떠 있는 CTA 가 없어 아래 경계가 화면 바닥이다. main 은 헤더 아래에서 시작하므로 아래 여백을 헤더 높이로 두면
      main 의 가운데가 화면 가운데와 겹친다. 로고 헤더 77 = 피그마 2070:799·823·847 의 content 아래 여백 77 */
-  .page:has(:is(#notice,#noticeCard):not([hidden])){display:flex;flex-direction:column}
-  .page:has(:is(#notice,#noticeCard):not([hidden])) .brief{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 var(--pad-x) 77px}
-  .page:has(:is(#notice,#noticeCard):not([hidden])):has(#backHd:not([hidden])) .brief{padding-bottom:calc(48px + env(safe-area-inset-top))}
+  /* 스켈레톤 동안 #notice 는 CSS 로만 숨는다(data-sk-hide) — hidden 속성은 그대로라 아래 가운데 정렬이 걸려
+     막대 화면이 89px 아래에 섰다가 본문이 오면 위로 튀었다(2026-10-15 덜컹임 전수). 스켈레톤 중에는 뺀다. */
+  html:not(.cc-sk) .page:has(:is(#notice,#noticeCard):not([hidden])){display:flex;flex-direction:column}
+  html:not(.cc-sk) .page:has(:is(#notice,#noticeCard):not([hidden])) .brief{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 var(--pad-x) 77px}
+  html:not(.cc-sk) .page:has(:is(#notice,#noticeCard):not([hidden])):has(#backHd:not([hidden])) .brief{padding-bottom:calc(48px + env(safe-area-inset-top))}
 
 
   @media (min-width:451px){
@@ -234,7 +236,7 @@
     <div class="notice-card" id="noticeCard" role="status" hidden><img src="/assets/logo-circle.svg" width="56" height="56" alt=""><h1 id="noticeT"></h1><p id="noticeB"></p><p id="noticeAsk"></p></div>
 
     <article id="letter" hidden data-sk-show>
-      <h1 class="t-h2" id="title" data-sk="lines" style="--skh:3.3em"></h1>
+      <h1 class="t-h2" id="title" data-sk="lines" style="--skh:2.8em"></h1>
       <p class="meta t-caption" id="meta" hidden data-sk-show>
         <span class="meta-i" id="metaTrack"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span id="track" data-sk style="--skw:5em"></span></span>
         <span class="meta-i" id="metaMins" hidden><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="mins"></span></span>
@@ -648,7 +650,10 @@
     card(MSG.badLink, MSG.badLinkSub);
   } else {
     try {
-      render(await call('insight_letter'));
+      const row = await call('insight_letter');
+      // 본문 글자의 글꼴 조각부터 받고 그린다 — 막대가 선 채로 그려 두면 조각이 하나씩 오며 문단이 줄어 막대가 움직였다(assets/steady.js)
+      await window.ccGlyphs?.([row.title, row.track, row.body].join(''));
+      render(row);
       // ★ 전문이 선 뒤에만 부른다. `card()` 는 #letter 만 감추므로, 실패한 화면에서
       //   이것을 부르면 「없는 글이에요」 안내문 아래에 소장 목록이 따라 서게 된다.
       await loadSaved();

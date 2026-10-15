@@ -83,3 +83,17 @@ export function 검사기() {
   };
   return { ok, 마무리 };
 }
+
+/** 구독자 화면 목록 — 화면 전환 검사와 첫 화면 덜컹임 검사가 같이 쓴다.
+ *  폴더 주소 화면은 저장소에서 찾는다 — 새 화면이 생기면 저절로 들어온다.
+ *  어드민·로그인 처리·가입 입구는 사람이 링크로 오가는 화면이 아니라 뺀다. 링크로 여는 두 화면은 토큰 모양만 맞춘 주소로 연다. */
+export function 구독자화면(T) {
+  return [
+    '/', '/terms.html', '/privacy.html', '/404.html',
+    `/insight/?t=${T}&id=1301`, `/jobs/?t=${T}&d=2026-10-13`,
+    ...fs.readdirSync(ROOT, { recursive: true })
+      .filter((f) => f.endsWith(`${path.sep}index.html`) && !/^(\.git|node_modules|ops|auth|signup|tools)\b/.test(f))
+      .map((f) => '/' + path.dirname(f).split(path.sep).join('/') + '/')
+      .filter((u) => !/^\/(insight|jobs)\/$/.test(u)),
+  ];
+}

@@ -231,6 +231,18 @@ node tools/preload/build.mjs          # 각 페이지 <head> 의 「미리받기
 supabase-js 판(`SUPABASE_JS`)을 올렸으면 `--cdn` 을 붙여 파일 목록(`cdn.json`)도 다시 뽑는다.
 🔴 랜딩(`index.html`)은 글꼴을 미리 받지 않는다 — 이유는 그 파일 `NO_FONT_PRELOAD` 주석.
 
+### 훅에 없는 검사 — 첫 화면 덜컹임·글씨체 바뀜 (`tools/shift-audit/`) (2026-10-15)
+
+```
+node tools/shift-audit/run.mjs                 # 구독자 화면 전부 · 기기·망 4가지 · 첫 방문·재방문
+node tools/shift-audit/run.mjs /jobs/ PC1280   # 화면·기기를 좁혀서
+```
+
+화면이 보인 뒤 내용이 밀리는지(layout shift)와 다 보인 뒤 글꼴 조각이 와서 글씨체가 바뀌는지를 잰다.
+`assets/steady.js`·글꼴 CSS·늦게 채워지는 칸(스켈레톤 `data-sk`)을 건드렸으면 돌린다. 전부 도는 데 40분쯤.
+화면 목록은 화면 전환 검사와 같은 것(`tools/ops-audit/harness.mjs` 의 `구독자화면`)이다.
+늦게 오는 값의 칸은 처음부터 자리를 잡아 둔다(`data-sk`, 막대 높이 `--skh` 는 흔한 줄 수로). 느린 망의 ⚠️ 가 무엇인지는 그 파일 머리말.
+
 ## 프로젝트 문서는 어디에 있나
 사업기획·브랜드 가이드·검증 데이터·작업 원칙 등 **모든 프로젝트 문서의 정본은 비공개 저장소
 `LS-kr-git/career-coach` 의 `docs/` 에 있다.** (2026-08-01 이관)

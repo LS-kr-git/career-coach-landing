@@ -30,9 +30,17 @@
  *   `window.ccLeave?.()` — 다른 주소로 떠나는 중. 이 화면은 끝까지 감춘다(스켈레톤도 안 띄운다).
  *   `window.ccMaybeLeave?.(약속)` — 떠날지 모르는 동안 ccLeave 처럼 감춘다. 약속이 거짓이면 평소대로 보여 준다.
  *   `window.ccNoKeep?.()` — 이번 화면은 실패 화면이라 「지난 값」으로 적지 않는다.
+ *   `await window.ccGlyphs?.(글자)` — 긴 값을 그리기 전에 그 글자의 글꼴 조각부터 받는다(상한 있음).
+ *   `window.ccFontCap` — 글꼴이 상한(FONT_MAX)까지 안 와서 기본 글꼴로 먼저 보여 줬다(검사 도구가 읽는다).
  */
 (function () {
-  var HOLD_MAX = 1200, SKEL_AT = 400, FADE = 150;
+  // FONT_MAX — 화면에 쓸 글자의 글꼴 조각을 기다리는 상한. 그 뒤에는 기본 글꼴로라도 보여 준다 — 빈 화면을 더 길게 두지 않는다.
+  // 글꼴 CSS 는 font-display:block 이다 — 막대가 서 있는 동안 조각이 하나씩 오며 기본 글꼴로 그려 둔 글자의 줄바꿈이 바뀌어
+  //   막대가 움직였다(swap 일 때 실측). 다 보여 준 뒤에는 swap 으로 바꾼다(reveal) — 그 뒤에 새로 치는 글자·뜨는 안내가
+  //   조각을 기다리며 빈칸으로 남지 않게(2026-10-15 검사관 ⑨).
+  // SKEL_FONT_MAX — 값은 왔는데 그 글자의 글꼴이 늦을 때, 막대(스켈레톤)를 세워 둔 채 기다리는 상한.
+  //   막대가 서 있으면 빈 화면이 아니므로 더 기다려도 된다. 기본 글꼴로 그렸다가 바꾸면 줄바꿈이 달라져 아래가 튄다.
+  var HOLD_MAX = 1200, SKEL_AT = 400, FADE = 150, FONT_MAX = 3000, SKEL_FONT_MAX = 8000;
   var root = document.documentElement, shown = false, fontsDone = false, pending = 0;
   var done = false, dcl = false, leaving = false, skel = false, wantSkel = false, restored = false, noKeep = false;
   // 기록은 누구의 것인지까지 이름에 넣는다 — 같은 탭에서 로그아웃하고 다른 사람이 들어오면 앞사람 값을 깔면 안 된다.
@@ -84,7 +92,15 @@
   function show(force) { if (!shown && (!leaving || force)) { shown = true; root.classList.remove('cc-wait'); if (resume) resume(); } }
   // 끝까지 기다렸는데도 값이 안 왔으면 — 자리가 있는 화면은 예시 값 대신 스켈레톤으로, 없는 화면은 그대로 보여 준다
   var capped = false;
-  setTimeout(function () { capped = true; skelIfWaiting(true); show(); }, Math.max(0, HOLD_MAX - performance.now()));
+  // 값이 늦으면 상한에서 보여 주되, 글꼴이 아직이면 글꼴까지는 기다린다(위 FONT_MAX) — 글씨체가 바뀌는 첫 그림을 막는다
+  setTimeout(function () { capped = true; if (fontsDone) { skelIfWaiting(true); show(); } }, Math.max(0, HOLD_MAX - performance.now()));
+  setTimeout(function () {
+    if (fontsDone) return;
+    window.ccFontCap = true; fontsDone = true; capped = true;
+    // 값은 이미 왔는데 그 글자의 글꼴이 아직이면 — 기본 글꼴로 그린 값을 내보이지 말고 막대를 세운다(finish 가 글꼴을 마저 기다린다)
+    if (dcl && !pending && !shown && !leaving && !restored) markSkel(); else skelIfWaiting(true);
+    show(); check();
+  }, Math.max(0, FONT_MAX - performance.now()));
   setTimeout(function () { show(true); }, 5000);   // 떠난다더니 5초째 그대로면(이동이 막혔으면) 그래도 보여 준다
   setTimeout(function () { wantSkel = true; skelIfWaiting(); }, Math.max(0, SKEL_AT - performance.now()));
   addEventListener('pageshow', function (e) { if (e.persisted) { leaving = false; show(); } });
@@ -118,14 +134,45 @@
   function skelIfWaiting(late) {
     if (!(wantSkel && fontsDone) && !late) return;
     if (shown || leaving || restored || (dcl && !pending)) return;   // 모듈이 아직 덜 왔어도 기다리는 중이다
+    markSkel();
+  }
+  function markSkel() {
     var slots = document.querySelectorAll('[data-sk]');
     if (!slots.length) return;
     for (var i = 0; i < slots.length; i++) if (dark(slots[i])) slots[i].setAttribute('data-skd', '');
     skel = true; root.classList.add('cc-sk'); show();
   }
+  // 값을 그린 뒤에 새로 필요해진 글꼴 조각까지 기다린다 — 회사 이름·제목처럼 늦게 들어온 글자는 첫 그림 때
+  // 없던 조각을 부른다. 안 기다리면 그 글자만 늦게 나타나거나(block) 글씨체가 바뀐다(swap). 상한(max)은 부르는 쪽이 준다.
+  // 레이아웃을 돌리고 document.fonts.ready 를 보는 것만으로는 안 됐다 — 조각 요청이 그 다음 틀에 나가서
+  // ready 가 이미 풀린 채로 지나갔다(2026-10-15 덜컹임 전수: 전문 7조각·저장소 1조각이 다 보인 뒤에 왔다).
+  // 그래서 화면에 있는 글자를 직접 넘겨 그 글자들의 조각을 불러 달라고 한다(fonts.load).
+  function chars(all) {
+    var seen = {}, out = '', add = function (t) { for (var i = 0; i < t.length; i++) if (!seen[t[i]]) { seen[t[i]] = 1; out += t[i]; } };
+    // 숨긴 칸(hidden)의 글자는 기다리지 않는다 — 안내 카드·토스트처럼 지금 안 보이는 글자까지 기다리면 보여 주는 것만 늦어진다.
+    //   그 글자는 DCL 에서 기다리지 않고 미리 받아 둔다(all) — 값이 와서 뜨는 안내창의 글자가 빈칸으로 떴다(탈퇴 화면, 2026-10-15 실측)
+    var w = document.createTreeWalker(document.body, 4, { acceptNode: function (n) { var p = n.parentElement; return !p || /^(SCRIPT|STYLE|NOSCRIPT|TEMPLATE)$/.test(p.nodeName) || (!all && p.closest('[hidden]')) ? 2 : 1; } }), n;
+    while ((n = w.nextNode())) add(n.nodeValue);
+    var f = document.querySelectorAll('[placeholder],input[value],button[value]');
+    for (var i = 0; i < f.length; i++) add((f[i].getAttribute('placeholder') || '') + (f[i].value || ''));
+    return out;
+  }
+  function afterFonts(cb, max) {
+    var fonts = document.fonts, once = false, go = function () { if (!once) { once = true; cb(); } };
+    if (!fonts || !fonts.load || !document.body) return go();
+    setTimeout(function () { if (!once) window.ccFontCap = true; go(); }, Math.max(200, max - performance.now()));
+    Promise.all([fonts.load('16px "Pretendard Variable"', chars() || ' '), fonts.ready]).then(go, go);
+  }
   function finish() {
     if (done) return;
     done = true;
+    if (!document.querySelector('[data-sk]')) return afterFonts(reveal, FONT_MAX);
+    // 자리가 있는 화면 — 글꼴이 FONT_MAX 까지 안 오면 막대를 세워 보여 주고, 글꼴이 오면 그때 걷는다(상한 SKEL_FONT_MAX)
+    var t = setTimeout(function () { if (!shown && !leaving) markSkel(); }, Math.max(0, FONT_MAX - performance.now()));
+    afterFonts(function () { clearTimeout(t); reveal(); }, SKEL_FONT_MAX);
+  }
+  function reveal() {
+    try { document.fonts.forEach(function (f) { f.display = 'swap'; }); } catch (e) { /* 못 바꾸는 브라우저 — block 그대로 */ }
     if (skel) {
       root.classList.remove('cc-sk'); root.classList.add('cc-skout');
       setTimeout(function () { root.classList.remove('cc-skout'); }, FADE + 50);
@@ -134,7 +181,8 @@
   }
   // 기다림이 다 끝난 뒤 한 박자(setTimeout 0) 더 본다 — 조회 하나가 끝나며 다음 조회를 맡기는
   // 사슬(로그인 확인 → 값 조회)이 그 사이에 끼어들 수 있게.
-  function check() { if (fontsDone && !pending) setTimeout(function () { if (!pending) finish(); }, 0); }
+  // dcl 까지 본다 — 마크업을 다 읽기 전(페이지 모듈이 ccHold 를 걸기 전)에 끝내면 빈 마크업을 내보인다(2026-10-15 검사관 ①)
+  function check() { if (dcl && fontsDone && !pending) setTimeout(function () { if (!pending) finish(); }, 0); }
   function settle() { pending--; check(); }
   window.ccHold = function (p) {
     // 거부를 여기서 삼키지 않고 다시 던진다 — 그래야 그리다 난 오류가 전처럼 처리 안 된 거부로
@@ -151,9 +199,17 @@
     leaving = true; pending++;
     var 머묾 = function () {
       leaving = 진짜떠남; settle();
-      if (!done) { if (capped) { skelIfWaiting(true); show(); } else skelIfWaiting(); }
+      if (!done) { if (capped && fontsDone) { skelIfWaiting(true); show(); } else skelIfWaiting(); }
     };
     Promise.resolve(p).then(function (간다) { if (!간다) 머묾(); }, 머묾);
+  };
+  // 값을 그리기 전에 그 글자의 글꼴 조각부터 받는다 — 막대가 선 채로 긴 글을 그려 두면 조각이 하나씩 오며
+  //   줄바꿈이 바뀌어 막대가 움직인다(전문 본문, 2026-10-15 실측). 상한은 SKEL_FONT_MAX 다.
+  window.ccGlyphs = function (text) {
+    var fonts = document.fonts;
+    if (!fonts || !fonts.load || !text) return Promise.resolve();
+    return Promise.race([fonts.load('16px "Pretendard Variable"', text).catch(function () {}),
+      new Promise(function (r) { setTimeout(r, Math.max(200, SKEL_FONT_MAX - performance.now())); })]);
   };
   window.ccNoKeep = function () { noKeep = true; try { sessionStorage.removeItem(KEY); } catch (e) { /* 막힌 저장소 */ } };
 
@@ -180,16 +236,18 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     dcl = true;
-    void document.body.offsetWidth;   // 레이아웃을 지금 돌려 필요한 글꼴 조각을 바로 요청시킨다
-    var fonts = document.fonts;
     function ready() {
-      fontsDone = true;
+      if (!fontsDone) {   // 이미 서 있으면 상한(FONT_MAX)이 먼저 보여 줬다 — 그래도 아래(끝내기)는 해야 한다
+        fontsDone = true;
+        if (capped) { skelIfWaiting(true); show(); }   // 값 상한은 지났는데 글꼴 때문에 붙잡아 둔 화면
+      }
       if (restored) show();             // 지난 값을 깔았으면 새 값을 기다리지 않고 보여 준다
       if (!pending) return finish();    // 기다릴 것이 없으면 지금 바로
       skelIfWaiting(); check();
     }
-    // 글꼴이 이미 다 있으면 지금 바로 — 첫 그림 전에 보여 줘야 페이드(View Transitions)가 산다
-    if (!fonts || fonts.status === 'loaded') ready();
-    else fonts.ready.then(ready, show);
+    // 마크업에 있는 글자의 조각을 지금 부른다. 이미 다 있으면 약속이 마이크로태스크로 풀려 첫 그림 전에 보여 준다
+    // — 그래야 페이드(View Transitions)가 산다. 늦으면 위 FONT_MAX 가 상한이다.
+    try { document.fonts.load('16px "Pretendard Variable"', chars(true) || ' ').catch(function () {}); } catch (e) { /* 글꼴 API 없음 */ }
+    if (fontsDone) ready(); else afterFonts(ready, FONT_MAX);
   });
 })();

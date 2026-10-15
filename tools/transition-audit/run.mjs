@@ -16,20 +16,11 @@
 // 크로미움이 없으면 건너뛴다(CI 에서만 실패). 5분 남짓 걸린다.
 import fs from 'node:fs';
 import path from 'node:path';
-import { ROOT, 서버열기, 브라우저열기, 검사기 } from '../ops-audit/harness.mjs';
+import { 서버열기, 브라우저열기, 검사기, 구독자화면 } from '../ops-audit/harness.mjs';
 
 const STUB = fs.readFileSync(new URL('./stub-supabase.mjs', import.meta.url), 'utf8');
 const T = 'AbCdEfGhIjKlMnOpQrStUv';   // 링크로 여는 화면의 토큰 모양만 맞춘 가짜 값
-const 출발 = [
-  '/', '/terms.html', '/privacy.html', '/404.html',
-  `/insight/?t=${T}&id=1301`, `/jobs/?t=${T}&d=2026-10-13`,
-  // 폴더 주소 화면은 저장소에서 찾는다 — 새 화면이 생기면 저절로 들어온다.
-  // 어드민·로그인 처리·가입 입구는 사람이 링크로 오가는 화면이 아니라 뺀다.
-  ...fs.readdirSync(ROOT, { recursive: true })
-    .filter((f) => f.endsWith(`${path.sep}index.html`) && !/^(\.git|node_modules|ops|auth|signup|tools)\b/.test(f))
-    .map((f) => '/' + path.dirname(f).split(path.sep).join('/') + '/')
-    .filter((u) => !/^\/(insight|jobs)\/$/.test(u)),
-];
+const 출발 = 구독자화면(T);
 const 진행 = JSON.stringify({ jobs: ['퍼포먼스마케팅'], years: 2, yearsMax: 5, regions: ['서울'], topic: null, topicClear: false, pending: false, owner: 'u1' });
 
 const { server, origin } = await 서버열기();
