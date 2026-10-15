@@ -92,6 +92,7 @@ export function 앱으로() {
   addEventListener('pageshow', 돌아옴, { signal: 끝.signal });
   setTimeout(돌아옴, 3000);
   넘긴때 = Date.now();
-  window.Kakao.Auth.authorize({ redirectUri: redirect_uri, state, scope, throughTalk: true });
+  try { window.Kakao.Auth.authorize({ redirectUri: redirect_uri, state, scope, throughTalk: true }); }
+  catch { 넘긴때 = 0; 끝.abort(); return false; }   // 못 넘겼으면 다음 누름을 삼키지 않는다 — 웹 로그인으로
   return true;
 }

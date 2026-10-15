@@ -486,7 +486,8 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
   // Supabase 가 state 를 못 읽으면(만료·없음) 우리 콜백이 아니라 **이 첫 화면**으로 `?error=…&error_code=…` 를 붙여 보낸다
   // (GoTrue 가 사이트 주소로 돌려보낸다 — 2026-10-15 출시 검수, 라이브 재현). 그것도 실패로 보고 안내·기록한다.
   const 해시 = new URLSearchParams(location.hash.slice(1));
-  const 받은오류 = 돌아옴.get('error_code') || 돌아옴.get('error') || 해시.get('error_code') || 해시.get('error');
+  // 순서는 콜백(auth/callback 「받은오류」)과 같이 `error` 먼저 — 같은 login_fail 원장에 두 규칙이 섞이지 않게.
+  const 받은오류 = 돌아옴.get('error') || 돌아옴.get('error_code') || 해시.get('error') || 해시.get('error_code');
   if (돌아옴.get('login') === 'fail' || 받은오류) {
     const 안내 = document.getElementById('lfail');
     오류안내(안내, 안내.textContent);   // 머묾은 글자 수로 — 오류 안내 공통 규칙 (2026-10-15 「오류 대체 화면」)

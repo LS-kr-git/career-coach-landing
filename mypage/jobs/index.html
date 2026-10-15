@@ -205,7 +205,7 @@
       acc.parentNode.querySelector('.chips').hidden = open;
     });
     save.addEventListener('click', function () {
-      if (!읽음 || save.disabled || !picked().length) return;
+      if (!읽음) return;
       var before = { jobs: readState().jobs };
       writeState({ jobs: picked().map(function (c) { return c.dataset.d2; }) });
       /* 🔴 저장된 것만 저장됐다고 말한다 — 연차·근무지 화면(mypage/years)과 같은 처리 (2026-10-14 출시 전 점검).

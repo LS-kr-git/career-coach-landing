@@ -248,7 +248,6 @@
 document.querySelector('.cta').addEventListener('click',()=>{
   const c=document.querySelector('.cta');
   if(c.classList.contains('off'))return;
-  if(window.ccOnChange) window.ccOnChange();   // 마지막으로 고른 값을 떠나기 전에 한 번 더 적는다(어느 손짓이 빠뜨려도)
   // 확인 화면 「바꾸기」로 왔으면 저장하고 그리로 돌아간다(아래 모듈이 ccNext 를 건다).
   if(window.ccNext) window.ccNext(); else location.href='/onboarding/3/';
 });

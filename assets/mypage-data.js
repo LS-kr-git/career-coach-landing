@@ -491,7 +491,7 @@ export function billingView(s, plan, now = Date.now()) {
     next: !구독중 ? '' : 미납 ? (해지예약 ? (s.close_on ? `${monthDay(s.close_on)} 새벽` : '곧 끝나요') : (s.next_try_on ? dayText(s.next_try_on) : '곧 다시 시도해요'))
       /* 기간 끝에는 결제한 시각이 남아 있어 05:40(청구 회차) 뒤에 결제한 사람은 다음 날 새벽에 걷힌다 —
          그 날을 서버가 준다(career-coach `mypage_subscription.next_charge_on`, 2026-10-15). 옛 서버면 기간 끝으로 말한다. */
-      : dayText(s.next_charge_on || s.current_period_end),
+      : 해지예약 ? dayText(s.current_period_end) : dayText(s.next_charge_on || s.current_period_end),
     amount: 구독중 ? priceText(s) : (plan ? priceText(plan) : ''),
     // 해지할 것이 없거나 이미 예약된 사람에게는 누를 것을 주지 않는다.
     canCancel: Boolean(구독중 && !해지예약),

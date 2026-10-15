@@ -110,7 +110,8 @@
   addEventListener('pagereveal', function (e) {
     var vt = e.viewTransition;
     // 건너뛴 전환의 거절이 잡히지 않은 채 남으면 오류 기록(client_error)에 「Skipping view transition」 이 쌓인다 — 늘 받아 둔다(2026-10-15 출시 검수)
-    if (vt) { vt.ready.catch(function () {}); if (vt.finished) vt.finished.catch(function () {}); }
+    // 이 거절은 화면 전환을 못 했다는 뜻일 뿐 사용자에게 보이는 고장이 아니다(화면은 show 가 보여 준다) — 이유와 상관없이 받는다.
+    if (vt) { vt.ready.catch(function () {}); vt.finished.catch(function () {}); }
     if (!vt || shown) return;
     vt.ready.then(function () {
       if (shown) return;
