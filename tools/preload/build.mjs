@@ -31,7 +31,6 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..', '..');
 const CHECK = process.argv.includes('--check');
 const FONT_CSS = '/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css';
-const SUPABASE = 'https://sxooygwggxeplzkfdbth.supabase.co';
 const CDN_JSON = join(HERE, 'cdn.json');
 const BEGIN = '<!-- 미리받기 (tools/preload/build.mjs 가 만든다 — 손으로 고치지 마라) -->';
 const END = '<!-- /미리받기 -->';
@@ -47,7 +46,9 @@ const NEEDS_SDK = /\b(requireLogin|requireOnboarded|getSubscription)\(|import\(\
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
 
 /* ── supabase-js 판과 파일 목록 ── */
-const SUPABASE_JS = read('assets/supabase-config.js').match(/SUPABASE_JS\s*=\s*'([^']+)'/)[1];
+const CONFIG = read('assets/supabase-config.js');   // 접속 정보의 정본 — 여기서 읽는다(주소를 이 파일에 다시 박지 않는다)
+const SUPABASE_JS = CONFIG.match(/SUPABASE_JS\s*=\s*'([^']+)'/)[1];
+const SUPABASE = CONFIG.match(/SUPABASE_URL\s*=\s*'([^']+)'/)[1];
 if (process.argv.includes('--cdn')) {
   const seen = []; const q = [SUPABASE_JS];
   while (q.length) {
@@ -91,10 +92,12 @@ function visibleText(html) {
       const ph = attrs.match(/\bplaceholder="([^"]*)"/); if (ph && !skip) out += ph[1];
       if (VOID.test(tag) || /\/\s*$/.test(attrs)) continue;
       const hid = /(^|\s)hidden(\s|=|$)/.test(attrs);
-      stack.push(hid); if (hid) skip++;
+      stack.push([tag.toLowerCase(), hid]); if (hid) skip++;
     } else {
-      // 닫는 태그 — 같은 이름이 나올 때까지 거슬러 닫는다(빠진 닫기 태그에 너그럽게)
-      while (stack.length) { const h = stack.pop(); if (h) skip--; break; }
+      // 닫는 태그 — 같은 이름이 나올 때까지 거슬러 닫는다(</p>·</li> 처럼 생략된 닫기 태그에 너그럽게)
+      const name = tag.toLowerCase();
+      if (!stack.some(([t]) => t === name)) continue;   // 짝 없는 닫기 태그는 무시
+      for (;;) { const [t, h] = stack.pop(); if (h) skip--; if (t === name) break; }
     }
   }
   return out.replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
@@ -121,8 +124,10 @@ function block(html, page) {
   const sdk = NEEDS_SDK.test(code);
   const fonts = NO_FONT_PRELOAD.has(page) ? new Set() : new Set([...fontsOf(html), ...CORE]);
   const lines = [BEGIN];
-  if (usesApi) lines.push(`<link rel="preconnect" href="${SUPABASE}" crossorigin>`);
-  if (sdk) lines.push(`<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>`);
+  // 페이지가 손으로 이미 연결해 두었으면 또 넣지 않는다(auth/callback)
+  const pre = (u) => { const l = `<link rel="preconnect" href="${u}" crossorigin>`; if (!html.includes(l)) lines.push(l); };
+  if (usesApi) pre(SUPABASE);
+  if (sdk) pre('https://cdn.jsdelivr.net');
   for (const f of [...fonts].sort((a, b) => fontNum(a) - fontNum(b)))
     lines.push(`<link rel="preload" href="${f}" as="font" type="font/woff2" crossorigin>`);
   for (const f of files) lines.push(`<link rel="modulepreload" href="${f}">`);
@@ -144,7 +149,11 @@ function pages(dir = ROOT) {
 let stale = 0;
 const FONT_LINK = `<link rel="stylesheet" href="${FONT_CSS}">`;
 const OLD_BLOCK = new RegExp(`${BEGIN.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[\\s\\S]*?${END}\\n`);
-const targets = pages().map((p) => [p, read(p)]).filter(([, h]) => h.includes(FONT_LINK));   // Pretendard 를 안 쓰는 페이지는 대상이 아니다
+const all = pages().map((p) => [p, read(p)]);
+// 글꼴 CSS 를 쓰는데 링크 모양이 달라 자리를 못 찾으면 조용히 빠지지 않게 멈춘다
+const odd = all.filter(([, h]) => h.includes(FONT_CSS) && !h.includes(FONT_LINK)).map(([p]) => p);
+if (odd.length) { console.error(`❌ 글꼴 링크 모양이 달라 묶음 자리를 못 찾았다: ${odd.join(', ')} — ${FONT_LINK} 로 맞춰라`); process.exit(1); }
+const targets = all.filter(([, h]) => h.includes(FONT_LINK));   // Pretendard 를 안 쓰는 페이지는 대상이 아니다
 const count = new Map();
 for (const [, h] of targets) for (const f of fontsOf(h)) count.set(f, (count.get(f) || 0) + 1);
 CORE = new Set([...count].filter(([, n]) => n >= targets.length * 0.8).map(([f]) => f));
