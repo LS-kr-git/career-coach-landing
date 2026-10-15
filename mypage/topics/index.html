@@ -156,8 +156,10 @@
   var mine = document.getElementById('mine');
   var rec = document.getElementById('rec'), rest = document.getElementById('rest');
   var cta = document.querySelector('.cta');
+  var 읽음 = false;   // 서버에서 읽어 칩을 다시 그렸나 — 그 전(또는 실패)에는 칩을 눌러도 저장을 풀지 않는다
   function paint(topic) {
-    mine.textContent = (topic === COMMON_TOPIC ? '일 잘하는 법·커리어' : topic) + ' 인사이트';
+    /* 고른 것이 없으면 월·수·금 줄을 비워 둔다 — 마크업의 「디자인 인사이트」(피그마 기준 상태)를 남기면 안 받을 주제를 말한다. */
+    mine.textContent = !topic ? '' : (topic === COMMON_TOPIC ? '일 잘하는 법·커리어' : topic) + ' 인사이트';
   }
   function esc(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
   function chips() { return Array.prototype.slice.call(document.querySelectorAll('.topics .chip')); }
@@ -180,11 +182,14 @@
        목록에 없는 트랙이 나오면 추천 없이 그린다 — 없는 칩을 지어내지 않는다. */
     var r = trackFromJobs(readTopicMap(), s.jobs);
     if (topics.indexOf(r) < 0) r = null;
-    /* 저장된 주제가 없으면 추천을, 그것도 없으면 마크업이 눌러 둔 칩(피그마 기준 상태)을 쓴다.
-       옛 칩 이름(「일하는 사람 공통」, 2026-10-03 에 바뀜)이 남아 있으면 목록에 없어 아무 칩도 안 눌린다 —
-       그러면 저장 버튼이 빈 손이 된다. 그때도 같은 순서로 돌린다. */
+    /* 저장된 주제가 없으면 추천을 쓴다. 옛 칩 이름(「일하는 사람 공통」, 2026-10-03 에 바뀜)이 남아 목록에 없을 때도 같다.
+       🔴 둘 다 없으면(트랙 없는 직군 — 교육·서비스 등, trackFromJobs 가 null) **아무 칩도 누르지 않고 저장을 잠근다** —
+       온보딩 4단계와 같은 처리다. 전에는 마크업이 미리 눌러 둔 「디자인」(피그마 기준 상태)을 골라, 그대로 저장하면
+       고른 적 없는 주제가 저장됐다(2026-10-15). 칩을 하나 누르면 풀린다. */
     var on = s.topic;
-    if (topics.indexOf(on) < 0) on = r || current();
+    if (topics.indexOf(on) < 0) on = r;
+    읽음 = true;
+    cta.disabled = !on;
     document.getElementById('gRec').hidden = rec.hidden = document.getElementById('gRest').hidden = !r;
     rec.innerHTML = r ? chipHtml(r, r === on, true) : '';
     rest.innerHTML = topics.filter(function (t) { return t !== r; })
@@ -201,11 +206,13 @@
     if (!chip) return;
     chips().forEach(function (c) { c.setAttribute('aria-pressed', c === chip ? 'true' : 'false'); });
     paint(chip.dataset.topic);
+    if (읽음) cta.disabled = false;   // 못 읽은 화면(실패 갈래)의 잠금은 칩으로 풀지 않는다
   });
 
   /* 저장은 온보딩과 같은 통로(save_onboarding)다 — 직군·연차·근무지는 건드리지 않고 주제만 실린다.
      통신 실패는 store 가 pending 으로 남겨 다음 진입에서 다시 보낸다(온보딩 세 화면·직군 화면과 같다). */
   cta.addEventListener('click', function () {
+    if (!current()) return;   // 고른 것이 없으면 보낼 것이 없다(버튼은 잠겨 있다)
     cta.disabled = true;
     /* 진입할 때 띄운 retryPending() 이 아직 돌고 있으면 store 가 'busy' 를 준다 — 실패가 아니라
        「지금은 못 보낸다」다. 한 번 기다렸다 다시 보낸다(그 재시도가 끝나면 자리가 빈다). */

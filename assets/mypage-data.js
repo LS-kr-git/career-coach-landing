@@ -458,8 +458,14 @@ export function profileView(p) {
  * (요금제 고르기는 planCards). 카드 전은 EMPTY 를 쓴다.
  * plan 은 결제 화면(checkout)이 「구독 전 금액」을 받으려고 넘기는 요금제 행이다 — 이 화면은 안 넘긴다.
  */
-export function billingView(s, plan) {
-  const 구독중 = Boolean(s && s.status && ['trialing', 'active', 'past_due'].includes(s.status));
+export function billingView(s, plan, now = Date.now()) {
+  /* 이용 종료일이 지난 해지 예약은 **끝난 것**이다 — 새벽 정리(0092)가 아직 안 돌았을 뿐이다. 서버도 그 구간의
+     해지 취소를 거절한다(career-coach 0137 `mypage_resume_subscription`: 미납이 아니면 current_period_end > now 만).
+     「해지 취소하기」를 주면 눌러도 실패만 한다. 결제 화면의 `끝난해지`(0136)와 같은 판정으로 구독 전 사람처럼 그린다.
+     미납은 날짜와 상관없이 되돌릴 수 있으므로 빼지 않는다. (2026-10-15) */
+  const 끝난해지 = Boolean(s && s.status !== 'past_due' && s.cancel_at_period_end
+    && Date.parse(s.current_period_end) <= now);
+  const 구독중 = Boolean(s && s.status && ['trialing', 'active', 'past_due'].includes(s.status)) && !끝난해지;
   const 해지예약 = Boolean(구독중 && s.cancel_at_period_end);
   /* 미납(past_due)이면 `current_period_end` 는 이미 지난 날이다 — 그대로 「다음 결제일」로 그리면 어제를 말한다.
      다음 시도일은 서버가 청구 배치와 같은 식으로 준다(career-coach 0140 `next_try_on`). 해지하면 다음 새벽 정리에서
