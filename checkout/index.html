@@ -353,7 +353,10 @@
       //    사람이 4단계를 건너뛰고(주소 직접 입력·중간에 나갔다 다시 로그인) 결제하면 월·수·금을 못 받는다.
       //    서버 값을 이 기기에 먼저 받는다 — 다른 기기에서 온 사람은 이 기기 값이 비어 4단계 추천이 틀린다.
       //    판정은 4단계·마이페이지와 같은 규칙(assets/topic-map.js). 발송도 마지막 안전망으로 공통 주제를 붙인다(ops/send.py).
-      await store.pullFromServer().catch(function () {});
+      //    서버 값을 못 받았으면 이 기기 값만으로 4단계로 보내지 않는다 — 다른 기기에서 온 사람은 이 기기 값이 비어
+      //    주제가 있는데도 밀려난다(검사관 ①). 그때는 열어 두고 발송의 안전망에 맡긴다.
+      var 받음 = await store.pullFromServer().then(function () { return true; }, function () { return false; });
+      if (!받음) return null;
       var tm = await import('/assets/topic-map.js');
       var st = store.readState();
       if (!st.topic && !tm.trackFromJobs(tm.readTopicMap(), st.jobs || [])) return '/onboarding/4/';
