@@ -319,7 +319,7 @@
       return getPlans().then(function (plans) { return [s, planCards(plans)]; });
     });
   }
-  window.ccHold?.(requireLogin().then(function (ok) {
+  window.ccHold?.(requireLogin(location.pathname + location.search).then(function (ok) {
     return ok ? 다시읽는다() : null;
   }).then(function (r) {
     if (r) paint(billingView(r[0]), false, r[1]);

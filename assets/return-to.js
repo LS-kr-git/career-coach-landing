@@ -9,7 +9,9 @@
  */
 const KEY = 'cc_next';
 const TTL = 30 * 60 * 1000;   // 30분이 지난 기록은 버린다 — 며칠 뒤 로그인한 사람을 결제 화면에 세우지 않게
-const ALLOWED = new Set(['/checkout/']);
+// /mypage/billing/ — 결제 실패 알림톡의 「결제수단 바꾸기」 버튼이 여는 곳이다(2026-10-16 출시 3차 검수).
+// 카톡 안 브라우저에는 대개 로그인이 없어, 안 적어 두면 로그인 뒤 마이페이지 첫 화면에 떨어져 카드 바꿀 곳을 다시 찾아야 했다.
+const ALLOWED = new Set(['/checkout/', '/mypage/billing/']);
 
 export function rememberNext(path) {
   try { localStorage.setItem(KEY, JSON.stringify({ path, at: Date.now() })); } catch {}
