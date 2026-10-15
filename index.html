@@ -392,7 +392,12 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
   // 더 아래 섹션에 닿을 때마다 「가장 깊이 간 섹션 번호」를 보낸다. 어드민 「가입 퍼널」이 그 방문의 가장 큰 값을 센다.
   // 닿았다 = 섹션의 절반이 보였거나 섹션이 화면의 절반을 채웠다. 첫 섹션은 방문 자체가 도달이라 안 보낸다.
   // 1.5초 모아 보내고(빠르게 훑으면 한 번), 화면을 떠날 때 남은 것을 보낸다. 우리 기기·자동 점검은 track.js 와 DB 가 뺀다.
-  const lv = document.querySelector('meta[name="cc-lv"]')?.content || '';
+  // 돌아온 방문(새로고침·뒤로가기)과 바로가기(#…) 입장은 브라우저가 아래 자리로 데려다 놓아, 내리지 않고도 깊은 섹션에
+  // 닿은 것으로 잡힌다(2026-10-16 실측: 맨 아래에서 새로고침하면 3초 만에 마지막 섹션 도달). 이런 방문은 버전 지문을
+  // 붙이지 않아 도달률 표본에서 빠진다 — 방문 기록 자체는 그대로 남는다.
+  const 처음부터 = !['reload', 'back_forward'].includes(performance.getEntriesByType?.('navigation')[0]?.type)
+    && !(location.hash.length > 1 && document.getElementById(location.hash.slice(1)));
+  const lv = 처음부터 ? document.querySelector('meta[name="cc-lv"]')?.content || '' : '';
   const vid = lv ? Array.from(crypto.getRandomValues(new Uint8Array(8)), (x) => x.toString(16).padStart(2, '0')).join('') : '';
   pageView('visit', lv ? { p: 'landing', lv, vid } : { p: 'landing' });
   if (lv && 'IntersectionObserver' in window) {
