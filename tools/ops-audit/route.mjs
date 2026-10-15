@@ -28,12 +28,14 @@ const NAV = [
 const browser = await 브라우저열기();
 const page = await browser.newPage();
 const viewed = [];
+const 부팅주소 = [];
 await page.route('**/functions/v1/**', async (route) => {
   const u = new URL(route.request().url());
   if (u.pathname.endsWith('/auth/login')) {
     return route.fulfill({ json: { access_token: 'T', user: { email: 'a@b.c' } } });
   }
   if (u.pathname.endsWith('/bootstrap')) {
+    부팅주소.push(u);
     return route.fulfill({ json: { user: { email: 'a@b.c' }, nav: NAV, css: TOKENS_STUB } });
   }
   // 🔴 **글자 종류로 좁히지 마라.** 여기는 `[^/]+` 다.
@@ -72,6 +74,10 @@ async function login(hash) {
 await login('#s01');
 ok('옛 북마크 → 첫 화면', await page.textContent('#t') === 's01', await page.textContent('#t'));
 ok('주소가 맞춰진다', page.url().endsWith('#s01'), page.url());
+// 어드민을 연 브라우저는 우리 기기로 표시된다(2026-10-15) — 랜딩 track.js 와 같은 표식 cc_b 를 만들어 넘긴다.
+const 표식 = await page.evaluate(() => localStorage.getItem('cc_b'));
+ok('부팅이 이 브라우저 표식(cc_b)을 넘긴다', /^[A-Za-z0-9_-]{8,64}$/.test(표식 || '')
+   && 부팅주소.length > 0 && 부팅주소[0].searchParams.get('b') === 표식, `${표식} / ${부팅주소[0]?.search}`);
 
 // ② 탭을 누르면 주소가 바뀐다
 await page.click('nav a[data-id="s03"]');
