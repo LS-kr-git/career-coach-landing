@@ -15,7 +15,11 @@ export async function 서버열기() {
     const p = path.join(ROOT, decodeURIComponent(req.url.split('?')[0].split('#')[0]));
     const f = fs.existsSync(p) && fs.statSync(p).isDirectory() ? path.join(p, 'index.html') : p;
     if (!fs.existsSync(f)) { res.writeHead(404); return res.end('no'); }
-    res.writeHead(200, { 'content-type': f.endsWith('.js') ? 'text/javascript' : 'text/html; charset=utf-8' });
+    // 화면 전환 검사(tools/transition-audit)가 구독자 화면 전체를 내므로 CSS·글꼴·그림 형식도 맞춘다 —
+    // 틀리면 브라우저가 스타일시트를 버려 맨 화면으로 잰다.
+    const 형식 = { '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.woff2': 'font/woff2',
+      '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.json': 'application/json' };
+    res.writeHead(200, { 'content-type': 형식[path.extname(f)] || 'text/html; charset=utf-8' });
     res.end(fs.readFileSync(f));
   });
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
