@@ -64,7 +64,7 @@ export function readState() {
       // 이 값을 고른 로그인 계정(auth uid). 같은 브라우저를 다른 사람이 쓰면 남의 값을 자기 계정에
       // 저장하거나 화면에 미리 체크된 채로 보게 된다(2026-10-14 출시 전 점검). 옛 저장분은 null 이다.
       owner: typeof s.owner === 'string' && s.owner ? s.owner : null,
-      // 이 기기에서 1·2단계를 마지막으로 확정한 시각(ms) — 서버 진행 기록(updated_at)과 어느 쪽이 새것인지 가른다(0160).
+      // 이 기기에서 1·2단계를 마지막으로 확정한 시각(ms) — 서버 진행 기록(updated_at)과 어느 쪽이 새것인지 가른다(0163).
       draftAt: Number.isFinite(s.draftAt) ? s.draftAt : 0,
     };
   } catch {
@@ -388,7 +388,7 @@ export async function pullFromServer() {
 }
 
 /**
- * 온보딩 하는 중(1·2단계) 진행 기록 — 고른 값을 서버에도 남긴다 (2026-10-16 사용자 지시 · career-coach 0160 `onboarding_draft`).
+ * 온보딩 하는 중(1·2단계) 진행 기록 — 고른 값을 서버에도 남긴다 (2026-10-16 사용자 지시 · career-coach 0163 `onboarding_draft`).
  * 다른 기기·지운 브라우저로 다시 와도 **확정한 다음 단계**부터 이어 하게 하려는 것이다. 3단계 저장(saveOnboarding)이 정본이고,
  * 이 기록은 「마쳤나」 판정·발송·결제가 읽지 않는다. 그래서 실패해도 막지 않는다 — 흐름을 멈출 만큼의 값이 아니다(남기기만 한다).
  * 부르는 곳: 1·2단계 「다음」과 2·3단계에 들어올 때(앞 단계 「다음」이 떠나며 끊겼어도 다음 화면이 다시 보낸다).

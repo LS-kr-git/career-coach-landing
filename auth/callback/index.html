@@ -270,7 +270,7 @@
         if (r.error) throw r.error;
         구독 = r.data;
       } else {
-        // 하는 중이면 서버의 1·2단계 진행 기록(0160)을 이 기기에 깐다 — 다른 기기에서 와도 확정한 다음 단계부터.
+        // 하는 중이면 서버의 1·2단계 진행 기록(0163)을 이 기기에 깐다 — 다른 기기에서 와도 확정한 다음 단계부터.
         mergeDraft(await readDraft(supabase));
       }
       답옴 = true;
