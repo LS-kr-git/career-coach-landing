@@ -159,17 +159,64 @@ function pixelOff() {
   } catch { return false; }
 }
 
+/**
+ * 서버의 운영자 브라우저 표(career-coach 0153 browser_flag · private.internal_browser)와 맞춘다 (2026-10-15 사용자 지시).
+ *   · 픽셀이 꺼진 브라우저는 그 표에 한 번 적는다 → 어드민 집계에서 빠지고, 이 브라우저로 로그인한 계정도
+ *     운영자 계정이 된다(0111). 적은 표식은 cc_nopx_reg 에 남겨 다시 안 보낸다.
+ *   · 아닌 브라우저는 픽셀 스크립트를 넣기 전에 표에 있는지 묻는다(카카오 로그인·어드민으로 이미 적힌 기기).
+ *     물을 동안 생긴 신호는 fbq 대기열에 쌓였다가 「아니다」면 그대로 나가고, 「맞다」면 버려진다.
+ *     못 물으면(1.5초·오류) 지금처럼 켠다 — 진짜 방문자 측정이 끊기는 쪽보다 낫다. 정상 응답의 「아니다」만 탭 하나 동안 기억한다.
+ */
+function 브라우저표(body, keepalive) {
+  return fetch(API + '/rest/v1/rpc/browser_flag', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', apikey: KEY, Authorization: 'Bearer ' + KEY },
+    body: JSON.stringify(body),
+    keepalive,
+  });
+}
+
+// 적기에 실패하면 cc_nopx_reg 가 안 남으므로 다음 화면에서 다시 적는다 — 따로 알리지 않는다.
+function 운영자로적기(b) {
+  try { if (!b || localStorage.getItem('cc_nopx_reg') === b) return; } catch { return; }
+  브라우저표({ p_b: b, p_mark: true }, true)
+    .then((r) => { if (r.ok) localStorage.setItem('cc_nopx_reg', b); })
+    .catch(() => {});
+}
+
+// 답: true(우리 것) · false(아님 — 정상 응답일 때만 탭 동안 기억) · null(오류·1.5초 넘김 — 기억하지 않고 켠다).
+// 시간 제한은 AbortSignal.timeout 대신 타이머 경주다 — 옛 사파리(15)에는 그 함수가 없어 요청이 걸리면 픽셀이 끝내 안 켜졌다.
+async function 운영자인가(b) {
+  if (!b) return false;
+  try { if (sessionStorage.getItem('cc_px_chk') === '0') return false; } catch { /* 그냥 묻는다 */ }
+  const 묻기 = 브라우저표({ p_b: b }).then(async (r) => (r.ok ? (await r.json()) === true : null)).catch(() => null);
+  const 답 = await Promise.race([묻기, new Promise((r) => setTimeout(() => r(null), 1500))]);
+  if (답 === false) try { sessionStorage.setItem('cc_px_chk', '0'); } catch { /* 다음 화면에서 또 묻는다 */ }
+  return 답 === true;
+}
+
 function loadPixel() {
-  // pixelOff 를 맨 앞에 둔다 — ?cc_px=off 주소는 urlIsClean 에서 걸리므로 그보다 먼저 읽어야 표시가 남는다.
-  if (pixelOff() || window.fbq || !onSite() || location.pathname.startsWith('/ops/') || !urlIsClean()) return;
-  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
-  document,'script','https://connect.facebook.net/en_US/fbevents.js');
-  window.fbq('set', 'autoConfig', false, PIXEL_ID);
-  window.fbq('init', PIXEL_ID);
-  window.fbq('track', 'PageView');
+  if (!onSite()) return;
+  // pixelOff 를 urlIsClean 보다 먼저 둔다 — ?cc_px=off 주소는 urlIsClean 에서 걸리므로 그보다 먼저 읽어야 표시가 남는다.
+  if (pixelOff()) { 운영자로적기(browserMark()); return; }
+  if (window.fbq || location.pathname.startsWith('/ops/') || !urlIsClean()) return;
+  // 메타의 붙여넣기 코드에서 스크립트를 넣는 부분만 뒤로 뺐다 — 대기열(fbq)은 지금 만들어 둔다.
+  const f = window, n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
+  if (!f._fbq) f._fbq = n;
+  n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = [];
+  n('set', 'autoConfig', false, PIXEL_ID);
+  n('init', PIXEL_ID);
+  n('track', 'PageView');
+  운영자인가(browserMark()).then((맞다) => {
+    if (맞다) {
+      try { localStorage.setItem('cc_nopx', '1'); } catch { /* 다음 화면에서 또 묻는다 */ }
+      delete window.fbq; delete window._fbq;
+      return;
+    }
+    const t = document.createElement('script'); t.async = true;
+    t.src = 'https://connect.facebook.net/en_US/fbevents.js';
+    const s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(t, s);
+  });
 }
 
 /**
