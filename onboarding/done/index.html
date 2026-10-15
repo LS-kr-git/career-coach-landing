@@ -162,6 +162,11 @@
   let 재시도 = retryPending();
   const cta = document.querySelector('.cta');
   let 가는중 = false;
+  // 앞 단계 저장이 실패한 채 들어왔고 여기서 다시 보낸 것도 실패했으면 「완료」를 누르기 전에 알린다
+  // (2026-10-15 「오류 대체 화면」 D1 B안). 이미 「완료」를 눌렀으면 그쪽(D2)이 말한다.
+  재시도.then((r) => {
+    if (r && r.status === 'error' && !가는중) 오류안내(document.getElementById('errToast'), '설정을 아직 저장하지 못했어요.\n완료를 누르면 다시 저장할게요');
+  }, () => {});
   cta.addEventListener('click', (e) => {
     e.preventDefault();
     if (가는중) return;
