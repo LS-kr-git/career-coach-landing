@@ -430,19 +430,30 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
   const 앱실패 = (e) => track('client_error', { msg: 'kakao_app:' + String(e?.message || e).slice(0, 80) });
   // 로그인 안 한 사람의 길 — 카카오 로그인. 처음부터 안 한 사람과, 브라우저에만 세션이 남은(탈퇴·삭제된)
   // 사람 둘 다 이 길이다. 뒤쪽은 서버에 물어본 뒤에야 알아서 페이지를 연 뒤에 다시 건다.
+  // 웹 로그인으로 넘기기 전에 기록이 닿기를 잠깐(최대 0.3초) 기다린다 — 그 브라우저의 첫 기록은 사전 확인부터
+  // 오가야 해서, 바로 넘기면 페이지와 같이 끊긴다(2026-10-16 실측 · 삼성 인터넷의 빈 「가입 시작」).
+  const 닿은뒤 = (기록, a) => Promise.race([기록, new Promise((r) => setTimeout(r, 300))])
+    .finally(() => { location.href = a.href; });
   const 로그인전 = () => {
+    let 앱 = null, 남김 = false;
     for (const a of 버튼) {
       a.href = KAKAO_LOGIN;
-      // 여기와 login 사이의 차이가 카카오 동의 화면 이탈률이다(어드민 「카카오 로그인이 실패하고 있나」).
-      a.addEventListener('click', () => track('signup_start'), { once: true });
+      a.addEventListener('click', (e) => {
+        // 여기와 login 사이의 차이가 카카오 동의 화면 이탈률이다(어드민 「카카오 로그인이 실패하고 있나」).
+        const 기록 = 남김 ? null : track('signup_start');
+        남김 = true;
+        // 휴대폰이면 카카오톡 앱으로 바로 — 앱 전환은 페이지를 안 내리므로 기다리지 않는다(누른 동작이 살아 있을 때만 된다).
+        if (앱 && 앱.앱으로()) { e.preventDefault(); return; }
+        if (!기록 || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;   // 새 탭으로 열기는 그대로 둔다
+        e.preventDefault();
+        닿은뒤(기록, a);
+      });
     }
     // 휴대폰이면 카카오 웹 로그인 화면을 건너뛰고 카카오톡 앱으로 바로 (2026-10-14 사용자 지시 · assets/kakao-login.js).
     // 준비가 안 됐거나 실패하면 위 a.href(웹 로그인)로 그대로 간다.
     import('/assets/kakao-login.js').then((k) => {
       if (!k.앱전환) return;
-      for (const a of 버튼) a.addEventListener('click', (e) => {
-        if (k.앱으로()) e.preventDefault();
-      });
+      앱 = k;
       return k.준비(앱실패);
     }).catch(앱실패);
   };
@@ -468,9 +479,9 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
       import('/assets/kakao-login.js').then((k) => k.앱전환 && k.준비(() => {}).then(() => { 앱 = k; })).catch(() => {});
       Promise.race([물음, new Promise((r) => setTimeout(r, 3000))]).then(() => {
         if (!a.href.startsWith(SUPABASE_URL)) { location.href = a.href; return; }
-        track('signup_start');   // 카카오 로그인 입구로 간다
+        const 기록 = track('signup_start');   // 카카오 로그인 입구로 간다
         const 동작살아있음 = navigator.userActivation?.isActive === true;   // 알 수 없는 옛 브라우저는 웹 로그인으로(앱이 안 열리고 멈추는 것보다 낫다)
-        if (!(앱 && 동작살아있음 && 앱.앱으로())) { location.href = a.href; return; }   // 못 넘기면 웹 로그인 — 지금까지와 같다
+        if (!(앱 && 동작살아있음 && 앱.앱으로())) { 닿은뒤(기록, a); return; }   // 못 넘기면 웹 로그인 — 기록이 닿은 뒤에
         // 기다린 뒤라 브라우저가 앱 열기를 막았을 수 있다 — 4초 지나도 이 화면에 그대로 있으면 웹 로그인으로 간다.
         let 떠남 = false;
         addEventListener('pagehide', () => { 떠남 = true; }, { once: true });

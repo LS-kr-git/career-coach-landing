@@ -186,7 +186,9 @@ export function track(name, props = {}, accessToken = null) {
       p_props: { ...props, w: window.innerWidth, ...(mc ? { mc } : {}), ...(mark ? { b: mark } : {}) },
     });
     // keepalive — 버튼 누르고 바로 페이지가 넘어가도 요청이 살아남는다.
-    fetch(API + '/rest/v1/rpc/track', {
+    // 다만 그 브라우저의 첫 기록은 사전 확인(OPTIONS)부터 오가야 해서, 그 전에 페이지가 떠나면 같이 끊긴다
+    // (2026-10-16 실측 — 삼성 인터넷의 「가입 시작」). 그래서 응답을 기다릴 수 있게 약속(promise)을 돌려준다.
+    return fetch(API + '/rest/v1/rpc/track', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
