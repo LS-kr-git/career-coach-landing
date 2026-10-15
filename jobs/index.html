@@ -331,23 +331,30 @@
   }
 
   document.addEventListener('click', (e) => {
-    const s = e.target.closest('[data-sort]'); if (s) { 정렬 = s.dataset.sort; page = 1; 그리기(); return; }
-    const g = e.target.closest('[data-go]'); if (g && !g.disabled) { page = Number(g.dataset.go); 그리기(); 끌어올리기(true); }
+    const s = e.target.closest('[data-sort]'); if (s) { 정렬 = s.dataset.sort; page = 1; $('list').style.minHeight = ''; 그리기(); return; }
+    const g = e.target.closest('[data-go]'); if (g && !g.disabled) { 넘기기(Number(g.dataset.go)); }
   });
-  $('q').addEventListener('input', (e) => { q = e.target.value.trim(); page = 1; 그리기(); });
+  $('q').addEventListener('input', (e) => { q = e.target.value.trim(); page = 1; $('list').style.minHeight = ''; 그리기(); });
+
+  /* 쪽을 넘겨도 화면은 누른 자리 그대로 두고 목록만 바꾼다 (2026-10-15 사용자 컨펌 To be).
+     공고가 적은 마지막 쪽에서 목록이 줄면 쪽 번호 줄이 손가락 아래에서 올라가 버리므로, 목록 높이를 줄이지 않는다. */
+  function 넘기기(쪽) {
+    const 높이 = $('list').offsetHeight;
+    page = 쪽; 그리기();
+    $('list').style.minHeight = Math.max(parseFloat($('list').style.minHeight) || 0, 높이) + 'px';
+  }
 
   /* 검색창을 누르면 검색·정렬 줄이 화면 맨 위에 붙는 자리까지 0.4초에 부드럽게 올린다 (2026-10-15 사용자 컨펌 B안).
      브라우저가 제멋대로 「키보드에 안 가릴 만큼」만 툭 옮기지 않게 기본 동작을 막고, 포커스는 같은 터치 안에서 바로 준다
      — 늦게 주면 아이폰이 키보드를 안 띄운다. 결과가 적어 페이지가 짧으면 그 자리까지 못 올라가므로 아래를 잠시 늘린다. */
-  // 쪽을 넘길 때도 같은 자리에 바로 세운다 — 전에는 띠가 보이는 자리(20px 아래)나, 마지막 쪽처럼 짧으면 더 아래에 멈춰 쪽마다 위치가 달랐다 (2026-10-15 사용자 지시)
-  function 끌어올리기(즉시) {
+  function 끌어올리기() {
     // 목적지는 검색 줄이 「막 붙는」 자리 — 회색 띠 바로 아래. 이미 붙어 있으면 위로 되돌아가 목록 첫 공고부터 보인다 (2026-10-15 사용자 컨펌 v3)
     const 띠 = $('band'), 끝 = 띠.getBoundingClientRect().bottom + scrollY + parseFloat(getComputedStyle(띠).marginBottom);
     const 시작 = scrollY, t0 = performance.now();
     if (Math.abs(끝 - 시작) < 1) return;
     // 늘리기만 한다 — 줄이면 아래에 있던 화면의 스크롤이 먼저 잘려 툭 튄다(검사관 ⑨)
     $('open').style.minHeight = Math.max(parseFloat($('open').style.minHeight) || 0, 끝 + innerHeight - $('open').offsetTop) + 'px';
-    if (즉시 || matchMedia('(prefers-reduced-motion: reduce)').matches) return scrollTo(0, 끝);
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return scrollTo(0, 끝);
     const 곡선 = (t) => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     const 한칸 = (n) => { const p = Math.min(1, (n - t0) / 400); scrollTo(0, 시작 + (끝 - 시작) * 곡선(p)); if (p < 1) requestAnimationFrame(한칸); };
     requestAnimationFrame(한칸);
