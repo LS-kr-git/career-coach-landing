@@ -30,6 +30,23 @@
 
 <!-- 메타 픽셀은 /assets/track.js 가 켠다(토큰 붙은 주소에서는 안 켜는 검사 포함). 여기에 픽셀 코드를 따로 넣지 않는다. -->
 
+<!-- 방문 기록은 여기 머리에서 바로 보낸다 (2026-10-16 사용자 지시). 전에는 맨 아래 모듈이 보냈는데, 그 모듈은 HTML·CSS 를
+     다 받은 뒤에야 돌아서 광고를 누르고 1~2초 만에 나간 사람은 방문으로 안 잡혔다. async 모듈은 위에서 미리받은
+     track.js 만 오면 화면을 기다리지 않고 돈다. 도달률이 쓰는 버전 지문(lv)·방문 표(vid)는 window.ccVisit 으로 아래 모듈에 넘긴다.
+     돌아온 방문(새로고침·뒤로가기)과 바로가기(#…, 값이 아닌 것) 입장은 브라우저가 아래 자리로 데려다 놓아 내리지 않고도
+     깊은 섹션에 닿은 것으로 잡히므로(2026-10-16 실측) lv 를 붙이지 않는다 — 도달률 표본에서만 빠지고 방문은 남는다.
+     지문 계산이 이 브라우저에서 터지면 lv 없이 방문만 보내고, 터진 이유는 client_error 로 남긴다(방문을 잃지 않되 표본이 준 이유는 보이게). -->
+<script>(function(){var lv='',vid='';try{var n=performance.getEntriesByType&&performance.getEntriesByType('navigation')[0],
+돌아옴=!!n&&(n.type==='reload'||n.type==='back_forward'),바로가기=location.hash.length>1&&location.hash.indexOf('=')<0,
+m=document.querySelector('meta[name="cc-lv"]');if(!돌아옴&&!바로가기&&m)lv=m.content||'';
+if(lv)vid=Array.prototype.map.call(crypto.getRandomValues(new Uint8Array(8)),function(x){return(x<16?'0':'')+x.toString(16)}).join('');
+}catch(e){lv='';vid='';var err=String(e&&e.message||e).slice(0,80)}window.ccVisit={lv:lv,vid:vid,err:err};})();</script>
+<script type="module" async>
+  import { pageView, track } from '/assets/track.js';
+  const { lv, vid, err } = window.ccVisit;
+  pageView('visit', lv ? { p: 'landing', lv, vid } : { p: 'landing' });
+  if (err) track('client_error', { msg: 'landing_lv:' + err });
+</script>
 <!-- 미리받기 (tools/preload/build.mjs 가 만든다 — 손으로 고치지 마라) -->
 <link rel="preconnect" href="https://sxooygwggxeplzkfdbth.supabase.co" crossorigin>
 <link rel="modulepreload" href="/assets/browser-mark.js">
@@ -385,21 +402,15 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 <script src="/assets/landing.js"></script>
 <script type="module">
   // 유입 경로 기록. 실패해도 화면에 영향이 없다 (track.js 가 예외를 삼킨다).
-  import { pageView, track } from '/assets/track.js';
+  import { track } from '/assets/track.js';
   import { KAKAO_LOGIN, SUPABASE_URL } from '/assets/supabase-config.js';
   import { 오류안내 } from '/assets/toast.js';
   // 랜딩 섹션 도달률 (2026-10-15 사용자 확정) — 방문마다 버전 지문(lv)과 무작위 표(vid)를 붙이고,
   // 더 아래 섹션에 닿을 때마다 「가장 깊이 간 섹션 번호」를 보낸다. 어드민 「가입 퍼널」이 그 방문의 가장 큰 값을 센다.
   // 닿았다 = 섹션의 절반이 보였거나 섹션이 화면의 절반을 채웠다. 첫 섹션은 방문 자체가 도달이라 안 보낸다.
   // 1.5초 모아 보내고(빠르게 훑으면 한 번), 화면을 떠날 때 남은 것을 보낸다. 우리 기기·자동 점검은 track.js 와 DB 가 뺀다.
-  // 돌아온 방문(새로고침·뒤로가기)과 바로가기(#…) 입장은 브라우저가 아래 자리로 데려다 놓아, 내리지 않고도 깊은 섹션에
-  // 닿은 것으로 잡힌다(2026-10-16 실측: 맨 아래에서 새로고침하면 3초 만에 마지막 섹션 도달). 이런 방문은 버전 지문을
-  // 붙이지 않아 도달률 표본에서 빠진다 — 방문 기록 자체는 그대로 남는다.
-  const 처음부터 = !['reload', 'back_forward'].includes(performance.getEntriesByType?.('navigation')[0]?.type)
-    && !(location.hash.length > 1 && document.getElementById(location.hash.slice(1)));
-  const lv = 처음부터 ? document.querySelector('meta[name="cc-lv"]')?.content || '' : '';
-  const vid = lv ? Array.from(crypto.getRandomValues(new Uint8Array(8)), (x) => x.toString(16).padStart(2, '0')).join('') : '';
-  pageView('visit', lv ? { p: 'landing', lv, vid } : { p: 'landing' });
+  // 방문(visit)은 머리의 async 모듈이 이미 보냈다. lv·vid 는 거기서 정한 것을 그대로 쓴다(머리 「방문 기록」 주석).
+  const { lv, vid } = window.ccVisit;
   if (lv && 'IntersectionObserver' in window) {
     const 섹션들 = [...document.querySelectorAll('#scr > section')];
     let 깊이 = 1, 보낸 = 1, 모음 = 0;
