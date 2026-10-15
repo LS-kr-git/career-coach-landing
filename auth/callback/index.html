@@ -150,7 +150,7 @@
   import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_JS } from '/assets/supabase-config.js';
   import { takeNext } from '/assets/return-to.js';
   import { forgetIfOtherOwner, readState } from '/assets/onboarding-store.js';
-  import { 이어갈곳판정 } from '/assets/mypage-data.js';
+  import { 이어갈곳판정, 온보딩마침판정 } from '/assets/mypage-data.js';
   // 주소는 설정 파일 한 곳에 — 랜딩이 같은 주소를 미리 받아 둔다(index.html 「미리 받아 두기」).
   window.ccAlive(20000);   // 여기까지 왔다 — supabase-js(가장 큰 파일 묶음)를 받는 동안 다시 넉넉히 잰다
   const { createClient } = await import(SUPABASE_JS);
@@ -263,7 +263,7 @@
         supabase.from('user_preference_job').select('job_code').limit(1),
       ]);
       for (const r of [pref, jobs]) if (r.error) throw r.error;
-      const 마침 = Boolean(pref.data) && jobs.data.length > 0;   // mypage-data `onboardingDone` 과 같은 기준
+      const 마침 = 온보딩마침판정(pref.data, jobs.data);   // mypage-data `onboardingDone` 과 같은 판정
       let 구독 = null;
       if (마침) {
         const r = await supabase.rpc('mypage_subscription').maybeSingle();
