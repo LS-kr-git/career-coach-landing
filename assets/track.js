@@ -16,7 +16,7 @@
  *   여기서 보내는 것은 이벤트 이름·유입 경로·화면 크기뿐이다.
  *   이름·전화번호·이메일은 **절대 넣지 않는다** — 넣어도 DB 의 CHECK 가 거부한다
  *   (career-coach: analytics.event.event_props_no_pii).
- *   저장은 localStorage 두 칸 — 최초 유입(cc_attr)과 브라우저 표식(cc_b, 무작위 값)뿐이다.
+ *   저장은 localStorage 세 칸 — 최초 유입(cc_attr)·브라우저 표식(cc_b, 무작위 값)·픽셀 끔(cc_nopx)뿐이다.
  *   cc_b 는 이름·계정과 묶이지 않은 난수이고, 운영 DB 는 **우리(운영자) 계정으로 로그인한
  *   브라우저**의 것만 따로 적어 가입 퍼널에서 우리 시험을 뺀다(career-coach 0111).
  */
@@ -25,7 +25,7 @@
 // 복원하면 프로젝트 ref 가 바뀌는데, 그때 고칠 곳이 세 군데였다. 이제 한 군데다.
 // 같은 오리진 파일이라 서드파티 CDN 의존이 생기지 않는다 — 그건 아래 주의사항 그대로다.
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from '/assets/supabase-config.js';
-import { browserMark } from '/assets/browser-mark.js';
+import { browserMark, pixelOff } from '/assets/browser-mark.js';
 
 const API = SUPABASE_URL;
 const KEY = SUPABASE_ANON_KEY;
@@ -142,7 +142,8 @@ function urlIsClean() {
 }
 
 function loadPixel() {
-  if (window.fbq || !onSite() || location.pathname.startsWith('/ops/') || !urlIsClean()) return;
+  // pixelOff 를 맨 앞에 둔다 — ?cc_px=off 주소는 urlIsClean 에서 걸리므로 그보다 먼저 읽어야 표시가 남는다.
+  if (pixelOff() || window.fbq || !onSite() || location.pathname.startsWith('/ops/') || !urlIsClean()) return;
   !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
   n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
   n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
