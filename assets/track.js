@@ -83,6 +83,8 @@ function keepClickId() {
  * - 로그인 처리·결제·마이페이지·열람 화면은 건드리지 않는다(주소에 열쇠·토큰이 있거나, 로그인 뒤라 서버가 이미 안다).
  */
 function carryClickInUrl() {
+  // 미리 그리는 중(speculationrules)에는 주소를 바꾸지 않는다 — 활성화 매칭을 흔들 수 있다. 실제로 보일 때 한다(검사관).
+  if (document.prerendering) return 보일때(carryClickInUrl);
   try {
     if (!/^\/(onboarding\/(\d|done)\/)?$/.test(location.pathname)) return;
     const 주소 = new URLSearchParams(location.search);
@@ -91,7 +93,9 @@ function carryClickInUrl() {
     const m = fbc && /^fb\.\d\.(\d+)\.(.+)$/.exec(decodeURIComponent(fbc));
     if (!m || Date.now() - Number(m[1]) > 7 * 864e5) return;
     주소.set('fbclid', m[2]);
+    // 저장된 첫 유입이 메타 광고일 때만 utm 을 같이 붙인다 — 다른 경로의 utm 이 이 클릭과 섞이지 않게(검사관).
     const utm = attribution();
+    if (!/^(meta|facebook|fb|ig|instagram)$/i.test(utm.source || '')) { history.replaceState(history.state, '', location.pathname + '?' + 주소 + location.hash); return; }
     for (const k of ['source', 'medium', 'campaign', 'content', 'term']) if (utm[k] && !주소.has('utm_' + k)) 주소.set('utm_' + k, utm[k]);
     history.replaceState(history.state, '', location.pathname + '?' + 주소 + location.hash);
   } catch { /* 무시 — 주소를 못 바꿔도 화면은 그대로다 */ }
