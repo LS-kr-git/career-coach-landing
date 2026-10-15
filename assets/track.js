@@ -154,10 +154,11 @@ const META_OF = { onboarding_done: 'CompleteRegistration' };
 
 /** 가입 완료는 사람마다 **한 번**이다 (2026-10-15 출시 검수). onboarding_done 은 저장할 때마다 남는데
  *  — 3·4단계 · 재시도 · 마이페이지에서 직군·연차를 고칠 때까지 — 그대로 메타에 보내면 한 사람이 여러 번
- *  「가입 완료」로 세어져 광고 학습이 흐려진다. 온보딩 화면의 첫 저장만, 이 기기에서 한 번만 보낸다. */
+ *  「가입 완료」로 세어져 광고 학습이 흐려진다. 마이페이지 수정은 빼고, 이 기기에서 한 번만 보낸다. */
 function 처음보내나(name, props) {
   if (name !== 'onboarding_done') return true;
-  if (props?.retry || !location.pathname.startsWith('/onboarding/')) return false;
+  // 재시도로 늦게 성공한 첫 저장(온보딩·결제 화면의 retryPending)도 가입 완료다 — 막는 것은 마이페이지 수정뿐(검사관 ①).
+  if (location.pathname.startsWith('/mypage/')) return false;
   try {
     if (localStorage.getItem('cc_px_reg')) return false;
     localStorage.setItem('cc_px_reg', '1');
