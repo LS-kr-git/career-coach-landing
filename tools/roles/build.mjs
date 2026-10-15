@@ -39,6 +39,7 @@ const STEP4 = join(ROOT, 'onboarding', '4', 'index.html');
  *  표가 두 벌이 되면 두 화면의 추천이 갈리므로 같은 생성기가 같은 값을 심는다. */
 const TOPICS_PAGE = join(ROOT, 'mypage', 'topics', 'index.html');
 const HOME_PAGE = join(ROOT, 'mypage', 'index.html');
+const CHECKOUT_PAGE = join(ROOT, 'checkout', 'index.html');
 
 /** 노출 기준 (2026-08-04 사용자 확정 → 같은 날 10 → 5 로 완화)
  *  대분류: 주당 신규 5건 미만이면 뺀다.
@@ -231,6 +232,8 @@ const topicsPageHtml = readFileSync(TOPICS_PAGE, 'utf8');
 const topicsPageNext = patch(topicsPageHtml, 'jobmap', jobMapHtml(), 'mypage/topics/index.html');
 const homePageHtml = readFileSync(HOME_PAGE, 'utf8');
 const homePageNext = patch(homePageHtml, 'jobmap', jobMapHtml(), 'mypage/index.html');
+const checkoutHtml = readFileSync(CHECKOUT_PAGE, 'utf8');
+const checkoutNext = patch(checkoutHtml, 'jobmap', jobMapHtml(), 'checkout/index.html');
 
 if (process.argv.includes('--check')) {
   const stale = [
@@ -240,6 +243,7 @@ if (process.argv.includes('--check')) {
     step4Next !== step4Html && '온보딩 4단계 주제 목록·직군→주제 표',
     topicsPageNext !== topicsPageHtml && '마이페이지 주제 화면 직군→주제 표',
     homePageNext !== homePageHtml && '마이페이지 첫 화면 직군→주제 표',
+    checkoutNext !== checkoutHtml && '결제 화면 직군→주제 표',
   ].filter(Boolean);
   if (!stale.length) { console.log('✅ 직군·주제 목록이 taxonomy.json + volume.json + tracks.json 과 일치합니다 (온보딩 1·4단계 · 마이페이지 · 완료 화면).'); process.exit(0); }
   console.error(`❌ ${stale.join(' · ')} 이(가) 기준과 다릅니다 — node tools/roles/build.mjs 를 돌리세요.`);
@@ -252,6 +256,7 @@ writeFileSync(DONE, doneNext);
 writeFileSync(STEP4, step4Next);
 writeFileSync(TOPICS_PAGE, topicsPageNext);
 writeFileSync(HOME_PAGE, homePageNext);
+writeFileSync(CHECKOUT_PAGE, checkoutNext);
 const shown = visible.reduce((a, g) => a + g.children.length, 0);
 const all = TAX.groups.reduce((a, g) => a + g.children.length, 0);
 console.log(`✅ 온보딩 1단계 · 마이페이지 직군 · 완료 화면 주제 갱신 — 대분류 ${visible.length}/${TAX.groups.length} · 중분류 ${shown}/${all}`);

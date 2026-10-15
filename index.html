@@ -489,12 +489,24 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
   // 순서는 콜백(auth/callback 「받은오류」)과 같이 `error` 먼저 — 같은 login_fail 원장에 두 규칙이 섞이지 않게.
   const 받은오류 = 돌아옴.get('error') || 돌아옴.get('error_code') || 해시.get('error') || 해시.get('error_code');
   if (돌아옴.get('login') === 'fail' || 받은오류) {
-    const 안내 = document.getElementById('lfail');
-    오류안내(안내, 안내.textContent);   // 머묾은 글자 수로 — 오류 안내 공통 규칙 (2026-10-15 「오류 대체 화면」)
     const why = (돌아옴.get('why') || (받은오류 ? 'provider' : '')).replace(/[^a-z_]/g, '').slice(0, 20);
     const code = (돌아옴.get('code') || 받은오류 || '').replace(/[^A-Za-z0-9_]/g, '').slice(0, 40);
-    track('login_fail', { ...(why && { why }), ...(code && { code }) });
-    history.replaceState(null, '', location.pathname + (받은오류 ? '' : location.hash));   // 새로고침에 안내가 다시 뜨지 않게
+    // 로그인 열쇠(state)가 만료돼 돌아왔으면 한 번만 저절로 다시 로그인한다 (2026-10-16 사용자 지시).
+    // 사람이 잘못한 게 아니라 열쇠가 낡은 것이라 다시 누르게 할 이유가 없다. 2분 안에 또 오면 안내를 띄운다(되풀이 방지).
+    // 저장소가 막힌 브라우저는 다시 보내지 않는다 — 몇 번 갔는지 셀 수 없으면 끝없이 돌 수 있다.
+    const 다시 = 돌아옴.get('error_code') === 'bad_oauth_state' || 해시.get('error_code') === 'bad_oauth_state';
+    const 갔던때 = (() => { try { return Number(sessionStorage.getItem('cc_relogin') || 0); } catch { return NaN; } })();
+    let 넘김 = false;
+    if (다시 && !로그인됨 && 갔던때 >= 0 && Date.now() - 갔던때 > 120_000) {
+      try { sessionStorage.setItem('cc_relogin', String(Date.now())); 넘김 = true; } catch { /* 셀 수 없으면 안내로 */ }
+    }
+    track('login_fail', { ...(why && { why }), ...(code && { code }), ...(넘김 && { retry: 1 }) });
+    if (넘김) location.replace(KAKAO_LOGIN);
+    else {
+      const 안내 = document.getElementById('lfail');
+      오류안내(안내, 안내.textContent);   // 머묾은 글자 수로 — 오류 안내 공통 규칙 (2026-10-15 「오류 대체 화면」)
+      history.replaceState(null, '', location.pathname + (받은오류 ? '' : location.hash));   // 새로고침에 안내가 다시 뜨지 않게
+    }
   }
   // 하단 고정 「카카오로 3초만에 시작하기」 → 메타 픽셀 전환 이벤트 (옛 랜딩의 ctaBtn 과 같은 자리).
   // 픽셀은 track.js 가 켠다 — 픽셀이 없으면 아무 일도 안 한다.
