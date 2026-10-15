@@ -9,8 +9,8 @@ const won=id=>+$(id).textContent.replace(/\D/g,"");
 // 시안은 폰 안 .screen 이 스크롤했다. 실제 페이지는 문서가 스크롤하므로 기준 사각형은 뷰포트다.
 const VIEW=()=>({top:0,bottom:innerHeight,height:innerHeight});
 const chipHTML=(list,on)=>list.map(([k,l])=>`<button class="chip${k===on?" on":""}" data-k="${k}">${l}</button>`).join("");
-function fitLine(el,min){el.style.fontSize="";let f=parseFloat(getComputedStyle(el).fontSize);while(el.scrollWidth>el.clientWidth+0.5&&f>min){f-=0.5;el.style.fontSize=f+"px"}}
-function renderQuiz(k){$("quiz").innerHTML=QUIZ[k].map((q,i)=>`<li><span>Q${i+1}</span><span class="t">${q}</span></li>`).join("");document.querySelectorAll("#quiz li").forEach(li=>fitLine(li,11))}
+function fitLine(el,min){el.style.fontSize="";const cs=getComputedStyle(el),room=el.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight),r=document.createRange(),need=()=>(r.selectNodeContents(el),r.getBoundingClientRect().width);let f=parseFloat(cs.fontSize);while(need()>room+0.5&&f>min){f-=0.5;el.style.fontSize=f+"px"}}   // 글자 폭을 안쪽 여백까지 빼고 잰다 — .t 가 넘친 글자를 잘라 scrollWidth 로는 안 보였다(2026-10-15)
+function renderQuiz(k){$("quiz").innerHTML=QUIZ[k].map((q,i)=>`<li><span>Q${i+1}</span><span class="t">${q}</span></li>`).join("");const fit=()=>document.querySelectorAll("#quiz li").forEach(li=>fitLine(li,11));fit();document.fonts&&document.fonts.ready.then(fit)}   // Pretendard 가 온 뒤 다시 잰다 — 먼저 재면 기기마다 다른 대체 글꼴 폭으로 줄였다(2026-10-15 사용자 확정 2-가)
 const CHIP_ORDER=[...JOBS.map(j=>j[0]==="dev"?JOBS.find(x=>x[0]==="mkt"):j[0]==="mkt"?JOBS.find(x=>x[0]==="dev"):j),...COMMON];
 $("quizChips").innerHTML=chipHTML(CHIP_ORDER,"mkt");
 const stars=n=>"★".repeat(n)+"<i>"+"★".repeat(5-n)+"</i>";
