@@ -25,7 +25,7 @@
 // 복원하면 프로젝트 ref 가 바뀌는데, 그때 고칠 곳이 세 군데였다. 이제 한 군데다.
 // 같은 오리진 파일이라 서드파티 CDN 의존이 생기지 않는다 — 그건 아래 주의사항 그대로다.
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from '/assets/supabase-config.js';
-import { browserMark, pixelOff } from '/assets/browser-mark.js';
+import { browserMark } from '/assets/browser-mark.js';
 
 const API = SUPABASE_URL;
 const KEY = SUPABASE_ANON_KEY;
@@ -139,6 +139,21 @@ const META_OF = { onboarding_done: 'CompleteRegistration' };
 function urlIsClean() {
   if (location.hash.includes('=')) return false;
   return [...new URLSearchParams(location.search).keys()].every((k) => /^(utm_\w+|fbclid|gclid)$/.test(k));
+}
+
+/**
+ * 운영자 브라우저에서는 픽셀을 켜지 않는다(cc_nopx, 2026-10-15 사용자 지시) — 우리 시험이 광고 학습에 섞이지 않게.
+ * 켜는 길 둘: 어드민을 연다(ops 셸이 같은 칸을 1 로 적는다) · 아무 화면이나 주소 끝에 ?cc_px=off. 되돌리기 ?cc_px=on.
+ * 🔴 이 파일 안에 둔다. browser-mark.js 의 새 export 로 두었더니 배포 직후 캐시된 옛 browser-mark.js 와 섞여
+ *    import 가 실패하고 이 파일을 부르는 화면의 스크립트가 통째로 죽었다(2026-10-15 실측, 598b09f).
+ */
+function pixelOff() {
+  try {
+    const q = new URLSearchParams(location.search).get('cc_px');
+    if (q === 'off') localStorage.setItem('cc_nopx', '1');
+    else if (q === 'on') localStorage.removeItem('cc_nopx');
+    return localStorage.getItem('cc_nopx') === '1';
+  } catch { return false; }
 }
 
 function loadPixel() {
