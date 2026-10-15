@@ -46,13 +46,18 @@ async function 받기() {
   재료 = { ...(await r.json()), at: Date.now() };
 }
 
-/** 미리 준비한다(페이지를 열 때 한 번, 앱전환일 때만 부른다). 실패는 호출자에게 던진다 — 기록은 호출자가 한다. */
-export async function 준비(기록) {
-  await Promise.all([sdk(), 받기()]);
-  if (!window.Kakao.isInitialized()) window.Kakao.init(JS_KEY);
-  // 열어 둔 채 오래 있다 누르는 사람을 위해 — 보이는 동안만 다시 받는다.
-  setInterval(() => { if (document.visibilityState === 'visible') 받기().catch(기록); }, FRESH);
-  다시받기 = () => 받기().catch(기록);
+/** 미리 준비한다(앱전환일 때만 부른다 — 랜딩을 열 때, 또는 로그인 여부를 기다리며 누른 때). 실패는 호출자에게 던진다 — 기록은 호출자가 한다. */
+// 랜딩은 두 길에서 부른다(처음부터 로그인 전 · 세션이 죽은 걸 늦게 안 때) — 한 번만 준비한다. 실패하면 다음에 다시.
+let 준비중 = null;
+export function 준비(기록) {
+  준비중 ??= (async () => {
+    await Promise.all([sdk(), 받기()]);
+    if (!window.Kakao.isInitialized()) window.Kakao.init(JS_KEY);
+    // 열어 둔 채 오래 있다 누르는 사람을 위해 — 보이는 동안만 다시 받는다.
+    setInterval(() => { if (document.visibilityState === 'visible') 받기().catch(기록); }, FRESH);
+    다시받기 = () => 받기().catch(기록);
+  })().catch((e) => { 준비중 = null; throw e; });
+  return 준비중;
 }
 
 /** 버튼을 누른 그 자리에서 부른다. 앱으로 넘겼으면 true — 아니면 호출자가 웹 로그인으로 간다. */

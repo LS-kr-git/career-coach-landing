@@ -413,9 +413,21 @@
       e.preventDefault();
       if (기다림) return;   // 기다리는 동안 다시 눌러도 한 번만 간다(「가입 시작」이 두 번 남지 않게)
       기다림 = true;
+      // 세션이 죽은 휴대폰 사용자는 카카오톡 앱으로 보내야 한다(assets/kakao-login.js). 앱 전환은 누른 동작이
+      // 살아 있는 동안(브라우저가 1초 남짓 쳐 준다)만 되므로, 답을 기다리는 사이 앱 전환 준비를 같이 해 둔다.
+      let 앱 = null;
+      // 기록은 남기지 않는다 — 세션이 멀쩡한 사람은 곧 다른 화면으로 넘어가며 이 요청이 끊기는 게 정상이다.
+      import('/assets/kakao-login.js').then((k) => k.앱전환 && k.준비(() => {}).then(() => { 앱 = k; })).catch(() => {});
       Promise.race([물음, new Promise((r) => setTimeout(r, 3000))]).then(() => {
-        if (a.href.startsWith(SUPABASE_URL)) track('signup_start');   // 카카오 로그인 입구로 간다
-        location.href = a.href;
+        if (!a.href.startsWith(SUPABASE_URL)) { location.href = a.href; return; }
+        track('signup_start');   // 카카오 로그인 입구로 간다
+        const 동작살아있음 = navigator.userActivation?.isActive === true;   // 알 수 없는 옛 브라우저는 웹 로그인으로(앱이 안 열리고 멈추는 것보다 낫다)
+        if (!(앱 && 동작살아있음 && 앱.앱으로())) { location.href = a.href; return; }   // 못 넘기면 웹 로그인 — 지금까지와 같다
+        // 기다린 뒤라 브라우저가 앱 열기를 막았을 수 있다 — 4초 지나도 이 화면에 그대로 있으면 웹 로그인으로 간다.
+        let 떠남 = false;
+        addEventListener('pagehide', () => { 떠남 = true; }, { once: true });
+        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') 떠남 = true; });
+        setTimeout(() => { if (!떠남 && document.visibilityState === 'visible') location.href = a.href; }, 4000);
       });
     });
   }
