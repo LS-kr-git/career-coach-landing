@@ -282,9 +282,10 @@ for (const rel of ['checkout/index.html', 'mypage/billing/index.html']) {
     const 나옴 = data.이어갈곳판정(...인자);
     if (나옴 !== 답) problems.push(`이어갈곳판정 — ${JSON.stringify(인자[0])}·${인자[1]?.status ?? '없음'} 에서 ${답} 이어야 하는데 ${나옴}`);
   }
-  for (const rel of ['auth/callback/index.html', 'index.html']) {
-    if (!/이어갈곳/.test(scriptOnly(rel))) problems.push(`${rel}: 다시 들어온 사람의 행선지를 이어갈곳 판정으로 정하지 않습니다`);
-  }
+  const 콜백 = scriptOnly('auth/callback/index.html');
+  if (!/이어갈곳판정\(/.test(콜백)) problems.push('auth/callback: 다시 들어온 사람의 행선지를 이어갈곳판정으로 정하지 않습니다');
+  if (!/온보딩마침판정\(/.test(콜백)) problems.push('auth/callback: 온보딩을 마쳤는지를 onboardingDone 과 다른 기준으로 봅니다 — 온보딩마침판정을 쓰세요');
+  if (data.온보딩마침판정({}, []) || !data.온보딩마침판정({}, [{}]) || data.온보딩마침판정(null, [{}])) problems.push('온보딩마침판정이 「선호 행 + 직군 1개 이상」이 아닙니다');
 }
 
 if (problems.length) {

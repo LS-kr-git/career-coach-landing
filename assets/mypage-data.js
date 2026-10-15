@@ -168,7 +168,12 @@ export async function onboardingDone() {
     supabase.from('user_preference_job').select('job_code').limit(1),
   ]);
   for (const r of [pref, jobs]) if (r.error) throw r.error;
-  return Boolean(pref.data) && jobs.data.length > 0;
+  return 온보딩마침판정(pref.data, jobs.data);
+}
+
+/** `onboardingDone` 의 판정만 — 선호 행이 있고 직군이 하나 이상. 로그인 콜백이 자기 클라이언트로 읽은 값에 같은 기준을 쓴다(검사관 ⑥). */
+export function 온보딩마침판정(pref, jobs) {
+  return Boolean(pref) && jobs.length > 0;
 }
 
 /**
