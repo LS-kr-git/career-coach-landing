@@ -208,6 +208,7 @@ h1{font-size:var(--adm-t-20);margin:0 0 var(--adm-sp-6)}
 <div id="app"><nav id="nav"></nav><main id="main"></main></div>
 <script type="module">
 import { SUPABASE_URL } from '/assets/supabase-config.js';
+import { browserMark } from '/assets/browser-mark.js';
 
 // 주소는 `#<화면id>` 한 칸이다. 예) careercoach.my/ops/#errors
 //
@@ -486,14 +487,8 @@ async function start() {
   부팅(true);
   // 어드민을 연 브라우저는 우리 기기다(2026-10-15 사용자 지시). 랜딩과 같은 오리진이라 track.js 의
   // 표식(cc_b)을 그대로 쓰고, 없으면 같은 규칙으로 만든다 — 그 브라우저로 본 랜딩이 집계에서 빠진다(career-coach 0111).
-  let 표식 = '';
-  try {
-    표식 = localStorage.getItem('cc_b') || '';
-    if (!/^[A-Za-z0-9_-]{8,64}$/.test(표식)) {
-      표식 = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()).replace(/-/g, '');
-      localStorage.setItem('cc_b', 표식);
-    }
-  } catch (e) { 표식 = ''; }
+  // 표식을 못 만드는 브라우저(사파리 프라이빗 등)는 랜딩도 표식 없이 기록하므로 가를 것이 없다 — 그냥 부팅한다.
+  const 표식 = browserMark();
   const boot = await (await call('/bootstrap' + (표식 ? '?b=' + encodeURIComponent(표식) : ''))).json();
   // 🔴 디자인 토큰. 화면을 그리기 **전에** 넣는다 — 뒤에 넣으면 첫 화면이 변수 없이
   //    한 번 그려졌다가 색이 바뀐다. 정본은 career-coach 의 `lib/tokens.ts` 다.
