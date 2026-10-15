@@ -267,6 +267,26 @@ for (const rel of ['checkout/index.html', 'mypage/billing/index.html']) {
   }
 }
 
+// 다시 들어온 사람이 이어서 갈 곳 (2026-10-16 사용자 지시) — 로그인 콜백과 랜딩 「시작하기」가 같은 판정을 쓴다.
+{
+  const 빈 = { jobs: [], years: null, regions: [] };
+  const 요금 = { price_krw: 5900, period_unit: 'month', period_count: 1, cancel_at_period_end: false };
+  const 구독중 = { ...요금, status: 'active', current_period_end: new Date(Date.now() + 864e5).toISOString() };
+  const 끝남 = { ...요금, status: 'canceled', current_period_end: new Date(Date.now() - 864e5).toISOString() };
+  const 기대 = [
+    [[true, 구독중, 빈], '/mypage/'], [[true, 끝남, 빈], '/checkout/'], [[true, { status: null }, 빈], '/checkout/'],
+    [[false, null, 빈], '/onboarding/1/'], [[false, null, { ...빈, jobs: ['a'] }], '/onboarding/2/'],
+    [[false, null, { ...빈, jobs: ['a'], years: 2 }], '/onboarding/3/'],
+  ];
+  for (const [인자, 답] of 기대) {
+    const 나옴 = data.이어갈곳판정(...인자);
+    if (나옴 !== 답) problems.push(`이어갈곳판정 — ${JSON.stringify(인자[0])}·${인자[1]?.status ?? '없음'} 에서 ${답} 이어야 하는데 ${나옴}`);
+  }
+  for (const rel of ['auth/callback/index.html', 'index.html']) {
+    if (!/이어갈곳/.test(scriptOnly(rel))) problems.push(`${rel}: 다시 들어온 사람의 행선지를 이어갈곳 판정으로 정하지 않습니다`);
+  }
+}
+
 if (problems.length) {
   console.error('❌ 마이페이지 데이터 층 ↔ 마크업이 어긋납니다:\n' + problems.map((p) => '   · ' + p).join('\n'));
   process.exit(1);

@@ -433,8 +433,8 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
   const 버튼 = document.querySelectorAll('.top .auth, #ctaBtn');
   // 로그인한 사람은 누르면 바로 간다 (2026-10-15 사용자 확정 B안). 전에는 누른 뒤에야 서버에
   // 「온보딩을 마쳤나」를 물었다 — 이제는 페이지를 열 때 물어 두므로 대개 답이 이미 와 있다.
-  // 행선지는 누르기 전에 정해 둔다 — 페이지를 열 때 서버에 물어, 선택이 다 모였으면 마이페이지, 아니면
-  // 온보딩 1단계, 세션이 죽었으면 카카오. 답이 오기 전(보통 1초 안)에 누르면 그 답을 여기서 기다렸다 간다 —
+  // 행선지는 누르기 전에 정해 둔다 — 페이지를 열 때 서버에 물어 이어서 할 곳(아래 `이어갈곳`),
+  // 세션이 죽었으면 카카오. 답이 오기 전(보통 1초 안)에 누르면 그 답을 여기서 기다렸다 간다 —
   // 마이페이지를 거쳐 가면 넘어가는 사이 마이페이지 바탕이 비치고, 카카오로 갈 때 「가입 시작」이 안 남는다.
   // 기다리는 동안 보이는 것은 어느 쪽이든 이 화면이라 체감은 같다. 3초가 넘으면 마이페이지에 맡긴다.
   const 실패 = (e) => track('client_error', { msg: 'landing_dest:' + String(e?.message || e).slice(0, 80) });
@@ -472,9 +472,12 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
   else {
     for (const a of 버튼) a.href = '/mypage/';
     let 정함 = false;
-    const 물음 = import('/assets/onboarding-store.js').then((s) => s.pullFromServer().then((답) => {
-      if (답 === 'no-session') 로그인전();   // 탈퇴·삭제로 세션이 죽었다 — 카카오 길로
-      else for (const a of 버튼) a.href = s.complete(s.readState()) ? '/mypage/' : '/onboarding/1/';
+    // 행선지는 로그인 콜백과 같은 판정이다(mypage-data `이어갈곳` — 2026-10-16 사용자 지시): 온보딩·결제 다 함 → 마이페이지,
+    // 온보딩만 다 함 → 결제 화면, 하는 중 → 그다음 단계.
+    const 물음 = import('/assets/onboarding-store.js').then((s) => s.pullFromServer().then(async (답) => {
+      if (답 === 'no-session') { 로그인전(); return; }   // 탈퇴·삭제로 세션이 죽었다 — 카카오 길로
+      const 갈곳 = await (await import('/assets/mypage-data.js')).이어갈곳();
+      for (const a of 버튼) a.href = 갈곳;
     })).catch(실패).finally(() => { 정함 = true; });
     let 기다림 = false;
     for (const a of 버튼) a.addEventListener('click', (e) => {

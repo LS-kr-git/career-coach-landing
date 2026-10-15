@@ -171,6 +171,28 @@ export async function onboardingDone() {
   return Boolean(pref.data) && jobs.data.length > 0;
 }
 
+/**
+ * 다시 들어온 사람이 **이어서 갈 곳** (2026-10-16 사용자 지시 — 로그인 콜백·랜딩 「시작하기」가 쓴다).
+ *   온보딩·결제 다 함 → 마이페이지 · 온보딩만 다 함 → 결제 화면 · 하는 중 → 그다음 단계.
+ * 온보딩을 서버에 마쳤는지는 서버로 본다(`onboardingDone`). 하는 중인 단계는 이 기기 값으로 본다 — 1·2단계는
+ * 서버에 안 남으니(3단계에서 한꺼번에 저장) 다른 기기에서 온 사람은 1단계부터다.
+ * 4단계(주제)는 여기서 따지지 않는다 — 결제 화면이 주제가 비면 4단계로 보낸다(checkout ③). 같은 판정을 두 곳에 두지 않는다.
+ * 못 물어봤으면 던진다 — 부르는 쪽이 지금까지의 길로 간다.
+ */
+export async function 이어갈곳() {
+  const store = await import('/assets/onboarding-store.js');
+  const 마침 = await onboardingDone();
+  return 이어갈곳판정(마침, 마침 ? await getSubscription() : null, store.readState());
+}
+
+/** `이어갈곳` 의 판정만 — 로그인 콜백은 자기 supabase 클라이언트로 값을 읽어 이것만 부른다(클라이언트를 둘 만들지 않게). */
+export function 이어갈곳판정(마침, 구독, s) {
+  if (마침) return billingView(구독).live ? '/mypage/' : '/checkout/';
+  if (!s.jobs.length) return '/onboarding/1/';
+  if (s.years === null) return '/onboarding/2/';
+  return '/onboarding/3/';   // 근무지가 비었거나, 다 골랐는데 저장만 못 됐다 — 3단계 「다음」이 다시 저장한다
+}
+
 /** 수정 화면(직군·연차·근무지·주제)의 입구 — 로그인했고 온보딩을 서버에 마친 사람만 들인다.
  *  안 마친 사람이 여기서 하나만 고쳐 저장하면, 이 기기에 남은 다른 값과 섞인 「완성된」 선호가 저장된다.
  *  마치지 않았으면 온보딩으로 보내고 false. 조회가 실패하면 예외 — 부르는 쪽의 읽기 실패 처리로 간다. */
