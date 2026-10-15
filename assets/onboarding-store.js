@@ -39,7 +39,7 @@ const MAX_REGIONS = 3;
  *    ⚠️ topic:null 과 다르다 — null 은 「한 번도 안 골랐다」이고, 서버는 그때 기존 값을
  *    유지한다(재온보딩이 주제를 지우면 안 되므로). 「지운다」를 말하려면 인자가 따로
  *    필요하고 그게 p_topic_clear 다. 두 상태를 한 값으로 접으면 서버가 못 가른다. */
-const EMPTY = { jobs: [], years: null, yearsMax: null, regions: [], topic: null, topicClear: false, pending: false, owner: null };
+const EMPTY = { jobs: [], years: null, yearsMax: null, regions: [], topic: null, topicClear: false, pending: false, owner: null, draftAt: 0 };
 
 const strings = (v) => (Array.isArray(v) ? v.filter((s) => typeof s === 'string' && s) : []);
 const intOrNull = (v) => (Number.isInteger(v) ? v : null);
@@ -64,6 +64,8 @@ export function readState() {
       // 이 값을 고른 로그인 계정(auth uid). 같은 브라우저를 다른 사람이 쓰면 남의 값을 자기 계정에
       // 저장하거나 화면에 미리 체크된 채로 보게 된다(2026-10-14 출시 전 점검). 옛 저장분은 null 이다.
       owner: typeof s.owner === 'string' && s.owner ? s.owner : null,
+      // 이 기기에서 1·2단계를 마지막으로 확정한 시각(ms) — 서버 진행 기록(updated_at)과 어느 쪽이 새것인지 가른다(0160).
+      draftAt: Number.isFinite(s.draftAt) ? s.draftAt : 0,
     };
   } catch {
     return { ...EMPTY };   // 사파리 프라이빗 모드 등
@@ -370,9 +372,7 @@ export async function pullFromServer() {
   ]);
   for (const r of [pref, jobs, regions]) if (r.error) throw r.error;
   if (!pref.data) {            // 서버에 아직 3단계까지 저장된 적 없는 사람 — 하는 중이면 1·2단계 진행 기록을 깐다
-    const d = await supabase.from('onboarding_draft').select('job_codes, years_min, years_max').maybeSingle();
-    if (d.error) throw d.error;
-    mergeDraft(d.data);
+    mergeDraft(await readDraft(supabase));
     return;
   }
   writeState({
@@ -397,6 +397,8 @@ export async function saveDraft() {
   if (document.prerendering) await new Promise((r) => document.addEventListener('prerenderingchange', r, { once: true }));
   const s = readState();
   if (!s.jobs.length) return;
+  const 지금 = new Date();
+  writeState({ draftAt: 지금.getTime() });   // 이 기기의 확정 시각 — 다른 기기의 서버 기록과 견준다(mergeDraft)
   try {
     const supabase = await client();
     const session = await liveSession(supabase);
@@ -407,7 +409,7 @@ export async function saveDraft() {
       job_codes: s.jobs.slice(0, MAX_JOBS),
       years_min: lo,
       years_max: lo === null ? null : Math.min(60, Math.max(lo, s.yearsMax ?? lo)),
-      updated_at: new Date().toISOString(),
+      updated_at: 지금.toISOString(),
     });
     if (error) throw error;
   } catch (e) {
@@ -415,13 +417,21 @@ export async function saveDraft() {
   }
 }
 
-/** 서버의 진행 기록을 이 기기에 깐다. **이 기기에 이미 고른 값이 있으면 그것이 이긴다** — 방금 고른 것이 더 새것이다.
+/** 서버 진행 기록 한 행을 읽는다 — 로그인 콜백(자기 클라이언트)과 pullFromServer 가 같이 쓴다. 없으면 null, 실패는 던진다. */
+export async function readDraft(supabase) {
+  const { data, error } = await supabase.from('onboarding_draft')
+    .select('job_codes, years_min, years_max, updated_at').maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+/** 서버의 진행 기록을 이 기기에 깐다. **더 나중에 확정한 쪽이 이긴다** — 이 기기의 확정 시각(draftAt)과 서버 updated_at 을 견준다.
+ *  이 기기에서 확정한 적 없는 값(draftAt 0 — 고르기만 하고 「다음」을 안 눌렀거나 옛 저장분)은 서버 기록에 진다.
+ *  직군·연차는 한 벌로 옮긴다 — 섞으면 다른 직군용으로 고른 연차가 붙는다(검사관 ①).
  *  owner 는 찍지 않는다 — owner 는 「서버에 저장된 값을 받았다(=마친 사람)」 표시로도 읽힌다(1단계 dest=unknown). */
 export function mergeDraft(d) {
-  if (!d) return;
-  const s = readState();
-  const 채움 = {};
-  if (!s.jobs.length && Array.isArray(d.job_codes) && d.job_codes.length) 채움.jobs = d.job_codes;
-  if (s.years === null && d.years_min !== null && d.years_min !== undefined) { 채움.years = d.years_min; 채움.yearsMax = d.years_max; }
-  if (Object.keys(채움).length) writeState(채움);
+  if (!d || !Array.isArray(d.job_codes) || !d.job_codes.length) return;
+  const 서버때 = Date.parse(d.updated_at) || 0;
+  if (readState().draftAt >= 서버때) return;
+  writeState({ jobs: d.job_codes, years: d.years_min ?? null, yearsMax: d.years_max ?? null, draftAt: 서버때 });
 }

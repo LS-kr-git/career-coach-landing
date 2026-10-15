@@ -149,7 +149,7 @@
   // 접속 정보는 /assets/supabase-config.js 한 곳에만 둔다 (2026-08-06 복구 훈련 결과).
   import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_JS } from '/assets/supabase-config.js';
   import { takeNext } from '/assets/return-to.js';
-  import { forgetIfOtherOwner, readState, mergeDraft } from '/assets/onboarding-store.js';
+  import { forgetIfOtherOwner, readState, mergeDraft, readDraft } from '/assets/onboarding-store.js';
   import { 이어갈곳판정, 온보딩마침판정 } from '/assets/mypage-data.js';
   // 주소는 설정 파일 한 곳에 — 랜딩이 같은 주소를 미리 받아 둔다(index.html 「미리 받아 두기」).
   window.ccAlive(20000);   // 여기까지 왔다 — supabase-js(가장 큰 파일 묶음)를 받는 동안 다시 넉넉히 잰다
@@ -271,9 +271,7 @@
         구독 = r.data;
       } else {
         // 하는 중이면 서버의 1·2단계 진행 기록(0160)을 이 기기에 깐다 — 다른 기기에서 와도 확정한 다음 단계부터.
-        const d = await supabase.from('onboarding_draft').select('job_codes, years_min, years_max').maybeSingle();
-        if (d.error) throw d.error;
-        mergeDraft(d.data);
+        mergeDraft(await readDraft(supabase));
       }
       답옴 = true;
       return 이어갈곳판정(마침, 구독, readState());
