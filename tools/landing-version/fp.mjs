@@ -11,6 +11,8 @@ import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
+// 주석 안의 <section>·data-v·meta 는 화면에 없으므로 세지 않는다 — 주석으로 막아 둔 섹션이 지문을 바꾸면 안 된다.
+const 주석빼기 = (h) => h.replace(/<!--[\s\S]*?-->/g, '');
 // 제목 속 장식(「TALK」 배지 · 각주 숫자)은 화면에서 글자로 읽히지 않으므로 뺀다.
 const 장식빼기 = (h) => h.replace(/<sup\b[\s\S]*?<\/sup>/gi, '').replace(/<em class="ti">[\s\S]*?<\/em>/gi, '');
 const 글자만 = (h, 태그자리 = '') => 장식빼기(h).replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, 태그자리)
@@ -19,6 +21,7 @@ const 글자만 = (h, 태그자리 = '') => 장식빼기(h).replace(/<br\s*\/?>/
 
 /** 랜딩 본문(#scr)의 섹션들과 시안 스위치. 섹션 이름은 data-sec, 제목은 첫 h1/h2(없으면 첫 문단). */
 export function 랜딩구성(html) {
+  html = 주석빼기(html);
   const 시작 = html.indexOf('id="scr"');
   if (시작 < 0) throw new Error('index.html 에 #scr 가 없다');
   const 본문 = html.slice(시작);
@@ -38,7 +41,7 @@ export function 랜딩구성(html) {
 }
 
 export const 지문 = (구성) => createHash('sha256').update(JSON.stringify(구성)).digest('hex').slice(0, 10);
-export const 적힌지문 = (html) => (html.match(/<meta name="cc-lv" content="([^"]*)">/) || [])[1] ?? null;
+export const 적힌지문 = (html) => (주석빼기(html).match(/<meta name="cc-lv" content="([^"]*)">/) || [])[1] ?? null;
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const 파일 = new URL('../../index.html', import.meta.url);

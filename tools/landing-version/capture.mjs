@@ -10,9 +10,9 @@
 // 이미 있는 지문이면 아무것도 안 한다 — 글자 하나 안 바뀐 배포가 새 버전을 만들지 않는다.
 //
 //   node tools/landing-version/capture.mjs <landing-versions 가지를 펼친 폴더>
-import { createServer } from 'node:http';
+import { 서버열기, 브라우저열기 } from '../ops-audit/harness.mjs';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, extname, join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 랜딩구성, 지문, 적힌지문 } from './fp.mjs';
 
@@ -34,7 +34,7 @@ function 한장() {
   const a = s.indexOf('<script type="module">'); const b = s.indexOf('</script>', a) + 9;
   if (a < 0) throw new Error('랜딩 모듈 스크립트를 못 찾았다');
   s = s.slice(0, a) + s.slice(b);                                    // 방문 기록·로그인 모듈 — 보관본은 기록을 안 남긴다
-  s = s.replace(/<link rel="(?:modulepreload|preconnect|canonical|icon)"[^>]*>/g, '');
+  s = s.replace(/<link rel="(?:modulepreload|preconnect|canonical|icon|apple-touch-icon|manifest)"[^>]*>/g, '');
 
   // 글꼴은 화면 글자가 걸리는 조각만 넣는다(전부 넣으면 3MB 다).
   const 글자 = new Set([...(s + A('/assets/landing.js'))].map((c) => c.codePointAt(0)));
@@ -45,22 +45,28 @@ function 한장() {
     if (rr && !범위(rr[1]).some(([lo, hi = lo]) => [...글자].some((c) => c >= lo && c <= hi))) return '';
     const u = blk.match(/url\(([^)]+)\)/)[1].replace(/['"]/g, '');
     const 자료 = readFileSync(join(ROOT, dirname(글꼴css), u)).toString('base64');
-    return blk.replace(/url\([^)]+\)/, `url(data:font/woff2;base64,${자료})`);
+    return blk.replace(/url\([^)]+\)/, () => `url(data:font/woff2;base64,${자료})`);
   });
   s = s.replace(/<link rel="stylesheet" href="([^"]+)">/g, (_, href) => `<style>${href === 글꼴css ? 글꼴 : A(href)}</style>`);
 
   // 스크립트를 안에 넣는다. landing.js 가 부르는 두 파일은 쓰는 것만 같은 코드로 옮겨 온다.
   const md = A('/assets/mypage-data.js');
-  const 휴일 = md.slice(md.indexOf('const HOLIDAYS'), md.indexOf('\n', md.indexOf(']);', md.indexOf('const HOLIDAYS'))));
-  const 첫날 = md.slice(md.indexOf('export function firstSendDay'), md.indexOf('\n}\n', md.indexOf('export function firstSendDay')) + 2).replace('export ', '');
+  const 잘라내기 = (머리, 끝) => {
+    const a = md.indexOf(머리), b = a < 0 ? -1 : md.indexOf(끝, a);
+    if (b < 0) throw new Error(`mypage-data.js 에서 「${머리}」를 못 찾았다 — 이 도구를 같이 고쳐라`);
+    return md.slice(a, b + 끝.length);
+  };
+  const 휴일 = 잘라내기('const HOLIDAYS', ']);');
+  const 첫날 = 잘라내기('export function firstSendDay', '\n}\n').replace('export ', '');
   s = s.replace(/<script src="([^"]+)"><\/script>/g, (_, src) => {
     let js = A(src);
     if (src === '/assets/landing.js') {
       const 덧 = 'document.body.appendChild(document.createElement("script")).src = "/assets/overscroll-top.js";';
       const 부름 = 'import("/assets/mypage-data.js")';
       if (!js.includes(덧) || !js.includes(부름)) throw new Error('landing.js 의 외부 파일 부르는 자리가 바뀌었다 — 이 도구를 같이 고쳐라');
-      js = js.replace(덧, `(function(){var t=document.createElement("script");t.text=${JSON.stringify(A('/assets/overscroll-top.js'))};document.body.appendChild(t)})();`)
-        .replace(부름, `(function(){${휴일};${첫날}return Promise.resolve({firstSendDay:firstSendDay});})()`);
+      // 🔴 바꿀 글을 **함수로** 넘긴다 — 글로 넘기면 그 안의 `$&`·`$'` 같은 글자를 replace 가 특수 기호로 읽어 코드가 조용히 깨진다.
+      js = js.replace(덧, () => `(function(){var t=document.createElement("script");t.text=${JSON.stringify(A('/assets/overscroll-top.js'))};document.body.appendChild(t)})();`)
+        .replace(부름, () => `(function(){${휴일};${첫날}return Promise.resolve({firstSendDay:firstSendDay});})()`);
     }
     return `<script>${js.replace(/<\/script/gi, '<\\/script')}</script>`;
   });
@@ -72,7 +78,8 @@ var 섹=function(i){return document.querySelectorAll('#scr > section')[i]};
 var 가기=function(i,부드럽게){var t=섹(i);if(t)scrollTo({top:i?t.getBoundingClientRect().top+scrollY:0,behavior:부드럽게?'smooth':'instant'})};
 addEventListener('message',function(e){var d=e.data;if(d&&d.go!=null)가기(+d.go,true)});
 var 시작=+window.__start||0;   /* 어드민이 <head> 에 window.__start 를 넣어 연다 */
-if(시작){가기(시작);addEventListener('load',function(){가기(시작)});setTimeout(function(){가기(시작)},150)}
+/* 중간에서 열 때는 아래 섹션 나중에 그리기(cc-lazy)를 끈다 — 덜 그린 위 섹션이 뒤늦게 제 높이를 찾으면 자리가 밀린다 */
+if(시작){document.documentElement.classList.remove('cc-lazy');가기(시작);addEventListener('load',function(){가기(시작)});setTimeout(function(){가기(시작)},150);setTimeout(function(){가기(시작)},700)}
 document.addEventListener('click',function(e){var a=e.target.closest('a[href]');if(a&&a.getAttribute('href').charAt(0)!=='#')e.preventDefault()},true);
 document.addEventListener('submit',function(e){e.preventDefault()},true);
 var 누름=null,축=null,대상=null,기록=[],관성=0,막기=false;
@@ -90,7 +97,12 @@ addEventListener('mouseup',function(){if(!누름)return;document.documentElement
  누름=null},true);
 addEventListener('click',function(e){if(막기){e.preventDefault();e.stopPropagation();막기=false}},true);
 addEventListener('dragstart',function(e){e.preventDefault()},true);})();</script>`;
-  s = s.replace('</body>', 보관본 + '</body>');
+  // 🔴 **맨 끝** </body> 앞이다 — 안에 넣은 스크립트의 주석에도 「</body> 앞에서 부른다」가 있어 첫 것을 집으면 코드 한가운데에 꽂힌다.
+  const 끝 = s.lastIndexOf('</body>');
+  s = s.slice(0, 끝) + 보관본 + s.slice(끝);
+  for (const [, 코드] of s.matchAll(/<script>([\s\S]*?)<\/script>/g)) {
+    try { new Function(코드); } catch (e) { throw new Error(`보관본 스크립트가 문법으로 안 선다(${e.message}): ${코드.slice(0, 80)}`); }
+  }
   const 남은 = [...s.replace(/<script>[\s\S]*?<\/script>/g, '').matchAll(/<(?:script|link)\b[^>]*(?:src|href)="\/[^"]*"/g)].map((m) => m[0]);
   if (남은.length) throw new Error(`보관본에 바깥 파일을 부르는 자리가 남았다: ${남은.join(' · ')}`);
   return s;
@@ -98,17 +110,9 @@ addEventListener('dragstart',function(e){e.preventDefault()},true);})();</script
 
 // ── 2) 섹션 그림 ─────────────────────────────────────────────────────────────
 async function 그림들(폴더) {
-  const { chromium } = await import('playwright');
-  const 종류 = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml', '.png': 'image/png', '.woff2': 'font/woff2', '.json': 'application/json' };
-  const 서버 = createServer((q, r) => {
-    let p = decodeURIComponent(new URL(q.url, 'http://x').pathname);
-    if (p.endsWith('/')) p += 'index.html';
-    const f = join(ROOT, p);
-    if (!f.startsWith(ROOT) || !existsSync(f)) { r.writeHead(404); return r.end(); }
-    r.writeHead(200, { 'content-type': 종류[extname(f)] || 'application/octet-stream' }); r.end(readFileSync(f));
-  }).listen(0);
-  const 주소 = `http://127.0.0.1:${서버.address().port}/`;
-  const 브라우저 = await chromium.launch();
+  const { server: 서버, origin } = await 서버열기();
+  const 주소 = `${origin}/`;
+  const 브라우저 = await 브라우저열기();
   try {
     const 쪽 = await 브라우저.newPage({ viewport: { width: 360, height: 740 } });
     await 쪽.route((u) => !u.href.startsWith(주소), (r) => r.abort());   // 바깥(Supabase·픽셀)은 안 부른다
