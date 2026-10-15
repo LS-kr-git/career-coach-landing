@@ -214,7 +214,7 @@ async function commit(state, supabase, session, retry) {
     // 단계 이벤트 + props 로 적는다. 목록은 다른 저장소(career-coach)에 있다.
     track('onboarding_step', { step: 3, save: 'failed' }, session.access_token);
     // 로그인은 됐는데 회원 행이 없다(가입 처리가 실패한 사람). 같은 저장을 되풀이하면 영영 막힌다 —
-    // 다시 로그인하면 서버가 회원 행을 메운다(career-coach 0153). 핑퐁을 막으려고 10분에 한 번만 보낸다.
+    // 다시 로그인하면 서버가 회원 행을 메운다(career-coach 0154). 핑퐁을 막으려고 10분에 한 번만 보낸다.
     if (/인증된 회원이 아닙니다/.test(error.message || '') && 다시로그인해도되나()) {
       await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
       location.href = (await import('/assets/supabase-config.js')).KAKAO_LOGIN;
