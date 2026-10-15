@@ -317,8 +317,8 @@
       await store.retryPending().catch(function () {});
       var 답 = await Promise.all([getSubscription(), onboardingDone()]);
       var s = 답[0], 마침 = 답[1];
-      var 끝난해지 = s && s.cancel_at_period_end && Date.parse(s.current_period_end) <= Date.now();
-      if (billingView(s).live && !끝난해지) return '/mypage/';
+      // 끝난 해지 예약(미납 제외)은 billingView 가 이미 「구독 전」으로 본다 — 사본 판정을 두지 않는다.
+      if (billingView(s).live) return '/mypage/';
       if (마침) return null;
       return store.readState().pending ? '저장안됨' : '/onboarding/1/';
     })().catch(function () { return null; });

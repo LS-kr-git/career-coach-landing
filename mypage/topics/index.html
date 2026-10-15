@@ -212,7 +212,6 @@
   /* 저장은 온보딩과 같은 통로(save_onboarding)다 — 직군·연차·근무지는 건드리지 않고 주제만 실린다.
      통신 실패는 store 가 pending 으로 남겨 다음 진입에서 다시 보낸다(온보딩 세 화면·직군 화면과 같다). */
   cta.addEventListener('click', function () {
-    if (!current()) return;   // 고른 것이 없으면 보낼 것이 없다(버튼은 잠겨 있다)
     cta.disabled = true;
     /* 진입할 때 띄운 retryPending() 이 아직 돌고 있으면 store 가 'busy' 를 준다 — 실패가 아니라
        「지금은 못 보낸다」다. 한 번 기다렸다 다시 보낸다(그 재시도가 끝나면 자리가 빈다). */
