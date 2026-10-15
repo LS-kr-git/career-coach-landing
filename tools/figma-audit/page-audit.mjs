@@ -218,6 +218,19 @@ for (const page of pages) {
           '랜딩 index.html 의 「넓은 화면 카드 어포던스」 블록을 그대로 옮기세요');
     }
   }
+  /* 랜딩 로딩 속도 장치 — 아래 섹션 나중에 그리기 (2026-10-15 사용자 지시 「랜딩이 바뀌어도 항상 유지」).
+     랜딩을 다시 만들거나 섹션을 늘리고 줄여도 이 두 줄은 남아야 한다. 실제로 첫 화면에서 섹션을 미루는지는
+     shift-audit 의 「아래 섹션 미룸」이 화면을 열어 본다 — 여기는 지워졌는지를 매 푸시 본다. */
+  if (page === 'index.html') {
+    const code = live.replace(/\/\*[\s\S]*?\*\//g, '');
+    const styles = [...code.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)].map((m) => m[1]).join('');
+    const scripts = [...code.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)].map((m) => m[1].replace(/^\s*\/\/.*$/gm, '')).join('');
+    if (!/html\.cc-lazy[^{]*section[^{]*\{[^}]*content-visibility\s*:\s*auto/.test(styles) ||
+        !/classList\.add\(\s*['"]cc-lazy['"]\s*\)/.test(scripts)) {
+      add('BLOCK', '랜딩 로딩 속도 장치', page, '「아래 섹션 나중에 그리기」(html.cc-lazy · content-visibility:auto)가 없습니다',
+          '랜딩이 바뀌어도 항상 둔다 — CLAUDE.md 「로딩 속도 장치는 항상 유지한다」');
+    }
+  }
   const title = live.match(/<title>([\s\S]*?)<\/title>/i);
   if (!title || !title[1].trim()) add('BLOCK', '머리 누락', page, '<title> 이 비었습니다');
   else if (!title[1].includes('커리어코치')) add('WARN', '제목', page, `"${title[1].trim()}" — 서비스명이 없습니다`);

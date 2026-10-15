@@ -59,10 +59,12 @@ const 관찰 = () => {
   // 이 스크립트는 <html> 이 생기기 전에 돈다 — documentElement 대신 문서 전체를 지켜본다(<html> 이 null 이라 관찰이 통째로 죽었다)
   let 기다림봄 = false;
   const 봄 = () => { const h = document.documentElement; if (!h || w.보임 != null) return;
-    if (h.classList.contains('cc-wait')) 기다림봄 = true; else if (기다림봄 || document.readyState !== 'loading') { w.보임 = performance.now(); 다됨봄(); } };
+    if (h.classList.contains('cc-wait')) 기다림봄 = true; else if (기다림봄 || document.readyState !== 'loading') { w.보임 = performance.now(); 미룸봄(); 다됨봄(); } };
   // 「다 됨」 — 스켈레톤 막대까지 걷힌 때. 막대 아래 글자는 투명이라 그 동안 온 글꼴 조각은 화면에서 안 바뀐다
   // 그 순간 이미 받아 둔 글꼴을 적어 둔다 — 「다 받고 나서 보여 줬다」와 「보여 준 뒤에 받았다」를 시각이 아니라 이것으로 가른다
   //   (받은 소식(loadingdone)이 보여 준 바로 다음에 와서 0ms 로 잘못 세던 것을 막는다)
+  // 보인 순간 화면 아래 섹션을 미뤄 그리고 있었나(랜딩 「로딩 속도 장치」) — 섹션 수와 미룬 수
+  const 미룸봄 = () => { const ss = [...document.querySelectorAll('section')]; w.섹션 = ss.length; w.미룸 = ss.filter((x) => getComputedStyle(x).contentVisibility === 'auto').length; };
   const 다됨봄 = () => { const h = document.documentElement; if (h && w.보임 != null && w.다됨 == null && !/\bcc-sk\b/.test(h.className)) {
     w.다됨 = performance.now(); w.받아둠 = new Set([...document.fonts].filter((f) => f.status === 'loaded')); } };
   new MutationObserver(다됨봄).observe(document, { subtree: true, attributes: true, attributeFilter: ['class'] });
@@ -102,7 +104,7 @@ async function 열기(ctx, 주소, 망) {
     const w = window.__sa || { 보임: null, 다됨: null, 밀림: [], 늦은글꼴: [], 막대: [] };
     const 뒤 = w.밀림.filter((e) => w.보임 != null && e.t >= w.보임 - 1);
     const 막대중 = (e) => w.막대.some(([a, b]) => e.t >= a && (b == null || e.t < b));
-    return { 상한: !!window.ccFontCap, 막대합: 뒤.filter(막대중).reduce((s, e) => s + e.v, 0), 주소: location.pathname, 보임: w.보임, 다됨: w.다됨, 전체밀림: w.밀림.length, 합: 뒤.reduce((s, e) => s + e.v, 0), 곳: 뒤.filter((e) => e.v > 0.001).map((e) => e.곳).join(' / '), 늦은글꼴: w.늦은글꼴 };
+    return { 상한: !!window.ccFontCap, 막대합: 뒤.filter(막대중).reduce((s, e) => s + e.v, 0), 주소: location.pathname, 보임: w.보임, 다됨: w.다됨, 섹션: w.섹션, 미룸: w.미룸, 전체밀림: w.밀림.length, 합: 뒤.reduce((s, e) => s + e.v, 0), 곳: 뒤.filter((e) => e.v > 0.001).map((e) => e.곳).join(' / '), 늦은글꼴: w.늦은글꼴 };
   });
   await page.close();
   return r;
@@ -134,6 +136,9 @@ for (const [이름, 설정] of Object.entries(기기).filter(([n]) => (기기거
       // 다른 화면으로 떠났으면(로그인·결제 상태에 따른 이동) 이 화면은 보이지 않는 것이 맞다 — 도착한 화면은 따로 잰다
       if (r.보임 == null && r.주소 !== new URL(origin + 주소).pathname) { console.log(`↪ ${줄} — ${r.주소} 로 이동해 이 화면은 안 보인다(그 화면은 따로 잰다)`); continue; }
       ok(`${줄} 보인 시각을 잼`, r.보임 != null, r.보임 != null ? `${Math.round(r.보임)}ms` : '못 잼 — 아래 판정들이 헛통과가 된다');
+      // 랜딩은 첫 화면을 띄울 때 셋째 섹션부터 미뤄 그린다 — 디자인이 바뀌어도 늘 켜져 있어야 한다(2026-10-15 사용자 지시).
+      //   바로가기(#…)로 들어온 경우만 일부러 끈다. CLAUDE.md 「로딩 속도 장치는 항상 유지한다」
+      if (주소 === '/') ok(`${줄} 아래 섹션 미룸`, r.섹션 >= 3 && r.미룸 >= r.섹션 - 2, `섹션 ${r.섹션}개 중 ${r.미룸}개를 미뤄 그림`);
       // 막대가 끝내 안 걷히면 아래 글씨체 판정이 셀 시점이 없어 헛통과한다 — 다 그려졌는지부터 묻는다(2026-10-15 검사관 ②)
       ok(`${줄} 막대가 걷힘`, r.다됨 != null, r.다됨 != null ? `${Math.round(r.다됨)}ms` : '9초 넘게 스켈레톤이 서 있다');
       const 밀림말 = `${r.합.toFixed(4)}${r.곳 ? ' · ' + r.곳 : ''}`;

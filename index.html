@@ -36,6 +36,16 @@
 <!-- /미리받기 -->
 <link rel="stylesheet" href="/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
 <script src="/assets/steady.js"></script>
+<!-- 🔴 로딩 속도 장치 — 아래 섹션 나중에 그리기 (2026-10-15 사용자 지시: 「랜딩이 바뀌어도 항상 유지」).
+     셋째 섹션부터는 화면에 가까워질 때 그린다 — 첫 화면이 보통 망 3.0초 → 2.0초로 빨라졌다(실측).
+     섹션 순서·개수·디자인이 바뀌어도 그대로 둔다. 지우거나 섹션을 다른 상자로 감싸면 page-audit 과 shift-audit 이 막는다.
+     · 바로가기(#…)로 들어오면 켜지 않는다 — 덜 그린 섹션의 높이가 어림값이라 엉뚱한 자리에 떨어진다
+     · 다 뜬 뒤 한가할 때 끈다 — 남은 섹션이 제 높이를 갖게 해 스크롤 막대가 튀지 않게
+     정본 서술: CLAUDE.md 「로딩 속도 장치는 항상 유지한다」 -->
+<style>html.cc-lazy body section:nth-of-type(n+3){content-visibility:auto;contain-intrinsic-size:auto 700px}</style>
+<script>(function(){if(location.hash)return;var h=document.documentElement,off=function(){h.classList.remove('cc-lazy')};h.classList.add('cc-lazy');
+addEventListener('click',function(e){if(e.target.closest&&e.target.closest('a[href^="#"]'))off()},true);addEventListener('hashchange',off);
+addEventListener('load',function(){setTimeout(function(){(window.requestIdleCallback||setTimeout)(off)},1500)})})();</script>
 <!-- 랜딩 스타일 — 시안 v71 의 <style> 을 순서 그대로 셋으로 나눠 옮겼다(2026-10-12 · 한 파일이 커서 올리는 길이 막혀). 순서를 바꾸지 마라 -->
 <!-- 🔴 2026-10-15: 시안 스위치(아래 hidden <i id=… data-v=…>)가 지금 값이 아닐 때만 맞는 규칙 332개를 뺐다(화면 변화 없음 · 계산 스타일 전수 대조). 스위치 값을 바꾸려면 커밋 dfab0f2 의 landing-*.css 에서 그 규칙을 되살려라 -->
 <link rel="stylesheet" href="/assets/landing-1.css">
