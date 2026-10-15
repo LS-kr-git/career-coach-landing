@@ -20,6 +20,7 @@
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.90.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.91.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="modulepreload" href="/assets/browser-mark.js">
+<link rel="modulepreload" href="/assets/mypage-data.js">
 <link rel="modulepreload" href="/assets/onboarding-store.js">
 <link rel="modulepreload" href="/assets/return-to.js">
 <link rel="modulepreload" href="/assets/supabase-config.js">
@@ -148,7 +149,8 @@
   // 접속 정보는 /assets/supabase-config.js 한 곳에만 둔다 (2026-08-06 복구 훈련 결과).
   import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_JS } from '/assets/supabase-config.js';
   import { takeNext } from '/assets/return-to.js';
-  import { forgetIfOtherOwner } from '/assets/onboarding-store.js';
+  import { forgetIfOtherOwner, readState } from '/assets/onboarding-store.js';
+  import { 이어갈곳판정 } from '/assets/mypage-data.js';
   // 주소는 설정 파일 한 곳에 — 랜딩이 같은 주소를 미리 받아 둔다(index.html 「미리 받아 두기」).
   window.ccAlive(20000);   // 여기까지 왔다 — supabase-js(가장 큰 파일 묶음)를 받는 동안 다시 넉넉히 잰다
   const { createClient } = await import(SUPABASE_JS);
@@ -247,16 +249,30 @@
   const go = window.ccGo;   // 이동 잠금은 위 폴백과 공유한다 — 두 경로가 겹쳐 두 번 이동하지 않게
   // 로그인 성공의 목적지. 결제 화면에서 로그인하러 온 사람은 그리로 돌아간다(assets/return-to.js).
   // 실패 쪽(/?login=fail)에서는 꺼내지 않는다 — 다시 로그인하면 그때 돌아가게.
-  // 결제 화면처럼 적어 둔 곳이 없으면 — 이미 온보딩을 마친 사람(다른 기기에서 가입했거나 다시 로그인한
-  // 사람)은 온보딩 1단계를 다시 밟지 않고 마이페이지로 간다(2026-10-14 사용자 지시 「퍼널을 최대한 간결하게」).
-  // 서버에 직군이 저장돼 있으면 마친 사람이다 — 랜딩 index.html 의 「로그인한 사람의 행선지」와 같은 기준(직군이 있는가).
+  // 결제 화면처럼 적어 둔 곳이 없으면 **이어서 할 곳**으로 간다 (2026-10-16 사용자 지시 — 판정은 mypage-data `이어갈곳판정`).
+  //   온보딩·결제 다 함 → 마이페이지 · 온보딩만 다 함 → 결제 화면 · 하는 중 → 이 기기에 남은 다음 단계.
+  //   (그 전 판은 서버에 직군만 있으면 결제 전이어도 마이페이지로 보내, 결제할 사람이 「구독 · 결제」 줄을 찾아야 했다.)
+  // 서버 값은 이 화면의 supabase 클라이언트로 읽는다 — 데이터 층 클라이언트를 하나 더 만들면 세션을 두 벌 든다.
   // 세션이 선 뒤에 묻는다(그 전에는 RLS 가 빈 답을 준다). 4초 안에 답이 없으면 온보딩으로 간다(1.5초는 느린 망의 재방문자를 빈 온보딩으로 보냈다 — 2026-10-15 출시 검수).
   // 못 물어봤으면(오류·시간 초과) null — 온보딩 1단계가 「설정을 불러오지 못해 처음 화면을 열었어요」를 띄운다(2026-10-15 D3).
   let 답옴 = false;
-  const 마쳤나 = () => Promise.race([
-    supabase.from('user_preference_job').select('job_code').limit(1)
-      .then(({ data, error }) => { 답옴 = true; if (error) throw error; return data.length > 0; })
-      .catch((e) => { track('client_error', { msg: 'callback_dest:' + String(e?.message || e).slice(0, 80) }); return null; }),
+  const 행선지 = () => Promise.race([
+    (async () => {
+      const [pref, jobs] = await Promise.all([
+        supabase.from('user_preference').select('user_id').maybeSingle(),
+        supabase.from('user_preference_job').select('job_code').limit(1),
+      ]);
+      for (const r of [pref, jobs]) if (r.error) throw r.error;
+      const 마침 = Boolean(pref.data) && jobs.data.length > 0;   // mypage-data `onboardingDone` 과 같은 기준
+      let 구독 = null;
+      if (마침) {
+        const r = await supabase.rpc('mypage_subscription').maybeSingle();
+        if (r.error) throw r.error;
+        구독 = r.data;
+      }
+      답옴 = true;
+      return 이어갈곳판정(마침, 구독, readState());
+    })().catch((e) => { 답옴 = true; track('client_error', { msg: 'callback_dest:' + String(e?.message || e).slice(0, 80) }); return null; }),
     new Promise((r) => setTimeout(() => { if (!답옴) track('client_error', { msg: 'callback_dest:timeout' }); r(null); }, 4000)),
   ]);
   let 성공중 = false;   // 이벤트·폴백·3초 판정 세 경로가 겹쳐도 한 번만 묻는다
@@ -266,10 +282,7 @@
     window.ccAlive();
     // 공용 기기 — 다른 계정이 고른 온보딩 값이 남아 있으면 지운다(앞 사람의 직무가 이 사람 화면에 보이고 저장되지 않게).
     forgetIfOtherOwner((await supabase.auth.getSession()).data.session?.user?.id);
-    const 갈곳 = takeNext(null) ?? await (async () => {
-      const 마침 = await 마쳤나();
-      return 마침 ? '/mypage/' : 마침 === null ? '/onboarding/1/?dest=unknown' : '/onboarding/1/';
-    })();
+    const 갈곳 = takeNext(null) ?? (await 행선지()) ?? '/onboarding/1/?dest=unknown';
     await window.ccDone();
     go(갈곳);
   };
