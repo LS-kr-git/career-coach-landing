@@ -134,7 +134,7 @@
 
   /* 소장 알림 — 소장된 전문을 열 때마다 떴다가 사라진다 (2026-09-13 컨펌 T2 · 2026-10-04 「열 때마다」).
      2026-10-04 피그마 2062:821 대로 제목 한 줄만 남겼다(링크·설명 줄 삭제).
-     모션: 아래에서 12px 떠오르며 나타남(.24s) → 2.5초 머묾 → 12px 가라앉으며 사라짐(.26s).
+     모션: 아래에서 12px 떠오르며 나타남(.24s) → 글자 수만큼 머묾(assets/toast.js 글자머묾) → 12px 가라앉으며 사라짐(.26s).
      바닥에 붙은 알림이라 들어온 방향으로 나간다. 감속 설정이면 움직임 없이 흐려지기만 한다. */
   .toast{position:fixed;left:50%;bottom:24px;z-index:20;
     width:calc(100% - 40px);max-width:410px;
@@ -276,7 +276,7 @@
   import '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
   // 접속 정보는 /assets/supabase-config.js 한 곳에만 둔다 (2026-08-06 복구 훈련 결과).
   import { SUPABASE_URL, SUPABASE_ANON_KEY } from '/assets/supabase-config.js';
-  import { 오류안내 } from '/assets/toast.js';
+  import { 오류안내, 하단안내 } from '/assets/toast.js';
   import { 막대 } from '/assets/skeleton.js';
   import { FAIL } from '/assets/mypage-data.js';
 
@@ -488,21 +488,10 @@
   }
 
   /** 소장 알림 — 소장된 전문을 **열 때마다** 뜬다(2026-10-04 사용자 지시).
-      떠오름(.24s) → 2.5초 머묾 → 가라앉음(.26s) 뒤 지운다. 전환을 안 쓰는 기기에서는
-      transitionend 가 안 오므로 **타이머로도 한 번 더 지운다** — 둘 중 먼저 오는 쪽이 이긴다. */
+      모양은 카드 그대로, 머무는 시간만 공용 규칙(글자 수)이다 — 2026-10-15 사용자 결정. */
   function 알림() {
-    const el = $('toast');
     $('toastTtl').textContent = SAVED_TOAST.title;
-    el.classList.remove('in', 'out');
-    el.hidden = false;
-    // 한 프레임 그린 뒤에 in 을 붙여야 시작 위치(12px 아래)에서 전환이 걸린다.
-    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('in')));
-    const 숨김 = () => { el.hidden = true; el.classList.remove('in', 'out'); };
-    setTimeout(() => {
-      el.classList.add('out');
-      el.addEventListener('transitionend', 숨김, { once: true });
-      setTimeout(숨김, 500);
-    }, 240 + 2500);
+    하단안내($('toast'));
   }
 
   $('makeup').addEventListener('click', async (e) => {

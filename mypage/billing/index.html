@@ -322,7 +322,7 @@
     되돌리는중 = true;
     resumeSubscription().then(다시읽는다).then(function (r) {
       paint(billingView(r[0]), false, r[1]);
-      하단안내($('toast'));   // 해지 취소 뒤 안내 — 공용 「하단 안내」(5초)
+      하단안내($('toast'));   // 해지 취소 뒤 안내 — 공용 「하단 안내」(글자 수 규칙)
     }, function () {
       오류안내($('resumeErr'), '해지를 취소하지 못했어요. 잠시 후 다시 눌러 주세요');
     }).then(function () { 되돌리는중 = false; });

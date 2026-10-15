@@ -387,7 +387,7 @@
   });
   메일줄.addEventListener('click', function () {
     (navigator.clipboard ? navigator.clipboard.writeText(MAIL).then(function () { return true; }, 옛복사) : Promise.resolve(옛복사()))
-      .then(function (ok) { if (ok) 하단안내(document.getElementById('toast'), 2000); else location.href = 'mailto:' + MAIL; });
+      .then(function (ok) { if (ok) 하단안내(document.getElementById('toast')); else location.href = 'mailto:' + MAIL; });
   });
 </script>
 </div>
