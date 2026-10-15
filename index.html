@@ -372,11 +372,12 @@
   // 이미 로그인한 사람은 카카오를 건너뛴다 — 세션은 supabase-js 기본 저장 이름에서 본다(CDN 을 기다리지 않게).
   const 로그인됨 = (() => { try { return !!localStorage.getItem('sb-' + new URL(SUPABASE_URL).hostname.split('.')[0] + '-auth-token'); } catch { return false; } })();
   const 버튼 = document.querySelectorAll('.top .auth, #ctaBtn');
-  // 로그인한 사람은 누르면 **기다리지 않고 바로** 간다 (2026-10-15 사용자 확정 B안). 전에는 서버에
-  // 「온보딩을 마쳤나」를 묻고 답을 최대 3초 기다려 그동안 아무 반응이 없었다.
+  // 로그인한 사람은 누르면 바로 간다 (2026-10-15 사용자 확정 B안). 전에는 누른 뒤에야 서버에
+  // 「온보딩을 마쳤나」를 물었다 — 이제는 페이지를 열 때 물어 두므로 대개 답이 이미 와 있다.
   // 행선지는 누르기 전에 정해 둔다 — 페이지를 열 때 서버에 물어, 선택이 다 모였으면 마이페이지, 아니면
-  // 온보딩 1단계. 답이 오기 전(보통 1초 안)에 누르면 마이페이지로 가고, 거기서 서버에 물어 길을 정한다
-  // (mypage/index.html 「마친사람」) — 그동안 이 화면이 멈춰 서 있다(assets/steady.js).
+  // 온보딩 1단계, 세션이 죽었으면 카카오. 답이 오기 전(보통 1초 안)에 누르면 그 답을 여기서 기다렸다 간다 —
+  // 마이페이지를 거쳐 가면 넘어가는 사이 마이페이지 바탕이 비치고, 카카오로 갈 때 「가입 시작」이 안 남는다.
+  // 기다리는 동안 보이는 것은 어느 쪽이든 이 화면이라 체감은 같다. 3초가 넘으면 마이페이지에 맡긴다.
   const 실패 = (e) => track('client_error', { msg: 'landing_dest:' + String(e?.message || e).slice(0, 80) });
   const 앱실패 = (e) => track('client_error', { msg: 'kakao_app:' + String(e?.message || e).slice(0, 80) });
   // 로그인 안 한 사람의 길 — 카카오 로그인. 처음부터 안 한 사람과, 브라우저에만 세션이 남은(탈퇴·삭제된)
@@ -400,13 +401,23 @@
   if (!로그인됨) 로그인전();
   else {
     for (const a of 버튼) a.href = '/mypage/';
-    import('/assets/onboarding-store.js').then((s) => {
-      // 서버 답이 오면 행선지를 정해 둔다. 세션이 이미 죽은 게 드러나면(탈퇴·삭제) 카카오 길로 바꾼다.
-      return s.pullFromServer().then((답) => {
-        if (답 === 'no-session') return 로그인전();
-        for (const a of 버튼) a.href = s.complete(s.readState()) ? '/mypage/' : '/onboarding/1/';
+    let 정함 = false;
+    const 물음 = import('/assets/onboarding-store.js').then((s) => s.pullFromServer().then((답) => {
+      if (답 === 'no-session') 로그인전();   // 탈퇴·삭제로 세션이 죽었다 — 카카오 길로
+      else for (const a of 버튼) a.href = s.complete(s.readState()) ? '/mypage/' : '/onboarding/1/';
+    })).catch(실패).finally(() => { 정함 = true; });
+    let 기다림 = false;
+    for (const a of 버튼) a.addEventListener('click', (e) => {
+      if (정함) return;   // 행선지가 정해졌으면 링크 그대로(카카오면 로그인전 의 기록·앱 전환이 맡는다)
+      if (e.metaKey || e.ctrlKey || e.shiftKey) return;   // 새 탭으로 열기는 그대로 둔다
+      e.preventDefault();
+      if (기다림) return;   // 기다리는 동안 다시 눌러도 한 번만 간다(「가입 시작」이 두 번 남지 않게)
+      기다림 = true;
+      Promise.race([물음, new Promise((r) => setTimeout(r, 3000))]).then(() => {
+        if (a.href.startsWith(SUPABASE_URL)) track('signup_start');   // 카카오 로그인 입구로 간다
+        location.href = a.href;
       });
-    }).catch(실패);
+    });
   }
   // 미리 받아 두기 (2026-10-14 사용자 지시) — 카카오에서 돌아온 로그인 처리 화면과 온보딩 1단계가 쓰는 파일을
   // 지금 브라우저에 받아 둔다. 그 화면에서 가장 오래 걸리던 것이 supabase-js(9개 파일·약 75KB, 세 겹으로 이어 받음)다.
