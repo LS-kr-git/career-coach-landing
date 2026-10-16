@@ -7,7 +7,7 @@
 <meta name="color-scheme" content="only light">
 <meta name="format-detection" content="telephone=no">
 <!-- 랜딩 버전 지문 — 섹션 구성·제목·시안 값으로 만든다. 손으로 고치지 말고 `node tools/landing-version/fp.mjs --write` (page-audit 이 대조한다) -->
-<meta name="cc-lv" content="fbdc450e15">
+<meta name="cc-lv" content="3412683a24">
 <title>커리어코치</title>
 <meta name="description" content="일하는 사람들의 커리어 성장을 위해">
 <link rel="canonical" href="https://careercoach.my/">
@@ -119,6 +119,27 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
       <li>새로운 업무는 AI에게 시키기 전에 내가 직접 해 보는 게 결국 내 실력과 연봉을 바꿔요.</li>
     </ol></div>
   </div></div>
+</section>
+
+<!-- 250개 -->
+<section data-sec="1년 250개" class="gap20 s-a100b c" id="sec250">
+  <div class="sal" data-v="0">
+    <p class="more">1년에 <b>250개</b>의 인사이트를<br>더 쌓은 만큼 역량 상승과<br><span class="ul">연봉 추가 인상</span>은 당연하죠</p>
+  </div>
+  <div class="yr"><div class="yg" id="yg"></div><div class="yl"><span>1월</span><span>6월</span><span>12월</span></div><div class="yc"><span>평일 발송 메시지</span><b><span id="ycn">0</span>개</b></div></div>
+</section>
+
+<!-- 연봉 1% -->
+<section data-sec="연봉 1% 효과" class="gap20 s-white">
+  <h2>연봉 협상에서<br><span class="hl">1%</span>만 추가 인상돼도<br>1년 구독료의 <span class="rxw" id="rx">8.5배</span></h2>
+  <p class="rxn">*아래 연봉 기준</p>
+  <div class="sal" id="sal" data-v="6">
+    <label class="u1"><span>내 연봉</span><input type="number" inputmode="numeric" class="sv" value="4000" min="1000" max="30000" step="100"><em>만원</em></label>
+    <div class="u2"><div class="rvv"><span>내 연봉</span><b class="sd">4,000만원</b></div><div class="rngw"><span class="tipb">← 밀어서 내 연봉 넣어보기 →</span><span class="fing">👆</span><input type="range" class="sv" min="2000" max="15000" step="100" value="4000"></div><div class="rl"><span>2천만원</span><span>1억 5천만원</span></div></div>
+    <div class="u3"><span class="lb">내 연봉은</span><div class="pc"><button data-s="3000">3천만</button><button data-s="4000" class="on">4천만</button><button data-s="5000">5천만</button><button data-s="7000">7천만</button><button data-s="10000">1억</button></div><label class="dx">직접 입력 <input type="number" inputmode="numeric" class="sv" value="4000"> 만원</label></div>
+    <p class="u4">내 연봉은 <input type="number" inputmode="numeric" class="sv" value="4000">만원이에요</p>
+    <div class="k33 live"><div class="col"><b id="b0">4.7만</b><i id="h0"></i><span>1년<br>구독료</span></div><div class="col up"><b id="b1">40만</b><i id="h1"></i><span>연봉 1%<br>추가 인상 시</span></div><div class="col up"><b id="b2">80만</b><i id="h2"></i><span>연봉 2%<br>추가 인상 시</span></div></div>
+  </div>
 </section>
 
 <!-- 퀴즈 -->
@@ -338,27 +359,6 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
     <div class="row"><s id="ps">70,800원</s><span class="pct" id="ppc">33%</span><span class="pr" id="ppr">47,200원</span></div>
     <div class="dayp">하루 약 <span class="a6">129원</span></div>
   </div>
-</section>
-
-<!-- 연봉 1% -->
-<section data-sec="연봉 1% 효과" class="gap20 s-white">
-  <h2>연봉 협상에서<br><span class="hl">1%</span>만 추가 인상돼도<br>1년 구독료의 <span class="rxw" id="rx">8.5배</span></h2>
-  <p class="rxn">*아래 연봉 기준</p>
-  <div class="sal" id="sal" data-v="6">
-    <label class="u1"><span>내 연봉</span><input type="number" inputmode="numeric" class="sv" value="4000" min="1000" max="30000" step="100"><em>만원</em></label>
-    <div class="u2"><div class="rvv"><span>내 연봉</span><b class="sd">4,000만원</b></div><div class="rngw"><span class="tipb">← 밀어서 내 연봉 넣어보기 →</span><span class="fing">👆</span><input type="range" class="sv" min="2000" max="15000" step="100" value="4000"></div><div class="rl"><span>2천만원</span><span>1억 5천만원</span></div></div>
-    <div class="u3"><span class="lb">내 연봉은</span><div class="pc"><button data-s="3000">3천만</button><button data-s="4000" class="on">4천만</button><button data-s="5000">5천만</button><button data-s="7000">7천만</button><button data-s="10000">1억</button></div><label class="dx">직접 입력 <input type="number" inputmode="numeric" class="sv" value="4000"> 만원</label></div>
-    <p class="u4">내 연봉은 <input type="number" inputmode="numeric" class="sv" value="4000">만원이에요</p>
-    <div class="k33 live"><div class="col"><b id="b0">4.7만</b><i id="h0"></i><span>1년<br>구독료</span></div><div class="col up"><b id="b1">40만</b><i id="h1"></i><span>연봉 1%<br>추가 인상 시</span></div><div class="col up"><b id="b2">80만</b><i id="h2"></i><span>연봉 2%<br>추가 인상 시</span></div></div>
-  </div>
-</section>
-
-<!-- 250개 -->
-<section data-sec="1년 250개" class="gap20 s-a100b c" id="sec250">
-  <div class="sal" data-v="0">
-    <p class="more">1년에 <b>250개</b>의 인사이트를<br>더 쌓은 만큼 역량 상승과<br><span class="ul">연봉 추가 인상</span>은 당연하죠</p>
-  </div>
-  <div class="yr"><div class="yg" id="yg"></div><div class="yl"><span>1월</span><span>6월</span><span>12월</span></div><div class="yc"><span>1년간 발송 메시지</span><b><span id="ycn">0</span>개</b></div></div>
 </section>
 
 <!-- 후기 -->
