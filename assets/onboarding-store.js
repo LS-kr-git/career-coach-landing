@@ -208,13 +208,22 @@ async function commit(state, supabase, session, retry) {
   const 비우기를_실었다 = state.topicClear === true;
   if (비우기를_실었다) args.p_topic_clear = true;
   else if (state.topic) args.p_topic = state.topic;
-  const { error } = await supabase.rpc('save_onboarding', args);
+  const { error, status } = await supabase.rpc('save_onboarding', args);
   if (error) {
     writeState({ pending: true });
     // 이름은 analytics.event_name 허용 목록(visit·signup_view·signup_start·login·
     // onboarding_step·onboarding_done)에 있는 것만 통과한다. 실패 전용 이름이 없어
     // 단계 이벤트 + props 로 적는다. 목록은 다른 저장소(career-coach)에 있다.
-    track('onboarding_step', { step: 3, save: 'failed' }, session.access_token);
+    // 실패 **사유**도 싣는다 (2026-10-17 사용자 결정 「저장 실패 사유 남기기」). 10-14 밤 한 브라우저의
+    // 저장 실패 27건이 사유 없이 남아 원인을 못 갈랐다. 🔴 오류 문구 원문은 싣지 않는다 — 입력값이
+    // 섞일 수 있다. 코드·HTTP 상태와, 문구를 정해 둔 갈래 넷으로만 줄인다.
+    const 문구 = String(error.message || '');
+    const why = /인증된 회원이 아닙니다/.test(문구) ? 'not-member'
+      : /JWT|token/i.test(문구) ? 'auth'
+      : /fetch|network|Load failed/i.test(문구) ? 'net' : 'other';
+    track('onboarding_step', {
+      step: 3, save: 'failed', why, code: String(error.code || '').slice(0, 16), http: Number(status) || 0,
+    }, session.access_token);
     // 로그인은 됐는데 회원 행이 없다(가입 처리가 실패한 사람). 같은 저장을 되풀이하면 영영 막힌다 —
     // 다시 로그인하면 서버가 회원 행을 메운다(career-coach 0155). 핑퐁을 막으려고 10분에 한 번만 보낸다.
     if (/인증된 회원이 아닙니다/.test(error.message || '') && 다시로그인해도되나()) {
