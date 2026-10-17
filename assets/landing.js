@@ -49,12 +49,12 @@ const rxSet=t=>{$("rx").dataset.t=t;clearTimeout(rxT);if(!rxSeen){$("rx").textCo
 new IntersectionObserver(es=>{if(es[0].isIntersecting){rxSeen=true}},{root:null,threshold:.8}).observe($("rx"));
 
 (()=>{const SUB=won("ppr")/1e4,f=n=>(Math.round(n*10)/10).toLocaleString("ko-KR")+"만원";
- const set=v=>{v=Math.max(1000,Math.min(30000,+v||0));const p1=v*.01,p2=v*.02,mx=Math.max(p2,SUB);
+ const set=v=>{v=Math.max(1000,Math.min(10000,+v||0));const p1=v*.03,p2=v*.04,mx=Math.max(p2,SUB);
   document.querySelectorAll("#sal .sv").forEach(i=>{if(document.activeElement!==i)i.value=v});
   document.querySelectorAll("#sal .pc button").forEach(b=>b.classList.toggle("on",+b.dataset.s===v));
   document.querySelector("#sal .sd").textContent=v.toLocaleString("ko-KR")+"만원";
   [[SUB,0],[p1,1],[p2,2]].forEach(([x,k])=>{$("h"+k).style.height=Math.max(3,x/mx*100)+"%";$("b"+k).textContent=(k?"+":"")+f(x)});
-  rxSet(Math.round(p1/SUB*10)/10+"배")};
+  const r=p1/SUB;rxSet((r>=10?Math.round(r):Math.round(r*10)/10)+"배")};
  document.querySelectorAll("#sal .sv").forEach(i=>i.addEventListener("input",()=>{if(i.value!=="")set(i.value)}));
  document.querySelector("#sal .pc").addEventListener("click",e=>{const b=e.target.closest("button");if(b)set(b.dataset.s)});
  set(4000)})();
