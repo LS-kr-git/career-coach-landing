@@ -510,12 +510,16 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3)
   // (career-coach 0178)에 같은 순간 남긴다 — 메타 광고 최적화와 어드민 가입 퍼널이 같은 기준을 쓴다.
   // 버튼을 빨리 누른 사람은 10초가 차기 전에 카카오로 떠나므로 click 이 없으면 가장 관심 큰 사람이 빠진다.
   // 운영자·시험 브라우저는 픽셀이 안 켜지고, 우리 기록은 track.js 와 DB 가 뺀다.
+  // 기준값은 여기 한 곳이다. 기록(why·s·t)에 그대로 실어 보내 어드민 「가입 퍼널」이 이 값을 읽어 그린다 —
+  // 이 숫자만 바꾸면 메타 신호·우리 기록·어드민 화면이 함께 따라간다(2026-10-18 사용자 지시 「손으로 같이 바꾸지 않게」).
+  const 관심기준 = { 섹션: 3, 초: 10 };
   let 관심보냄 = false;
   const 관심 = (why) => {
     if (관심보냄) return;
     관심보냄 = true;
-    try { window.fbq?.('trackCustom', 'LandingEngaged', { why, lv }); } catch { /* 무시 */ }
-    track('landing_engaged', lv ? { why, lv, vid } : { why });
+    const 기준 = { s: 관심기준.섹션, t: 관심기준.초 };
+    try { window.fbq?.('trackCustom', 'LandingEngaged', { why, lv, ...기준 }); } catch { /* 무시 */ }
+    track('landing_engaged', lv ? { why, lv, vid, ...기준 } : { why, ...기준 });
   };
   document.querySelectorAll('.top .auth, #ctaBtn').forEach((a) => a.addEventListener('click', () => 관심('click')));
   if (lv && 'IntersectionObserver' in window) {
@@ -566,7 +570,7 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3)
     let 본초 = 0;
     const 관심재기 = setInterval(() => {
       if (document.visibilityState !== 'visible') return;
-      if (++본초 < 10 || 깊이 < 3) return;
+      if (++본초 < 관심기준.초 || 깊이 < 관심기준.섹션) return;
       clearInterval(관심재기);
       관심('read');
     }, 1000);
