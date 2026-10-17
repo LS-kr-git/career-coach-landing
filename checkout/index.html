@@ -523,7 +523,10 @@
       sdk = new Promise(function (ok, fail) {
         var el = document.createElement('script');
         el.src = 'https://cdn.portone.io/v2/browser-sdk.js';
-        el.onload = function () { ok(window.PortOne); };
+        el.onload = function () {
+          if (window.PortOne) return ok(window.PortOne);
+          sdk = null; var x = new Error(''); x.at = 'sdk'; fail(x);   // 받았는데 비어 있다(차단기 등) — 결제창이 못 뜬 것이다
+        };
         el.onerror = function () { sdk = null; var x = new Error(''); x.at = 'sdk'; fail(x); };
         document.head.appendChild(el);
       });
@@ -599,11 +602,7 @@
     if (변경) return;
     track('checkout_fail', { at: at, code: code ? String(code).slice(0, 60) : undefined, cancel: cancel || undefined });
   }
-  function 어디서(e, at) {
-    var x = e instanceof Error ? e : new Error(String(e || ''));
-    if (!x.at) x.at = at;
-    return x;
-  }
+  function 어디서(e, at) { e.at = at; return e; }
   function 앞요금제이름(code) {
     var p = code && 요금제[code];
     return p ? p.period_count + '개월권' : '앞서 고르신 구독권';
