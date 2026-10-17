@@ -380,5 +380,6 @@ footer .links a[href$="privacy.html"]{font-weight:600}
 
 /* ===== PC 에서 휴대폰 목업이 카드 폭(450)을 따라 늘어나지 않게 — 모바일 360 과 같은 312px 로 묶는다 (2026-10-13 사용자 확정) ===== */
 .pm-hero,#thusec .pm{max-width:312px;width:100%;margin-left:auto;margin-right:auto}
-/* ===== 마지막 카카오 버튼 아래 검은 바탕 +100px — #closing 바탕색(cbg=2 의 #0B0D12)과 같은 띠를 푸터 위에 붙인다 (2026-10-13 사용자 확정) ===== */
-.screen:has(#cbg[data-v="2"]) #closing[data-v="45"]~footer{border-top:100px solid #0B0D12}
+/* ===== 마지막 카카오 버튼 아래 검은 바탕 +100px — #closing 바탕색(cbg=2 의 #0B0D12)과 같은 띠를 푸터 위에 붙인다 (2026-10-13 사용자 확정)
+   #closing 이 푸터 바로 앞일 때만 붙인다 — 2026-10-18 후기·띠가 그 아래로 가자 띠 아래에 검은 띠가 떴다 ===== */
+.screen:has(#cbg[data-v="2"]) #closing[data-v="45"]+footer{border-top:100px solid #0B0D12}
