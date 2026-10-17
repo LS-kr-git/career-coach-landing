@@ -637,6 +637,8 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3)
   // 이미 로그인한 사람은 카카오를 건너뛴다 — 세션은 supabase-js 기본 저장 이름에서 본다(CDN 을 기다리지 않게).
   const 로그인됨 = (() => { try { return !!localStorage.getItem('sb-' + new URL(SUPABASE_URL).hostname.split('.')[0] + '-auth-token'); } catch { return false; } })();
   const 버튼 = document.querySelectorAll('.top .auth, #ctaBtn');
+  // 어느 버튼으로 가입을 시작했나 — 어드민 「가입 퍼널」이 CTA 클릭을 버튼별로 나눠 센다(career-coach 0175 · 2026-10-18 사용자 확정).
+  const 버튼표 = (a) => ({ btn: a.id === 'ctaBtn' ? 'cta' : 'top' });
   // 로그인한 사람은 누르면 바로 간다 (2026-10-15 사용자 확정 B안). 전에는 누른 뒤에야 서버에
   // 「온보딩을 마쳤나」를 물었다 — 이제는 페이지를 열 때 물어 두므로 대개 답이 이미 와 있다.
   // 행선지는 누르기 전에 정해 둔다 — 페이지를 열 때 서버에 물어 이어서 할 곳(아래 `이어갈곳`),
@@ -657,7 +659,7 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3)
       a.href = KAKAO_LOGIN;
       a.addEventListener('click', (e) => {
         // 여기와 login 사이의 차이가 카카오 동의 화면 이탈률이다(어드민 「카카오 로그인이 실패하고 있나」).
-        const 기록 = 남김 ? null : track('signup_start');
+        const 기록 = 남김 ? null : track('signup_start', 버튼표(a));
         남김 = true;
         // 휴대폰이면 카카오톡 앱으로 바로 — 앱 전환은 페이지를 안 내리므로 기다리지 않는다(누른 동작이 살아 있을 때만 된다).
         if (앱 && 앱.앱으로()) { e.preventDefault(); return; }
@@ -699,7 +701,7 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3)
       import('/assets/kakao-login.js').then((k) => k.앱전환 && k.준비(() => {}).then(() => { 앱 = k; })).catch(() => {});
       Promise.race([물음, new Promise((r) => setTimeout(r, 3000))]).then(() => {
         if (!a.href.startsWith(SUPABASE_URL)) { location.href = a.href; return; }
-        const 기록 = track('signup_start');   // 카카오 로그인 입구로 간다
+        const 기록 = track('signup_start', 버튼표(a));   // 카카오 로그인 입구로 간다
         const 동작살아있음 = navigator.userActivation?.isActive === true;   // 알 수 없는 옛 브라우저는 웹 로그인으로(앱이 안 열리고 멈추는 것보다 낫다)
         if (!(앱 && 동작살아있음 && 앱.앱으로())) { 닿은뒤(기록, a); return; }   // 못 넘기면 웹 로그인 — 기록이 닿은 뒤에
         // 기다린 뒤라 브라우저가 앱 열기를 막았을 수 있다 — 4초 지나도 이 화면에 그대로 있으면 웹 로그인으로 간다.
