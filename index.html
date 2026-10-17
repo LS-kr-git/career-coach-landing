@@ -505,6 +505,19 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3)
   // 1.5초 모아 보내고(빠르게 훑으면 한 번), 화면을 떠날 때 남은 것을 보낸다. 우리 기기·자동 점검은 track.js 와 DB 가 뺀다.
   // 방문(visit)은 머리의 async 모듈이 이미 보냈다. lv·vid 는 거기서 정한 것을 그대로 쓴다(머리 「방문 기록」 주석).
   const { lv, vid } = window.ccVisit;
+  // 랜딩 「관심 방문」 (2026-10-18 사용자 확정) — 「3번째 섹션 + 화면 보인 시간 10초」(read) 또는 상단·하단 「시작하기」
+  // 버튼 클릭(click) 중 먼저 온 것. 방문마다 한 번, 메타 맞춤 이벤트 LandingEngaged 와 우리 기록 landing_engaged
+  // (career-coach 0178)에 같은 순간 남긴다 — 메타 광고 최적화와 어드민 가입 퍼널이 같은 기준을 쓴다.
+  // 버튼을 빨리 누른 사람은 10초가 차기 전에 카카오로 떠나므로 click 이 없으면 가장 관심 큰 사람이 빠진다.
+  // 운영자·시험 브라우저는 픽셀이 안 켜지고, 우리 기록은 track.js 와 DB 가 뺀다.
+  let 관심보냄 = false;
+  const 관심 = (why) => {
+    if (관심보냄) return;
+    관심보냄 = true;
+    try { window.fbq?.('trackCustom', 'LandingEngaged', { why, lv }); } catch { /* 무시 */ }
+    track('landing_engaged', lv ? { why, lv, vid } : { why });
+  };
+  document.querySelectorAll('.top .auth, #ctaBtn').forEach((a) => a.addEventListener('click', () => 관심('click')));
   if (lv && 'IntersectionObserver' in window) {
     const 섹션들 = [...document.querySelectorAll('#scr > section')];
     let 깊이 = 1, 보낸 = 1, 모음 = 0;
@@ -546,17 +559,16 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3)
       if (document.visibilityState === 'hidden') 떠남(); else { 앞시각 = performance.now(); 켜짐 = true; }
     });
 
-    // 메타 최적화 신호 「랜딩 관심 방문」 LandingEngaged (2026-10-17 사용자 확정) — 첫 화면 아래로 두 섹션 이상(위에서 3번째 섹션에 닿음)
-    // + 화면이 보인 시간 합쳐 10초. 섹션 순서가 바뀌어도 이름이 아닌 위치로 센다. 방문마다 한 번.
-    // 10초는 10/17 체류 기록 11건에서 「5초 이하로 나감」과 「13초 이상 읽음」 사이 빈 구간이라 골랐다.
-    // 운영자·시험 브라우저는 픽셀이 안 켜져 아무 일도 안 한다. 새로고침·뒤로가기·#바로가기 입장(lv 없음)도 안 보낸다 —
-    // 브라우저가 깊은 자리로 데려다 놓아 안 읽어도 깊이 3이 되기 때문이다(머리 「방문 기록」 주석). 광고 클릭은 새 입장이라 해당 없음.
+    // 관심 방문의 read 갈래 — 첫 화면 아래로 두 섹션 이상(위에서 3번째 섹션에 닿음) + 화면이 보인 시간 합쳐 10초.
+    // 섹션 순서가 바뀌어도 이름이 아닌 위치로 센다. 10초는 10/17 체류 기록 11건에서 「5초 이하로 나감」과
+    // 「13초 이상 읽음」 사이 빈 구간이라 골랐다. 새로고침·뒤로가기·#바로가기 입장(lv 없음)은 이 갈래가 안 돈다 —
+    // 브라우저가 깊은 자리로 데려다 놓아 안 읽어도 깊이 3이 되기 때문이다(머리 「방문 기록」 주석). click 갈래는 돈다.
     let 본초 = 0;
     const 관심재기 = setInterval(() => {
       if (document.visibilityState !== 'visible') return;
       if (++본초 < 10 || 깊이 < 3) return;
       clearInterval(관심재기);
-      try { window.fbq?.('trackCustom', 'LandingEngaged', { sec: 섹션들[2].dataset.sec, lv }); } catch { /* 무시 */ }
+      관심('read');
     }, 1000);
 
     // 옆으로 넘기는 묶음(전문가 카드 · 후기) — 세로로 같은 줄에 선 카드를 한 칸(열)으로 센다. 열의 절반이 들어오면 「봤다」.
