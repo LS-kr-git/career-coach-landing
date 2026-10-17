@@ -415,16 +415,115 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
     const 섹션들 = [...document.querySelectorAll('#scr > section')];
     let 깊이 = 1, 보낸 = 1, 모음 = 0;
     const 보내기 = () => { clearTimeout(모음); if (깊이 > 보낸) { 보낸 = 깊이; track('landing_reach', { lv, vid, s: 깊이 }); } };
+    // 섹션별 머문 시간 · 인터렉션 (2026-10-17 사용자 확정, 어드민 목업 v5) — 어드민 「랜딩 섹션 도달률」의 「체류 시간」 탭과 ▶ 펼침 줄.
+    // 머문 시간 = 위 「닿았다」와 같은 규칙으로 보이는 동안의 초. 탭이 숨은 동안은 안 세고, 섹션당 180초에서 자른다.
+    // 인터렉션 = 손으로 해서 새로 본 것만. 처음부터 보이던 것·저절로 넘어가며 보인 것(후기 자동 흐름)은 안 센다.
+    // 화면을 떠날 때(숨김·pagehide) 누적값을 landing_engage 한 건으로 보낸다. DB 는 한 방문(vid)의 가장 큰 값을 쓴다.
+    const 머묾 = 섹션들.map(() => 0), 보임 = new Set(), 조작 = {};
+    // 켜짐 — 「지금까지」 화면이 보이고 있었나. 숨김 알림이 올 때는 상태가 이미 hidden 이라 그 값으로 재면 마지막 구간이 통째로 빠진다.
+    let 앞시각 = performance.now(), 보낸값 = '', 켜짐 = document.visibilityState === 'visible';
+    const 쌓기 = () => {
+      const 지금 = performance.now(), 초 = (지금 - 앞시각) / 1000; 앞시각 = 지금;
+      if (켜짐) 보임.forEach((i) => { 머묾[i] = Math.min(180, 머묾[i] + 초); });
+    };
+    const 섹션번호 = (el) => 섹션들.indexOf(el.closest('#scr > section')) + 1;
     const 지켜봄 = new IntersectionObserver((줄) => {
+      쌓기();
       for (const e of 줄) {
-        if (!e.isIntersecting || e.intersectionRect.height < Math.min(e.boundingClientRect.height, innerHeight) / 2) continue;
-        const 번호 = 섹션들.indexOf(e.target) + 1;
-        if (번호 > 깊이) { 깊이 = 번호; clearTimeout(모음); 모음 = setTimeout(보내기, 1500); }
+        const i = 섹션들.indexOf(e.target);
+        if (!e.isIntersecting || e.intersectionRect.height < Math.min(e.boundingClientRect.height, innerHeight) / 2) { 보임.delete(i); continue; }
+        보임.add(i);
+        if (i + 1 > 깊이) { 깊이 = i + 1; clearTimeout(모음); 모음 = setTimeout(보내기, 1500); }
       }
     }, { threshold: Array.from({ length: 21 }, (_, k) => k / 20) });
     섹션들.forEach((x) => 지켜봄.observe(x));
-    addEventListener('pagehide', 보내기);
-    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') 보내기(); });
+    const 머묾보내기 = () => {
+      쌓기();
+      const d = 머묾.map((x) => Math.round(x * 10) / 10);
+      while (d.length && !d[d.length - 1]) d.pop();
+      const 값 = JSON.stringify([d, 조작]);
+      if (!d.length || 값 === 보낸값) return;
+      보낸값 = 값;
+      track('landing_engage', { lv, vid, d, x: 조작 });
+    };
+    const 떠남 = () => { 보내기(); 머묾보내기(); 켜짐 = false; };
+    addEventListener('pagehide', 떠남);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') 떠남(); else { 앞시각 = performance.now(); 켜짐 = true; }
+    });
+
+    // 옆으로 넘기는 묶음(전문가 카드 · 후기) — 세로로 같은 줄에 선 카드를 한 칸(열)으로 센다. 열의 절반이 들어오면 「봤다」.
+    // 손을 대기 전까지 보인 가장 먼 열이 기준이고, 손을 댄 뒤 그보다 먼 열을 보면 [섹션, 본 가장 먼 열, 열 수] 를 남긴다.
+    const 넘김 = (종류, 통) => {
+      const 겉 = 통 && 통.closest('.arw');
+      if (!겉) return;
+      let 손 = false, 기준 = 0, 최대 = 0;
+      const 열들 = () => [...new Set([...통.children].map((k) => Math.round(k.offsetLeft)))].sort((a, b) => a - b);
+      const 재기 = () => {
+        const 판 = 통.getBoundingClientRect();
+        if (!판.width) return;
+        const 왼 = 열들();
+        let 먼 = 0;
+        for (const k of 통.children) {
+          const b = k.getBoundingClientRect(), 가운데 = b.left + b.width / 2;
+          if (b.width && 가운데 >= 판.left && 가운데 <= 판.right) 먼 = Math.max(먼, 왼.indexOf(Math.round(k.offsetLeft)) + 1);
+        }
+        if (!손) { 기준 = Math.max(기준, 먼); return; }
+        최대 = Math.max(최대, 먼);
+        if (최대 > 기준) 조작[종류] = [섹션번호(통), 최대, 왼.length];
+      };
+      const 손댐 = () => { if (!손) { 재기(); 손 = true; } };
+      겉.addEventListener('click', (e) => { if (e.isTrusted && e.target.closest('.cpv,.cnx')) 손댐(); });
+      통.addEventListener('pointerdown', (e) => { if (e.isTrusted && e.pointerType === 'mouse') 손댐(); });
+      통.addEventListener('wheel', (e) => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) 손댐(); }, { passive: true });
+      let tx = 0, ty = 0;
+      통.addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+      통.addEventListener('touchmove', (e) => {
+        const dx = Math.abs(e.touches[0].clientX - tx), dy = Math.abs(e.touches[0].clientY - ty);
+        if (dx > 8 && dx > dy) 손댐();
+      }, { passive: true });
+      통.addEventListener('scroll', 재기, { passive: true });
+      // 화면 밖으로 나가면 손을 뗀 것으로 본다 — 돌아오면 후기 자동 흐름이 다시 도는데, 그때 넘어간 묶음은 손으로 본 것이 아니다.
+      new IntersectionObserver((줄) => {
+        if (줄.some((e) => e.isIntersecting)) { 재기(); return; }
+        기준 = Math.max(기준, 최대); 손 = false;
+      }).observe(통);
+    };
+    넘김('exp', document.getElementById('experts'));
+    넘김('rv', document.getElementById('reviews'));
+
+    // 직군 퀴즈 — 처음 골라져 있던 직군 말고 눌러 본 직군 수. 누를 때마다 질문 넷이 통째로 바뀐다.
+    const 칩통 = document.getElementById('quizChips');
+    if (칩통) {
+      const 처음 = 칩통.querySelector('.chip.on')?.dataset.k, 본직군 = new Set();
+      칩통.addEventListener('click', (e) => {
+        const b = e.isTrusted && e.target.closest('.chip');
+        if (!b || b.dataset.k === 처음) return;
+        본직군.add(b.dataset.k);
+        조작.quiz = [섹션번호(칩통), 본직군.size, 칩통.querySelectorAll('.chip').length - 1];
+      });
+    }
+
+    // 연봉 바꿔 보기 — 손을 멈추고 0.8초 지난 값만 한 번으로 센다(밀대를 끄는 동안의 값은 안 센다). 자동 시연은 isTrusted 로 빠진다.
+    const 연봉 = document.getElementById('sal');
+    if (연봉) {
+      let 마지막 = 연봉.querySelector('.sv')?.value, 번 = 0, 멈춤 = 0;
+      const 정함 = () => {
+        const v = 연봉.querySelector('.sv')?.value;
+        if (v && v !== 마지막) { 마지막 = v; 번++; 조작.sal = [섹션번호(연봉), 번, 0]; }
+      };
+      const 바꿈 = (e) => { if (e.isTrusted) { clearTimeout(멈춤); 멈춤 = setTimeout(정함, 800); } };
+      연봉.addEventListener('input', 바꿈);
+      연봉.addEventListener('click', (e) => { if (e.target.closest('button')) 바꿈(e); });
+    }
+
+    // 자주 묻는 질문 — 펼쳐 본 질문 수(같은 질문을 다시 펼쳐도 한 번).
+    const 질문들 = [...document.querySelectorAll('#scr > section.faq details')], 편질문 = new Set();
+    질문들.forEach((q, i) => q.addEventListener('toggle', () => {
+      if (!q.open) return;
+      편질문.add(i);
+      조작.faq = [섹션번호(q), 편질문.size, 질문들.length];
+    }));
   }
   // 가입·로그인 입구 — 두 버튼 모두 카카오로 바로 간다 (2026-10-14 /signup/ 화면 삭제, 사용자 지시).
   // 마크업의 /signup/ 은 이 모듈이 못 돌 때만 쓰이는 길이다(그 주소는 카카오로 넘겨주기만 한다).
