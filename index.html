@@ -637,7 +637,7 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3)
   // 이미 로그인한 사람은 카카오를 건너뛴다 — 세션은 supabase-js 기본 저장 이름에서 본다(CDN 을 기다리지 않게).
   const 로그인됨 = (() => { try { return !!localStorage.getItem('sb-' + new URL(SUPABASE_URL).hostname.split('.')[0] + '-auth-token'); } catch { return false; } })();
   const 버튼 = document.querySelectorAll('.top .auth, #ctaBtn');
-  // 어느 버튼으로 가입을 시작했나 — 어드민 「가입 퍼널」이 CTA 클릭을 버튼별로 나눠 센다(career-coach 0175 · 2026-10-18 사용자 확정).
+  // 어느 버튼으로 가입을 시작했나 — 어드민 「가입 퍼널」이 CTA 클릭을 버튼별로 나눠 센다(career-coach 0176 · 2026-10-18 사용자 확정).
   const 버튼표 = (a) => ({ btn: a.id === 'ctaBtn' ? 'cta' : 'top' });
   // 로그인한 사람은 누르면 바로 간다 (2026-10-15 사용자 확정 B안). 전에는 누른 뒤에야 서버에
   // 「온보딩을 마쳤나」를 물었다 — 이제는 페이지를 열 때 물어 두므로 대개 답이 이미 와 있다.
