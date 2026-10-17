@@ -546,6 +546,19 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3)
       if (document.visibilityState === 'hidden') 떠남(); else { 앞시각 = performance.now(); 켜짐 = true; }
     });
 
+    // 메타 최적화 신호 「랜딩 관심 방문」 LandingEngaged (2026-10-17 사용자 확정) — 첫 화면 아래로 두 섹션 이상(위에서 3번째 섹션에 닿음)
+    // + 화면이 보인 시간 합쳐 10초. 섹션 순서가 바뀌어도 이름이 아닌 위치로 센다. 방문마다 한 번.
+    // 10초는 10/17 체류 기록 11건에서 「5초 이하로 나감」과 「13초 이상 읽음」 사이 빈 구간이라 골랐다.
+    // 운영자·시험 브라우저는 픽셀이 안 켜져 아무 일도 안 한다. 새로고침·뒤로가기·#바로가기 입장(lv 없음)도 안 보낸다 —
+    // 브라우저가 깊은 자리로 데려다 놓아 안 읽어도 깊이 3이 되기 때문이다(머리 「방문 기록」 주석). 광고 클릭은 새 입장이라 해당 없음.
+    let 본초 = 0;
+    const 관심재기 = setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
+      if (++본초 < 10 || 깊이 < 3) return;
+      clearInterval(관심재기);
+      try { window.fbq?.('trackCustom', 'LandingEngaged', { sec: 섹션들[2].dataset.sec, lv }); } catch { /* 무시 */ }
+    }, 1000);
+
     // 옆으로 넘기는 묶음(전문가 카드 · 후기) — 세로로 같은 줄에 선 카드를 한 칸(열)으로 센다. 열의 절반이 들어오면 「봤다」.
     // 손을 대기 전까지 보인 가장 먼 열이 기준이고, 손을 댄 뒤 그보다 먼 열을 보면 [섹션, 본 가장 먼 열, 열 수] 를 남긴다.
     const 넘김 = (종류, 통) => {
