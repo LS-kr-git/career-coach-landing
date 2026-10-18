@@ -281,19 +281,21 @@ const BILLING_FN = 'portone-6r2k9tvq';
 
 // `plan` 은 결제 화면이 고른 요금제 코드다(career-coach 0126 · 2026-10-09). 안 넘기면 서버가
 // 살아 있는 요금제 하나로 건다 — 요금제를 둘 켠 뒤에는 꼭 넘겨야 첫 청구가 걸린다.
+// `billingKey` 가 없으면 **이미 보관된 카드**로 고른 요금제를 걷는다(`/charge-stored` — 다시 구독하는 사람의
+// 확인 창, 2026-10-19 사용자 지시). 답의 모양은 같다 — 결제 화면이 같은 갈래로 읽는다.
 export async function saveBillingKey(billingKey, plan) {
   const { SUPABASE_URL } = await import('/assets/supabase-config.js');
   const supabase = await supa();
   const { data, error } = await supabase.auth.getSession();
   if (error) throw error;
   if (!data.session) throw new Error('로그인 세션이 없습니다');
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/${BILLING_FN}/billing-key`, {
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/${BILLING_FN}/${billingKey ? 'billing-key' : 'charge-stored'}`, {
     method: 'POST',
     headers: {
       authorization: `Bearer ${data.session.access_token}`,
       'content-type': 'application/json',
     },
-    body: JSON.stringify({ billingKey, plan: plan || undefined, meta: (await import('/assets/track.js')).metaCookies() }),
+    body: JSON.stringify({ billingKey: billingKey || undefined, plan: plan || undefined, meta: (await import('/assets/track.js')).metaCookies() }),
     // 인앱 브라우저에서 연결이 끊기면 답이 영영 안 와 「창을 닫지 말고」 덮개가 계속 돈다. 서버 쪽 청구·되묻기
     // 상한(30초+15초)보다 넉넉히 기다린 뒤 끊는다 — 끊기면 TimeoutError 로, 결제 화면이 구독이 열렸는지 물어 보고 다시 누르게 한다.
     // iOS 15 이하 사파리에는 AbortSignal.timeout 이 없다 — 없으면 시간 제한 없이 보낸다(결제를 막지 않는다).
