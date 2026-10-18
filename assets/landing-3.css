@@ -26,7 +26,7 @@
 @keyframes hpop{0%{opacity:0;transform:scale(.7)}60%{opacity:1;transform:scale(1.05)}80%{transform:scale(.98)}100%{transform:none}}
 @keyframes nbn{0%{transform:translateY(-130%);opacity:0}15%,70%{transform:none;opacity:1}100%{transform:translateY(-130%);opacity:0}}
 @keyframes tshow{0%,99%{opacity:1}100%{opacity:0}}
-.screen:has(#ha[data-v="2"]) #hero.play .slide .at{animation:hup 1.15s cubic-bezier(.2,.8,.2,1) both}
+.screen:has(#ha[data-v="2"]) :is(.herow,#_).play .slide .at{animation:hup 1.15s cubic-bezier(.2,.8,.2,1) both}
 
 
 
@@ -116,8 +116,8 @@
 
 .stw .s1{width:var(--sw,96%)!important;transition:none!important}
 /* v48 */
-#pvsec .chp,#sec2 .chp2{font-size:13.5px;font-weight:600;color:var(--g600)}
-#chw1 .chip,#chw2 .chip{animation:none!important}
+:is(.pv,#_) .chp,#sec2 .chp2{font-size:13.5px;font-weight:600;color:var(--g600)}
+:is(.pvchw,#_) .chip,#chw2 .chip{animation:none!important}
 .rvp.rvflow{scroll-snap-type:none}
 /* v50 */
 .artp{font-size:16px!important;color:var(--g800)!important;font-weight:500}
@@ -152,7 +152,7 @@
 
 
 
-#pvsec .chp,#sec2 .chp2{font-weight:500}
+:is(.pv,#_) .chp,#sec2 .chp2{font-weight:500}
 #qz{margin-top:28px!important}
 /* v52 */
 .screen{overflow-x:clip}#tv5{overflow-x:clip;overflow-y:visible}
@@ -189,7 +189,7 @@
 
 
 /* v53 */
-#pvsec #sampleChips{padding-top:20px!important}#pvsec .chp{padding-bottom:52px!important}
+:is(.pv,#_) :is(.pvchips,#_){padding-top:20px!important}:is(.pv,#_) .chp{padding-bottom:52px!important}
 /* QG one-card variants */
 
 
@@ -212,7 +212,7 @@
 
 
 /* LK */
-#hero{position:relative}.lkb{display:none}
+:is(.herow,#_){position:relative}.lkb{display:none}
 .lkn{display:none}
 
 .lkb b{font-weight:800}
@@ -260,7 +260,7 @@
 .expn{text-align:center!important}
 /* v62 */
 .sarwb[hidden]{display:none!important}
-#pvsec .chp{padding-bottom:38px!important}
+:is(.pv,#_) .chp{padding-bottom:38px!important}
 
 
 
@@ -273,16 +273,16 @@
 
 /* v63 */
 .pm-hero .hint b,.hint b{animation:none!important;transform:none!important;line-height:1;font-size:15px;position:relative;top:-0.5px}
-#pvsec .chp{padding-bottom:30px!important}
-#pvsec .cet{display:inline-block;font-size:14.5px;font-weight:700;color:var(--a700);animation:cebob 1.6s ease-in-out infinite}
-#pvsec .cet::before{content:"👆 "}
+:is(.pv,#_) .chp{padding-bottom:30px!important}
+:is(.pv,#_) .cet{display:inline-block;font-size:14.5px;font-weight:700;color:var(--a700);animation:cebob 1.6s ease-in-out infinite}
+:is(.pv,#_) .cet::before{content:"👆 "}
 /* v64 번호 표시 */
-#hint{display:none!important}
-#dots{gap:8px;padding:6px 0 14px;align-items:center}
-#dots i{font-style:normal;cursor:pointer;display:grid;place-items:center;font-size:12px;font-weight:700;line-height:1;transition:all .25s;color:var(--g400);background:none;width:auto;height:auto;border-radius:0}
+:is(.pvhint,#_){display:none!important}
+:is(.pvdots,#_){gap:8px;padding:6px 0 14px;align-items:center}
+:is(.pvdots,#_) i{font-style:normal;cursor:pointer;display:grid;place-items:center;font-size:12px;font-weight:700;line-height:1;transition:all .25s;color:var(--g400);background:none;width:auto;height:auto;border-radius:0}
 /* DN1 숫자 원 */
-.screen:has(#dn[data-v="1"]) #dots i{width:24px;height:24px;border-radius:50%;background:#fff;border:1px solid var(--g200);color:var(--g400)}
-.screen:has(#dn[data-v="1"]) #dots i.on{background:var(--a500);border-color:var(--a500);color:#fff}
+.screen:has(#dn[data-v="1"]) :is(.pvdots,#_) i{width:24px;height:24px;border-radius:50%;background:#fff;border:1px solid var(--g200);color:var(--g400)}
+.screen:has(#dn[data-v="1"]) :is(.pvdots,#_) i.on{background:var(--a500);border-color:var(--a500);color:#fff}
 /* DN2 숫자+밑줄 */
 
 
@@ -319,8 +319,8 @@
 
 
 /* CD: 기본(v63) 규칙을 덮어씀 */
-.screen:not(:has(#cdz[data-v="1"])) #pvsec .cet{animation:none;font-size:14px;color:var(--g600);font-weight:500;background:none;padding:0;border:0}
-.screen:not(:has(#cdz[data-v="1"])) #pvsec .cet::before{content:none}
+.screen:not(:has(#cdz[data-v="1"])) :is(.pv,#_) .cet{animation:none;font-size:14px;color:var(--g600);font-weight:500;background:none;padding:0;border:0}
+.screen:not(:has(#cdz[data-v="1"])) :is(.pv,#_) .cet::before{content:none}
 
 
 
@@ -336,8 +336,8 @@
 
 
 @keyframes cdty{to{max-width:14em}}@keyframes cdcur{50%{border-right-color:transparent}}
-.screen:has(#cdz[data-v="11"]) #pvsec .cet{color:var(--g800);font-weight:600}
-.screen:has(#cdz[data-v="11"]) #pvsec .cet::before{content:"👆";display:inline-block;margin-right:5px;animation:cdtap 1.5s ease-in-out infinite}
+.screen:has(#cdz[data-v="11"]) :is(.pv,#_) .cet{color:var(--g800);font-weight:600}
+.screen:has(#cdz[data-v="11"]) :is(.pv,#_) .cet::before{content:"👆";display:inline-block;margin-right:5px;animation:cdtap 1.5s ease-in-out infinite}
 @keyframes cdtap{0%,60%,100%{transform:translateY(0) scale(1)}25%{transform:translateY(-4px) scale(1)}40%{transform:translateY(0) scale(.85)}}
 
 
