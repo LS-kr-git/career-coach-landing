@@ -168,8 +168,8 @@ renderSamples("career");hintUpdate();
 (()=>{if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;const b=$("samples"),sec=$("pvsec");let t=0,off=false;
  ["pointerdown","wheel","touchstart","keydown"].forEach(ev=>sec.addEventListener(ev,()=>{off=true;clearInterval(t)},{passive:true}));
  new IntersectionObserver(es=>es.forEach(e=>{clearInterval(t);if(e.isIntersecting&&!off)t=setInterval(()=>{const i=[...$("dots").children].findIndex(d=>d.classList.contains("on"));goSlide((i+1)%b.children.length)},3200)}),{threshold:.5}).observe(b)})();
-// 목요일 공고 브리핑 — 폰 화면이 보이면 줄이 위에서부터 차례로 나타난다(69). 글은 승인본 그대로 두고 줄만 나눈다
-(()=>{const tp=document.querySelector("#thusec .tpl");if(!tp||matchMedia("(prefers-reduced-motion: reduce)").matches)return;
- const ls=tp.textContent.replace(/^\s*\n|\n\s*$/g,"").split("\n");tp.textContent="";
- ls.forEach((l,i)=>{const s=document.createElement("span");s.className="tl";s.style.transitionDelay=i*.12+"s";s.textContent=l.trim()||" ";tp.appendChild(s)});
- new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){tp.classList.add("go");o.disconnect()}}),{threshold:.5}).observe(tp)})();
+// 목요일 「내 조건」 말풍선 — 보이면 조건이 하나씩 붙는다(A2). 글은 HTML 그대로 두고 「 · 」로만 나눈다
+(()=>{const c=document.querySelector("#thusec .cond"),b=c&&c.querySelector("b");if(!b||matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+ const ps=b.textContent.split(" · ");b.textContent="";
+ ps.forEach((x,i)=>{const s=document.createElement("span");s.className="cp";s.style.animationDelay=.2+i*.35+"s";s.textContent=(i?" · ":"")+x;b.appendChild(s)});
+ new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){c.classList.add("pl");o.disconnect()}}),{threshold:.6}).observe(c)})();
