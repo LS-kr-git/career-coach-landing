@@ -604,7 +604,8 @@
     $('cfYes').innerHTML = '<span class="spin" aria-hidden="true"></span>결제하고 있어요';
     note('');
     // 걷히면 완료 화면으로 넘어간다(첫 결제와 같은 화면 — 2026-10-19 사용자 지시). 아니면 창을 닫고 버튼 위 안내로 말한다.
-    보관하고_알린다(null, 고른.code).catch(실패).then(function () { $('confirm').hidden = true; });
+    // 못 걷었으면 다음 누름은 결제창으로 간다 — 거절된 카드로만 다시 걷게 두면 다른 카드를 넣을 길이 없다(검사관 ①).
+    보관하고_알린다(null, 고른.code).catch(실패).then(function () { $('confirm').hidden = true; 저장카드 = null; });
   });
 
   // 토글이 둘이다 — 각 버튼이 자기 section 만 접는다. 절을 id 로 집는다(하나라도 없으면 여기서 터진다).
