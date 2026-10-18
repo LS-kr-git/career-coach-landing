@@ -104,8 +104,6 @@ new IntersectionObserver(es=>es.forEach(e=>{const w=$("stw");if(e.isIntersecting
 
 (()=>{const els=[...document.querySelectorAll("#fv .scene")];const chk=()=>{const q=VIEW();els.forEach(el=>{const r=el.getBoundingClientRect();if(r.top<q.top+q.height*.68&&r.bottom>q.top)el.classList.add("in");else if(r.bottom<q.top||r.top>q.bottom)el.classList.remove("in")})};addEventListener("scroll",chk,{passive:true});chk();})();
 
-(()=>{const n=$("nph"),h=$("coh");document.querySelectorAll("#names>div").forEach((d,k)=>{d.style.setProperty("--k",k);d.querySelector(".who").style.setProperty("--wd",(k*.35)+"s")});
- new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.4){n.classList.add("in");h.classList.add("in")}else if(e.intersectionRatio===0){n.classList.remove("in");h.classList.remove("in")}}),{root:null,threshold:[0,.4]}).observe(n);})();
 
 (()=>{const t=$("thusec"),pm=t.querySelector(".pm");new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3){if(!t.classList.contains("play"))t.classList.add("play")}else if(e.intersectionRatio===0)t.classList.remove("play")}),{root:null,threshold:[0,.3]}).observe(pm)})();
 
