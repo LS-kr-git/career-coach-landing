@@ -49,9 +49,10 @@ document.querySelectorAll(".slot").forEach(sl=>{const txt=sl.dataset.n;
 (()=>{const st=$("sticky");
  new IntersectionObserver(es=>es.forEach(en=>st.classList.toggle("ride",en.isIntersecting)),{root:null,threshold:.35}).observe($("closing"));})();
 
-let rxT=0,rxSeen=false,rxN=0;const rxRoll=t=>{const el=$("rx"),n=++rxN;el.innerHTML=[...t].map(ch=>/\d/.test(ch)?`<span class="d"><i>${[...Array(20).keys()].map(n=>n%10).concat([+ch]).map(n=>`<b>${n}</b>`).join("")}</i></span>`:`<span class="c">${ch}</span>`).join("");const is=[...el.querySelectorAll(".d i")];el.querySelectorAll(".d").forEach((d,k)=>{const m=document.createElement("span");m.className="c";m.style.visibility="hidden";m.style.position="absolute";m.textContent=[...t].filter(c=>/\d/.test(c))[k];el.appendChild(m);d.style.width=m.getBoundingClientRect().width+"px";m.remove()});requestAnimationFrame(()=>requestAnimationFrame(()=>is.forEach((x,k)=>{x.style.transitionDuration=(.9+k*.18)+"s";x.style.transform="translateY(-"+(2000/21)+"%)"})));setTimeout(()=>{if(n===rxN)el.textContent=t},(.9+(is.length-1)*.18)*1000+120)};
-const rxSet=t=>{$("rx").dataset.t=t;clearTimeout(rxT);if(!rxSeen){$("rx").textContent=t;return}rxT=setTimeout(()=>rxRoll(t),220)};
-new IntersectionObserver(es=>{if(es[0].isIntersecting){rxSeen=true}},{root:null,threshold:.8}).observe($("rx"));
+// 슬롯머신 숫자 — 「32배+」(#rx)와 「약 12일」의 숫자(#rxd)이 같은 방식으로 굴러간다. 화면에서 한 번 본 뒤부터 값이 바뀔 때마다 굴린다
+const slotRoll=(el,t)=>{const n=el._n=(el._n||0)+1;el.innerHTML=[...t].map(ch=>/\d/.test(ch)?`<span class="d"><i>${[...Array(20).keys()].map(n=>n%10).concat([+ch]).map(n=>`<b>${n}</b>`).join("")}</i></span>`:`<span class="c">${ch}</span>`).join("");const is=[...el.querySelectorAll(".d i")];el.querySelectorAll(".d").forEach((d,k)=>{const m=document.createElement("span");m.className="c";m.style.visibility="hidden";m.style.position="absolute";m.textContent=[...t].filter(c=>/\d/.test(c))[k];el.appendChild(m);d.style.width=m.getBoundingClientRect().width+"px";m.remove()});requestAnimationFrame(()=>requestAnimationFrame(()=>is.forEach((x,k)=>{x.style.transitionDuration=(.9+k*.18)+"s";x.style.transform="translateY(-"+(2000/21)+"%)"})));setTimeout(()=>{if(n===el._n)el.textContent=t},(.9+(is.length-1)*.18)*1000+120)};
+const slotSet=(id,t)=>{const el=$(id);el.dataset.t=t;clearTimeout(el._t);if(!el._seen){el.textContent=t;return}el._t=setTimeout(()=>slotRoll(el,t),220)};
+["rx","rxd"].forEach(id=>new IntersectionObserver(es=>{if(es[0].isIntersecting)$(id)._seen=true},{root:null,threshold:.8}).observe($(id)));
 
 (()=>{const SUB=won("ppr")/1e4,f=n=>(Math.round(n*10)/10).toLocaleString("ko-KR")+"만원";
  const set=v=>{v=Math.max(1000,Math.min(10000,+v||0));const p1=v*.03,p2=v*.04,mx=Math.max(p2,SUB);
@@ -59,7 +60,7 @@ new IntersectionObserver(es=>{if(es[0].isIntersecting){rxSeen=true}},{root:null,
   document.querySelectorAll("#sal .pc button").forEach(b=>b.classList.toggle("on",+b.dataset.s===v));
   document.querySelector("#sal .sd").textContent=v.toLocaleString("ko-KR")+"만원";
   [[SUB,0],[p1,1],[p2,2]].forEach(([x,k])=>{$("h"+k).style.height=Math.max(3,x/mx*100)+"%";$("b"+k).textContent=(k?"+":"")+f(x)});
-  const r=p1/SUB;rxSet((r>=10?Math.round(r):Math.round(r*10)/10)+"배+")};
+  const r=p1/SUB;slotSet("rx",(r>=10?Math.round(r):Math.round(r*10)/10)+"배+");slotSet("rxd",String(Math.ceil(365*SUB/p1)))};
  document.querySelectorAll("#sal .sv").forEach(i=>i.addEventListener("input",()=>{if(i.value!=="")set(i.value)}));
  document.querySelector("#sal .pc").addEventListener("click",e=>{const b=e.target.closest("button");if(b)set(b.dataset.s)});
  set(5000)})();
