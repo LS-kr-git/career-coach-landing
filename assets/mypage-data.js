@@ -429,6 +429,12 @@ export function planCards(plans) {
       per: n === 1 ? '/월' : '',
       rec: n > 1,
       cta: `${n}개월권 · ${wonText(p.price_krw)} 결제하기`,
+      // 결제 화면 27판(2026-10-18 사용자 확정)만 쓰는 칸 — 마이페이지 「멤버십·결제」는 위 칸 그대로 쓴다.
+      ticket: `${n}개월권`,
+      buy: `${n}개월권 구독하기`,
+      gift: BONUS_MONTHS[n] ? `${BONUS_MONTHS[n]}개월 무료 증정` : null,
+      parts: BONUS_MONTHS[n] ? `${n - BONUS_MONTHS[n]}개월 + ${BONUS_MONTHS[n]}개월` : null,
+      month: n > 1 ? wonText(Math.round(p.price_krw / n)) : null,
     };
   });
   const 고른 = 카드.findIndex((c) => c.rec);

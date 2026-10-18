@@ -9,6 +9,7 @@
 <!-- 미리받기 (tools/preload/build.mjs 가 만든다 — 손으로 고치지 마라) -->
 <link rel="preconnect" href="https://sxooygwggxeplzkfdbth.supabase.co" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.76.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.82.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.84.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.85.woff2" as="font" type="font/woff2" crossorigin>
@@ -71,8 +72,13 @@
   /* ── 26판 (피그마 2369:1325 · 2026-10-05 사용자 확정) ─────────────────────── */
   .pick{padding:8px var(--pad-x) 0}
   .t-title{font-size:19px;line-height:27px;font-weight:700;color:var(--gray-900)}
+  /* 27판 (2026-10-18 사용자 확정 · 목업 v15) — 구역마다 「주황 이름표 + 제목」. 첫 제목만 22 */
+  .head{display:flex;flex-direction:column;gap:6px}
+  .eyebrow{font-size:13px;line-height:18px;font-weight:800;color:var(--amber-600)}
+  .t-hero{font-size:22px;line-height:32px;font-weight:800;letter-spacing:-.4px;color:var(--gray-900)}
+  .hl{background:linear-gradient(transparent 42%,var(--amber-200) 42%);padding:0 2px}
   /* 요금 카드 — 마이페이지 「멤버십·결제」(mypage/billing)의 카드와 같은 값이다. 한쪽을 고치면 같이 고친다 */
-  .plans{display:flex;flex-direction:column;gap:12px;padding-top:6px;margin-top:20px}
+  .plans{display:flex;flex-direction:column;gap:12px;padding-top:6px;margin-top:24px}
   .pc{position:relative;display:flex;flex-direction:column;gap:10px;padding:16px 18px;border-radius:14px;
     background:var(--gray-50);border:1.5px solid var(--gray-50);text-align:left;font:inherit;color:inherit;
     cursor:pointer;-webkit-tap-highlight-color:transparent;width:100%}
@@ -91,15 +97,29 @@
   .pc[aria-checked="true"] .day b{color:var(--amber-600)}
   .pc .amt{display:flex;align-items:baseline;gap:6px;font-size:14px;line-height:22px}
   .pc .amt s{color:var(--gray-400)}
-  .pc .amt .pct{font-weight:700;color:var(--error-600)}
+  .pc .amt .pct{font-weight:700;color:#F87171}
   .pc .amt .won{font-size:16px;font-weight:500;color:var(--gray-800)}
   .pc .amt .per{font-size:13px;color:var(--gray-500);margin-left:-5px}
+  .pc .gift{padding-left:28px;margin-bottom:-6px;font-size:13px;line-height:18px;font-weight:700;color:var(--amber-600)}
+  .pc .top .sub{font-size:13px;font-weight:600;color:var(--gray-500)}
+  .pc .month{margin:2px -4px 0;background:var(--amber-50);border-radius:10px;padding:8px 12px;font-size:13px;line-height:19px;font-weight:600;color:var(--gray-700);text-align:center}
+  .pc .month b{font-weight:800;color:var(--amber-700)}
+
+  /* 안심 구역 — 위 구분선까지 72, 선 아래 28 */
+  .safe{margin-top:72px;padding-top:28px;border-top:1px solid var(--gray-200);display:flex;flex-direction:column;gap:6px}
+  .safe .t-title{margin-bottom:16px}
+  .safe-box{background:#F7FEFA;border:1px solid #A7F3D0;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:14px;list-style:none}
+  .safe-box li{display:flex;gap:10px;align-items:center}
+  .safe-box i{font-style:normal;width:32px;height:32px;border-radius:10px;background:#D1FAE5;color:#047857;display:grid;place-items:center;font-size:15px;font-weight:900;flex:none}
+  .safe-box b{display:block;font-size:14.5px;line-height:22px;font-weight:700;color:var(--gray-900);word-break:keep-all}
+  .safe-box span{display:block;font-size:12.5px;line-height:18px;color:var(--gray-500);word-break:keep-all}
   /* 요금을 못 읽었을 때 — 카드 두 장 자리에 스켈레톤(줄 세 개) · 버튼 잠김 · 실패는 하단 안내 (2026-10-15 사용자 확정 S12-C) */
   .pc.sk{cursor:default;gap:12px}
   .pc .sk-col{display:flex;flex-direction:column;gap:8px}
 
-  /* 요일 블록 — 위 52(= main 간격 20 + 32) · 아래 36 (25판 2번 확정) */
-  .week{margin-top:32px;padding:20px 0 36px;display:flex;flex-direction:column;gap:14px}
+  /* 요일 블록 — 27판: 위 구분선까지 72 · 선 아래 28 · 상자 아래 띠까지 72 */
+  .week{margin-top:72px;padding:28px 0 72px;border-top:1px solid var(--gray-200);display:flex;flex-direction:column;gap:6px}
+  .week .t-title{margin-bottom:8px}
   .week-box{background:var(--gray-50);border-radius:16px;padding:16px 12px;display:flex;flex-direction:column;gap:14px}
   .wrow{display:flex;gap:6px;align-items:flex-start}
   .wrow .sq{width:10px;height:10px;border-radius:3px;margin-top:6px;flex:none}
@@ -111,7 +131,7 @@
   .band{height:12px;background:var(--gray-100)}
 
   /* 시계 — 상자 없음 · 가운데 (23판 2번) · 위아래 40 (2026-10-15 — 아래 띠가 생겨 위를 24→40 으로 맞췄다). 다음 평일 08:00 KST 까지 */
-  .clock{display:flex;flex-direction:column;align-items:center;gap:4px;padding:40px 0;text-align:center}
+  .clock{display:flex;flex-direction:column;align-items:center;gap:4px;padding:88px 0;text-align:center}
   .clock-l{font-size:13px;line-height:19px;font-weight:600;color:var(--gray-600)}
   .clock-v{font-size:40px;line-height:46px;font-weight:800;color:var(--gray-900);font-variant-numeric:tabular-nums}
   .clock-n{font-size:13px;line-height:20px;font-weight:600;color:var(--gray-800)}
@@ -210,10 +230,21 @@
   <!-- 구독 신청 (기본) — 피그마 2369:1325. 요금 카드는 서버 plan 표의 살아 있는 요금제로 스크립트가 그린다 -->
   <div id="pickView">
     <main class="pick">
-      <h1 class="t-title">구독권을 골라 주세요</h1>
+      <div class="head"><p class="eyebrow">구독권을 골라 주세요</p><h1 class="t-hero">한 달 <span class="hl">커피 한 잔</span> 보다 저렴해요</h1></div>
       <div class="plans" id="plans" role="radiogroup" aria-label="구독권" data-sk="box" style="--skh:112px;--sk2:block"></div>
 
+      <!-- 안심 구역 (2026-10-18 신설 · 문구 근거: terms.html 제6조 · 랜딩 「부담 없이 시작해 보세요」) -->
+      <section class="safe" aria-labelledby="safeTitle">
+        <p class="eyebrow">부담 없이 시작해 보세요</p>
+        <h2 class="t-title" id="safeTitle">마음에 안 들면 돌려드려요</h2>
+        <ul class="safe-box">
+          <li><i aria-hidden="true">↺</i><div><b>첫 브리핑이 마음에 안 들면 전액 환불</b><span>요청만 하면 돼요 · 첫 결제 1회</span></div></li>
+          <li><i aria-hidden="true">Ⅱ</i><div><b>원할 때 바로 해지 가능</b><span>마이페이지에서 바로 해지 가능</span></div></li>
+        </ul>
+      </section>
+
       <section class="week" aria-labelledby="weekTitle">
+        <p class="eyebrow">받게 될 내용</p>
         <h2 class="t-title" id="weekTitle">요일별로 이렇게 보내드려요</h2>
         <div class="week-box">
           <div class="wrow"><i class="sq" style="background:#FEF3C7" aria-hidden="true"></i><span class="dd">월·수·금</span><span class="nm"><b>내 직무 인사이트</b><span>내 분야의 중요 트렌드·인사이트</span></span></div>
@@ -420,7 +451,7 @@
   function 고르기(c) {
     고른 = c;
     카드들.forEach(function (x) { x.el.setAttribute('aria-checked', String(x === c)); });
-    if (!변경) $('submit').textContent = c.cta;
+    if (!변경) $('submit').textContent = c.buy;
     var q = new URLSearchParams(location.search);
     q.set('plan', c.code);
     history.replaceState(null, '', location.pathname + '?' + q.toString());
@@ -434,9 +465,14 @@
       b.type = 'button'; b.className = 'pc'; b.setAttribute('role', 'radio');
       // 「기간 한정 특가」 — 2026-10-12 사용자 지시로 시안 그대로 둔다(종료일은 나중에 정한다).
       b.innerHTML = (c.rec ? '<span class="chip">추천 · 기간 한정 특가</span>' : '') +
-        '<span class="top"><span class="radio" aria-hidden="true"></span><span></span></span>' +
-        '<span class="tiers"><span class="day"><span>하루</span><b></b></span><span class="amt"></span></span>';
-      b.querySelector('.top span:last-child').textContent = c.name;
+        (c.gift ? '<span class="gift"></span>' : '') +
+        '<span class="top"><span class="radio" aria-hidden="true"></span><span class="nm"></span>' + (c.parts ? '<span class="sub"></span>' : '') + '</span>' +
+        '<span class="tiers"><span class="day"><span>하루 약</span><b></b></span><span class="amt"></span></span>' +
+        (c.month ? '<span class="month">☕ 한 달 <b></b></span>' : '');
+      b.querySelector('.nm').textContent = c.ticket;
+      if (c.gift) b.querySelector('.gift').textContent = c.gift;
+      if (c.parts) b.querySelector('.sub').textContent = c.parts;
+      if (c.month) b.querySelector('.month b').textContent = c.month;
       b.querySelector('.day b').textContent = c.day;
       var amt = b.querySelector('.amt');
       if (c.strike) {
@@ -466,7 +502,7 @@
     if (v && v.live) { 구독행 = s; 변경모드(v); $('submit').disabled = false; return; }
     return getPlans().then(function (plans) {
       plans.forEach(function (p) { 요금제[p.code] = p; });
-      카드그리기(planCards(plans));
+      카드그리기(planCards(plans).reverse());   // 27판: 1개월권이 위, 12개월권(기본 선택)이 아래
       $('submit').disabled = 저장안됨;
       if (저장안됨) note('고르신 직무·근무지가 아직 저장되지 않았어요.\n잠시 후 이 화면을 다시 열어 주세요.');
       // 새로고침·뒤로가기로 다시 열려도 같은 날은 한 번으로 센다 — 같은 eventID 는 메타가 48시간 안에서 하나로 묶는다(2026-10-15 출시 검수).
