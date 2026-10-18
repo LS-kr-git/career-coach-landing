@@ -76,9 +76,10 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 /* ===== 첫 화면 카톡 카드 (2026-10-13 · 아티클 폰과 같은 크기, 파란 바탕 + 흰 카드) ===== */
 /* 카카오 로그인 실패로 돌아왔을 때 버튼 위 짧은 안내 (2026-10-14 · auth/callback 이 /?login=fail 로 보낸다)
    모양은 공용 「하단 안내」(assets/toast.css · toast.js). 머묾은 오류 안내 공통 규칙 1.5초 + 글자당 0.13초 (2026-10-15 사용자 결정) */
-.cond{display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;margin:14px 0 22px}
-.cond span{font-size:12px;color:var(--g500);font-weight:600;margin-right:2px}
-.cond b{padding:5px 10px;border-radius:999px;background:#fff;border:1px solid var(--g200);font-size:12.5px;font-weight:600;color:var(--g700)}
+/* 목요일 「내 조건」 말풍선 (K4) — 꼬리가 아래 폰을 가리킨다 */
+.cond{position:relative;width:fit-content;max-width:100%;margin:14px auto 26px;padding:10px 16px;border-radius:14px;background:#191919;color:#fff;font-size:13px;font-weight:600;line-height:1.5;text-align:center}
+.cond b{color:#FEE500}
+.cond::after{content:"";position:absolute;left:50%;bottom:-7px;margin-left:-7px;width:14px;height:14px;background:#191919;transform:rotate(45deg)}
 .sticky .cc-toast{margin-bottom:10px}
 /* 버튼 밑 환불 한 줄 — 배경 없이 글자만(N1). 버튼 뒤 흰 그라데이션 위에 놓이고, 바탕이 투명해지는 어두운 마지막 섹션(.ride)에서만 흰 글자. 한 줄 늘어난 만큼 위로 더 당겨 끝에서 잘리지 않게 */
 .sticky{margin-top:-110px}
@@ -154,11 +155,13 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 .vC .ic .no{position:absolute;top:-4px;right:-6px}
 .vC small{font-size:13px;line-height:1.4;color:var(--g700);text-align:center;word-break:keep-all}
 .tvx:not(.play) .vC .it{opacity:0;transform:scale(.6)}
-/* 4곳 → 카톡 1통 (2026-10-19 v5) — 아이콘이 다 뜬 뒤 화살표·노란 알약이 이어서 뜬다 */
-.tvo{margin-top:18px;text-align:center;transition:opacity .45s ease 1s,transform .45s cubic-bezier(.2,.8,.2,1) 1s}
-.tvo i{display:block;font-style:normal;font-size:20px;line-height:1;color:var(--a500)}
-.tvo b{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:9px 16px;border-radius:14px;background:#FEE500;font-weight:800;font-size:15px;color:#191919}
-.tvx:not(.play) .tvo{opacity:0;transform:translateY(8px)}
+/* 4곳 → 카톡 1통 깔때기 (2026-10-19 v5 · H2) — 아이콘이 다 뜬 뒤 네 선이 한 점으로 그려지고, 그 끝에 노란 알약이 뜬다 */
+.tvo{margin-top:6px;text-align:center}
+.tvf{display:block;width:100%;height:56px}
+.tvf path{fill:none;stroke:#FCD34D;stroke-width:2;vector-effect:non-scaling-stroke;stroke-dasharray:1;stroke-dashoffset:0;transition:stroke-dashoffset .9s ease .9s}
+.tvx:not(.play) .tvf path{stroke-dashoffset:1}
+.tvo b{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:14px;background:#FEE500;font-weight:800;font-size:15px;color:#191919;transition:opacity .4s ease 1.7s,transform .4s cubic-bezier(.2,.8,.2,1) 1.7s}
+.tvx:not(.play) .tvo b{opacity:0;transform:scale(.8)}
 @media (prefers-reduced-motion:reduce){.tvx *{transition:none!important}}
 </style>
 <style id="v4">
@@ -219,7 +222,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 <!-- 시간 -->
 <section data-sec="하루 1시간 절약" class="gap20 s-a100b" style="padding-top:104px">
   <h2>링크드인·뉴스레터<br><span class="hl">다 안 봐도 괜찮아요.</span><br>이것만 보면 따라가요.</h2>
-  <div class="tvx" id="tvx"><div class="vC"><i class="ln"></i><div class="it" style="--k:0"><span class="ic">📧<em class="no">1</em></span><small>뉴스레터<br>여러 통</small></div><div class="it" style="--k:1"><span class="ic">💼<em class="no">2</em></span><small>링크드인<br>게시글</small></div><div class="it" style="--k:2"><span class="ic">📰<em class="no">3</em></span><small>해외<br>기사</small></div><div class="it" style="--k:3"><span class="ic">🗣️<em class="no">4</em></span><small>커뮤니티<br>정보</small></div></div><div class="tvo"><i>↓</i><b>💬 커리어코치 카톡 1통으로</b></div></div>
+  <div class="tvx" id="tvx"><div class="vC"><i class="ln"></i><div class="it" style="--k:0"><span class="ic">📧<em class="no">1</em></span><small>뉴스레터<br>여러 통</small></div><div class="it" style="--k:1"><span class="ic">💼<em class="no">2</em></span><small>링크드인<br>게시글</small></div><div class="it" style="--k:2"><span class="ic">📰<em class="no">3</em></span><small>해외<br>기사</small></div><div class="it" style="--k:3"><span class="ic">🗣️<em class="no">4</em></span><small>커뮤니티<br>정보</small></div></div><div class="tvo"><svg class="tvf" viewBox="0 0 400 70" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M50 0C50 40 200 30 200 70"/><path pathLength="1" d="M150 0C150 40 200 30 200 70"/><path pathLength="1" d="M250 0C250 40 200 30 200 70"/><path pathLength="1" d="M350 0C350 40 200 30 200 70"/></svg><b>💬 커리어코치 카톡 1통으로</b></div></div>
   <p class="big c" style="margin-top:64px;font-weight:400">읽을 건 매일 쌓이는데…<br>시간은 늘 모자라니까요 🥺</p>
 </section>
 <!-- 알림톡 미리보기 (2026-10-18 되살림 — 옛 첫 화면 d837e22^ 의 폰·직군 칩. 첫 칩 「공통」이 기본 선택) -->
@@ -262,7 +265,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 <section data-sec="목요일 맞춤 공고" class="gap20 s-a100b crop" id="thusec" style="padding-bottom:72px">
   <div><p style="text-align:center;font-size:17px;font-weight:600;color:var(--g700);margin-bottom:8px">일주일에 한번은</p><h2 class="h2d" style="text-align:center">이직하고 싶은 곳의 <span class="ul">새 공고,</span><br><span class="ul">내 조건에 맞춰</span> 먼저 보내드려요</h2>
   <p style="margin-top:16px;text-align:center">현재 채용 시장 트렌드도 알려드려요</p></div>
-  <div class="cond"><span>내 조건</span><b>마케팅·그로스</b><b>3~7년</b><b>서울</b></div>
+  <div class="cond">내 조건 <b>마케팅·그로스 · 3~7년 · 서울</b></div>
   <div class="pm"><div class="sc">
     <div class="sb"><span>8:01</span><span class="ic"><span class="sig"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:10px"></i></span>5G<span class="bat"><i></i></span></span></div>
     <div class="hd"><span class="bk"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="ttl"><svg width="20" height="20" viewBox="0 0 21 21"><use href="#ccmark"/></svg>커리어코치</span><span class="ics"><svg viewBox="0 0 24 24" width="21" height="21"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 15.5l4.5 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><svg viewBox="0 0 24 24" width="21" height="21"><path d="M4 6.5h16M4 12h16M4 17.5h16" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></svg></span></div>
