@@ -162,3 +162,7 @@ hintUpdate();
  w.querySelector(".cnx").addEventListener("click",()=>goSlide(Math.min(b.children.length-1,idx()+1)));w.querySelector(".cpv").addEventListener("click",()=>goSlide(Math.max(0,idx()-1)))})();
 (()=>{[...$("dots").children].forEach((d,k)=>d.addEventListener("click",()=>goSlide(k)))})();
 renderSamples("career");hintUpdate();
+// 미리보기 카드 자동 넘김 (2026-10-18 v5) — 카드가 절반 넘게 보일 때만 3.2초마다. 방문자가 섹션을 한 번이라도 만지면 그 뒤로는 멈춘다
+(()=>{if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;const b=$("samples"),sec=$("pvsec");let t=0,off=false;
+ ["pointerdown","wheel","touchstart","keydown"].forEach(ev=>sec.addEventListener(ev,()=>{off=true;clearInterval(t)},{passive:true}));
+ new IntersectionObserver(es=>es.forEach(e=>{clearInterval(t);if(e.isIntersecting&&!off)t=setInterval(()=>{const i=[...$("dots").children].findIndex(d=>d.classList.contains("on"));goSlide((i+1)%b.children.length)},3200)}),{threshold:.5}).observe(b)})();
