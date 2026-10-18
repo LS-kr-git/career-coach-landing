@@ -168,8 +168,8 @@ renderSamples("career");hintUpdate();
 (()=>{if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;const b=$("samples"),sec=$("pvsec");let t=0,off=false;
  ["pointerdown","wheel","touchstart","keydown"].forEach(ev=>sec.addEventListener(ev,()=>{off=true;clearInterval(t)},{passive:true}));
  new IntersectionObserver(es=>es.forEach(e=>{clearInterval(t);if(e.isIntersecting&&!off)t=setInterval(()=>{const i=[...$("dots").children].findIndex(d=>d.classList.contains("on"));goSlide((i+1)%b.children.length)},3200)}),{threshold:.5}).observe(b)})();
-// 목요일 「내 조건」 말풍선 — 보이면 조건이 하나씩 붙는다(A2). 글은 HTML 그대로 두고 「 · 」로만 나눈다
+// 목요일 「내 조건」 말풍선 — 보이면 체크가 그려지고(C7) 조건이 하나씩 붙는다(A2). 글은 HTML 그대로 두고 「 · 」로만 나눈다
 (()=>{const c=document.querySelector("#thusec .cond"),b=c&&c.querySelector("b");if(!b||matchMedia("(prefers-reduced-motion: reduce)").matches)return;
- const ps=b.textContent.split(" · ");b.textContent="";
+ c.classList.add("wt");const ps=b.textContent.split(" · ");b.textContent="";
  ps.forEach((x,i)=>{const s=document.createElement("span");s.className="cp";s.style.animationDelay=.2+i*.35+"s";s.textContent=(i?" · ":"")+x;b.appendChild(s)});
  new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){c.classList.add("pl");o.disconnect()}}),{threshold:.6}).observe(c)})();

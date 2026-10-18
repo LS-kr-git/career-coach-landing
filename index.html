@@ -79,6 +79,9 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 /* 목요일 「내 조건」 말풍선 (K4 · 색 M5) — 흰 말풍선 + 부드러운 그림자, 꼬리가 아래 폰을 가리킨다 */
 .cond{position:relative;width:fit-content;max-width:100%;margin:14px auto 26px;padding:8px 14px;border-radius:14px;background:#fff;box-shadow:0 6px 16px rgba(15,23,42,.08);color:var(--g400);font-size:12px;font-weight:500;line-height:1.5;text-align:center}
 .cond b{color:var(--g600);font-weight:500}
+/* 「내 조건」 왼쪽 초록 체크(C7) — 원 없이 선만. 보이면 그려진다 */
+.cond{display:flex;align-items:center;justify-content:center;gap:5px}.cond .ck{flex:none;display:block;width:12px;height:12px;color:#10B981}.cond .ck svg{display:block}
+.cond.wt .ck path{stroke-dasharray:1;stroke-dashoffset:1}.cond.pl .ck path{animation:ckd .4s ease-out .1s both}@keyframes ckd{to{stroke-dashoffset:0}}
 .cond .cp{display:inline-block;opacity:0;white-space:pre}.cond.pl .cp{animation:cin .35s ease-out both}@keyframes cin{0%{opacity:0;transform:translateY(4px)}100%{opacity:1;transform:none}}
 /* 미리보기 폰 0.82배 (2026-10-19 P1) — 긴 5줄 카드로 섹션이 길어져 폰 전체를 줄인다 */
 #hero .pm-hero{zoom:.82}
@@ -267,7 +270,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 <section data-sec="목요일 맞춤 공고" class="gap20 s-a100b crop" id="thusec" style="padding-bottom:72px">
   <div><p style="text-align:center;font-size:17px;font-weight:600;color:var(--g700);margin-bottom:8px">일주일에 한번은</p><h2 class="h2d" style="text-align:center">이직하고 싶은 곳의 <span class="ul">새 공고,</span><br><span class="ul">내 조건에 맞춰</span> 먼저 보내드려요</h2>
   <p style="margin-top:16px;text-align:center">현재 채용 시장 트렌드도 알려드려요</p></div>
-  <div class="cond">내 조건 <b>마케팅·그로스 · 3~7년 · 서울</b></div>
+  <div class="cond"><span class="ck" aria-hidden="true"><svg viewBox="0 0 12 12" width="12" height="12"><path d="M2.5 6.2l2.3 2.3 4.7-4.9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/></svg></span>내 조건 <b>마케팅·그로스 · 3~7년 · 서울</b></div>
   <div class="pm"><div class="sc">
     <div class="sb"><span>8:01</span><span class="ic"><span class="sig"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:10px"></i></span>5G<span class="bat"><i></i></span></span></div>
     <div class="hd"><span class="bk"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="ttl"><svg width="20" height="20" viewBox="0 0 21 21"><use href="#ccmark"/></svg>커리어코치</span><span class="ics"><svg viewBox="0 0 24 24" width="21" height="21"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 15.5l4.5 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><svg viewBox="0 0 24 24" width="21" height="21"><path d="M4 6.5h16M4 12h16M4 17.5h16" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></svg></span></div>
