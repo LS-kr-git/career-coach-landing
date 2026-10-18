@@ -77,12 +77,13 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 /* 카카오 로그인 실패로 돌아왔을 때 버튼 위 짧은 안내 (2026-10-14 · auth/callback 이 /?login=fail 로 보낸다)
    모양은 공용 「하단 안내」(assets/toast.css · toast.js). 머묾은 오류 안내 공통 규칙 1.5초 + 글자당 0.13초 (2026-10-15 사용자 결정) */
 .sticky .cc-toast{margin-bottom:10px}
-/* 버튼 밑 환불 한 줄 — 어두운 마지막 섹션·회색 푸터 위에서도 읽히게 흰 알약에 담는다. 그만큼 위로 더 당겨 끝에서 잘리지 않게 */
+/* 버튼 밑 환불 한 줄 — 배경 없이 글자만(N1). 버튼 뒤 흰 그라데이션 위에 놓이고, 바탕이 투명해지는 어두운 마지막 섹션(.ride)에서만 흰 글자. 한 줄 늘어난 만큼 위로 더 당겨 끝에서 잘리지 않게 */
 .sticky{margin-top:-110px}
 .rxd .rxdn{color:var(--a600)}
 .rxd{margin-top:10px;font-size:15px;line-height:1.45;font-weight:600;color:var(--g600);word-break:keep-all}
 .sticky .sfn{margin-top:8px;text-align:center;font-size:12px;line-height:1.4;font-weight:600}
-.sticky .sfn span{display:inline-block;padding:2px 10px;border-radius:999px;background:rgba(255,255,255,.92);color:var(--g600)}
+.sticky .sfn span{color:var(--g500)}
+.sticky.ride .sfn span{color:rgba(255,255,255,.72)}
 .rfd{margin-top:14px;text-align:center;font-size:13px;font-weight:600;color:var(--g600);word-break:keep-all}
 #sec1 .hh{text-align:center;word-break:keep-all}
 #sec1 .hh .hk1{display:inline-block;margin-bottom:6px;font-size:17px;line-height:1.75;font-weight:500;color:var(--g800)}
@@ -239,7 +240,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 <div class="pm pm-art" id="pmart"><div class="sc">
     <div class="hd"><span class="bk"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="ttl"><svg width="20" height="20" viewBox="0 0 21 21"><use href="#ccmark"/></svg>커리어코치</span><span class="ics"><svg viewBox="0 0 24 24" width="21" height="21"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 15.5l4.5 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><svg viewBox="0 0 24 24" width="21" height="21"><path d="M4 6.5h16M4 12h16M4 17.5h16" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></svg></span></div>
     <div class="art">
-      <h4>연봉 협상이 거절됐을 때, 다음을 여는 한마디</h4>
+      <h4>연봉 협상이 거절됐을 때,<br>다음을 여는 한마디</h4>
       <p class="meta"><span>#일 잘하는 법·커리어</span><span>⏱ 3분</span></p>
       <p>연봉 인상 요청이 거절되면 대부분 그 자리에서 대화를 끝내요. 그런데 거절 직후가 다음 협상을 준비하기 가장 좋은 때예요.</p>
       <p>"그럼 어떤 성과를 내면 다음에 반영될 수 있을까요?"라고 물어보세요. 막연한 거절이 구체적인 조건으로 바뀌어요.</p>
