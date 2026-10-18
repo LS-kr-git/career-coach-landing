@@ -79,6 +79,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 /* 목요일 「내 조건」 말풍선 (K4 · 색 M5) — 흰 말풍선 + 부드러운 그림자, 꼬리가 아래 폰을 가리킨다 */
 .cond{position:relative;width:fit-content;max-width:100%;margin:14px auto 26px;padding:8px 14px;border-radius:14px;background:#fff;box-shadow:0 6px 16px rgba(15,23,42,.08);color:var(--g400);font-size:12px;font-weight:500;line-height:1.5;text-align:center}
 .cond b{color:var(--g600);font-weight:500}
+#thusec .tpl .tl{display:block;opacity:0;transform:translateY(6px);transition:opacity .4s,transform .4s}#thusec .tpl.go .tl{opacity:1;transform:none}
 /* 미리보기 폰 0.82배 (2026-10-19 P1) — 긴 5줄 카드로 섹션이 길어져 폰 전체를 줄인다 */
 #hero .pm-hero{zoom:.82}
 .cond::after{content:"";position:absolute;left:50%;bottom:-7px;margin-left:-7px;width:14px;height:14px;background:#fff;transform:rotate(45deg)}
