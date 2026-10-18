@@ -7,7 +7,7 @@
 <meta name="color-scheme" content="only light">
 <meta name="format-detection" content="telephone=no">
 <!-- 랜딩 버전 지문 — 섹션 구성·제목·시안 값으로 만든다. 손으로 고치지 말고 `node tools/landing-version/fp.mjs --write` (page-audit 이 대조한다) -->
-<meta name="cc-lv" content="02f2f414a9">
+<meta name="cc-lv" content="42d311b60a">
 <title>커리어코치</title>
 <meta name="description" content="일하는 사람들의 커리어 성장을 위해">
 <link rel="canonical" href="https://careercoach.my/">
@@ -84,17 +84,12 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 #hero .pm-hero{zoom:.82}
 .cond::after{content:"";position:absolute;left:50%;bottom:-7px;margin-left:-7px;width:14px;height:14px;background:#fff;transform:rotate(45deg)}
 .sticky .cc-toast{margin-bottom:10px}
-/* 버튼 밑 환불 한 줄 — 배경 없이 글자만(N1). 버튼 뒤 흰 그라데이션 위에 놓이고, 바탕이 투명해지는 어두운 마지막 섹션(.ride)에서만 흰 글자. 한 줄 늘어난 만큼 위로 더 당겨 끝에서 잘리지 않게 */
-.sticky{margin-top:-110px}
 .rxd .rxdn{color:var(--a600)}
 .rxd{margin-top:10px;font-size:15px;line-height:1.45;font-weight:600;color:var(--g600);word-break:keep-all}
-.sticky .sfn{margin-top:8px;text-align:center;font-size:12px;line-height:1.4;font-weight:600}
-.sticky .sfn span{color:var(--g500)}
 /* 첫 화면에서는 바닥 버튼을 숨겨 폰 카드를 가리지 않는다. 400px 내려가면 올라온다(66) */
 .sticky{transition:background .3s,transform .35s ease,opacity .35s ease,visibility 0s}
 .sticky.hide0{transform:translateY(120%);opacity:0;visibility:hidden;pointer-events:none;transition:background .3s,transform .35s ease,opacity .35s ease,visibility 0s .35s}
 @media (prefers-reduced-motion:reduce){.sticky,.sticky.hide0{transition:none}}
-.sticky.ride .sfn span{color:rgba(255,255,255,.72)}
 .rfd{margin-top:14px;text-align:center;font-size:13px;font-weight:600;color:var(--g600);word-break:keep-all}
 #sec1 .hh{text-align:center;word-break:keep-all}
 #sec1 .hh .hk1{display:inline-block;margin-bottom:6px;font-size:17px;line-height:1.75;font-weight:500;color:var(--g800)}
@@ -303,11 +298,11 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 </section>
 <!-- 요일별 구성 -->
 <section data-sec="요일별 발송" class="gap20 s-white" id="wksec">
-  <div><h2>요일별로<br>이렇게 보내드려요</h2>
+  <div><h2>월요일부터 금요일까지<br>이렇게 받아요</h2>
   <div class="wk" id="wk" data-v="3">
     <p class="wa1">평일 아침마다 <b>내 직무 인사이트</b>, <b>일 잘하는 법·커리어</b>, <b>채용시장 · 공고 브리핑</b>, 세 가지를 요일에 맞춰 보내드려요.</p>
     <p class="wa2">세 가지가 요일별로 나눠 도착해요<br><span class="tg1">내 직무 인사이트</span><span class="tg2">일 잘하는 법·커리어</span><span class="tg3">채용시장 · 공고 브리핑</span></p>
-    <div class="wbx" id="wbx" data-v="1"><ul class="wa3"><li><i class="tg1"></i><b>월·수·금</b><span class="lt">내 직무 인사이트<small>내 분야의 중요 트렌드·인사이트</small></span></li><li><i class="tg2"></i><b>화</b><span class="lt">일 잘하는 법·커리어<small>연봉 협상·이직처럼<br>모든 직군에 통하는 이야기</small></span></li><li><i class="tg3"></i><b>목</b><span class="lt">채용시장 · 공고 브리핑<small>최신 7일 공고와 채용시장 트렌드</small></span></li></ul></div>
+    <div class="wbx" id="wbx" data-v="1"><ul class="wa3"><li><i class="tg1"></i><b>월·수·금</b><span class="lt">업계 노하우·뉴스<small>내 직군 현직자가 5줄로 요약해요</small></span></li><li><i class="tg2"></i><b>화</b><span class="lt">일 잘하는 법·커리어<small>연봉 협상·이직처럼<br>모든 직군에 통하는 이야기</small></span></li><li><i class="tg3"></i><b>목</b><span class="lt">채용시장 · 공고 브리핑<small>최신 7일 공고와 채용시장 트렌드</small></span></li></ul></div>
     <p class="wa4"><b class="n">3</b><span>가지 종류로 나눠 보내드려요<br><small>직무 인사이트 · 일 잘하는 법·커리어 · 채용시장 · 공고 브리핑</small></span></p>
   </div></div>
   <div class="wkh" id="wkh" data-v="2">
@@ -429,7 +424,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
   <p class="cdn">*돌아오는 영업일 오전 8시부터 발송</p>
 </section>
 
-<div class="sticky" id="sticky"><p class="cc-toast" id="lfail" role="alert" hidden>로그인하지 못했어요. 다시 시도해 주세요.</p><a class="btn" id="ctaBtn" href="/signup/"><span><svg class="kk" viewBox="0 0 24 24" aria-hidden="true"><path fill="#191919" d="M12 3.2C6.6 3.2 2.3 6.7 2.3 11c0 2.8 1.8 5.2 4.6 6.6l-.9 3.4c-.1.3.3.6.5.4l4-2.7c.5.1 1 .1 1.5.1 5.4 0 9.7-3.5 9.7-7.8S17.4 3.2 12 3.2z"/></svg>카카오로 3초만에 시작하기</span></a><p class="sfn"><span>첫 브리핑이 마음에 안 들면 전액 환불해 드려요</span></p></div>
+<div class="sticky" id="sticky"><p class="cc-toast" id="lfail" role="alert" hidden>로그인하지 못했어요. 다시 시도해 주세요.</p><a class="btn" id="ctaBtn" href="/signup/"><span><svg class="kk" viewBox="0 0 24 24" aria-hidden="true"><path fill="#191919" d="M12 3.2C6.6 3.2 2.3 6.7 2.3 11c0 2.8 1.8 5.2 4.6 6.6l-.9 3.4c-.1.3.3.6.5.4l4-2.7c.5.1 1 .1 1.5.1 5.4 0 9.7-3.5 9.7-7.8S17.4 3.2 12 3.2z"/></svg>카카오로 3초만에 시작하기</span></a></div>
 
   <footer>
     <div class="biz">
