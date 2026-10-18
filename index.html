@@ -77,8 +77,8 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 /* 카카오 로그인 실패로 돌아왔을 때 버튼 위 짧은 안내 (2026-10-14 · auth/callback 이 /?login=fail 로 보낸다)
    모양은 공용 「하단 안내」(assets/toast.css · toast.js). 머묾은 오류 안내 공통 규칙 1.5초 + 글자당 0.13초 (2026-10-15 사용자 결정) */
 /* 목요일 「내 조건」 말풍선 (K4 · 색 M5) — 흰 말풍선 + 부드러운 그림자, 꼬리가 아래 폰을 가리킨다 */
-.cond{position:relative;width:fit-content;max-width:100%;margin:14px auto 26px;padding:10px 16px;border-radius:14px;background:#fff;box-shadow:0 6px 16px rgba(15,23,42,.08);color:var(--g500);font-size:13px;font-weight:600;line-height:1.5;text-align:center}
-.cond b{color:var(--g900)}
+.cond{position:relative;width:fit-content;max-width:100%;margin:14px auto 26px;padding:8px 14px;border-radius:14px;background:#fff;box-shadow:0 6px 16px rgba(15,23,42,.08);color:var(--g400);font-size:12px;font-weight:500;line-height:1.5;text-align:center}
+.cond b{color:var(--g600);font-weight:500}
 /* 미리보기 폰 0.82배 (2026-10-19 P1) — 긴 5줄 카드로 섹션이 길어져 폰 전체를 줄인다 */
 #hero .pm-hero{zoom:.82}
 .cond::after{content:"";position:absolute;left:50%;bottom:-7px;margin-left:-7px;width:14px;height:14px;background:#fff;transform:rotate(45deg)}
@@ -89,6 +89,10 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 .rxd{margin-top:10px;font-size:15px;line-height:1.45;font-weight:600;color:var(--g600);word-break:keep-all}
 .sticky .sfn{margin-top:8px;text-align:center;font-size:12px;line-height:1.4;font-weight:600}
 .sticky .sfn span{color:var(--g500)}
+/* 첫 화면에서는 바닥 버튼을 숨겨 폰 카드를 가리지 않는다. 400px 내려가면 올라온다(66) */
+.sticky{transition:background .3s,transform .35s ease,opacity .35s ease,visibility 0s}
+.sticky.hide0{transform:translateY(120%);opacity:0;visibility:hidden;pointer-events:none;transition:background .3s,transform .35s ease,opacity .35s ease,visibility 0s .35s}
+@media (prefers-reduced-motion:reduce){.sticky,.sticky.hide0{transition:none}}
 .sticky.ride .sfn span{color:rgba(255,255,255,.72)}
 .rfd{margin-top:14px;text-align:center;font-size:13px;font-weight:600;color:var(--g600);word-break:keep-all}
 #sec1 .hh{text-align:center;word-break:keep-all}

@@ -47,7 +47,8 @@ document.querySelectorAll(".slot").forEach(sl=>{const txt=sl.dataset.n;
  new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){roll(false);requestAnimationFrame(()=>requestAnimationFrame(()=>roll(true)))}}),{root:null,threshold:.6}).observe(sl)});
 // 바닥 버튼: 늘 같은 자리(하단에서 띄운 채)에 고정. 마지막 섹션에서는 배경만 바뀐다(글자는 그대로)
 (()=>{const st=$("sticky");
- new IntersectionObserver(es=>es.forEach(en=>st.classList.toggle("ride",en.isIntersecting)),{root:null,threshold:.35}).observe($("closing"));})();
+ new IntersectionObserver(es=>es.forEach(en=>st.classList.toggle("ride",en.isIntersecting)),{root:null,threshold:.35}).observe($("closing"));
+ const up=()=>st.classList.toggle("hide0",scrollY<400);addEventListener("scroll",up,{passive:true});up();})();
 
 // 슬롯머신 숫자 — 「32배+」(#rx)와 「약 12일」의 숫자(#rxd)이 같은 방식으로 굴러간다. 화면에서 한 번 본 뒤부터 값이 바뀔 때마다 굴린다
 const slotRoll=(el,t)=>{const n=el._n=(el._n||0)+1;el.innerHTML=[...t].map(ch=>/\d/.test(ch)?`<span class="d"><i>${[...Array(20).keys()].map(n=>n%10).concat([+ch]).map(n=>`<b>${n}</b>`).join("")}</i></span>`:`<span class="c">${ch}</span>`).join("");const is=[...el.querySelectorAll(".d i")];el.querySelectorAll(".d").forEach((d,k)=>{const m=document.createElement("span");m.className="c";m.style.visibility="hidden";m.style.position="absolute";m.textContent=[...t].filter(c=>/\d/.test(c))[k];el.appendChild(m);d.style.width=m.getBoundingClientRect().width+"px";m.remove()});requestAnimationFrame(()=>requestAnimationFrame(()=>is.forEach((x,k)=>{x.style.transitionDuration=(.9+k*.18)+"s";x.style.transform="translateY(-"+(2000/21)+"%)"})));setTimeout(()=>{if(n===el._n)el.textContent=t},(.9+(is.length-1)*.18)*1000+120)};
