@@ -116,7 +116,7 @@
 
 .stw .s1{width:var(--sw,96%)!important;transition:none!important}
 /* v48 */
-#sec1 .chp,#sec2 .chp2{font-size:13.5px;font-weight:600;color:var(--g600)}
+#pvsec .chp,#sec2 .chp2{font-size:13.5px;font-weight:600;color:var(--g600)}
 #chw1 .chip,#chw2 .chip{animation:none!important}
 .rvp.rvflow{scroll-snap-type:none}
 /* v50 */
@@ -152,7 +152,7 @@
 
 
 
-#sec1 .chp,#sec2 .chp2{font-weight:500}
+#pvsec .chp,#sec2 .chp2{font-weight:500}
 #qz{margin-top:28px!important}
 /* v52 */
 .screen{overflow-x:clip}#tv5{overflow-x:clip;overflow-y:visible}
@@ -189,7 +189,7 @@
 
 
 /* v53 */
-#sec1 #sampleChips{padding-top:20px!important}#sec1 .chp{padding-bottom:52px!important}
+#pvsec #sampleChips{padding-top:20px!important}#pvsec .chp{padding-bottom:52px!important}
 /* QG one-card variants */
 
 
@@ -260,7 +260,7 @@
 .expn{text-align:center!important}
 /* v62 */
 .sarwb[hidden]{display:none!important}
-#sec1 .chp{padding-bottom:38px!important}
+#pvsec .chp{padding-bottom:38px!important}
 
 
 
@@ -273,9 +273,9 @@
 
 /* v63 */
 .pm-hero .hint b,.hint b{animation:none!important;transform:none!important;line-height:1;font-size:15px;position:relative;top:-0.5px}
-#sec1 .chp{padding-bottom:30px!important}
-#sec1 .cet{display:inline-block;font-size:14.5px;font-weight:700;color:var(--a700);animation:cebob 1.6s ease-in-out infinite}
-#sec1 .cet::before{content:"👆 "}
+#pvsec .chp{padding-bottom:30px!important}
+#pvsec .cet{display:inline-block;font-size:14.5px;font-weight:700;color:var(--a700);animation:cebob 1.6s ease-in-out infinite}
+#pvsec .cet::before{content:"👆 "}
 /* v64 번호 표시 */
 #hint{display:none!important}
 #dots{gap:8px;padding:6px 0 14px;align-items:center}
@@ -319,8 +319,8 @@
 
 
 /* CD: 기본(v63) 규칙을 덮어씀 */
-.screen:not(:has(#cdz[data-v="1"])) #sec1 .cet{animation:none;font-size:14px;color:var(--g600);font-weight:500;background:none;padding:0;border:0}
-.screen:not(:has(#cdz[data-v="1"])) #sec1 .cet::before{content:none}
+.screen:not(:has(#cdz[data-v="1"])) #pvsec .cet{animation:none;font-size:14px;color:var(--g600);font-weight:500;background:none;padding:0;border:0}
+.screen:not(:has(#cdz[data-v="1"])) #pvsec .cet::before{content:none}
 
 
 
@@ -336,8 +336,8 @@
 
 
 @keyframes cdty{to{max-width:14em}}@keyframes cdcur{50%{border-right-color:transparent}}
-.screen:has(#cdz[data-v="11"]) #sec1 .cet{color:var(--g800);font-weight:600}
-.screen:has(#cdz[data-v="11"]) #sec1 .cet::before{content:"👆";display:inline-block;margin-right:5px;animation:cdtap 1.5s ease-in-out infinite}
+.screen:has(#cdz[data-v="11"]) #pvsec .cet{color:var(--g800);font-weight:600}
+.screen:has(#cdz[data-v="11"]) #pvsec .cet::before{content:"👆";display:inline-block;margin-right:5px;animation:cdtap 1.5s ease-in-out infinite}
 @keyframes cdtap{0%,60%,100%{transform:translateY(0) scale(1)}25%{transform:translateY(-4px) scale(1)}40%{transform:translateY(0) scale(.85)}}
 
 

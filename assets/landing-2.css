@@ -218,8 +218,8 @@ section.crop{padding-bottom:0}
 .yg i.on{background:var(--a500)}
 .yl{display:flex;justify-content:space-between;font-size:11px;color:var(--g400);margin-top:6px}
 .yc{display:flex;align-items:baseline;gap:8px;margin-top:12px}.yc b{font-size:26px;color:var(--a600)}.yc>span{font-size:13px;color:var(--g500)}
-#sec1 .chp{margin:0 calc(-1*var(--sec-x));padding:0 var(--sec-x) 16px;background:var(--g100)}
-#sec1 #sampleChips{padding-bottom:10px}
+#pvsec .chp{margin:0 calc(-1*var(--sec-x));padding:0 var(--sec-x) 16px;background:var(--g100)}
+#pvsec #sampleChips{padding-bottom:10px}
 #sec2{background:var(--a50)}#sec2 #quizChips{background:none;padding-top:12px;padding-bottom:12px;margin-top:-12px;margin-bottom:-12px}
 #sec250 .yr{text-align:left}
 .pm-art .sc{background:#fff}
@@ -233,7 +233,7 @@ section.crop{padding-bottom:0}
 .art .fb div{display:flex;gap:8px}.art .fb span{flex:1;background:#fff;border:1px solid var(--g200);border-radius:999px;padding:7px 0;font-size:12.5px;font-weight:600;color:var(--g700)}
 .rv .rh{align-items:center}.rv .rp{display:flex;align-items:center;gap:8px}.rv .rp i{width:28px;height:28px;border-radius:50%;display:flex;overflow:hidden;flex:none}.rv .rp i svg{width:100%;height:100%}
 #hero .lab,#hero .abtn,#hero .hd .ttl{display:none}
-#sec1{padding-bottom:0}#sec1 #sampleChips,#sec1 .chp{background:var(--g50)}#sec1 .chp{padding-bottom:22px}
+#sec1{padding-bottom:0}#pvsec #sampleChips,#pvsec .chp{background:var(--g50)}#pvsec .chp{padding-bottom:22px}
 .tnote{font-size:12.5px;color:var(--g400)}
 .pm-art .art{padding:24px 20px 26px;font-size:12px;line-height:1.7}.pm-art .art p:not(.meta){font-size:12px;line-height:1.7}
 .pm-art .art h4{font-size:16px}.pm-art .art .meta{font-size:11px;margin-bottom:12px;padding-bottom:12px}
@@ -243,7 +243,7 @@ section.crop{padding-bottom:0}
 #thusec .pm .hd .ttl{display:none}
 .pm-hero .hint{position:static;transform:none;margin:2px auto 8px;width:max-content}
 .pm .hd{padding:18px 16px 12px 14px}.pm .hd .ics{grid-column:3;gap:12px}
-#sec1 .chp{padding-bottom:40px}
+#pvsec .chp{padding-bottom:40px}
 .arw{position:relative}
 .arw .cnx,.arw .cpv{position:absolute;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;border:1px solid var(--g200);background:#fff;color:var(--g700);font-size:22px;line-height:1;box-shadow:0 3px 10px rgba(15,23,42,.12);cursor:pointer;display:grid;place-items:center;z-index:2;padding:0 0 3px;font-family:inherit}
 .arw .cnx{right:-12px;padding-left:2px}.arw .cpv{left:-12px;padding-right:2px}
