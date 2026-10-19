@@ -107,11 +107,19 @@
   // 화면 사이 전환 — 새 화면이 아직 숨어 있으면 **앞 화면 사진을 멈춰 세워 둔다.** 다 그려지면(show) 그때 0.15초로 넘긴다.
   // 전에는 이때 전환을 건너뛰어, 숨은 새 화면(바탕만)이 한 번 비쳤다가 내용이 떴다 — 랜딩↔마이페이지에서
   // 「앞 화면이 한 번 더 보이고 넘어간다」로 보였다(2026-10-15 사용자 지적). 붙잡는 시간은 위 HOLD_MAX 가 상한이다(다른 주소로 떠나는 중이면 그 이동이 막혔을 때의 5초).
+  // 전환의 세 약속(ready·finished·updateCallbackDone)이 건너뛰면 다 거절된다 — 앞 판은 둘만 받아 10-18 에도 「Transition was skipped」가 남았다(2026-10-19)
+  function 받아둠(vt) {
+    if (!vt) return;
+    var ps = [vt.ready, vt.finished, vt.updateCallbackDone];
+    for (var i = 0; i < ps.length; i++) if (ps[i] && ps[i].catch) ps[i].catch(function () {});
+  }
+  // 떠나는 화면 쪽 전환도 같다 — 새 화면이 넘김을 건너뛰면 앞 화면의 약속이 거절된다
+  addEventListener('pageswap', function (e) { 받아둠(e.viewTransition); });
   addEventListener('pagereveal', function (e) {
     var vt = e.viewTransition;
     // 건너뛴 전환의 거절이 잡히지 않은 채 남으면 오류 기록(client_error)에 「Skipping view transition」 이 쌓인다 — 늘 받아 둔다(2026-10-15 출시 검수)
     // 이 거절은 화면 전환을 못 했다는 뜻일 뿐 사용자에게 보이는 고장이 아니다(화면은 show 가 보여 준다) — 이유와 상관없이 받는다.
-    if (vt) { vt.ready.catch(function () {}); vt.finished.catch(function () {}); }
+    받아둠(vt);
     if (!vt || shown) return;
     vt.ready.then(function () {
       if (shown) return;

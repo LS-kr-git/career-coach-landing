@@ -402,6 +402,26 @@ export async function pullFromServer() {
  * 이 기록은 「마쳤나」 판정·발송·결제가 읽지 않는다. 그래서 실패해도 막지 않는다 — 흐름을 멈출 만큼의 값이 아니다(남기기만 한다).
  * 부르는 곳: 1·2단계 「다음」과 2·3단계에 들어올 때(앞 단계 「다음」이 떠나며 끊겼어도 다음 화면이 다시 보낸다).
  */
+// 「다음」을 누르면 이 기록을 보내는 사이 화면이 넘어가 요청이 끊긴다(사파리 `Load failed` · 크롬 `Failed to fetch` ·
+// `Importing a module script failed`). 다음 화면이 들어오며 다시 보내므로 잃는 것이 없다 — 떠나는 중에 끊긴 것은 안 남긴다(2026-10-19:
+// 일주일 11건이 전부 이 모양이었다). 떠나는 중이 아닌데 끊겼으면 한 번 더 보내 보고, 그래도 안 되면 그때 남긴다.
+let 떠나는중 = false;
+{
+  addEventListener('pagehide', () => { 떠나는중 = true; });
+  addEventListener('beforeunload', () => { 떠나는중 = true; });
+  addEventListener('pageshow', () => { 떠나는중 = false; });
+  // iOS 사파리는 beforeunload 를 안 쏘고, 요청은 pagehide 전에 끊길 수 있다 — 같은 창으로 넘어가는 링크를 누른 순간부터 떠나는 중으로 본다.
+  // 넘어가지 않았으면(막혔으면) 3초 뒤 되돌린다.
+  addEventListener('click', (e) => {
+    const a = e.target?.closest?.('a[href]');
+    if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+    if (a.hash && a.pathname === location.pathname && a.search === location.search) return;   // 같은 문서 안 옮김(#…)은 안 떠난다
+    setTimeout(() => { if (e.defaultPrevented) return; 떠나는중 = true; setTimeout(() => { if (document.visibilityState === 'visible') 떠나는중 = false; }, 3000); }, 0);
+  }, true);
+}
+const 끊김 = (e) => /Load failed|Failed to fetch|NetworkError|Importing a module script failed|error loading dynamically imported module/i
+  .test(String(e?.message || e));
+
 export async function saveDraft() {
   if (document.prerendering) await new Promise((r) => document.addEventListener('prerenderingchange', r, { once: true }));
   const s = readState();
@@ -409,21 +429,36 @@ export async function saveDraft() {
   const 지금 = new Date();
   writeState({ draftAt: 지금.getTime() });   // 이 기기의 확정 시각 — 다른 기기의 서버 기록과 견준다(mergeDraft)
   try {
-    const supabase = await client();
-    const session = await liveSession(supabase);
-    if (!session) return;
-    const lo = s.years === null ? null : Math.min(60, Math.max(0, s.years));
-    const { error } = await supabase.from('onboarding_draft').upsert({
-      auth_user_id: session.user.id,
-      job_codes: s.jobs.slice(0, MAX_JOBS),
-      years_min: lo,
-      years_max: lo === null ? null : Math.min(60, Math.max(lo, s.yearsMax ?? lo)),
-      updated_at: 지금.toISOString(),
-    });
-    if (error) throw error;
+    await sendDraft(s, 지금);
   } catch (e) {
+    // 떠나는 중이어도 **끊김일 때만** 뺀다 — 권한 거부·코드 오류는 그대로 남긴다(검사관 ①, 2026-10-19)
+    if (끊김(e)) {
+      if (떠나는중) return;                             // 다음 화면이 다시 보낸다
+      await new Promise((r) => setTimeout(r, 1500));
+      if (떠나는중) return;
+      try { await sendDraft(s, 지금); return; } catch (e2) {
+        if (떠나는중 && 끊김(e2)) return;
+        track('client_error', { msg: 'onboarding_draft:retry:' + String(e2?.message || e2).slice(0, 70) });
+        return;
+      }
+    }
     track('client_error', { msg: 'onboarding_draft:' + String(e?.message || e).slice(0, 80) });
   }
+}
+
+async function sendDraft(s, 지금) {
+  const supabase = await client();
+  const session = await liveSession(supabase);
+  if (!session) return;
+  const lo = s.years === null ? null : Math.min(60, Math.max(0, s.years));
+  const { error } = await supabase.from('onboarding_draft').upsert({
+    auth_user_id: session.user.id,
+    job_codes: s.jobs.slice(0, MAX_JOBS),
+    years_min: lo,
+    years_max: lo === null ? null : Math.min(60, Math.max(lo, s.yearsMax ?? lo)),
+    updated_at: 지금.toISOString(),
+  });
+  if (error) throw error;
 }
 
 /** 서버 진행 기록 한 행을 읽는다 — 로그인 콜백(자기 클라이언트)과 pullFromServer 가 같이 쓴다. 없으면 null, 실패는 던진다. */
