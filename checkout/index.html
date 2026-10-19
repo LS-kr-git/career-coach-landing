@@ -230,9 +230,8 @@
   @media (prefers-reduced-motion:reduce){.wait .slot i{animation-duration:2.4s}}
 
   /* 다시 구독 · 저장 카드 확인 창 · 결제 실패 창 — 공용 가운데 창(/assets/modal.css). 아래 둘은 확인 창에만 있는 줄 */
-  .m-renew{margin-top:10px;font-size:13px;line-height:18px;color:var(--gray-500)}
   .m-btns + .m-other{margin-top:4px}
-  .m-other{height:44px;border:0;background:none;font:inherit;font-size:14px;line-height:20px;color:var(--gray-600);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+  .m-other{height:44px;border:0;background:none;font:inherit;font-size:13px;line-height:18px;color:var(--gray-500);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -359,7 +358,6 @@
       <div class="m-row"><span class="l">구독권</span><span class="v" id="cfPlan"></span></div>
       <div class="m-row"><span class="l">결제 금액</span><span class="v" id="cfAmt"></span></div>
     </div>
-    <p class="m-renew">이후 같은 주기로 같은 금액이 자동 결제되고,<br>언제든 해지할 수 있어요.</p>
     <div class="m-btns"><button class="m-btn sub" type="button" id="cfNo">취소</button><button class="m-btn main" type="button" id="cfYes">결제하기</button></div>
     <button class="m-other" type="button" id="cfOther">다른 카드로 결제할게요</button>
   </div>
