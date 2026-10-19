@@ -828,7 +828,7 @@
     var 말 = [e && e.message, e && e.pgCode, e && e.pgMessage].filter(Boolean).join(' / ');
     if (말) console.error('결제수단 등록 실패', (e && e.code) || '', 말);
     실패기록((e && e.at) || (e && e.name === '연결끊김' ? 'save' : 'pg'),
-            (e && (e.code || e.name)) || '', /취소|cancel/i.test(말 + ' ' + ((e && e.code) || '')));
+            (e && (e.code || e.name)) || '', /취소|cancel/i.test(말 + ' ' + ((e && e.code) || '')), e && e.pgCode);
     if (e && e.name === '연결끊김') {
       note(변경 ? '연결이 끊겨 카드 변경을 확인하지 못했어요.\n한 번 더 눌러 주세요.'
                 : '연결이 끊겨 결제를 마치지 못했어요.\n「결제하기」를 다시 눌러 주세요. 두 번 결제되지 않아요.');
@@ -847,10 +847,13 @@
   }
   /* 결제가 어디서 멈췄는지 원장에 남긴다(career-coach 0174 checkout_fail, 2026-10-17). 화면은 바꾸지 않는다.
      결제 행은 걷혀야만 생겨서, 이게 없으면 「버튼을 안 눌렀다」와 「눌렀는데 결제창이 안 떴다」를 못 가른다.
-     결제사 문장(message)은 싣지 않는다 — 코드만. 카드 변경은 퍼널이 아니라 안 센다. */
-  function 실패기록(at, code, cancel) {
+     결제사 문장(message)은 싣지 않는다 — 코드만. 카드 변경은 퍼널이 아니라 안 센다.
+     `pg` 는 카드사·PG 가 준 사유 코드(pgCode) — 포트원 code(FAILURE_TYPE_PG)는 「결제사 쪽 실패」까지만 말해서
+     한도·인증 실패를 못 가른다(2026-10-20 사용자 지시). */
+  function 실패기록(at, code, cancel, pg) {
     if (변경) return;
-    track('checkout_fail', { at: at, code: code ? String(code).slice(0, 60) : undefined, cancel: cancel || undefined, iab: 인앱 });
+    track('checkout_fail', { at: at, code: code ? String(code).slice(0, 60) : undefined, cancel: cancel || undefined,
+                             pg: pg ? String(pg).slice(0, 40) : undefined, iab: 인앱 });
   }
   function 어디서(e, at) { e.at = at; return e; }
   function 앞요금제이름(code) {
