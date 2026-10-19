@@ -264,7 +264,8 @@
       // 'withdrawn' · 'not_found'(이미 탈퇴) 둘 다 끝난 것이다. 로그인 계정이 지워졌으니 이 기기의 세션도 버린다
       끝남 = true;
       forgetLocal();   // 이 기기에 남은 온보딩 값·갈 곳도 지운다(2026-10-14)
-      (await client()).auth.signOut({ scope: 'local' }).catch(() => {});
+      // 탈퇴는 이미 끝났다 — 세션 정리가 실패해도(클라이언트를 못 불러와도) 「탈퇴하지 못했어요」로 가면 안 된다
+      client().then((c) => c.auth.signOut({ scope: 'local' })).catch(() => {});
       $('ask').hidden = true; $('bye').hidden = false; agree.hidden = true;
       go.classList.remove('danger'); go.disabled = false; lab.textContent = '처음 화면으로';
       go.onclick = () => { location.href = '/'; };
