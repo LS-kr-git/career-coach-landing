@@ -632,21 +632,41 @@
     $('confirm').hidden = false;
   }
   $('cfNo').addEventListener('click', function () { $('confirm').hidden = true; });
-  /* 저장 카드로 못 걷었을 때의 창 (2026-10-19 사용자 확정 「실패 문구 v4·v5」). 한도·잔액 거절은 서버가 limit 으로 알려 준다
-     (career-coach portone `한도거절인가` — 결제사 거절 코드로 가른다). 「다시 결제하기」는 카드 입력 창으로 간다 —
-     창을 닫을 때 저장카드를 비워 두므로(아래 cfYes) 결제 버튼이 그 길을 탄다. */
+  /* 결제가 안 됐을 때의 창 (2026-10-19 사용자 확정 「실패 문구 v4·v5」 · 새 카드·연결 불안정도 같은 창). 한도·잔액 거절은
+     서버가 limit 으로 알려 준다(career-coach portone `한도거절인가` — 결제사 거절 코드로 가른다).
+     한도·일반 — 「다시 결제하기」는 카드 입력 창으로 간다(그 카드는 거절됐다).
+     연결 — 카드 탓이 아니다. 「다시 결제하기」는 등록된 카드로 이 창 안에서 다시 걷는다(같은 주문번호라 두 번 걷히지 않는다 · 0091). */
   var 실패문구 = {
     한도: ['한도나 잔액이 부족해\n결제되지 않았어요', '다른 카드로 다시 결제해 주세요.'],
     일반: ['입력한 카드로 결제하지 못했어요', '다른 카드로 결제하거나 잠시 후 다시 시도해 주세요.\n오류 문의 : careercoach.my@gmail.com'],
+    연결: ['결제 연결이 잠시 불안정했어요', '지금 다시 결제하셔도 두 번 결제되지 않아요.\n그대로 두면 3일 안에 등록하신 카드로 자동으로 다시 결제해요.'],
   };
-  function 실패창(한도) {
-    var t = 실패문구[한도 ? '한도' : '일반'];
+  // 걷은요금제 — 마지막으로 걷기를 보낸 요금제. 연결 창의 다시 걷기는 이 값으로 보낸다(같은 주문이어야 한다 · 0127 가드).
+  // 다시걷기 — 그 다시 걷기가 연결 끊김으로 끝났으면, 다음 「결제하기」도 카드 입력 없이 같은 요금제로 다시 걷는다(알약이 그렇게 말한다).
+  var 실패종류 = null, 창에서걷는중 = false, 걷은요금제 = null, 다시걷기 = null;
+  function 실패창(종류) {
+    var t = 실패문구[실패종류 = 종류];
     $('failTitle').textContent = t[0];
     $('failBody').textContent = t[1];
+    $('failYes').textContent = '다시 결제하기';
+    $('failYes').disabled = $('failNo').disabled = false;
+    $('wait').hidden = true;   // 새 카드 길은 덮개가 떠 있다 — 창 뒤에 남기지 않는다
     $('fail').hidden = false;
   }
   $('failNo').addEventListener('click', function () { $('fail').hidden = true; });
-  $('failYes').addEventListener('click', function () { $('fail').hidden = true; $('submit').click(); });
+  $('failYes').addEventListener('click', function () {
+    if (실패종류 !== '연결') { $('fail').hidden = true; $('submit').click(); return; }
+    $('failYes').disabled = $('failNo').disabled = true;
+    $('failYes').innerHTML = '<span class="m-spin" aria-hidden="true"></span>결제하고 있어요';
+    note('');
+    창에서걷는중 = true;
+    var 요금제코드 = 걷은요금제;
+    // 다시 안 걷히면 결과대로 창이 다시 열린다(실패창). 창이 안 다시 열린 결과(알약 안내)면 기다리던 창을 닫는다.
+    보관하고_알린다(null, 요금제코드).catch(function (e) { if (e && e.name === '연결끊김') 다시걷기 = 요금제코드; 실패(e); }).then(function () {
+      창에서걷는중 = false;
+      if ($('failYes').disabled) $('fail').hidden = true;
+    });
+  });
   // 다른 카드로 — 저장 카드 대신 결제창(카드 새로 입력)을 연다 (2026-10-19 사용자 확정 · 목업 v1 ①).
   // 이 화면에서는 저장 카드를 잊는다 — 다음 누름도 결제창으로 간다.
   var 다른카드로 = false;
@@ -723,7 +743,8 @@
      planCode — 카드 변경이면 보내지 않는다(서버가 그 사람 구독의 요금제를 안다). */
   function 보관하고_알린다(billingKey, planCode) {
     // 🔴 여기서 끝내지 않는다. 서버가 포트원에 되물어 보관해야 구독이 열린다.
-    if (!변경 && !저장카드) $('wait').hidden = false;   // 저장 카드는 확인 창이 「결제하고 있어요」로 기다린다
+    if (!변경 && !저장카드 && !창에서걷는중) $('wait').hidden = false;   // 저장 카드는 확인 창이 「결제하고 있어요」로 기다린다
+    if (!변경 && planCode) 걷은요금제 = planCode;
     return saveBillingKey(billingKey, 변경 ? undefined : planCode).catch(function (e) {
       // 연결이 끊기거나(인앱 브라우저·지하철) 90초 안에 답이 없으면, 결제는 서버에서 끝났을 수도 있다 —
       // 구독이 열렸는지 직접 물어 열렸으면 완료 화면으로, 아니면 다시 누르게 한다(같은 주문번호를 다시 쓰므로 두 번 걷히지 않는다 · career-coach 0091·0106).
@@ -750,11 +771,8 @@
         try { sessionStorage.setItem('cc_card_changed', r.overdue ? 'od' : '1'); } catch (e) { /* 못 적으면 완료 화면이 멤버십·결제 화면으로 돌려보낸다 */ }
         location.replace('/checkout/changed/');
       }
-      else if (charged === '첫결제실패' && !billingKey && 저장카드) 실패창(r.limit === true);
-      else if (charged === '첫결제실패')
-        note((billingKey ? '카드는 등록됐지만 결제가 되지 않았어요.' : '결제가 되지 않았어요.') + '\n카드 한도나 잔액을 확인해 주세요.\n오류 문의 : careercoach.my@gmail.com');
-      else if (charged === '청구실패')
-        note('결제 연결이 잠시 불안정했어요.\n3일 안에 등록하신 카드로 자동으로 다시 결제해요.\n지금 다시 결제하셔도 두 번 결제되지 않아요.');
+      else if (charged === '첫결제실패') 실패창(r.limit === true ? '한도' : '일반');
+      else if (charged === '청구실패') 실패창('연결');
       // 아래 넷은 결제가 **안 됐고 저절로 다시 되지도 않는** 경우다(2026-10-14 출시 전 점검) — 「등록되었습니다」로 덮지 않는다.
       else if (charged === '이미구독') location.replace('/mypage/');
       else if (charged === '온보딩미완료') 이어갈곳().catch(function () { return '/onboarding/1/'; }).then(function (u) { location.replace(u); });   // 하던 단계로
@@ -784,7 +802,7 @@
                 : '연결이 끊겨 결제를 마치지 못했어요.\n「결제하기」를 다시 눌러 주세요. 두 번 결제되지 않아요.');
       return;
     }
-    if (저장카드 && !변경 && !/취소|cancel/i.test(말)) { 실패창(false); return; }
+    if (저장카드 && !변경 && !/취소|cancel/i.test(말)) { 실패창('일반'); return; }
     note(/취소|cancel/i.test(말) ? '결제를 취소했어요' : '결제수단을 등록하지 못했어요. 다시 시도해 주세요.\n오류 문의 : careercoach.my@gmail.com');
   }
   /* 결제가 어디서 멈췄는지 원장에 남긴다(career-coach 0174 checkout_fail, 2026-10-17). 화면은 바꾸지 않는다.
@@ -830,6 +848,12 @@
     if (btn.classList.contains('locked')) return;
     if (!변경 && !고른) return;
     if (저장카드 && !변경) { track('checkout_click', { plan: 고른.code }); 확인창(); return; }
+    if (다시걷기 && !변경) {
+      var 다시 = 다시걷기; 다시걷기 = null;
+      btn.disabled = true; note('');
+      보관하고_알린다(null, 다시).catch(function (e) { if (e && e.name === '연결끊김') 다시걷기 = 다시; 실패(e); }).then(function () { btn.disabled = false; });
+      return;
+    }
     btn.disabled = true;
     note('');
     var planCode = 고른 && 고른.code;
