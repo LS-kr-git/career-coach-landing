@@ -15,7 +15,6 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.83.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.86.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.87.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.88.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.89.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.90.woff2" as="font" type="font/woff2" crossorigin>
@@ -125,31 +124,7 @@
   .dock-note{font-size:13px;line-height:18px;color:var(--gray-600);text-align:center;padding:0 20px;word-break:keep-all}
   .page.has-dock.resume main{padding-bottom:124px}
 
-  /* 구독권 고르기 — 결제 화면 26판(피그마 2369:1325)의 요금 카드와 같은 값.
-     안 고른 카드 gray-50 바탕 · 고른 카드 흰 바탕 + amber-500 테두리 + 그림자. 색은 바로 바뀐다(피그마 프리뷰도 즉시). */
-  .plans{display:flex;flex-direction:column;gap:12px;padding-top:6px}
-  .pc{position:relative;display:flex;flex-direction:column;gap:10px;padding:16px 18px;border-radius:14px;
-    background:var(--gray-50);border:1.5px solid var(--gray-50);text-align:left;font:inherit;color:inherit;
-    cursor:pointer;-webkit-tap-highlight-color:transparent}
-  .pc[aria-checked="true"]{background:#fff;border-color:var(--amber-500);box-shadow:0 6px 18px rgba(15,23,42,.08)}
-  .pc .chip{position:absolute;left:16px;top:-11px;background:var(--amber-500);color:#fff;border-radius:9999px;
-    padding:4px 9px;font-size:11px;line-height:14px;font-weight:800}
-  .pc .top{display:flex;align-items:center;gap:8px;font-size:16px;line-height:24px;font-weight:700;color:var(--gray-900)}
-  .pc .radio{width:20px;height:20px;border-radius:50%;border:1.6px solid var(--gray-300);background:#fff;flex:none;
-    display:flex;align-items:center;justify-content:center}
-  .pc[aria-checked="true"] .radio{border-color:var(--amber-500)}
-  .pc[aria-checked="true"] .radio::after{content:'';width:10px;height:10px;border-radius:50%;background:var(--amber-500)}
-  .pc .tiers{display:flex;flex-direction:column;gap:4px;padding-left:28px}
-  .pc .day{display:flex;align-items:baseline;gap:6px}
-  .pc .day span{font-size:14px;line-height:20px;font-weight:500;color:var(--gray-500)}
-  .pc .day b{font-size:26px;line-height:34px;font-weight:700;color:var(--gray-900)}
-  .pc[aria-checked="true"] .day b{color:var(--amber-600)}
-  .pc .amt{display:flex;align-items:baseline;gap:6px;font-size:14px;line-height:22px}
-  .pc .amt s{color:var(--gray-400)}
-  .pc .amt .pct{font-weight:700;color:var(--error-600)}
-  .pc .amt .won{font-size:16px;font-weight:500;color:var(--gray-800)}
-  .pc .amt .per{font-size:13px;color:var(--gray-500);margin-left:-5px}
-  /* 하단 결제 버튼 — 26판처럼 바탕 투명·그림자 없음, 버튼 자체의 앰버 그림자만. 폭은 CLAUDE.md 「CTA 규칙」 */
+  /* 하단 버튼(해지 취소) — 바탕 투명·그림자 없음, 버튼 자체의 앰버 그림자만. 폭은 CLAUDE.md 「CTA 규칙」 */
   .cta-dock{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:var(--card-max);
     padding:14px 0 20px;display:flex;justify-content:center;pointer-events:none;z-index:10}
   .cta{width:calc(100% - 40px);max-width:410px;height:var(--cta-h);border:0;border-radius:var(--cta-radius);
@@ -177,12 +152,6 @@
 <main>
   <div class="title"><h1 class="t-display">멤버십·결제</h1></div>
   <div class="bill">
-    <!-- 구독 전 (피그마 908:606 · 기준 상태) — 카드는 서버 요금제로 스크립트가 그린다 -->
-    <section class="sec" id="pick" data-sk-hide>
-      <h2 class="t-h4">구독권을 골라 주세요</h2>
-      <div class="plans" id="plans" role="radiogroup" aria-label="구독권"></div>
-    </section>
-
     <!-- 구독 중 (피그마 03-C) -->
     <section class="sec" id="member" hidden>
       <h2 class="t-h4">멤버십</h2>
@@ -200,7 +169,7 @@
     <section class="sec skph" hidden data-sk-show aria-hidden="true"><h2 class="t-h4" data-sk>멤버십</h2><div data-sk="box" style="--skh:130px"></div></section>
 
     <section class="sec">
-      <h2 class="t-h4" id="payLabel" data-sk>결제수단</h2>
+      <h2 class="t-h4" data-sk>결제</h2>
       <div class="pcard">
         <div class="prow">
           <span class="art" aria-hidden="true"></span>
@@ -224,7 +193,6 @@
     <button class="cancel" type="button" hidden>구독 해지하기</button>
   </div>
 </main>
-<div class="cta-dock" id="dock" hidden><button class="cta" type="button" id="cta"></button></div>
 <div class="cta-dock resume" id="resumeDock" hidden><p class="cc-toast" id="resumeErr" role="alert" hidden></p><span class="dock-note" id="resumeNote"></span><button class="cta" type="button" id="resume">해지 취소하기</button></div>
 <p class="cc-toast float" id="toast" role="status" hidden>해지를 취소했어요. 멤버십이 이어져요</p>
 <p class="cc-toast float" id="errToast" role="alert" hidden></p>
@@ -235,11 +203,12 @@
   /* 값은 전부 서버에서 온다 (career-coach 0086 `mypage_subscription` · `plan` 표).
      🔴 금액 상수를 여기 두지 않는다 (2026-09-21 사용자 결정 「세 곳 다 서버 값으로」) —
         화면에 적힌 금액과 실제 청구액이 갈리는 자리가 하나도 없어야 한다.
-     세 상태 (2026-10-05 사용자 컨펌 시안 v3 C · v5 A):
-       구독 전 — 구독권 고르기 + 결제수단 + 하단 결제 버튼 (마크업 기본 상태 · 피그마 908:606)
+     두 상태 (2026-10-05 사용자 컨펌 시안 v3 C · v5 A):
        구독 중 — 멤버십 + 결제 + 이용 중인 요금제 + 맨 아래 해지 (피그마 03-C)
-       조회 실패 — 멤버십 + 결제 자리에 실패 문구 (피그마 03-B 2157:997) */
-  import { requireLogin, getSubscription, getPlans, planCards, resumeSubscription, billingView, billingFail }
+       조회 실패 — 멤버십 + 결제 자리에 실패 문구 (피그마 03-B 2157:997)
+     구독 전이면 이 화면을 그리지 않고 결제 화면으로 바로 보낸다 (2026-10-19 사용자 지시) — 고르기·결제는 결제 화면 하나가 한다.
+     replace 로 보낸다: 이 화면이 방문 기록에 남으면 결제 화면의 「뒤로」가 여기로 와서 다시 결제 화면으로 튕긴다. */
+  import { requireLogin, getSubscription, resumeSubscription, billingView, billingFail }
     from '/assets/mypage-data.js';
 
   var $ = function (id) { return document.getElementById(id); };
@@ -249,51 +218,13 @@
   var card = document.querySelector('.pcol .t-body-l');
   var cardSub = document.querySelector('.pcol .masked');
   var link = document.querySelector('.pcard .link');
-  var 고른것 = null;     // 구독 전에 고른 카드
-  var 구독중 = false;
 
-  function 카드그리기(cards) {
-    var box = $('plans');
-    box.textContent = '';
-    cards.forEach(function (c) {
-      var b = document.createElement('button');
-      b.type = 'button'; b.className = 'pc'; b.setAttribute('role', 'radio');
-      b.innerHTML = (c.rec ? '<span class="chip">추천 · 기간 한정 특가</span>' : '') +
-        '<span class="top"><span class="radio" aria-hidden="true"></span><span></span></span>' +
-        '<span class="tiers"><span class="day"><span>하루</span><b></b></span><span class="amt"></span></span>';
-      b.querySelector('.top span:last-child').textContent = c.name;
-      b.querySelector('.day b').textContent = c.day;
-      var amt = b.querySelector('.amt');
-      if (c.strike) {
-        var s = document.createElement('s'); s.textContent = c.strike; amt.appendChild(s);
-        var p = document.createElement('span'); p.className = 'pct'; p.textContent = c.pct; amt.appendChild(p);
-      }
-      var w = document.createElement('span'); w.className = 'won'; w.textContent = c.price; amt.appendChild(w);
-      if (c.per) { var per = document.createElement('span'); per.className = 'per'; per.textContent = c.per; amt.appendChild(per); }
-      b.addEventListener('click', function () { 고르기(c, cards); });
-      c.el = b;
-      box.appendChild(b);
-    });
-    고르기(cards.find(function (c) { return c.on; }) || cards[0], cards);
-  }
-  function 고르기(c, cards) {
-    고른것 = c;
-    cards.forEach(function (x) { x.el.setAttribute('aria-checked', String(x === c)); });
-    $('cta').textContent = c.cta;
-  }
-
-  /* 한 함수로 그린다 — 값·빈 상태·실패가 같은 자리에 들어가야 한 갈래만 고쳐지는 일이 안 생긴다. */
-  function paint(v, bad, cards) {
-    구독중 = v.subscribed;
-    var 고를곳 = !bad && !v.subscribed && cards;
-    $('pick').hidden = !고를곳;
-    $('dock').hidden = !고를곳;
+  function paint(v, bad) {
     $('resumeDock').hidden = !v.canResume;
     $('resumeNote').textContent = v.resumeNote;
-    page.classList.toggle('has-dock', !!고를곳 || v.canResume);
+    page.classList.toggle('has-dock', v.canResume);
     page.classList.toggle('resume', v.canResume);
-    $('member').hidden = 고를곳;
-    $('payLabel').textContent = 고를곳 ? '결제수단' : '결제';
+    $('member').hidden = false;
     $('mine').hidden = !v.subscribed;
     /* 못 읽었으면 카드 이름 두 줄을 스켈레톤으로, 실패는 하단 안내로 (2026-10-15 「오류 대체 화면」 S21) */
     if (bad) { 막대로(card, '92px', 20); 막대로(cardSub, '70px', 14); 오류안내($('errToast'), v.card); }
@@ -308,38 +239,26 @@
     cancel.hidden = !v.canCancel && !v.canResume;
     cancel.textContent = v.canResume ? '해지 취소하기' : '구독 해지하기';
     cancel.classList.toggle('undo', v.canResume);
-    if (고를곳) 카드그리기(cards);
   }
 
   /* 🔴 실패 처리기는 **조회 실패만** 받는다 (`.then(성공, 실패)`). `.catch` 로 뒤에 달면
      paint() 안의 오류까지 받아 실패 갈래가 또 터지고, 화면에는 마크업의 빈 상태가 남는다. */
-  function 다시읽는다() {
-    return getSubscription().then(function (s) {
-      if (billingView(s).subscribed) return [s, null];
-      return getPlans().then(function (plans) { return [s, planCards(plans)]; });
-    });
-  }
   window.ccHold?.(requireLogin(location.pathname + location.search).then(function (ok) {
-    return ok ? 다시읽는다() : null;
-  }).then(function (r) {
-    if (r) paint(billingView(r[0]), false, r[1]);
+    return ok ? getSubscription() : undefined;
+  }).then(function (s) {
+    if (s === undefined) return;
+    var v = billingView(s);
+    if (!v.subscribed) { location.replace('/checkout/'); return; }
+    paint(v, false);
   }, function () {
     /* 실패를 빈 상태로 그리면 결제한 사람이 「등록된 결제수단 없음」을 본다. */
-    paint(billingFail(), true, null);
+    paint(billingFail(), true);
   }));
 
-  /* 결제 버튼 — 고른 요금제를 결제 화면에 넘긴다. */
-  function 결제로() {
-    location.href = '/checkout/' + (고른것 ? '?plan=' + encodeURIComponent(고른것.code) : '');
-  }
-  $('cta').addEventListener('click', 결제로);
   /* 「변경」은 카드 등록 화면으로 보낸다 (2026-09-25 사용자 지시). 구독 중이면 서버가 새 카드만
      보관하고 걷지 않는다(`이미구독`) — 미납 중이면 다음 재시도가 그 카드로 걷는다.
-     카드가 없는 구독 전 사람에게는 「등록」으로 뜨고, 카드를 등록하는 것이 곧 결제라 결제 버튼과 같은 길로 간다. */
-  link.addEventListener('click', function () {
-    if (구독중 || link.textContent === '변경') location.href = '/checkout/?mode=change';
-    else 결제로();
-  });
+     구독 전 사람은 이 화면에 머물지 않으므로(위 replace) 「등록」으로 결제하는 갈래는 없다. */
+  link.addEventListener('click', function () { location.href = '/checkout/?mode=change'; });
 
   /* 해지는 해지 화면(/mypage/cancel/)에서 이유를 받고 한다 (2026-10-05 사용자 컨펌 「해지 사유 v3」).
      해지 예약된 사람에게는 같은 자리가 「해지 취소하기」다 — 아래 고정 버튼과 똑같이 동작한다. */
@@ -355,8 +274,8 @@
   function 되돌리기() {
     if (되돌리는중) return;
     되돌리는중 = true;
-    resumeSubscription().then(다시읽는다).then(function (r) {
-      paint(billingView(r[0]), false, r[1]);
+    resumeSubscription().then(getSubscription).then(function (s) {
+      paint(billingView(s), false);
       하단안내($('toast'));   // 해지 취소 뒤 안내 — 공용 「하단 안내」(글자 수 규칙)
     }, function () {
       오류안내($('resumeErr'), '해지를 취소하지 못했어요. 잠시 후 다시 눌러 주세요');

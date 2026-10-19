@@ -160,7 +160,9 @@ for (const [화면, a, b] of [['01 프로필', 빈것, 실패한것], ['03 결�
   const [y, m] = data.planCards([한달, 일년]);
   기대.push([`${y.name}|${y.day}|${y.strike}|${y.pct}|${y.price}|${y.cta}|${y.rec}|${y.on}`,
              '8개월+4개월|22원|12,000원|33%|8,000원|12개월권 · 8,000원 결제하기|true|true'],
-            [`${m.name}|${m.day}|${m.strike}|${m.per}|${m.on}`, '1개월|33원|null|/월|false']);
+            [`${m.name}|${m.day}|${m.strike}|${m.per}|${m.on}`, '1개월|33원|null|/월|false'],
+            [`${y.ticket}|${y.buy}|${y.gift}|${y.parts}|${y.month}`, '12개월권|12개월권 구독하기|4개월 무료 증정|8개월 + 4개월|667원'],
+            [`${m.ticket}|${m.buy}|${m.gift}|${m.parts}|${m.month}`, '1개월권|1개월권 구독하기|null|null|null']);
   for (const [값, 바람] of 기대) if (값 !== 바람) problems.push(`03 결제: 「${바람}」 이어야 할 자리가 「${값}」 입니다`);
 }
 
