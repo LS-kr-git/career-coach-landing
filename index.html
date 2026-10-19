@@ -169,6 +169,11 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 .tvx:not(.play) .tvf path{stroke-dashoffset:1}
 .tvo b{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:14px;background:#1E293B;font-weight:800;font-size:15px;color:#fff;transition:opacity .4s ease 1.7s,transform .4s cubic-bezier(.2,.8,.2,1) 1.7s}
 .tvx:not(.play) .tvo b{opacity:0;transform:scale(.8)}
+/* 「카톡 1통」이 뜬 뒤에 이어서 나온다(80) */
+.tvo .tvm{margin:8px 0 0;font-size:13px;font-weight:600;color:var(--g500);transition:opacity .4s ease 2.2s,transform .4s ease 2.2s}
+.tvx:not(.play) .tvo .tvm{opacity:0;transform:translateY(4px)}
+/* 아티클 화면 제목 위 「오늘만」 배지(86) — 전문 보기는 받은 날 당일에만 열린다 */
+.art .tday{display:inline-block;margin-bottom:8px;padding:3px 9px;border-radius:999px;background:var(--a100);color:var(--a700);font-size:11px;font-weight:700;line-height:1.4}
 @media (prefers-reduced-motion:reduce){.tvx *{transition:none!important}}
 </style>
 <style id="v4">
@@ -230,7 +235,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 <!-- 시간 -->
 <section data-sec="하루 1시간 절약" class="gap20 s-a100b" style="padding-top:104px">
   <h2>링크드인·뉴스레터<br><span class="hl">다 안 봐도 괜찮아요.</span><br>이것만 보면 따라가요.</h2>
-  <div class="tvx" id="tvx"><div class="vC"><i class="ln"></i><div class="it" style="--k:0"><span class="ic">📧<em class="no">1</em></span><small>뉴스레터<br>여러 통</small></div><div class="it" style="--k:1"><span class="ic">💼<em class="no">2</em></span><small>링크드인<br>게시글</small></div><div class="it" style="--k:2"><span class="ic">📰<em class="no">3</em></span><small>해외<br>기사</small></div><div class="it" style="--k:3"><span class="ic">🗣️<em class="no">4</em></span><small>커뮤니티<br>정보</small></div></div><div class="tvo"><svg class="tvf" viewBox="0 0 400 70" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M50 0C50 40 200 30 200 70"/><path pathLength="1" d="M150 0C150 40 200 30 200 70"/><path pathLength="1" d="M250 0C250 40 200 30 200 70"/><path pathLength="1" d="M350 0C350 40 200 30 200 70"/></svg><b>💬 커리어코치 카톡 1통으로</b></div></div>
+  <div class="tvx" id="tvx"><div class="vC"><i class="ln"></i><div class="it" style="--k:0"><span class="ic">📧<em class="no">1</em></span><small>뉴스레터<br>여러 통</small></div><div class="it" style="--k:1"><span class="ic">💼<em class="no">2</em></span><small>링크드인<br>게시글</small></div><div class="it" style="--k:2"><span class="ic">📰<em class="no">3</em></span><small>해외<br>기사</small></div><div class="it" style="--k:3"><span class="ic">🗣️<em class="no">4</em></span><small>커뮤니티<br>정보</small></div></div><div class="tvo"><svg class="tvf" viewBox="0 0 400 70" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M50 0C50 40 200 30 200 70"/><path pathLength="1" d="M150 0C150 40 200 30 200 70"/><path pathLength="1" d="M250 0C250 40 200 30 200 70"/><path pathLength="1" d="M350 0C350 40 200 30 200 70"/></svg><b>💬 커리어코치 카톡 1통으로</b><p class="tvm">⏱ 읽는 데 1분</p></div></div>
   <p class="big c" style="margin-top:64px;font-weight:400">새 읽을 건 매일 쌓이는데…<br>시간은 늘 모자라니까요 🥺</p>
 </section>
 <!-- 알림톡 미리보기 (2026-10-18 되살림 — 옛 첫 화면 d837e22^ 의 폰·직군 칩. 첫 칩 「공통」이 기본 선택) -->
@@ -261,6 +266,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 <div class="pm pm-art" id="pmart"><div class="sc">
     <div class="hd"><span class="bk"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="ttl"><svg width="20" height="20" viewBox="0 0 21 21"><use href="#ccmark"/></svg>커리어코치</span><span class="ics"><svg viewBox="0 0 24 24" width="21" height="21"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 15.5l4.5 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><svg viewBox="0 0 24 24" width="21" height="21"><path d="M4 6.5h16M4 12h16M4 17.5h16" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></svg></span></div>
     <div class="art">
+      <span class="tday">⏰ 오늘만 열람 가능</span>
       <h4>연봉 협상이 거절됐을 때,<br>다음을 여는 한마디</h4>
       <p class="meta"><span>#일 잘하는 법·커리어</span><span>⏱ 3분</span></p>
       <p>연봉 인상 요청이 거절되면 대부분 그 자리에서 대화를 끝내요. 그런데 거절 직후가 다음 협상을 준비하기 가장 좋은 때예요.</p>

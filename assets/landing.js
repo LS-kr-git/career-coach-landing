@@ -171,8 +171,14 @@ function mountPv(r){const q=c=>r.querySelector(c),b=q(".swipe"),dots=q(".pvdots"
   new IntersectionObserver(es=>es.forEach(e=>{clearInterval(t);if(e.isIntersecting&&!r.touched)t=setInterval(()=>go((idx()+1)%b.children.length),3200)}),{threshold:.5}).observe(b)}
  r.pv={render};render(JOB)}
 PVS.forEach(mountPv);
-// 목요일 「내 조건」 말풍선 — 보이면 체크가 그려지고(C7) 조건이 하나씩 붙는다(A2). 글은 HTML 그대로 두고 「 · 」로만 나눈다
-(()=>{const c=document.querySelector("#thusec .cond"),b=c&&c.querySelector("b");if(!b||matchMedia("(prefers-reduced-motion: reduce)").matches)return;
- c.classList.add("wt");const ps=b.textContent.split(" · ");b.textContent="";
- ps.forEach((x,i)=>{const s=document.createElement("span");s.className="cp";s.style.animationDelay=.2+i*.35+"s";s.textContent=(i?" · ":"")+x;b.appendChild(s)});
- new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){c.classList.add("pl");o.disconnect()}}),{threshold:.6}).observe(c)})();
+// 목요일 「내 조건」 말풍선 — 보이면 체크가 그려지고(C7) 조건이 하나씩 붙는다(A2).
+// 위에서 직군을 고르면 말풍선과 공고 세 줄도 그 직군으로 바뀐다(77). 「공통」이면 처음 예시(마케팅·그로스) 그대로
+const THU_JOBS={dev:["백엔드 개발자","프론트엔드 개발자","데브옵스 엔지니어"],uiux:["프로덕트 디자이너","UX 리서처","UI 디자이너"],mkt:["퍼포먼스 마케터","그로스 매니저","CRM 마케터"],dsn:["브랜드 디자이너","그래픽 디자이너","아트디렉터"],prd:["프로덕트 매니저","사업 전략 매니저","서비스 기획자"],sales:["B2B 영업 매니저","어카운트 매니저","GTM 매니저"],mfg:["공정 엔지니어","품질 엔지니어","R&D 연구원"],fin:["재무회계 담당","FP&A 매니저","세무 담당"],hr:["HRBP","채용 담당","조직문화 담당"],com:["온라인 MD","카테고리 매니저","리테일 영업"],log:["SCM 매니저","물류 운영 매니저","구매 담당"],law:["사내 변호사","컴플라이언스 담당","법무 담당"],money:["투자 애널리스트","리스크 매니저","자산운용 매니저"],media:["콘텐츠 PD","에디터","영상 기획자"],cx:["CX 매니저","고객지원 리드","VOC 분석가"],med:["임상 연구원","의료정보 담당","제약 마케터"],build:["현장 엔지니어","공무 담당","설계 엔지니어"],space:["공간 디자이너","인테리어 설계자","VMD"],game:["게임 기획자","사업 PM","라이브 운영 PD"]};
+(()=>{const c=document.querySelector("#thusec .cond"),b=c&&c.querySelector("b");if(!b)return;
+ const still=matchMedia("(prefers-reduced-motion: reduce)").matches,first=b.textContent,rest=" · "+first.split(" · ").slice(1).join(" · ");
+ const tn=[...document.querySelector("#thusec .tpl").childNodes].find(n=>n.nodeType===3&&n.data.includes("1. A사 - ")),tpl0=tn&&tn.data;
+ const put=t=>{b.textContent="";if(still){b.textContent=t;return}t.split(" · ").forEach((x,i)=>{const s=document.createElement("span");s.className="cp";s.style.animationDelay=.2+i*.35+"s";s.textContent=(i?" · ":"")+x;b.appendChild(s)})};
+ if(!still)c.classList.add("wt");put(first);
+ const replay=()=>{if(!c.classList.contains("pl"))return;c.classList.remove("pl");void c.offsetWidth;c.classList.add("pl")};
+ document.addEventListener("ccjob",e=>{const k=e.detail,J=THU_JOBS[k];put(J?LABEL[k]+rest:first);if(tn)tn.data=J?tpl0.replace(/1\. A사 - .*\n2\. B사 - .*\n3\. C사 - .*/,`1. A사 - ${J[0]}\n2. B사 - ${J[1]}\n3. C사 - ${J[2]}`):tpl0;replay()});
+ if(!still)new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){c.classList.add("pl");o.disconnect()}}),{threshold:.6}).observe(c)})();
