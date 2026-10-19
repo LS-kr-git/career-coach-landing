@@ -29,7 +29,10 @@ const MAX_AGE = 90 * 1000;      // 누를 때 이보다 오래된 state 는 안 
 
 const ua = navigator.userAgent;
 // 카톡 안 브라우저는 이미 카카오 로그인 상태라 웹 화면이 한 번에 지나간다. PC 는 앱 전환이 없다.
-export const 앱전환 = /Android|iPhone|iPad|iPod/i.test(ua) && !/KAKAOTALK/i.test(ua);
+// 안드로이드 앱 안 브라우저(WebView, UA 에 「; wv)」)도 뺀다 (2026-10-19 퍼널 점검) — SDK 는 그 안에서 `intent:` 주소로 카톡을
+// 여는데, 네이버·밴드·라인 같은 WebView 는 그 주소를 안 받아 버튼이 아무 반응 없거나 오류 화면이 뜬다. 웹 로그인은 어디서나 지난다.
+// (인스타·페이스북 WebView 는 SDK 가 이미 웹 로그인으로 보내고 있었다 — 같은 길이다.)
+export const 앱전환 = /Android|iPhone|iPad|iPod/i.test(ua) && !/KAKAOTALK/i.test(ua) && !/; wv\)/.test(ua);
 
 let 재료 = null;   // { state, scope, redirect_uri, at }
 let 다시받기 = () => {};

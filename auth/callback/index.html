@@ -157,7 +157,8 @@
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   window.ccAlive();   // CDN 로딩이 끝났다 — 위 하드 폴백의 8초를 여기서부터 다시 잰다
 
-  const { track, metaCookies } = await import('/assets/track.js');
+  // 기록 모듈을 못 받아도 로그인은 끝낸다 — 여기서 멈추면 8초 뒤 성공한 로그인을 실패로 보냈다(2026-10-19 퍼널 점검).
+  const { track, metaCookies } = await import('/assets/track.js').catch(() => ({ track() {}, metaCookies: () => ({}) }));
   window.ccAlive();   // track.js 도 별도 fetch 다 — 이 구간에 진척 신호가 없으면
                       // 앞 칸에서 잰 8초가 여기서 터져 성공한 로그인을 실패로 보낸다
 
