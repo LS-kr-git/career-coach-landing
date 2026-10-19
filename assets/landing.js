@@ -104,13 +104,6 @@ new IntersectionObserver(es=>es.forEach(e=>{const w=$("stw");if(e.isIntersecting
  const replay=()=>{w.classList.remove("in");void w.offsetWidth;setTimeout(()=>w.classList.add("in"),60)};
  let seen=false;new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3&&!seen){seen=true;replay()}else if(e.intersectionRatio===0){seen=false;w.classList.remove("in")}}),{root:null,threshold:[0,.3]}).observe(w);})();
 
-(()=>{document.querySelectorAll(".trust .slot").forEach(sl=>{let vis=false;const ds=[...sl.querySelectorAll(".d i")];
- const roll=on=>ds.forEach((i,idx)=>{i.style.transitionDuration=on?(.7+idx*.1)+"s":"0s";i.style.transform=on?`translateY(-${30*1.25}em)`:"translateY(0)"});
- const chk=()=>{const r=sl.getBoundingClientRect(),q=VIEW();const v=r.top<q.bottom-60&&r.bottom>q.top+60;if(v&&!vis){vis=true;roll(false);requestAnimationFrame(()=>requestAnimationFrame(()=>roll(true)))}else if(!v&&vis){vis=false;roll(false)}};
- addEventListener("scroll",chk,{passive:true});chk()})})();
-
-
-
 (()=>{const els=[...document.querySelectorAll("#fv .scene")];const chk=()=>{const q=VIEW();els.forEach(el=>{const r=el.getBoundingClientRect();if(r.top<q.top+q.height*.68&&r.bottom>q.top)el.classList.add("in");else if(r.bottom<q.top||r.top>q.bottom)el.classList.remove("in")})};addEventListener("scroll",chk,{passive:true});chk();})();
 
 
