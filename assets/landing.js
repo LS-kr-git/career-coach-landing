@@ -155,7 +155,7 @@ document.body.appendChild(document.createElement("script")).src = "/assets/overs
 
 // 첫 화면 카드는 높이를 줄이고(3줄 남짓), 카드 아래 「아래로 더 보기」로 나머지를 읽는다(S2). 한 번 누르면 버튼이 가리던 줄부터 한 화면만큼 내려간다
 function moreBtn(ab){const f=document.createElement("div");f.className="mfd";const bt=document.createElement("button");bt.type="button";bt.className="mbtn";ab.append(f,bt);
- const end=()=>ab.scrollTop+ab.clientHeight>=ab.scrollHeight-4,set=()=>{const e=end();bt.textContent=e?"처음으로 ▴":"아래로 더 보기 ▾";f.style.opacity=e?0:1};
+ const end=()=>ab.scrollTop+ab.clientHeight>=ab.scrollHeight-4,set=()=>{const e=end();bt.textContent=e?"위로 ▴":"아래로 더 보기 ▾";f.style.opacity=e?0:1};
  ab.addEventListener("scroll",set,{passive:true});set();
  bt.addEventListener("click",e=>{e.stopPropagation();ab.scrollTo({top:end()?0:ab.scrollTop+ab.clientHeight-(bt.offsetHeight+16),behavior:"smooth"})})}
 // 알림톡 미리보기 한 벌 — 넘기기·번호·높이 고정·직군 이름·자동 넘김 (옛 첫 화면 그대로, 두 곳에 같은 것을 붙인다)

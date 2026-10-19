@@ -181,6 +181,9 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 /* 아티클 화면 제목 위 「오늘만」 배지(86) — 전문 보기는 받은 날 당일에만 열린다 */
 /* 첫 화면 미리보기 카드 — 높이를 줄이고 안에서 읽는다(S2). 높이를 고정하니 직군·카드를 바꿔도 첫 화면 길이가 안 바뀐다 */
 #sec1 .swipe{min-height:0!important}
+/* 첫 화면 휴대폰은 앱 머리 띠(‹ 🔍 ☰)를 빼고, 카드와 위 테두리·아래 번호(1·2·3) 사이를 카드 왼쪽 여백(12)과 같게 */
+#sec1 .pm-hero .hd{display:none!important}
+#sec1 .swipe{padding-top:12px!important;padding-bottom:0!important}#sec1 .swipe .msg{margin-bottom:0!important}#sec1 .pvdots{padding-top:12px!important}
 #sec1 .swipe .ab{height:350px;overflow-y:auto;position:relative;scrollbar-width:none}
 #sec1 .swipe .ab::-webkit-scrollbar{display:none}
 #sec1 .swipe .ab ol{padding-bottom:36px} /* 끝까지 내렸을 때 마지막 줄이 「처음으로」 버튼에 안 가리게 */
