@@ -57,7 +57,7 @@ async function 받기() {
 // 랜딩은 두 길에서 부른다(처음부터 로그인 전 · 세션이 죽은 걸 늦게 안 때) — 한 번만 준비한다. 실패하면 다음에 다시.
 let 준비중 = null;
 export function 준비(기록) {
-  준비중 ??= (async () => {
+  if (!준비중) 준비중 = (async () => {   // `??=` 는 iOS 14·크롬 84 이하에서 문법 오류다
     await Promise.all([sdk(), 받기()]);
     if (!window.Kakao.isInitialized()) window.Kakao.init(JS_KEY);
     // 열어 둔 채 오래 있다 누르는 사람을 위해 — 보이는 동안만 다시 받는다.

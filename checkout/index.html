@@ -401,7 +401,8 @@
   import { 오류안내 } from '/assets/toast.js';
   import { 막대 } from '/assets/skeleton.js';
   import { getPlans, planCards, getSubscription, billingView, saveBillingKey, billingCustomerId, requireLogin, FAIL, firstSendDay, onboardingDone, 이어갈곳 } from '/assets/mypage-data.js';
-
+  // 최상위 await 을 함수로 감싼다 — iOS 14·크롬 88 이하는 최상위 await 이 문법 오류라 모듈 전체가 안 돌았다(2026-10-19 점검).
+  (async function () {
   var $ = function (id) { return document.getElementById(id); };
   // 요금 카드까지 그린 뒤에 화면을 내보인다 — 빈 칸이 보였다 채워지며 덜컹이지 않게(assets/steady.js)
   var 다그림; window.ccHold?.(new Promise(function (r) { 다그림 = r; }));
@@ -864,6 +865,7 @@
       return 보관하고_알린다(res.billingKey, planCode);
     }).catch(실패).then(function () { 결제창표시(false); btn.disabled = false; });
   });
+  })();
 </script>
 </body>
 </html>

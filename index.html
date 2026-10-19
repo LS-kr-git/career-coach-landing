@@ -706,7 +706,7 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3)
     let 넘김 = false;
     // 화면이 보일 때만 — 카톡 앱 전환 뒤 10분 동안 돌아오지 않으면 SDK 가 낡은 열쇠로 이 화면에 돌아오는데, 그때 저절로 카카오로 넘기면
     // 열어만 둔 사람이 돌아와 엉뚱한 로그인 화면을 본다. 안 보일 때 온 것은 안내로 남긴다.
-    if (다시 && !로그인됨 && document.visibilityState === 'visible' && 갔던때 >= 0 && Date.now() - 갔던때 > 120_000) {
+    if (다시 && !로그인됨 && document.visibilityState === 'visible' && 갔던때 >= 0 && Date.now() - 갔던때 > 120000) {
       try { sessionStorage.setItem('cc_relogin', String(Date.now())); 넘김 = true; } catch { /* 셀 수 없으면 안내로 */ }
     }
     track('login_fail', { ...(why && { why }), ...(code && { code }), ...(넘김 && { retry: 1 }) });

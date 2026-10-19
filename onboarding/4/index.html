@@ -85,7 +85,7 @@
   /* 플로팅 CTA — 3단계와 같은 값 */
   .fade{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:450px;height:100px;
     background:linear-gradient(180deg,rgba(255,255,255,0),#fff 55%);pointer-events:none;z-index:9}
-  .cta{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  .cta{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
     width:calc(100% - 40px);max-width:410px;height:var(--cta-h);
     display:block;text-align:center;line-height:var(--cta-h);
     background:var(--amber-500);color:#fff;border-radius:var(--cta-radius);
