@@ -1,9 +1,11 @@
 /* 공용 「가운데 창」(모달) — 구독자 화면에서 한 가지 모양만 쓴다 (2026-10-19 사용자 지시: 두 창의 글자·모양을 맞추고 디자인 시스템에 올린다).
    쓰는 법: <div class="dim" hidden role="dialog" aria-modal="true"><div class="modal"><h2>제목</h2><p class="m-body">설명</p>
             [<div class="m-rows"><div class="m-row"><span class="l">이름</span><span class="v">값</span></div>…</div>]
-            <div class="m-btns"><button class="m-btn sub">닫기</button><button class="m-btn main">하기</button></div></div></div>
+            <div class="m-btns"><button class="m-btn sub">닫기</button><button class="m-btn main">하기</button></div>
+            [<button class="m-other">다른 길(글자 단추)</button>]</div></div>
    글자는 피그마 텍스트 스타일 그대로다 — 제목 text/h3(17/24·600) · 설명 text/body-s(14/20·400) · 줄 이름 text/caption(13/18) · 줄 값 text/body-strong(15/23·600) · 버튼 text/button-strong(15/20·700).
    쓰는 페이지: mypage/leave(멤버십 남음) · checkout(저장 카드 확인 · 결제 실패). 어드민 「제품 디자인 시스템」 9절이 이 파일을 읽어 보여 준다.
+   키보드(첫 단추로 포커스 · Tab 은 창 안 · ESC 는 보조 단추 · 닫으면 연 자리로)는 /assets/modal.js 가 한다 — 창을 쓰는 페이지는 둘 다 건다.
    ⚠️ 각 페이지 :root 의 --pad-x · --gray-* · --amber-500 을 쓴다. */
 .dim{position:fixed;inset:0;z-index:40;background:rgba(15,23,42,.5);display:flex;align-items:center;justify-content:center;padding:0 var(--pad-x)}
 .dim[hidden]{display:none}
@@ -26,4 +28,7 @@
 .m-btn.dark{background:var(--gray-800);color:#fff}
 .m-spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;animation:m-spin .8s linear infinite}
 @keyframes m-spin{to{transform:rotate(360deg)}}
+/* 글자 단추 — 단추 줄 아래의 다른 길 하나(「다른 카드로 결제할게요」). 13/18 · gray-500 · 밑줄 · 누르는 높이 44 */
+.m-btns + .m-other{margin-top:4px}
+.m-other{height:44px;border:0;background:none;font:inherit;font-size:13px;line-height:18px;color:var(--gray-500);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 @media (prefers-reduced-motion:reduce){.m-spin{animation-duration:2.4s}}

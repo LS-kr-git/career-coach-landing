@@ -283,12 +283,15 @@
        조회가 실패하면 회색 판으로 둔다(아래 D6) — 지어낸 상태는 그리지 않는다. */
     /* 답을 기다리는 동안은 배너 자리를 회색 판으로 잡아 둔다 — 비워 두면 답이 온 뒤 배너가 끼어들며
        아래 카드가 밀린다(2026-10-18 shift-audit 휴대폰360 0.0377, 일요일에만). 판은 상태를 말하지 않는다. */
-    var 자리 = document.querySelector('.banner[data-state="locked"]');
+    // 판은 「완료」 배너를 빌린다 — 잠김은 좁은 화면에서 두 줄(89)이라, 열람 가능·완료(69)가 들어올 때 아래가 당겨졌다(2026-10-19 점검).
+    var 자리 = document.querySelector('.banner[data-state="done"]');
+    showBanner('done');
     자리.classList.add('cc-bar-fill');
     window.ccHold?.(requireLogin().then(function (ok) { return ok ? getSunday() : null; })
       .then(function (s) { showBanner(s ? sundayStateOf(s) : null); 자리.classList.remove('cc-bar-fill'); }, function (e) {
         console.error('일요일 상태 조회 실패', e);
         /* 배너 자리를 회색 판으로 두고 실패는 하단 안내로 (2026-10-15 「오류 대체 화면」 D6). 지어낸 상태는 여전히 안 그린다 — 판은 눌리지 않는다 */
+        자리.classList.remove('cc-bar-fill');   // 실패 판은 지금처럼 잠김 자리에 둔다(피그마 01-E D6)
         showBanner('locked');
         document.querySelector('.banner[data-state="locked"]').classList.add('cc-bar-fill');
         오류안내(document.getElementById('errToast'), FAIL.line);
