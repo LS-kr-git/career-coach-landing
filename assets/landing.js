@@ -165,7 +165,7 @@ function mountPv(r){const q=c=>r.querySelector(c),b=q(".swipe"),dots=q(".pvdots"
   const max=b.scrollWidth-b.clientWidth;w.classList.toggle("atS",b.scrollLeft<=2);w.classList.toggle("atE",b.scrollLeft>=max-2)};
  const go=i=>{const sl=b.children[i];if(sl)b.scrollTo({left:sl.offsetLeft-b.children[0].offsetLeft,behavior:"smooth"})};
  const play=()=>{h.classList.remove("play");void h.offsetWidth;h.classList.add("play")};
- const more=r.closest("#sec1")?moreBtn:null;
+ const more=moreBtn;
  const render=k=>{b.innerHTML=samplesHTML(k);b.scrollLeft=0;if(more)b.querySelectorAll(".ab").forEach(more);upd();play();const on=q(".pvchips .chip.on");if(on)q(".lkk").textContent=on.textContent.trim();if(r.pv){h.classList.remove("flash");void h.offsetWidth;h.classList.add("flash")}};
  const lock=()=>{const m=b.cloneNode(false);m.setAttribute("aria-hidden","true");m.style.cssText=`position:absolute;visibility:hidden;pointer-events:none;left:0;top:0;width:${b.clientWidth}px`;b.parentNode.appendChild(m);let hh=0;for(const [k] of CHIP_ORDER){m.innerHTML=samplesHTML(k);hh=Math.max(hh,m.offsetHeight)}m.remove();b.style.minHeight=hh+"px"};
  b.addEventListener("scroll",upd,{passive:true});new ResizeObserver(upd).observe(b);
