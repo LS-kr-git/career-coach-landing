@@ -464,3 +464,8 @@ if (typeof window !== 'undefined') {
       (r && r.stack ? String(r.stack).split('\n')[1] || '' : '').trim(), 0, 0);
   });
 }
+
+// 로그인 처리 화면이 이 모듈을 못 받아 기록 없이 로그인을 끝냈으면 그 사실을 다음 화면에서 남긴다(auth/callback 「cc_cb_notrack」).
+try {
+  if (sessionStorage.getItem('cc_cb_notrack')) { sessionStorage.removeItem('cc_cb_notrack'); track('client_error', { msg: 'callback_track:import_failed' }); }
+} catch { /* 저장소가 막힌 브라우저 — 남길 길이 없다 */ }
