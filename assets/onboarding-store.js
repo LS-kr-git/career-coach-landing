@@ -332,8 +332,11 @@ export async function saveThenGo(재시도, href) {
  * 망이 붙잡히면(인앱 브라우저·지하철) 버튼이 아무 반응 없이 수십 초 멈춘다 — 사람은 고장으로 보고 떠난다.
  * 8초가 넘으면 `slow` 로 넘긴다. 저장 전에 pending 을 적어 두므로 다음 화면(재시도)·결제 화면이 다시 보낸다.
  */
-export function 상한(p, ms = 8000) {
-  return Promise.race([p, new Promise((r) => setTimeout(() => r({ status: 'slow' }), ms))]);
+export function 상한(p) {
+  return Promise.race([p, new Promise((r) => setTimeout(() => {
+    track('client_error', { msg: 'onboarding_slow:' + location.pathname.slice(0, 40) });   // 얼마나 자주 걸리는지 보이게
+    r({ status: 'slow' });
+  }, 8000))]);
 }
 
 /**

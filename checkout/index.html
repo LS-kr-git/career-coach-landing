@@ -432,7 +432,7 @@
   if (들어온주소.get('mode') !== 'change' && !들어온주소.has('billingKey') && !들어온주소.has('code')) {
     var 갈곳 = await (async function () {
       var store = await import('/assets/onboarding-store.js');
-      await store.retryPending().catch(function () {});
+      await store.상한(store.retryPending()).catch(function () {});   // 망이 붙잡혀도 결제 화면 전체가 멈추지 않게 — 저장 여부는 아래 판정이 서버에 다시 묻는다
       var 답 = await Promise.all([getSubscription(), onboardingDone()]);
       var s = 답[0], 마침 = 답[1];
       앞구독 = s;
@@ -521,8 +521,8 @@
   if (결제창표 && !결과달고옴 && 주소.get('mode') !== 'change') track('checkout_fail', { at: 'back', iab: 인앱 });
   function 결제창표시(on) { try { if (on) sessionStorage.setItem('cc_pg_go', '1'); else sessionStorage.removeItem('cc_pg_go'); } catch (e) { /* 못 적으면 표시만 없다 */ } }
   /* 받은 빌링키는 서버가 받을 때까지 이 탭에 둔다 — 보관이 실패하면(연결 끊김·서버 일시 오류) 다음 누름이 결제창·카드사 인증을
-     처음부터 다시 거치지 않고 같은 키로 다시 보낸다. 서버는 같은 키를 다시 받아도 갱신으로 받고, 결제는 같은 주문번호로 간다(0091·0106).
-     서버가 답을 하면(성공이든 카드 거절이든) 지운다. 30분이 지난 것은 쓰지 않는다. */
+     처음부터 다시 거치지 않고 같은 키로 한 번 다시 보낸다. 서버는 같은 키를 다시 받아도 갱신으로 받고, 결제는 같은 주문번호로 간다(0091·0106).
+     서버가 답을 하면(성공이든 카드 거절이든) 지우고, 다시 보낼 때도 꺼내며 지운다. 30분이 지난 것은 쓰지 않는다. */
   function 받은키(k) {
     try {
       if (k) sessionStorage.setItem('cc_bk', JSON.stringify({ k: k, t: Date.now() }));
@@ -801,8 +801,9 @@
     var issueId = 'cc-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
     if (!변경) track('checkout_click', { plan: planCode, iab: 인앱 });
     // 앞서 받은 빌링키를 서버가 못 받았으면 결제창을 다시 열지 않고 그 키로 다시 보낸다(위 「받은키」).
+    // 다시 보내는 것은 한 번뿐이다 — 꺼내면서 지운다. 서버가 그 키를 계속 거절하면 다음 누름은 결제창(다른 카드)으로 간다.
     var 남은키 = !변경 && 받은키();
-    if (남은키) { 보관하고_알린다(남은키, planCode).catch(실패).then(function () { btn.disabled = false; }); return; }
+    if (남은키) { 받은키(null); 보관하고_알린다(남은키, planCode).catch(실패).then(function () { btn.disabled = false; }); return; }
     결제창표시(true);
     Promise.all([loadPortOne(), billingCustomerId().catch(function (e) { throw 어디서(e, 'prep'); })]).then(function (둘) {
       var PortOne = 둘[0];
