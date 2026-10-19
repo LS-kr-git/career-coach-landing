@@ -153,6 +153,11 @@ new IntersectionObserver(es=>es.forEach(e=>{const w=$("stw");if(e.isIntersecting
 document.documentElement.style.setProperty("--overscroll-top", "#fff");
 document.body.appendChild(document.createElement("script")).src = "/assets/overscroll-top.js";
 
+// 첫 화면 카드는 높이를 줄이고(3줄 남짓), 카드 아래 「아래로 더 보기」로 나머지를 읽는다(S2). 한 번 누르면 버튼이 가리던 줄부터 한 화면만큼 내려간다
+function moreBtn(ab){const f=document.createElement("div");f.className="mfd";const bt=document.createElement("button");bt.type="button";bt.className="mbtn";ab.append(f,bt);
+ const end=()=>ab.scrollTop+ab.clientHeight>=ab.scrollHeight-4,set=()=>{const e=end();bt.textContent=e?"처음으로 ▴":"아래로 더 보기 ▾";f.style.opacity=e?0:1};
+ ab.addEventListener("scroll",set,{passive:true});set();
+ bt.addEventListener("click",e=>{e.stopPropagation();ab.scrollTo({top:end()?0:ab.scrollTop+ab.clientHeight-(bt.offsetHeight+16),behavior:"smooth"})})}
 // 알림톡 미리보기 한 벌 — 넘기기·번호·높이 고정·직군 이름·자동 넘김 (옛 첫 화면 그대로, 두 곳에 같은 것을 붙인다)
 function mountPv(r){const q=c=>r.querySelector(c),b=q(".swipe"),dots=q(".pvdots"),dt=q(".dtabs"),hint=q(".pvhint"),h=q(".herow"),w=q(".sarwb"),sw=q(".scrollwrap");
  const step=()=>{const sl=b.children;return sl[1]?sl[1].offsetLeft-sl[0].offsetLeft:b.clientWidth},idx=()=>b.children.length?Math.round(b.scrollLeft/step()):0;
@@ -160,7 +165,8 @@ function mountPv(r){const q=c=>r.querySelector(c),b=q(".swipe"),dots=q(".pvdots"
   const max=b.scrollWidth-b.clientWidth;w.classList.toggle("atS",b.scrollLeft<=2);w.classList.toggle("atE",b.scrollLeft>=max-2)};
  const go=i=>{const sl=b.children[i];if(sl)b.scrollTo({left:sl.offsetLeft-b.children[0].offsetLeft,behavior:"smooth"})};
  const play=()=>{h.classList.remove("play");void h.offsetWidth;h.classList.add("play")};
- const render=k=>{b.innerHTML=samplesHTML(k);b.scrollLeft=0;upd();play();const on=q(".pvchips .chip.on");if(on)q(".lkk").textContent=on.textContent.trim();if(r.pv){h.classList.remove("flash");void h.offsetWidth;h.classList.add("flash")}};
+ const more=r.closest("#sec1")?moreBtn:null;
+ const render=k=>{b.innerHTML=samplesHTML(k);b.scrollLeft=0;if(more)b.querySelectorAll(".ab").forEach(more);upd();play();const on=q(".pvchips .chip.on");if(on)q(".lkk").textContent=on.textContent.trim();if(r.pv){h.classList.remove("flash");void h.offsetWidth;h.classList.add("flash")}};
  const lock=()=>{const m=b.cloneNode(false);m.setAttribute("aria-hidden","true");m.style.cssText=`position:absolute;visibility:hidden;pointer-events:none;left:0;top:0;width:${b.clientWidth}px`;b.parentNode.appendChild(m);let hh=0;for(const [k] of CHIP_ORDER){m.innerHTML=samplesHTML(k);hh=Math.max(hh,m.offsetHeight)}m.remove();b.style.minHeight=hh+"px"};
  b.addEventListener("scroll",upd,{passive:true});new ResizeObserver(upd).observe(b);
  lock();document.fonts&&document.fonts.ready.then(lock);{let lw=innerWidth;addEventListener("resize",()=>{if(innerWidth!==lw){lw=innerWidth;lock()}})}
