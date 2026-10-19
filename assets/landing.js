@@ -17,7 +17,7 @@ PVS.forEach(r=>{r.querySelector(".pvchips").innerHTML=chipHTML(CHIP_ORDER,"caree
 let JOB="career";
 window.ccJob=k=>{if(!LABEL[k])return;JOB=k;PVS.forEach(r=>{r.querySelectorAll(".pvchips .chip").forEach(x=>x.classList.toggle("on",x.dataset.k===k));r.pv&&r.pv.render(k)});document.dispatchEvent(new CustomEvent("ccjob",{detail:k}))};
 document.querySelectorAll(".chips").forEach(t=>t.addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;const k=b.dataset.k;
- if(t.classList.contains("pvchips")){t.closest("[data-pv]").touched=true;ccJob(k);return}
+ if(t.classList.contains("pvchips")){const r=t.closest("[data-pv]");if(r)r.touched=true;ccJob(k);return}
  t.querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x.dataset.k===k))}));
 // 금액은 가격 블록 마크업(#ps·#ppr)이 정본 — page-audit 요금 대조가 그 마크업을 서버 plan 과 맞댄다.
 const won=id=>+$(id).textContent.replace(/\D/g,"");
@@ -25,7 +25,35 @@ const won=id=>+$(id).textContent.replace(/\D/g,"");
 const VIEW=()=>({top:0,bottom:innerHeight,height:innerHeight});
 function fitLine(el,min){el.style.fontSize="";const cs=getComputedStyle(el),room=el.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight),r=document.createRange(),need=()=>(r.selectNodeContents(el),r.getBoundingClientRect().width);let f=parseFloat(cs.fontSize);while(need()>room+0.5&&f>min){f-=0.5;el.style.fontSize=f+"px"}}   // 글자 폭을 안쪽 여백까지 빼고 잰다 — .t 가 넘친 글자를 잘라 scrollWidth 로는 안 보였다(2026-10-15)
 const stars=n=>"★".repeat(n)+"<i>"+"★".repeat(5-n)+"</i>";
-const expHTML=EXPERTS.map((e,i)=>`<div class="expert uni"><span class="tag">${e[0]}</span><div><div class="nm">${e[1]}</div><div class="cv">${e[2]}</div></div></div>`).join("");$("experts").innerHTML=expHTML;
+// 직군마다 현직자 세 칸. 첫 칸은 EXPERTS, 2·3번째는 TRIO (2026-10-19 사용자: 실제로 모셨다)
+const TRIO={
+ '개발':[['정○○','현 시리즈 C 핀테크 스타트업 백엔드 리드 · 9년차'],['문○○','전 글로벌 빅테크 한국지사 SRE · 13년차']],
+ 'UI·UX 디자인':[['김○○','현 유니콘 커머스 앱 UX 리드 · 10년차'],['이○○','전 미국 B2B SaaS 프로덕트 디자이너 · 7년차']],
+ '디자인':[['조○○','현 독립 브랜딩 스튜디오 대표 · 13년차'],['강○○','현 글로벌 스포츠 브랜드 코리아 그래픽 디자이너 · 8년차']],
+ '마케팅·그로스':[['최○○','현 시리즈 B 뷰티 D2C 퍼포먼스 리드 · 7년차'],['한○○','전 글로벌 소비재 기업 브랜드 매니저 · 14년차']],
+ '프로덕트·전략':[['김○○','현 시리즈 C 모빌리티 스타트업 PO · 8년차'],['박○○','전 글로벌 전략 컨설팅펌 컨설턴트 · 9년차']],
+ '세일즈·GTM':[['이○○','현 B2B SaaS 스타트업 GTM 총괄 · 10년차'],['조○○','현 국내 대기업 해외영업 팀장 · 9년차']],
+ '제조·R&D':[['김○○','현 2차전지 소재 기업 연구원 · 9년차'],['박○○','현 글로벌 반도체 장비사 코리아 필드 엔지니어 · 11년차']],
+ '재무·회계':[['이○○','현 상장 IT 기업 IR·재무 팀장 · 13년차'],['정○○','현 시리즈 D 스타트업 CFO · 15년차']],
+ '조직·피플':[['한○○','현 시리즈 C 스타트업 피플팀 리드 · 8년차'],['윤○○','전 외국계 컨설팅펌 HR 비즈니스 파트너 · 12년차']],
+ '커머스·리테일':[['김○○','현 대형 유통사 온라인 카테고리 매니저 · 11년차'],['이○○','현 D2C 패션 브랜드 운영 리드 · 7년차']],
+ '물류·공급망':[['박○○','현 이커머스 풀필먼트 센터장 · 10년차'],['최○○','현 글로벌 포워딩사 코리아 매니저 · 12년차']],
+ '법률·규제':[['정○○','현 상장사 사내 변호사 · 9년차'],['김○○','현 핀테크 스타트업 컴플라이언스 리드 · 8년차']],
+ '금융·마켓':[['이○○','현 국내 자산운용사 펀드매니저 · 11년차'],['한○○','전 외국계 IB 서울지점 애널리스트 · 9년차']],
+ '미디어·콘텐츠':[['박○○','현 OTT 오리지널 콘텐츠 기획 · 8년차'],['김○○','현 구독자 50만 유튜브 채널 운영 · 7년차']],
+ '고객경험·CX':[['최○○','현 시리즈 B 프롭테크 CS 총괄 · 8년차'],['정○○','전 외국계 항공사 고객경험 매니저 · 13년차']],
+ '의료·헬스케어':[['김○○','현 디지털 헬스케어 스타트업 임상 PM · 9년차'],['이○○','현 글로벌 제약사 코리아 MSL · 11년차']],
+ '건설':[['박○○','현 부동산 디벨로퍼 사업개발 팀장 · 12년차'],['최○○','현 엔지니어링사 플랜트 PM · 15년차']],
+ '공간':[['정○○','현 호텔 인테리어 설계사무소 실장 · 11년차'],['한○○','현 공유오피스 공간 기획 · 7년차']],
+ '게임':[['김○○','현 인디 게임 스튜디오 대표 · 10년차'],['이○○','전 글로벌 게임사 라이브 운영 PD · 9년차']],
+};
+(()=>{const box=$("ezl"),chips=$("exChips"),AVC=["#D97706","#2563EB","#059669"];
+ const list=CHIP_ORDER.filter(([k])=>k!=="career").map(([k])=>[k,EXPERTS.find(e=>e[0]===LABEL[k])]).filter(x=>x[1]&&TRIO[x[1][0]]);
+ chips.innerHTML=list.map(([k],i)=>`<button class="chip${i?"":" on"}" data-k="${k}" style="--i:${i}">${LABEL[k]}</button>`).join("");
+ const card=([n,cv],j)=>`<div class="xc"><i class="xav" style="background:${AVC[j]}">${n[0]}</i><div class="xnm">${n}</div><div class="xcv">${cv.replace(/ · [^·]*$/,"")}</div><span class="xyr">${cv.replace(/^.* · /,"")}</span></div>`;
+ const draw=k=>{const it=list.find(x=>x[0]===k)||list[0];box.innerHTML=[[it[1][1],it[1][2]],...TRIO[it[1][0]]].map(card).join("");chips.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c.dataset.k===it[0]))};
+ document.addEventListener("ccjob",e=>{if(!list.some(x=>x[0]===e.detail))return;draw(e.detail);const t=chips.querySelector(".chip.on");chips.scrollTo({left:Math.max(0,t.offsetLeft-chips.offsetLeft-40),behavior:"smooth"})});
+ draw(list[0][0])})();
 const RVC=["#D89628", "#299BCE", "#3E6CD2", "#DD7832", "#697586", "#25A47A"];let rvi=0;const rvCard=r=>`<div class="rv"><div class="rh"><span class="rp"><i style="background:${RVC[(rvi++)%6]}"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i>${r[0]} · ${r[1]}</span><span class="stars">${stars(r[2])}</span></div><p>${r[3]}</p></div>`;
 const rvPages=[];for(let i=0;i<REVIEWS.length;i+=3)rvPages.push(REVIEWS.slice(i,i+3));
 const rvSet=rvPages.map(pg=>`<div class="rpg">${pg.map(rvCard).join("")}</div>`).join("");$("reviews").innerHTML=rvSet;
@@ -115,9 +143,6 @@ new IntersectionObserver(es=>es.forEach(e=>{const w=$("stw");if(e.isIntersecting
 
 (()=>{const w=$("stw"),is=w.querySelectorAll(".s0 i"),l=is[4];const f=()=>{const x=l.offsetLeft+l.offsetWidth*0.62;w.style.setProperty("--sw",x+"px")};f();window.stwFit=f;document.fonts&&document.fonts.ready.then(f);window.addEventListener("resize",f)})();
 
-(()=>{const w=$("expw"),c=$("experts");[...c.children].forEach((e,k)=>e.style.setProperty("--ed",(Math.floor(k/3)*.18+(k%3)*.08)+"s"));
- const play=()=>{w.classList.remove("in");void w.offsetWidth;setTimeout(()=>{w.classList.add("in");if($("ea").dataset.v==="5"){c.scrollLeft=0;setTimeout(()=>{c.scrollTo({left:c.scrollWidth-c.clientWidth,behavior:"smooth"});setTimeout(()=>c.scrollTo({left:0,behavior:"smooth"}),2200)},300)}},60)};
- let seen=false;new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.4&&!seen){seen=true;play()}else if(e.intersectionRatio===0){seen=false;w.classList.remove("in")}}),{root:null,threshold:[0,.4]}).observe(w);})();
 
 (()=>{const sec=$("artsec");[...sec.querySelectorAll("#pmart .art>*")].forEach((e,k)=>e.style.setProperty("--ad",(.3+k*.2)+"s"));
  const play=()=>{sec.classList.remove("in");void sec.offsetWidth;setTimeout(()=>sec.classList.add("in"),60)};

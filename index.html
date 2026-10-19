@@ -7,7 +7,7 @@
 <meta name="color-scheme" content="only light">
 <meta name="format-detection" content="telephone=no">
 <!-- 랜딩 버전 지문 — 섹션 구성·제목·시안 값으로 만든다. 손으로 고치지 말고 `node tools/landing-version/fp.mjs --write` (page-audit 이 대조한다) -->
-<meta name="cc-lv" content="ccbead98a5">
+<meta name="cc-lv" content="56e275486c">
 <title>커리어코치</title>
 <meta name="description" content="일하는 사람들의 커리어 성장을 위해">
 <link rel="canonical" href="https://careercoach.my/">
@@ -182,6 +182,16 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 .tvo .tvm{margin:8px 0 0;font-size:13px;font-weight:600;color:var(--g500);transition:opacity .4s ease 2.2s,transform .4s ease 2.2s}
 .tvx:not(.play) .tvo .tvm{opacity:0;transform:translateY(4px)}
 /* 아티클 화면 제목 위 「오늘만」 배지(86) — 전문 보기는 받은 날 당일에만 열린다 */
+/* 전문가 — 직군마다 현직자 세 칸 카드 + 미리보기와 같은 직군 칩 띠(바탕만 다름). 연차는 아주 작은 연한 알약(Y1-c) */
+#exsec{padding-bottom:0!important}#exsec .exsub{margin-top:12px!important;font-size:15px;line-height:1.5;color:#475569;word-break:keep-all}
+#exsec .expn{margin:64px 0 0!important;font-size:11px!important;color:#B4BFCC!important}
+#ezl{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px!important}
+#ezl .xc{padding:14px 8px 20px;background:#fff;border:1px solid #E2E8F0;border-radius:14px;text-align:center;display:flex;flex-direction:column;align-items:center}
+#ezl .xav{flex:none;width:40px;height:40px;border-radius:50%;color:#fff;font-style:normal;font-weight:800;font-size:16px;display:grid;place-items:center}
+#ezl .xnm{margin-top:8px;font-weight:700;font-size:13px;color:#0F172A}
+#ezl .xcv{margin-top:2px;font-size:11px;color:#64748B;word-break:keep-all;line-height:1.4}
+#ezl .xyr{display:block;margin-top:auto;position:relative;top:8px;border-radius:999px;padding:1px 7px;font-size:10px;font-weight:500;line-height:1.4;color:#64748B;background:#F8FAFC}
+#exsec #chw9{--fb:#F7FCFF;margin-top:16px!important}#exsec #chw9,#exsec #exChips,#exsec .chp{background:#F7FCFF!important}#exsec .chp{margin-bottom:0!important;padding-bottom:48px!important}
 /* 미리보기 카드(첫 화면·「이런 카카오톡이 쌓이면」 둘 다 같게) — 높이를 줄이고 안에서 읽는다(S2). 높이를 고정하니 직군·카드를 바꿔도 첫 화면 길이가 안 바뀐다 */
 :is(#sec1,#pvsec) .swipe{min-height:0!important}
 /* 첫 화면 휴대폰은 앱 머리 띠(‹ 🔍 ☰)를 빼고, 카드와 위 테두리·아래 번호(1·2·3) 사이를 카드 왼쪽 여백(12)과 같게 */
@@ -261,10 +271,13 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 </section>
 <!-- 알림톡 미리보기 (2026-10-18 되살림 — 옛 첫 화면 d837e22^ 의 폰·직군 칩. 첫 칩 「공통」이 기본 선택) -->
 <!-- 전문가 -->
-<section data-sec="전문가 5줄 요약" class="gap20 s-sky">
+<section data-sec="전문가 5줄 요약" class="gap20 s-sky pv" id="exsec">
   <h2>현직자의 업무 노하우를<br>따라할 수 있게 알려드려요</h2>
-  <div class="expw arw" id="expw" data-v="3" data-step="1.6"><div class="hs exp" id="experts"></div><button class="cpv" type="button" aria-label="앞으로">‹</button><button class="cnx" type="button" aria-label="더 보기">›</button></div>
+  <p class="exsub">현직자 3명이 업계 노하우·뉴스를 5줄로 요약해요</p>
   <p class="expn">*현재 재직 중으로 본명은 가림 처리 되었습니다.</p>
+  <div id="ezl"></div>
+  <div class="chw arw pvchw" id="chw9"><span class="chint">👆 직군을 누르면 내용이 바뀌어요</span><div class="chips two pvchips" id="exChips"></div><button class="cpv" type="button" aria-label="앞으로">‹</button><button class="cnx" type="button" aria-label="직군 더 보기">›</button><span class="fing">👆</span></div>
+  <p class="chp"><span class="cet">내 직군을 선택해 보세요</span></p>
 </section>
 <section data-sec="알림톡 미리보기" class="gap20 s-white crop pv" id="pvsec">
   <h2>이런 카카오톡이 쌓이면<br><span class="hl">면접·연봉 협상이 달라져요</span></h2>
