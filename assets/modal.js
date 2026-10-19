@@ -7,24 +7,39 @@
   function 단추들(d) {
     return [].slice.call(d.querySelectorAll('button')).filter(function (b) { return !b.hidden && !b.disabled; });
   }
+  // 창은 aria-modal 인 .dim 만 본다(role 은 dialog·alertdialog 둘 다 쓴다) — 마이페이지 메일 줄의 눌림 표시(.mail.dim)처럼
+  // 같은 이름을 쓰는 것과 섞이지 않게.
+  function 창인가(d) { return d.classList && d.classList.contains('dim') && d.getAttribute('aria-modal') === 'true'; }
   function 열린창() {
-    var 다 = [].slice.call(document.querySelectorAll('.dim')).filter(function (d) { return !d.hidden; });
+    var 다 = [].slice.call(document.querySelectorAll('.dim[aria-modal="true"]')).filter(function (d) { return !d.hidden; });
     return 다.length ? 다[다.length - 1] : null;
+  }
+  function 첫단추로(d) {
+    var b = 단추들(d)[0];
+    if (b) b.focus({ preventScroll: true, focusVisible: false });   // 저절로 뜬 창에 테두리를 그리지 않는다(키보드로 움직이면 그때 보인다)
   }
   new MutationObserver(function (rs) {
     rs.forEach(function (r) {
       var d = r.target;
-      if (!d.classList || !d.classList.contains('dim')) return;
+      if (r.target === document.documentElement) {
+        // 화면을 그리기 전(html.cc-wait — assets/steady.js)에 열린 창은 포커스를 못 받는다 — 덮개가 걷히면 다시 준다.
+        var 열린 = 열린창();
+        if (열린 && !document.documentElement.classList.contains('cc-wait') && !열린.contains(document.activeElement)) 첫단추로(열린);
+        return;
+      }
+      if (!창인가(d)) return;
       if (d.hidden) {
         var a = 앞.get(d); 앞.delete(d);
         if (a && a.focus && document.contains(a) && !열린창()) a.focus({ preventScroll: true });
       } else if (!앞.has(d)) {
-        앞.set(d, document.activeElement);
-        var b = 단추들(d)[0];
-        if (b) b.focus({ preventScroll: true, focusVisible: false });   // 저절로 뜬 창에 테두리를 그리지 않는다(키보드로 움직이면 그때 보인다)
+        // 다른 창에서 넘어온 것이면(확인 창 → 실패 창) 그 창이 기억한 자리를 물려받는다 — 아니면 닫은 뒤 포커스가 사라진다.
+        var 다른 = [].slice.call(document.querySelectorAll('.dim[aria-modal="true"]')).filter(function (x) { return x !== d && !x.hidden; })[0];
+        if (다른 && 앞.get(다른)) { 앞.set(d, 앞.get(다른)); 앞.set(다른, null); }
+        else 앞.set(d, document.activeElement);
+        첫단추로(d);
       }
     });
-  }).observe(document.documentElement, { attributes: true, attributeFilter: ['hidden'], subtree: true });
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['hidden', 'class'], subtree: true });
   document.addEventListener('keydown', function (e) {
     var d = 열린창(); if (!d) return;
     if (e.key === 'Escape') {

@@ -1,5 +1,5 @@
 /* 실패 스켈레톤 — 못 불러온 자리를 막대로 채운 채 둔다 (2026-10-15 사용자 확정 「오류 대체 화면」).
-   실패 문구는 그 자리에 쓰지 않고 공용 「하단 안내」(toast.css) 하나로만 말한다.
+   실패 문구는 그 자리에 쓰지 않고 공용 「하단 안내」(toast.css) 하나로만 말한다(결제가 안 된 것만 가운데 창 — assets/modal.css).
    색·숨쉬기는 기다리는 동안의 스켈레톤(steady.js 의 html.cc-sk, 같은 날 사용자 확정 B 「바탕 맞춤 + 숨쉬기」)과 같은 값이다 —
    기다림이 실패로 끝나도 막대 모양이 바뀌지 않게. 클래스·키프레임 이름은 steady.js 의 cc-sk 와 겹치지 않게 cc-bar 로 둔다. */
 .cc-bar{display:inline-block;vertical-align:middle;max-width:100%;border-radius:4px;
