@@ -147,7 +147,7 @@
 </script>
 <script type="module">
   import { metaEvent } from '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
-  import { requireLogin, getSubscription, firstSendDay } from '/assets/mypage-data.js';
+  import { requireLogin, getSubscription, firstSendDay, billingView } from '/assets/mypage-data.js';
   import { 오류안내 } from '/assets/toast.js';
   var $ = function (id) { return document.getElementById(id); };
   $('firstDay').textContent = '일월화수목금토'[new Date(firstSendDay() + 'T00:00:00Z').getUTCDay()] + '요일 아침 8시';
@@ -162,7 +162,8 @@
      「구독이 시작됐어요」를 보여 줄 근거가 없으므로 마이페이지로 돌려보낸다. */
   requireLogin().then(function (ok) { return ok ? getSubscription() : undefined; }).then(function (s) {
     if (s === undefined) return;
-    if (!s || ['trialing', 'active', 'past_due'].indexOf(s.status) < 0) { window.ccLeave?.(); location.replace('/mypage/'); return; }   // 떠나는 중 — 이 화면을 비추지 않는다
+    // 기간이 끝났는데 새벽 정리 전이라 아직 active 로 남은 해지 구독은 「구독 중」이 아니다(billingView — 2026-10-19 점검)
+    if (!s || !billingView(s).live) { window.ccLeave?.(); location.replace('/mypage/'); return; }   // 떠나는 중 — 이 화면을 비추지 않는다
     /* 이 화면은 새로고침·뒤로가기로 또 열린다. 같은 결제 기간이면 메타에 한 번만 보낸다 —
        eventID 가 같으면 메타도 묶지만 그건 48시간까지라, 기기에도 적어 둔다. */
     var 결제키 = 'purchase-' + s.current_period_end;

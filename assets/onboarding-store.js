@@ -39,7 +39,7 @@ const MAX_REGIONS = 3;
  *    ⚠️ topic:null 과 다르다 — null 은 「한 번도 안 골랐다」이고, 서버는 그때 기존 값을
  *    유지한다(재온보딩이 주제를 지우면 안 되므로). 「지운다」를 말하려면 인자가 따로
  *    필요하고 그게 p_topic_clear 다. 두 상태를 한 값으로 접으면 서버가 못 가른다. */
-const EMPTY = { jobs: [], years: null, yearsMax: null, regions: [], topic: null, topicClear: false, pending: false, owner: null, draftAt: 0 };
+const EMPTY = { jobs: [], years: null, yearsMax: null, regions: [], topic: null, topicClear: false, pending: false, owner: null, draftAt: 0, pendingAt: 0, draftOwner: null };
 
 const strings = (v) => (Array.isArray(v) ? v.filter((s) => typeof s === 'string' && s) : []);
 const intOrNull = (v) => (Number.isInteger(v) ? v : null);
@@ -66,6 +66,10 @@ export function readState() {
       owner: typeof s.owner === 'string' && s.owner ? s.owner : null,
       // 이 기기에서 1·2단계를 마지막으로 확정한 시각(ms) — 서버 진행 기록(updated_at)과 어느 쪽이 새것인지 가른다(0163).
       draftAt: Number.isFinite(s.draftAt) ? s.draftAt : 0,
+      // 못 보낸 변경(pending)이 생긴 시각(ms) — 다른 기기에서 그 뒤에 서버 값을 바꿨으면 이 기기의 옛 값을 다시 보내지 않는다(retryPending).
+      pendingAt: Number.isFinite(s.pendingAt) ? s.pendingAt : 0,
+      // 1·2단계 진행 기록을 서버에 남긴 로그인 계정 — owner 는 「3단계를 서버에 저장한 사람」이라 따로 둔다(공용 기기, forgetIfOtherOwner).
+      draftOwner: typeof s.draftOwner === 'string' && s.draftOwner ? s.draftOwner : null,
     };
   } catch {
     return { ...EMPTY };   // 사파리 프라이빗 모드 등
@@ -74,7 +78,10 @@ export function readState() {
 
 /** 바뀐 부분만 얹어 저장한다. 세 화면이 각자 자기 몫만 갱신한다. */
 export function writeState(patch) {
-  const next = { ...readState(), ...patch };
+  const now = readState();
+  const next = { ...now, ...patch };
+  if (patch.pending === true && !now.pending) next.pendingAt = Date.now();
+  else if (patch.pending === false) next.pendingAt = 0;
   try { localStorage.setItem(KEY, JSON.stringify(next)); } catch { /* 무시 */ }
   return next;
 }
@@ -167,14 +174,17 @@ function 남의것이면_버린다(session) {
 /** 로그아웃·탈퇴 때 부른다 — 이 기기에 남은 온보딩 값과 로그인 뒤 갈 곳을 지운다(공용 기기). */
 export function forgetLocal() {
   try { localStorage.removeItem(KEY); localStorage.removeItem('cc_next'); } catch { /* 무시 */ }
+  // 결제 화면이 서버에 못 보낸 빌링키를 이 탭에 잠깐 둔다(checkout 「받은키」) — 같은 탭의 다음 사람이 그 키를 보내지 않게.
+  try { sessionStorage.removeItem('cc_bk'); sessionStorage.removeItem('cc_newcard'); } catch { /* 무시 */ }
 }
 
 /** 로그인 직후 부른다 — 이 기기에 다른 계정이 고른 값이 남아 있으면 통째로 지운다(공용 기기에서
  *  앞 사람의 직무가 뒤 사람 화면에 보이고 그대로 저장되는 것을 막는다). 로그인 전에 고른 값(owner 없음)은 둔다.
  *  `cc_next` 는 지우지 않는다 — 결제 화면에서 로그인하러 온 그 사람의 갈 곳이다. */
 export function forgetIfOtherOwner(userId) {
-  const owner = readState().owner;
-  if (owner && userId && owner !== userId) {
+  const { owner, draftOwner } = readState();
+  // 1·2단계만 고르고 떠난 앞 사람(draftOwner)의 값도 지운다 — owner 만 보면 비어 있어 뒤 사람 화면에 그대로 깔렸다(2026-10-19 점검).
+  if (userId && ((owner && owner !== userId) || (draftOwner && draftOwner !== userId))) {
     try { localStorage.removeItem(KEY); } catch { /* 무시 */ }
   }
 }
@@ -358,6 +368,17 @@ export async function retryPending() {
     // 1·2 단계는 로그인 없이도 볼 수 있는 화면이다.
     if (!session) return { status: 'no-session' };
     if (남의것이면_버린다(session)) return { status: 'idle' };
+    // 이 기기의 못 보낸 값이 생긴 뒤에 다른 기기에서 서버 값을 바꿨으면 그쪽이 새것이다 — 옛 값으로 덮지 않고 서버 값을 받는다.
+    // 기기 시계가 틀릴 수 있어 10분 넘게 새것일 때만 그렇게 본다(모르면 지금처럼 보낸다).
+    if (state.pendingAt) {
+      const { data } = await supabase.from('user_preference').select('updated_at').maybeSingle();
+      const 서버때 = data && Date.parse(data.updated_at);
+      if (서버때 && 서버때 - state.pendingAt > 10 * 60 * 1000) {
+        writeState({ pending: false });
+        await pullFromServer().catch(() => {});
+        return { status: 'idle' };
+      }
+    }
     return await commit(state, supabase, session, true);
   } catch {
     return { status: 'error' };
@@ -462,6 +483,7 @@ async function sendDraft(s, 지금) {
   const session = await liveSession(supabase);
   if (!session) return;
   const lo = s.years === null ? null : Math.min(60, Math.max(0, s.years));
+  writeState({ draftOwner: session.user.id });
   const { error } = await supabase.from('onboarding_draft').upsert({
     auth_user_id: session.user.id,
     job_codes: s.jobs.slice(0, MAX_JOBS),
