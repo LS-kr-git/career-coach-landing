@@ -284,12 +284,28 @@
     /* 답을 기다리는 동안은 배너 자리를 회색 판으로 잡아 둔다 — 비워 두면 답이 온 뒤 배너가 끼어들며
        아래 카드가 밀린다(2026-10-18 shift-audit 휴대폰360 0.0377, 일요일에만). 판은 상태를 말하지 않는다. */
     // 판은 「열람 가능」 배너를 빌린다 — 일요일 답은 대개 이것이고(완료는 이미 쓴 사람뿐), 잠김은 좁은 화면에서 두 줄이라
-    // 답이 오면 아래가 당겨졌다(2026-10-19 점검). 320px 에서 「완료」(한 줄)로 답이 오면 20px 줄어드는 것은 남는다.
+    // 답이 오면 아래가 당겨졌다(2026-10-19 점검). 좁은 화면의 줄 수 차이는 아래 「높이맞춤」이 맞춘다.
     var 자리 = document.querySelector('.banner[data-state="open"]');
     showBanner('open');
     자리.classList.add('cc-bar-fill');
     자리.setAttribute('tabindex', '-1'); 자리.setAttribute('aria-hidden', 'true');   // 판일 때는 링크가 아니다(키보드·낭독기로도 안 눌리게)
     var 판걷기 = function () { 자리.classList.remove('cc-bar-fill'); 자리.removeAttribute('tabindex'); 자리.removeAttribute('aria-hidden'); };
+    // 세 배너(열람 가능·완료·잠김)는 좁은 화면에서 제목 줄 수가 달라 높이가 갈린다(320px: 두 줄 89 · 한 줄 69) — 판이 어느 답으로
+    // 바뀌어도 아래가 안 움직이게, 셋 중 가장 큰 높이를 셋 모두의 최소 높이로 준다. 넓은 화면에서는 셋이 같아 바뀌는 것이 없다(2026-10-19 점검).
+    var 높이맞춤 = function () {
+      var 배너들 = [].slice.call(document.querySelectorAll('.card-me .banner')), 폭 = 자리.getBoundingClientRect().width, 큰 = 0;
+      if (!폭) return;
+      배너들.forEach(function (b) {
+        var c = b.cloneNode(true);
+        c.hidden = false; c.classList.remove('cc-bar-fill'); c.removeAttribute('id');
+        c.style.cssText = 'position:absolute;visibility:hidden;left:0;top:0;min-height:0;width:' + 폭 + 'px';
+        b.parentElement.appendChild(c); 큰 = Math.max(큰, c.getBoundingClientRect().height); c.remove();
+      });
+      배너들.forEach(function (b) { b.style.minHeight = 큰 ? 큰 + 'px' : ''; });
+    };
+    높이맞춤();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(높이맞춤);   // 글꼴이 늦게 와 줄바꿈이 바뀌면 다시 잰다
+    addEventListener('resize', 높이맞춤);
     window.ccHold?.(requireLogin().then(function (ok) { return ok ? getSunday() : null; })
       .then(function (s) { showBanner(s ? sundayStateOf(s) : null); 판걷기(); }, function (e) {
         console.error('일요일 상태 조회 실패', e);
