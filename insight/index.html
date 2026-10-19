@@ -645,6 +645,8 @@
 
   // 글이 그려진 뒤에 화면을 내보인다 — 「불러오는 중」이 보였다 바뀌며 덜컹이지 않게(assets/steady.js)
   let 다그림; window.ccHold?.(new Promise((r) => { 다그림 = r; }));
+  // 최상위 await 을 함수로 감싼다 — iOS 14·크롬 88 이하는 모듈 최상위 await 이 문법 오류라 이 화면이 통째로 안 떴다(2026-10-19 점검).
+  (async function () {
   if (!wellFormed) {
     card(MSG.badLink, MSG.badLinkSub);
   } else {
@@ -665,6 +667,7 @@
     }
   }
   다그림();
+  })();
 </script>
 </body>
 </html>
