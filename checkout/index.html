@@ -244,6 +244,10 @@
   .m-yes{flex:1;background:var(--amber-500);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px}
   .m-btns button:disabled{cursor:default}
   .m-yes:disabled{opacity:.85}
+  .m-renew{margin-top:10px;font-size:13px;line-height:18px;color:var(--gray-500)}
+  .m-btns + .m-other{margin-top:4px}
+  .m-other{height:44px;border:0;background:none;font:inherit;font-size:14px;line-height:20px;color:var(--gray-600);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+  .m-other[hidden]{display:none}
   .spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;animation:cc-spin .8s linear infinite}
   @keyframes cc-spin{to{transform:rotate(360deg)}}
   @media (prefers-reduced-motion:reduce){.spin{animation-duration:2.4s}}
@@ -373,7 +377,9 @@
       <div><span class="l">구독권</span><span class="v" id="cfPlan"></span></div>
       <div><span class="l">결제 금액</span><span class="v" id="cfAmt"></span></div>
     </div>
+    <p class="m-renew">이후 같은 주기로 같은 금액이 자동 결제되고,<br>언제든 해지할 수 있어요.</p>
     <div class="m-btns"><button class="m-no" type="button" id="cfNo">취소</button><button class="m-yes" type="button" id="cfYes">결제하기</button></div>
+    <button class="m-other" type="button" id="cfOther">다른 카드로 결제할게요</button>
   </div>
 </div>
 <!-- 모바일은 결제창에서 이 화면으로 페이지째 돌아온다 — 결제 화면을 한 번도 보이지 않고 덮개부터 그린다 -->
@@ -623,11 +629,20 @@
     $('cfAmt').textContent = 고른.price;
     $('cfYes').textContent = '결제하기';
     $('cfYes').disabled = $('cfNo').disabled = false;
+    $('cfOther').hidden = false;
     $('confirm').hidden = false;
   }
   $('cfNo').addEventListener('click', function () { $('confirm').hidden = true; });
+  // 다른 카드로 — 저장 카드 대신 결제창(카드 새로 입력)을 연다 (2026-10-19 사용자 확정 · 목업 v1 ①).
+  // 이 화면에서는 저장 카드를 잊는다 — 다음 누름도 결제창으로 간다.
+  $('cfOther').addEventListener('click', function () {
+    $('confirm').hidden = true;
+    저장카드 = null;
+    $('submit').click();
+  });
   $('cfYes').addEventListener('click', function () {
     $('cfYes').disabled = $('cfNo').disabled = true;
+    $('cfOther').hidden = true;   // 걷는 중에는 다른 길을 열지 않는다
     $('cfYes').innerHTML = '<span class="spin" aria-hidden="true"></span>결제하고 있어요';
     note('');
     // 걷히면 완료 화면으로 넘어간다(첫 결제와 같은 화면 — 2026-10-19 사용자 지시). 아니면 창을 닫고 버튼 위 안내로 말한다.
