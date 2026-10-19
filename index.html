@@ -184,10 +184,10 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 /* 첫 화면 휴대폰은 앱 머리 띠(‹ 🔍 ☰)를 빼고, 카드와 위 테두리·아래 번호(1·2·3) 사이를 카드 왼쪽 여백(12)과 같게 */
 #sec1 .pm-hero .hd{display:none!important}
 #sec1 .swipe{padding-top:12px!important;padding-bottom:0!important}#sec1 .swipe .msg{margin-bottom:0!important}#sec1 .pvdots{padding-top:12px!important}
-#sec1 .swipe .ab{height:370px;overflow-y:auto;position:relative;scrollbar-width:none}
+#sec1 .swipe .ab{height:370px;overflow-y:auto;position:relative;scrollbar-width:none;padding-bottom:0!important}
 #sec1 .swipe .ab::-webkit-scrollbar{display:none}
-#sec1 .swipe .ab ol{padding-bottom:60px} /* 끝까지 내렸을 때 마지막 줄이 「처음으로」 버튼에 안 가리게 */
-#sec1 .ab .mfd{position:sticky;left:0;right:0;bottom:-1px;height:56px;margin-top:-56px;background:linear-gradient(rgba(255,255,255,0),#fff);pointer-events:none;transition:opacity .25s}
+#sec1 .swipe .ab ol{padding-bottom:64px} /* 끝까지 내렸을 때 마지막 줄이 「처음으로」 버튼에 안 가리게 */
+#sec1 .ab .mfd{position:sticky;left:0;right:0;bottom:-1px;height:56px;margin-top:-56px;background:linear-gradient(rgba(255,255,255,0),#fff 55%);pointer-events:none;transition:opacity .25s}
 #sec1 .ab .mbtn{position:sticky;bottom:8px;display:block;margin:-34px auto 0;width:fit-content;padding:6px 12px;border:0;border-radius:999px;background:#1E293B;color:#fff;font:inherit;font-size:12px;font-weight:700;box-shadow:0 4px 10px rgba(15,23,42,.18);z-index:3;cursor:pointer}
 /* FAQ 질문 앞 이모지(E1) — 둘째 줄이 글자 첫머리에 맞도록 이모지는 왼쪽에 따로 세운다 */
 .faq summary{padding-left:28px}.faq summary .fe{position:absolute;left:0;top:0;font-size:16px;line-height:1.5}
