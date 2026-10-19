@@ -188,6 +188,8 @@ export function forgetIfOtherOwner(userId) {
   // 1·2단계만 고르고 떠난 앞 사람(draftOwner)의 값도 지운다 — owner 만 보면 비어 있어 뒤 사람 화면에 그대로 깔렸다(2026-10-19 점검).
   if (userId && ((owner && owner !== userId) || (draftOwner && draftOwner !== userId))) {
     try { localStorage.removeItem(KEY); } catch { /* 무시 */ }
+    // 결제 화면이 탭에 남긴 앞 사람의 빌링키·「다른 카드로」 표시도 이 사람 것이 아니다
+    try { sessionStorage.removeItem('cc_bk'); sessionStorage.removeItem('cc_newcard'); } catch { /* 무시 */ }
   }
 }
 
