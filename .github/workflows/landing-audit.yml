@@ -56,6 +56,8 @@ jobs:
 
       - name: 온보딩 직군 목록 ↔ taxonomy.json (1.5겹)
         run: node tools/roles/build.mjs --check
+      - name: 옛 브라우저 문법 (iOS 14·크롬 88 이 못 읽는 ES2021+ — 2026-10-19)
+        run: node tools/syntax/check.mjs
 
       - name: 약관·개인정보·가입·온보딩 문구 대조 (2겹a)
         run: node tools/figma-audit/docs-audit.mjs
