@@ -158,7 +158,7 @@ function moreBtn(ab){const f=document.createElement("div");f.className="mfd";con
  const end=()=>ab.scrollTop+ab.clientHeight>=ab.scrollHeight-4,set=()=>{const e=end();bt.textContent=e?"위로 ▴":"아래로 더 보기 ▾";f.style.opacity=e?0:1};
  ab.addEventListener("scroll",set,{passive:true});set();
  bt.addEventListener("click",e=>{e.stopPropagation();ab.scrollTo({top:end()?0:ab.scrollTop+ab.clientHeight-(bt.offsetHeight+16),behavior:"smooth"})})}
-// 알림톡 미리보기 한 벌 — 넘기기·번호·높이 고정·직군 이름·자동 넘김 (옛 첫 화면 그대로, 두 곳에 같은 것을 붙인다)
+// 알림톡 미리보기 한 벌 — 넘기기·번호·높이 고정·직군 이름 (옛 첫 화면 그대로, 두 곳에 같은 것을 붙인다)
 function mountPv(r){const q=c=>r.querySelector(c),b=q(".swipe"),dots=q(".pvdots"),dt=q(".dtabs"),hint=q(".pvhint"),h=q(".herow"),w=q(".sarwb"),sw=q(".scrollwrap");
  const step=()=>{const sl=b.children;return sl[1]?sl[1].offsetLeft-sl[0].offsetLeft:b.clientWidth},idx=()=>b.children.length?Math.round(b.scrollLeft/step()):0;
  const upd=()=>{const i=idx();hint.classList.toggle("hide",b.scrollLeft>20);[...dots.children].forEach((d,k)=>d.classList.toggle("on",k===i));[...dt.children].forEach((d,k)=>d.classList.toggle("on",k===i));
@@ -174,9 +174,7 @@ function mountPv(r){const q=c=>r.querySelector(c),b=q(".swipe"),dots=q(".pvdots"
  const pos=()=>{const a=sw.getBoundingClientRect(),hr=h.getBoundingClientRect();w.style.top=(a.top-hr.top+a.height/2)+"px"};new ResizeObserver(pos).observe(sw);pos();
  w.querySelector(".cnx").addEventListener("click",()=>go(Math.min(b.children.length-1,idx()+1)));w.querySelector(".cpv").addEventListener("click",()=>go(Math.max(0,idx()-1)));
  [...dots.children].forEach((d,k)=>d.addEventListener("click",()=>go(k)));
- // 자동 넘김 — 카드가 절반 넘게 보일 때만 3.2초마다. 그 미리보기를 한 번이라도 만지면 그 뒤로는 멈춘다
- if(!matchMedia("(prefers-reduced-motion: reduce)").matches){let t=0;["pointerdown","wheel","touchstart","keydown"].forEach(ev=>r.addEventListener(ev,()=>{r.touched=true;clearInterval(t)},{passive:true}));
-  new IntersectionObserver(es=>es.forEach(e=>{clearInterval(t);if(e.isIntersecting&&!r.touched)t=setInterval(()=>go((idx()+1)%b.children.length),3200)}),{threshold:.5}).observe(b)}
+ // 자동 넘김은 껐다(2026-10-19 사용자 지시) — 카드는 손으로만 넘긴다
  r.pv={render};render(JOB)}
 PVS.forEach(mountPv);
 // 목요일 「내 조건」 말풍선 — 보이면 체크가 그려지고(C7) 조건이 하나씩 붙는다(A2).
