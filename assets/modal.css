@@ -7,9 +7,13 @@
    쓰는 페이지: mypage/leave(멤버십 남음) · checkout(저장 카드 확인 · 결제 실패). 어드민 「제품 디자인 시스템」 9절이 이 파일을 읽어 보여 준다.
    키보드(첫 단추로 포커스 · Tab 은 창 안 · ESC 는 보조 단추 · 닫으면 연 자리로)는 /assets/modal.js 가 한다 — 창을 쓰는 페이지는 둘 다 건다.
    ⚠️ 각 페이지 :root 의 --pad-x · --gray-* · --amber-500 을 쓴다. */
-.dim{position:fixed;inset:0;z-index:40;background:rgba(15,23,42,.5);display:flex;align-items:center;justify-content:center;padding:0 var(--pad-x)}
+/* 창이 화면보다 길면(가로 화면·큰 글자) 딤 안에서 스크롤된다 — 가운데 정렬은 .modal 의 margin:auto 가 한다(넘칠 때 위가 잘리지 않게).
+   창이 떠 있는 동안 뒤 화면은 안 움직인다(html:has). 2026-10-19 점검 */
+.dim{position:fixed;inset:0;z-index:40;background:rgba(15,23,42,.5);display:flex;align-items:flex-start;justify-content:center;
+  overflow-y:auto;overscroll-behavior:contain;padding:max(16px,env(safe-area-inset-top)) var(--pad-x) max(16px,env(safe-area-inset-bottom))}
+html:has(.dim:not([hidden])){overflow:hidden}
 .dim[hidden]{display:none}
-.modal{width:100%;max-width:402px;background:#fff;border-radius:20px;padding:28px 20px 20px;box-shadow:0 12px 32px rgba(15,23,42,.16);display:flex;flex-direction:column;word-break:keep-all}
+.modal{margin:auto;width:100%;max-width:402px;background:#fff;border-radius:20px;padding:28px 20px 20px;box-shadow:0 12px 32px rgba(15,23,42,.16);display:flex;flex-direction:column;word-break:keep-all}
 .modal h2{font-size:17px;line-height:24px;font-weight:600;color:var(--gray-900);margin-bottom:8px;white-space:pre-line}
 .modal .m-body{font-size:14px;line-height:20px;font-weight:400;color:var(--gray-600);white-space:pre-line}
 .m-rows{margin-top:16px;background:var(--gray-50);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
@@ -18,7 +22,7 @@
 .m-row .l{font-size:13px;line-height:18px;color:var(--gray-500)}
 .m-row .v{font-size:15px;line-height:23px;font-weight:600;color:var(--gray-900);text-align:right}
 .m-btns{margin-top:24px;display:flex;gap:8px}
-.m-btn{flex:1;height:48px;border:0;border-radius:12px;font:inherit;font-size:15px;line-height:20px;font-weight:700;cursor:pointer;
+.m-btn{flex:1;min-height:48px;padding:12px 0;border:0;border-radius:12px;font:inherit;font-size:15px;line-height:20px;font-weight:700;cursor:pointer;
   display:flex;align-items:center;justify-content:center;gap:8px;-webkit-tap-highlight-color:transparent}
 .m-btn:active{transform:scale(.98)}
 .m-btn:disabled{cursor:default;transform:none}
@@ -26,6 +30,8 @@
 .m-btn.main:disabled{opacity:.85}
 .m-btn.sub{flex:0 0 96px;background:var(--gray-100);color:var(--gray-700)}
 .m-btn.dark{background:var(--gray-800);color:#fff}
+/* 화면에는 안 보이고 화면 낭독기만 읽는 상태 한 줄(「결제하고 있어요」) */
+.m-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .m-spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;animation:m-spin .8s linear infinite}
 @keyframes m-spin{to{transform:rotate(360deg)}}
 /* 글자 단추 — 단추 줄 아래의 다른 길 하나(「다른 카드로 결제할게요」). 13/18 · gray-500 · 밑줄 · 누르는 높이 44 */
