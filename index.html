@@ -91,6 +91,12 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 .sticky .cc-toast{margin-bottom:10px}
 .rxd .rxdn{color:var(--a600)}
 .rxd{margin-top:10px;font-size:15px;line-height:1.45;font-weight:600;color:var(--g600);word-break:keep-all}
+.sticky .btn{position:relative}
+.sticky .btn.glow{animation:ctaS .9s ease-out 2}
+.sticky .btn.glow::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;animation:ctaG .9s ease-out 2}
+@keyframes ctaS{30%{transform:scale(1.03)}}
+@keyframes ctaG{0%{box-shadow:0 0 0 0 rgba(254,229,0,.9)}100%{box-shadow:0 0 0 20px rgba(254,229,0,0)}}
+@media (prefers-reduced-motion:reduce){.sticky .btn.glow,.sticky .btn.glow::after{animation:none}}
 /* 첫 화면에서는 바닥 버튼을 숨겨 폰 카드를 가리지 않는다. 400px 내려가면 올라온다(66) */
 .sticky{transition:background .3s,transform .35s ease,opacity .35s ease,visibility 0s}
 .sticky.hide0{transform:translateY(120%);opacity:0;visibility:hidden;pointer-events:none;transition:background .3s,transform .35s ease,opacity .35s ease,visibility 0s .35s}
