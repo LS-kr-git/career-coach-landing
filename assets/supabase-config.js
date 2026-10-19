@@ -26,9 +26,9 @@ export const SUPABASE_ANON_KEY = 'sb_publishable_qKgzeXLu4fX9T_xfEjbNnQ_zPH_xPUu
 /** supabase-js — 판을 고정한다(올릴 때는 일부러 올린다). 랜딩이 이 주소를 미리 받아 두므로 로그인 처리 화면과
  *  온보딩이 **같은 주소**를 써야 미리 받은 것이 쓰인다 — 그래서 여기 한 곳에만 둔다. */
 export const SUPABASE_JS = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/+esm';
-/** 위 주소(jsdelivr)를 못 받는 망에서 한 번 더 받는 곳 — **같은 판**이다. 판을 올리면 둘을 같이 올린다.
+/** 위 주소(jsdelivr)를 못 받는 망에서 한 번 더 받는 곳 — **같은 판**이다 — 위 주소에서 만들어 판이 늘 같다.
  *  jsdelivr 가 막히면 로그인 처리 화면이 20초 뒤 실패로 끝났다(2026-10-19 점검 · 차단 재현). */
-export const SUPABASE_JS_ALT = 'https://esm.sh/@supabase/supabase-js@2.117.3';
+export const SUPABASE_JS_ALT = SUPABASE_JS.replace('https://cdn.jsdelivr.net/npm/', 'https://esm.sh/').replace(/\/\+esm$/, '');   // 판 번호를 두 곳에 적지 않는다(검사관 ⑩)
 /** supabase-js 를 받는다 — 앞 주소가 안 되면 뒤 주소로. 부르는 곳은 이것만 쓴다. */
 export const loadSupabase = () => import(SUPABASE_JS).catch(() => import(SUPABASE_JS_ALT));
 

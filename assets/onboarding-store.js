@@ -80,7 +80,8 @@ export function readState() {
 export function writeState(patch) {
   const now = readState();
   const next = { ...now, ...patch };
-  if (patch.pending === true && !now.pending) next.pendingAt = Date.now();
+  // 누를 때마다 새로 찍는다 — 처음 실패한 시각에 머물면 그 뒤 고친 값이 「다른 기기 값이 더 새것」으로 오판돼 버려진다(2026-10-19 검사관 ①).
+  if (patch.pending === true) next.pendingAt = patch.pendingAt || Date.now();
   else if (patch.pending === false) next.pendingAt = 0;
   try { localStorage.setItem(KEY, JSON.stringify(next)); } catch { /* 무시 */ }
   return next;
@@ -375,8 +376,13 @@ export async function retryPending() {
       const { data } = await supabase.from('user_preference').select('updated_at').maybeSingle();
       const 서버때 = data && Date.parse(data.updated_at);
       if (서버때 && 서버때 - state.pendingAt > 10 * 60 * 1000) {
-        writeState({ pending: false });
-        await pullFromServer().catch(() => {});
+        writeState({ pending: false });   // pullFromServer 는 「못 보냄」이 있으면 안 덮는다
+        try { await pullFromServer(); } catch (e) {
+          // 못 받았으면 「못 보냄」을 되살린다 — 안 그러면 옛 값이 「보냄 완료」로 남아 다시 보내지도 받지도 않는다.
+          writeState({ pending: true, pendingAt: state.pendingAt });
+          track('client_error', { msg: 'onboarding_pull:' + String(e?.message || e).slice(0, 80) });
+          return { status: 'error' };
+        }
         return { status: 'idle' };
       }
     }
@@ -482,7 +488,8 @@ export async function saveDraft() {
 async function sendDraft(s, 지금) {
   const supabase = await client();
   const session = await liveSession(supabase);
-  if (!session) return;
+  // 로그인 전에 고른 값은 앞 사람 것이 아니다 — 남은 draftOwner 를 내려야 로그인 직후 forgetIfOtherOwner 가 이 값을 안 지운다(검사관 ①).
+  if (!session) { if (readState().draftOwner) writeState({ draftOwner: null }); return; }
   const lo = s.years === null ? null : Math.min(60, Math.max(0, s.years));
   writeState({ draftOwner: session.user.id });
   const { error } = await supabase.from('onboarding_draft').upsert({
