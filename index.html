@@ -102,6 +102,9 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 .sticky.hide0{transform:translateY(120%);opacity:0;visibility:hidden;pointer-events:none;transition:background .3s,transform .35s ease,opacity .35s ease,visibility 0s .35s}
 @media (prefers-reduced-motion:reduce){.sticky,.sticky.hide0{transition:none}}
 .rfd{margin-top:14px;text-align:center;font-size:13px;font-weight:600;color:var(--g600);word-break:keep-all}
+/* 「전액 환불」 밑줄이 보일 때 한 번 그어진다(R3) */
+.rfd .ru{position:relative;color:var(--g800);font-weight:700}.rfd .ru::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2px;border-radius:2px;background:var(--a500);transform:scaleX(0);transform-origin:left;transition:transform .5s ease-out .3s}.rfd.pl .ru::after{transform:scaleX(1)}
+@media (prefers-reduced-motion:reduce){.rfd .ru::after{transform:scaleX(1);transition:none}}
 #sec1 .hh{text-align:center;word-break:keep-all}
 #sec1 .hh .hk1{display:inline-block;margin-bottom:6px;font-size:17px;line-height:1.75;font-weight:500;color:var(--g800)}
 #sec1 .hh .hc{color:var(--a500)}
@@ -382,7 +385,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
     <div class="dayp">하루 약 <span class="a6">129원</span></div>
   </div>
   <div class="cof out">☕ 한 달 <b>3,933원</b></div>
-  <p class="rfd">✓ 첫 브리핑이 마음에 안 들면 전액 환불</p>
+  <p class="rfd" id="rfd">✓ 첫 브리핑이 마음에 안 들면 <span class="ru">전액 환불</span></p>
 </section>
 <!-- 부담 없이 시작 (2026-10-17 신설 · 문구 근거: terms.html 제6조) -->
 <section data-sec="부담 없이 시작" class="gap20 s-a100b" id="safesec">
@@ -432,7 +435,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 <section data-sec="자주 묻는 질문" class="faq s-white">
   <h2 style="margin-bottom:12px">자주 묻는 질문</h2>
   <details><summary><span class="fe" aria-hidden="true">💼</span>내 직군에 맞는 노하우를 받을 수 있나요?</summary><ul class="fq"><li>네. 기본적으로는 가입할 때 고른 직군에 맞춰지지만, 원하는 분야로 조정도 가능해요.</li></ul></details>
-  <details><summary><span class="fe" aria-hidden="true">📋</span>원하는대로 공고 브리핑을 받을 수 있나요?</summary><ul class="fq"><li>네. 원하는 관심 직군·연차·지역을 선택해 주시면 돼요.</li><li>매주 목요일마다 최근 7일간 열린 공고 중 조건에 맞는 것만 모아 보내 드려요.</li><li>설정은 언제든 바꿀 수 있어요.</li></ul></details>
+  <details><summary><span class="fe" aria-hidden="true">📋</span>원하는 조건들로 최신 채용공고<br>취합 브리핑을 받을 수 있나요?</summary><ul class="fq"><li>네. 원하는 관심 직군·연차·지역을 선택해 주시면 돼요.</li><li>매주 목요일마다 최근 7일간 열린 공고 중 조건에 맞는 것만 모아 보내 드려요.</li><li>설정은 언제든 바꿀 수 있어요.</li></ul></details>
   <details><summary><span class="fe" aria-hidden="true">📅</span>주말에도 알림톡이 오나요?</summary><ul class="fq"><li>주말과 공휴일을 제외한 평일에만 보내 드려요.</li></ul></details>
   <details><summary><span class="fe" aria-hidden="true">📖</span>전문 보기는 당일에만 가능한가요?</summary><ul class="fq"><li>네. 커리어코치가 직접 만든 아티클의 전문 보기는 받은 날 당일에만 열 수 있어요.</li><li>당일에 아티클을 더 자주 열고, 자연스럽게 더 많이 공부하게 되는 구조예요.</li><li>하지만 한번 열어본 아티클 전문은, 시간이 지나도 계속 다시 열람할 수 있어요.</li></ul></details>
 </section>
