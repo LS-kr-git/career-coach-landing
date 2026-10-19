@@ -158,9 +158,8 @@
   window.ccAlive();   // CDN 로딩이 끝났다 — 위 하드 폴백의 8초를 여기서부터 다시 잰다
 
   // 기록 모듈을 못 받아도 로그인은 끝낸다 — 여기서 멈추면 8초 뒤 성공한 로그인을 실패로 보냈다(2026-10-19 퍼널 점검).
-  // 한 번 더 받아 보고(잠깐 끊긴 망), 그래도 못 받으면 기록 없이 진행한다 — 그때는 다음 화면이 기록 모듈을 다시 받아
-  // `callback_track` 실패를 남긴다(아래 표시).
-  const { track, metaCookies } = await import('/assets/track.js').catch(() => import('/assets/track.js?r=1')).catch(() => {
+  // 못 받으면 기록 없이 진행한다 — 그때는 다음 화면이 기록 모듈을 다시 받아 `callback_track` 실패를 남긴다(아래 표시).
+  const { track, metaCookies } = await import('/assets/track.js').catch(() => {
     try { sessionStorage.setItem('cc_cb_notrack', '1'); } catch { /* 못 적으면 흔적 없음 */ }
     return { track() {}, metaCookies: () => ({}) };
   });
