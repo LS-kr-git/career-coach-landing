@@ -627,6 +627,15 @@ io.observe(document.getElementById("safesec"))})();</script>
   // 오가야 해서, 바로 넘기면 페이지와 같이 끊긴다(2026-10-16 실측 · 삼성 인터넷의 빈 「가입 시작」).
   const 닿은뒤 = (기록, a) => Promise.race([기록, new Promise((r) => setTimeout(r, 300))])
     .finally(() => { location.href = a.href; });
+  let 앱살핌 = 0;
+  const 앱안열림 = (a) => {
+    if (앱살핌) return;
+    let 떠남 = false;
+    const 끔 = () => { 떠남 = true; };
+    addEventListener('pagehide', 끔, { once: true });
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') 끔(); });
+    앱살핌 = setTimeout(() => { 앱살핌 = 0; if (!떠남 && document.visibilityState === 'visible') location.href = a.href; }, 3000);
+  };
   const 로그인전 = () => {
     let 앱 = null, 남김 = false;
     for (const a of 버튼) {
@@ -636,7 +645,9 @@ io.observe(document.getElementById("safesec"))})();</script>
         const 기록 = 남김 ? null : track('signup_start', 버튼표(a));
         남김 = true;
         // 휴대폰이면 카카오톡 앱으로 바로 — 앱 전환은 페이지를 안 내리므로 기다리지 않는다(누른 동작이 살아 있을 때만 된다).
-        if (앱 && 앱.앱으로()) { e.preventDefault(); return; }
+        // 브라우저가 앱 열기를 조용히 막으면(앱 열기 확인창 취소·앱 없음) 화면이 그대로 남는다 — 3초 뒤에도 보이고 있으면
+        // 웹 로그인으로 간다(로그인한 사람 길의 4초 장치와 같은 판정 · 2026-10-19 퍼널 점검).
+        if (앱 && 앱.앱으로()) { e.preventDefault(); 앱안열림(a); return; }
         if (!기록 || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;   // 새 탭으로 열기는 그대로 둔다
         e.preventDefault();
         닿은뒤(기록, a);
@@ -662,6 +673,8 @@ io.observe(document.getElementById("safesec"))})();</script>
       for (const a of 버튼) a.href = 갈곳;
     })).catch(실패).finally(() => { 정함 = true; });
     let 기다림 = false;
+    // 행선지 답이 멈춘 채 마이페이지로 갔다가 뒤로가기 캐시로 돌아오면 「기다리는 중」이 남아 버튼이 영영 안 먹었다(2026-10-19 퍼널 점검).
+    addEventListener('pageshow', (e) => { if (e.persisted) 기다림 = false; });
     for (const a of 버튼) a.addEventListener('click', (e) => {
       if (정함) return;   // 행선지가 정해졌으면 링크 그대로(카카오면 로그인전 의 기록·앱 전환이 맡는다)
       if (e.metaKey || e.ctrlKey || e.shiftKey) return;   // 새 탭으로 열기는 그대로 둔다
@@ -709,7 +722,9 @@ io.observe(document.getElementById("safesec"))})();</script>
     const 다시 = 돌아옴.get('error_code') === 'bad_oauth_state' || 해시.get('error_code') === 'bad_oauth_state';
     const 갔던때 = (() => { try { return Number(sessionStorage.getItem('cc_relogin') || 0); } catch { return NaN; } })();
     let 넘김 = false;
-    if (다시 && !로그인됨 && 갔던때 >= 0 && Date.now() - 갔던때 > 120_000) {
+    // 화면이 보일 때만 — 카톡 앱 전환 뒤 10분 동안 돌아오지 않으면 SDK 가 낡은 열쇠로 이 화면에 돌아오는데, 그때 저절로 카카오로 넘기면
+    // 열어만 둔 사람이 돌아와 엉뚱한 로그인 화면을 본다. 안 보일 때 온 것은 안내로 남긴다.
+    if (다시 && !로그인됨 && document.visibilityState === 'visible' && 갔던때 >= 0 && Date.now() - 갔던때 > 120000) {
       try { sessionStorage.setItem('cc_relogin', String(Date.now())); 넘김 = true; } catch { /* 셀 수 없으면 안내로 */ }
     }
     track('login_fail', { ...(why && { why }), ...(code && { code }), ...(넘김 && { retry: 1 }) });

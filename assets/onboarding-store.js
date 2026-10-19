@@ -39,7 +39,7 @@ const MAX_REGIONS = 3;
  *    ⚠️ topic:null 과 다르다 — null 은 「한 번도 안 골랐다」이고, 서버는 그때 기존 값을
  *    유지한다(재온보딩이 주제를 지우면 안 되므로). 「지운다」를 말하려면 인자가 따로
  *    필요하고 그게 p_topic_clear 다. 두 상태를 한 값으로 접으면 서버가 못 가른다. */
-const EMPTY = { jobs: [], years: null, yearsMax: null, regions: [], topic: null, topicClear: false, pending: false, owner: null, draftAt: 0 };
+const EMPTY = { jobs: [], years: null, yearsMax: null, regions: [], topic: null, topicClear: false, pending: false, owner: null, draftAt: 0, pendingAt: 0, draftOwner: null };
 
 const strings = (v) => (Array.isArray(v) ? v.filter((s) => typeof s === 'string' && s) : []);
 const intOrNull = (v) => (Number.isInteger(v) ? v : null);
@@ -66,6 +66,10 @@ export function readState() {
       owner: typeof s.owner === 'string' && s.owner ? s.owner : null,
       // 이 기기에서 1·2단계를 마지막으로 확정한 시각(ms) — 서버 진행 기록(updated_at)과 어느 쪽이 새것인지 가른다(0163).
       draftAt: Number.isFinite(s.draftAt) ? s.draftAt : 0,
+      // 못 보낸 변경(pending)이 생긴 시각(ms) — 다른 기기에서 그 뒤에 서버 값을 바꿨으면 이 기기의 옛 값을 다시 보내지 않는다(retryPending).
+      pendingAt: Number.isFinite(s.pendingAt) ? s.pendingAt : 0,
+      // 1·2단계 진행 기록을 서버에 남긴 로그인 계정 — owner 는 「3단계를 서버에 저장한 사람」이라 따로 둔다(공용 기기, forgetIfOtherOwner).
+      draftOwner: typeof s.draftOwner === 'string' && s.draftOwner ? s.draftOwner : null,
     };
   } catch {
     return { ...EMPTY };   // 사파리 프라이빗 모드 등
@@ -74,7 +78,11 @@ export function readState() {
 
 /** 바뀐 부분만 얹어 저장한다. 세 화면이 각자 자기 몫만 갱신한다. */
 export function writeState(patch) {
-  const next = { ...readState(), ...patch };
+  const now = readState();
+  const next = { ...now, ...patch };
+  // 누를 때마다 새로 찍는다 — 처음 실패한 시각에 머물면 그 뒤 고친 값이 「다른 기기 값이 더 새것」으로 오판돼 버려진다(2026-10-19 검사관 ①).
+  if (patch.pending === true) next.pendingAt = patch.pendingAt || Date.now();
+  else if (patch.pending === false) next.pendingAt = 0;
   try { localStorage.setItem(KEY, JSON.stringify(next)); } catch { /* 무시 */ }
   return next;
 }
@@ -124,12 +132,13 @@ export function client() {
       const [{ createClient }, cfg] = await Promise.all([
         // 판을 고정한다 — `@2` 면 상위 릴리스 하나가 우리 배포 없이 로그인·마이페이지 전체를 바꾼다
         // (2026-10-14 출시 전 점검. 그날 `@2` 가 풀리던 판 그대로다). 올릴 때는 일부러 올린다.
-        import('/assets/supabase-config.js').then((c) => import(c.SUPABASE_JS)),
+        import('/assets/supabase-config.js').then((c) => c.loadSupabase()),
         // 접속 정보는 /assets/supabase-config.js 한 곳에만 둔다 (2026-08-06 복구 훈련 결과).
         import('/assets/supabase-config.js'),
       ]);
       return createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
     })();
+    clientPromise.catch(() => { clientPromise = null; });   // 못 받았으면 다음 부름에서 다시 받는다(망이 잠깐 끊긴 경우)
   }
   return clientPromise;
 }
@@ -167,14 +176,17 @@ function 남의것이면_버린다(session) {
 /** 로그아웃·탈퇴 때 부른다 — 이 기기에 남은 온보딩 값과 로그인 뒤 갈 곳을 지운다(공용 기기). */
 export function forgetLocal() {
   try { localStorage.removeItem(KEY); localStorage.removeItem('cc_next'); } catch { /* 무시 */ }
+  // 결제 화면이 서버에 못 보낸 빌링키를 이 탭에 잠깐 둔다(checkout 「받은키」) — 같은 탭의 다음 사람이 그 키를 보내지 않게.
+  try { sessionStorage.removeItem('cc_bk'); sessionStorage.removeItem('cc_newcard'); } catch { /* 무시 */ }
 }
 
 /** 로그인 직후 부른다 — 이 기기에 다른 계정이 고른 값이 남아 있으면 통째로 지운다(공용 기기에서
  *  앞 사람의 직무가 뒤 사람 화면에 보이고 그대로 저장되는 것을 막는다). 로그인 전에 고른 값(owner 없음)은 둔다.
  *  `cc_next` 는 지우지 않는다 — 결제 화면에서 로그인하러 온 그 사람의 갈 곳이다. */
 export function forgetIfOtherOwner(userId) {
-  const owner = readState().owner;
-  if (owner && userId && owner !== userId) {
+  const { owner, draftOwner } = readState();
+  // 1·2단계만 고르고 떠난 앞 사람(draftOwner)의 값도 지운다 — owner 만 보면 비어 있어 뒤 사람 화면에 그대로 깔렸다(2026-10-19 점검).
+  if (userId && ((owner && owner !== userId) || (draftOwner && draftOwner !== userId))) {
     try { localStorage.removeItem(KEY); } catch { /* 무시 */ }
   }
 }
@@ -323,9 +335,20 @@ addEventListener('pageshow', (e) => { if (e.persisted) 가는중 = false; });
 export async function saveThenGo(재시도, href) {
   if (가는중) return;
   가는중 = true;
-  await 재시도.catch(() => {});
-  const { status } = await saveOnboarding();
+  const { status } = await 상한((async () => { await 재시도.catch(() => {}); return saveOnboarding(); })());
   if (status !== 'no-session') location.href = href;
+}
+
+/**
+ * 저장을 기다리는 버튼의 상한 (2026-10-19 퍼널 점검). supabase-js 받기·세션 갱신·저장 요청에는 시간 제한이 없어,
+ * 망이 붙잡히면(인앱 브라우저·지하철) 버튼이 아무 반응 없이 수십 초 멈춘다 — 사람은 고장으로 보고 떠난다.
+ * 8초가 넘으면 `slow` 로 넘긴다. 저장 전에 pending 을 적어 두므로 다음 화면(재시도)·결제 화면이 다시 보낸다.
+ */
+export function 상한(p) {
+  return Promise.race([p, new Promise((r) => setTimeout(() => {
+    track('client_error', { msg: 'onboarding_slow:' + location.pathname.slice(0, 40) });   // 얼마나 자주 걸리는지 보이게
+    r({ status: 'slow' });
+  }, 8000))]);
 }
 
 /**
@@ -347,6 +370,22 @@ export async function retryPending() {
     // 1·2 단계는 로그인 없이도 볼 수 있는 화면이다.
     if (!session) return { status: 'no-session' };
     if (남의것이면_버린다(session)) return { status: 'idle' };
+    // 이 기기의 못 보낸 값이 생긴 뒤에 다른 기기에서 서버 값을 바꿨으면 그쪽이 새것이다 — 옛 값으로 덮지 않고 서버 값을 받는다.
+    // 기기 시계가 틀릴 수 있어 10분 넘게 새것일 때만 그렇게 본다(모르면 지금처럼 보낸다).
+    if (state.pendingAt) {
+      const { data } = await supabase.from('user_preference').select('updated_at').maybeSingle();
+      const 서버때 = data && Date.parse(data.updated_at);
+      if (서버때 && 서버때 - state.pendingAt > 10 * 60 * 1000) {
+        writeState({ pending: false });   // pullFromServer 는 「못 보냄」이 있으면 안 덮는다
+        try { await pullFromServer(); } catch (e) {
+          // 못 받았으면 「못 보냄」을 되살린다 — 안 그러면 옛 값이 「보냄 완료」로 남아 다시 보내지도 받지도 않는다.
+          writeState({ pending: true, pendingAt: state.pendingAt });
+          track('client_error', { msg: 'onboarding_pull:' + String(e?.message || e).slice(0, 80) });
+          return { status: 'error' };
+        }
+        return { status: 'idle' };
+      }
+    }
     return await commit(state, supabase, session, true);
   } catch {
     return { status: 'error' };
@@ -402,6 +441,26 @@ export async function pullFromServer() {
  * 이 기록은 「마쳤나」 판정·발송·결제가 읽지 않는다. 그래서 실패해도 막지 않는다 — 흐름을 멈출 만큼의 값이 아니다(남기기만 한다).
  * 부르는 곳: 1·2단계 「다음」과 2·3단계에 들어올 때(앞 단계 「다음」이 떠나며 끊겼어도 다음 화면이 다시 보낸다).
  */
+// 「다음」을 누르면 이 기록을 보내는 사이 화면이 넘어가 요청이 끊긴다(사파리 `Load failed` · 크롬 `Failed to fetch` ·
+// `Importing a module script failed`). 다음 화면이 들어오며 다시 보내므로 잃는 것이 없다 — 떠나는 중에 끊긴 것은 안 남긴다(2026-10-19:
+// 일주일 11건이 전부 이 모양이었다). 떠나는 중이 아닌데 끊겼으면 한 번 더 보내 보고, 그래도 안 되면 그때 남긴다.
+let 떠나는중 = false;
+{
+  addEventListener('pagehide', () => { 떠나는중 = true; });
+  addEventListener('beforeunload', () => { 떠나는중 = true; });
+  addEventListener('pageshow', () => { 떠나는중 = false; });
+  // iOS 사파리는 beforeunload 를 안 쏘고, 요청은 pagehide 전에 끊길 수 있다 — 같은 창으로 넘어가는 링크를 누른 순간부터 떠나는 중으로 본다.
+  // 넘어가지 않았으면(막혔으면) 3초 뒤 되돌린다.
+  addEventListener('click', (e) => {
+    const a = e.target?.closest?.('a[href]');
+    if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+    if (a.hash && a.pathname === location.pathname && a.search === location.search) return;   // 같은 문서 안 옮김(#…)은 안 떠난다
+    setTimeout(() => { if (e.defaultPrevented) return; 떠나는중 = true; setTimeout(() => { if (document.visibilityState === 'visible') 떠나는중 = false; }, 3000); }, 0);
+  }, true);
+}
+const 끊김 = (e) => /Load failed|Failed to fetch|NetworkError|Importing a module script failed|error loading dynamically imported module/i
+  .test(String(e?.message || e));
+
 export async function saveDraft() {
   if (document.prerendering) await new Promise((r) => document.addEventListener('prerenderingchange', r, { once: true }));
   const s = readState();
@@ -409,21 +468,38 @@ export async function saveDraft() {
   const 지금 = new Date();
   writeState({ draftAt: 지금.getTime() });   // 이 기기의 확정 시각 — 다른 기기의 서버 기록과 견준다(mergeDraft)
   try {
-    const supabase = await client();
-    const session = await liveSession(supabase);
-    if (!session) return;
-    const lo = s.years === null ? null : Math.min(60, Math.max(0, s.years));
-    const { error } = await supabase.from('onboarding_draft').upsert({
-      auth_user_id: session.user.id,
-      job_codes: s.jobs.slice(0, MAX_JOBS),
-      years_min: lo,
-      years_max: lo === null ? null : Math.min(60, Math.max(lo, s.yearsMax ?? lo)),
-      updated_at: 지금.toISOString(),
-    });
-    if (error) throw error;
+    await sendDraft(s, 지금);
   } catch (e) {
+    // 떠나는 중이어도 **끊김일 때만** 뺀다 — 권한 거부·코드 오류는 그대로 남긴다(검사관 ①, 2026-10-19)
+    if (끊김(e)) {
+      if (떠나는중) return;                             // 다음 화면이 다시 보낸다
+      await new Promise((r) => setTimeout(r, 1500));
+      if (떠나는중) return;
+      try { await sendDraft(s, 지금); return; } catch (e2) {
+        if (떠나는중 && 끊김(e2)) return;
+        track('client_error', { msg: 'onboarding_draft:retry:' + String(e2?.message || e2).slice(0, 70) });
+        return;
+      }
+    }
     track('client_error', { msg: 'onboarding_draft:' + String(e?.message || e).slice(0, 80) });
   }
+}
+
+async function sendDraft(s, 지금) {
+  const supabase = await client();
+  const session = await liveSession(supabase);
+  // 로그인 전에 고른 값은 앞 사람 것이 아니다 — 남은 draftOwner 를 내려야 로그인 직후 forgetIfOtherOwner 가 이 값을 안 지운다(검사관 ①).
+  if (!session) { if (readState().draftOwner) writeState({ draftOwner: null }); return; }
+  const lo = s.years === null ? null : Math.min(60, Math.max(0, s.years));
+  writeState({ draftOwner: session.user.id });
+  const { error } = await supabase.from('onboarding_draft').upsert({
+    auth_user_id: session.user.id,
+    job_codes: s.jobs.slice(0, MAX_JOBS),
+    years_min: lo,
+    years_max: lo === null ? null : Math.min(60, Math.max(lo, s.yearsMax ?? lo)),
+    updated_at: 지금.toISOString(),
+  });
+  if (error) throw error;
 }
 
 /** 서버 진행 기록 한 행을 읽는다 — 로그인 콜백(자기 클라이언트)과 pullFromServer 가 같이 쓴다. 없으면 null, 실패는 던진다. */

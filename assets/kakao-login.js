@@ -29,7 +29,10 @@ const MAX_AGE = 90 * 1000;      // 누를 때 이보다 오래된 state 는 안 
 
 const ua = navigator.userAgent;
 // 카톡 안 브라우저는 이미 카카오 로그인 상태라 웹 화면이 한 번에 지나간다. PC 는 앱 전환이 없다.
-export const 앱전환 = /Android|iPhone|iPad|iPod/i.test(ua) && !/KAKAOTALK/i.test(ua);
+// 안드로이드 앱 안 브라우저(WebView, UA 에 「; wv)」)도 뺀다 (2026-10-19 퍼널 점검) — SDK 는 그 안에서 `intent:` 주소로 카톡을
+// 여는데, 네이버·밴드·라인 같은 WebView 는 그 주소를 안 받아 버튼이 아무 반응 없거나 오류 화면이 뜬다. 웹 로그인은 어디서나 지난다.
+// (인스타·페이스북 WebView 는 SDK 가 이미 웹 로그인으로 보내고 있었다 — 같은 길이다.)
+export const 앱전환 = /Android|iPhone|iPad|iPod/i.test(ua) && !/KAKAOTALK/i.test(ua) && !/; wv\)/.test(ua);
 
 let 재료 = null;   // { state, scope, redirect_uri, at }
 let 다시받기 = () => {};
@@ -54,7 +57,7 @@ async function 받기() {
 // 랜딩은 두 길에서 부른다(처음부터 로그인 전 · 세션이 죽은 걸 늦게 안 때) — 한 번만 준비한다. 실패하면 다음에 다시.
 let 준비중 = null;
 export function 준비(기록) {
-  준비중 ??= (async () => {
+  if (!준비중) 준비중 = (async () => {   // `??=` 는 iOS 14·크롬 84 이하에서 문법 오류다
     await Promise.all([sdk(), 받기()]);
     if (!window.Kakao.isInitialized()) window.Kakao.init(JS_KEY);
     // 열어 둔 채 오래 있다 누르는 사람을 위해 — 보이는 동안만 다시 받는다.

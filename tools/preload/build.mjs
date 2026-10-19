@@ -41,7 +41,7 @@ const SKIP_DIRS = new Set(['.git', 'tools', 'ops', 'node_modules']);
  *  글자 크기를 정한다. 지금 그 순간은 대개 Pretendard 가 오기 전이라 대체 글꼴 폭으로 재는데, 미리 받으면 Pretendard 로
  *  재게 되어 퀴즈 Q2 줄이 줄어들지 않고 카드 끝에 닿았다(2026-10-15 화면 대조). 화면이 바뀌므로 넣지 않는다. */
 const NO_FONT_PRELOAD = new Set(['index.html']);
-const NEEDS_SDK = /\b(requireLogin|requireOnboarded|getSubscription)\(|import\(\s*SUPABASE_JS\s*\)/;
+const NEEDS_SDK = /\b(requireLogin|requireOnboarded|getSubscription)\(|import\(\s*SUPABASE_JS\s*\)|\bloadSupabase\(/;   // loadSupabase — jsdelivr 가 안 되면 다른 곳에서 받는 입구(supabase-config)
 
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
 

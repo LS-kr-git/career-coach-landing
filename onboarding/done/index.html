@@ -96,7 +96,7 @@
   #errToast{bottom:calc(84px + env(safe-area-inset-bottom));z-index:30}
   .fade{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:450px;height:100px;
     background:linear-gradient(180deg,rgba(255,255,255,0),#fff 55%);pointer-events:none;z-index:9}
-  .cta{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  .cta{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
     width:calc(100% - 40px);max-width:410px;height:var(--cta-h);
     display:block;text-align:center;line-height:var(--cta-h);text-decoration:none;
     background:var(--amber-500);color:#fff;border-radius:var(--cta-radius);
@@ -139,7 +139,7 @@
 <script type="module">
   // 앞 네 화면이 모아 둔 선택값을 읽어 확인시킨다 — assets/onboarding-store.js.
   // 주제 고르기는 2026-10-05 결정으로 4단계(/onboarding/4/)로 옮겨 갔다. 이 화면은 확인만 한다.
-  import { readState, retryPending, complete } from '/assets/onboarding-store.js';
+  import { readState, retryPending, complete, 상한 } from '/assets/onboarding-store.js';
   import { 오류안내 } from '/assets/toast.js';
   import { 이어갈곳판정 } from '/assets/mypage-data.js';
   // 직군 → 주제. 표는 tools/roles/tracks.json 이 정본이고 build.mjs 가 위 blob 을 만든다.
@@ -201,7 +201,15 @@
     cta.setAttribute('aria-busy', 'true');
     // 저장이 실패했으면 넘어가지 않는다 — 저장 안 된 채 결제로 가면 결제 화면(S13)에서 막힌다 (2026-10-15 「오류 대체 화면」 D2).
     // 다시 누르면 다시 보낸다. 그 밖의 결과(보낼 것 없음·로그인 전 등)는 전처럼 넘어간다.
-    재시도.catch(() => ({ status: 'error' })).then((r) => {
+    // 8초 넘게 붙잡히면 저장 실패와 같이 말하고 버튼을 푼다(D2 — 저장 안 된 채 결제로 넘기지 않는다). 아직 도는 저장은 그대로 두고
+    // 다음 누름이 같은 저장을 다시 기다린다 — 새로 보내면 겹쳐 `busy` 로 튕긴다.
+    상한(재시도.catch(() => ({ status: 'error' }))).then((r) => {
+      if (r && r.status === 'slow') {
+        가는중 = false;
+        cta.removeAttribute('aria-busy');
+        오류안내(document.getElementById('errToast'), '설정을 저장하지 못했어요. 다시 눌러 주세요');
+        return;
+      }
       if (r && r.status === 'error') {
         가는중 = false;
         cta.removeAttribute('aria-busy');

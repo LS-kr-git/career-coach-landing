@@ -390,6 +390,18 @@ function optionalSrc(src) {
   try { return OPTIONAL_HOSTS.includes(new URL(src).hostname); } catch { return false; }
 }
 
+// 휴대폰 앱 안 브라우저(인스타·페이스북)·확장 프로그램이 페이지에 끼워 넣은 스크립트 — 주소가 http(s) 가 아니다.
+// 그 안에서 난 오류는 우리 화면과 무관하다(2026-10-19: 메타 앱 창이 닫히며 `iabjs://navigation_performance_logger_android`
+// 의 「Error invoking postMessage: Java object is gone」 이 일주일 11건 쌓였다). 어드민 errors.ts 의 SQL_CLIENT 가 같은 것을 거른다.
+const FOREIGN_SCHEME = /^(iabjs|chrome-extension|moz-extension|safari-extension|safari-web-extension|webkit-masked-url):/i;
+function foreignSrc(src) { return FOREIGN_SCHEME.test(String(src || '')); }
+// 화면 넘김 효과(view transition)가 건너뛰어지거나 취소됐다는 거절 — 넘김 효과만 못 냈을 뿐 화면은 멀쩡하다(steady.js 가 보여 준다).
+// steady.js 가 받아 두지만, 받을 틈이 없는 자리(떠나는 화면 쪽·브라우저 안쪽)에서 난 것까지 여기서 한 번 더 거른다.
+function transitionAbort(r) {
+  const n = r && r.name, m = String((r && r.message) || r || '');
+  return (n === 'AbortError' || n === 'InvalidStateError' || !n) && /transition/i.test(m) && /skip|abort/i.test(m);
+}
+
 const ERR_MAX = 3;          // 한 번 로드에 이만큼만. 루프 안에서 터지면 원장이 잠긴다
 const ERR_CUT = 300;        // 메시지 길이 상한 (props 전체가 2,000자를 넘으면 RPC 가 거부한다)
 let errSent = 0;
@@ -440,13 +452,20 @@ if (typeof window !== 'undefined') {
       reportError('resource load failed: ' + (el.tagName || '?'), cutUrl(el.src || el.href), 0, 0);
       return;
     }
+    if (foreignSrc(e.filename)) return;
     reportError(e.message, e.filename, e.lineno, e.colno);
     화면오류(e.filename);
   }, true);                            // 캡처 단계 — 리소스 오류는 버블링하지 않는다
 
   window.addEventListener('unhandledrejection', (e) => {
     const r = e.reason;
+    if (transitionAbort(r)) return;
     reportError('unhandled rejection: ' + (r && r.message ? r.message : String(r)),
       (r && r.stack ? String(r.stack).split('\n')[1] || '' : '').trim(), 0, 0);
   });
 }
+
+// 로그인 처리 화면이 이 모듈을 못 받아 기록 없이 로그인을 끝냈으면 그 사실을 다음 화면에서 남긴다(auth/callback 「cc_cb_notrack」).
+try {
+  if (sessionStorage.getItem('cc_cb_notrack')) { sessionStorage.removeItem('cc_cb_notrack'); track('client_error', { msg: 'callback_track:import_failed' }); }
+} catch { /* 저장소가 막힌 브라우저 — 남길 길이 없다 */ }

@@ -41,6 +41,7 @@
 <!-- /미리받기 -->
 <link rel="stylesheet" href="/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
 <link rel="stylesheet" href="/assets/toast.css">
+<link rel="stylesheet" href="/assets/modal.css">
 <script src="/assets/steady.js"></script>
 <style>
   :root{
@@ -139,17 +140,7 @@
   .agree[aria-checked="true"] .box{border-color:var(--amber-500);background:var(--amber-500)}
   .agree[aria-checked="true"] .box svg{visibility:visible}
   .agree-t{font-size:14px;line-height:20px;color:var(--gray-700)}
-  /* 멤버십이 남아 있을 때 — 화면 위에 모달(09-B). 버튼은 「닫기」 하나, 누르면 모달만 닫힌다(탈퇴하기는 잠긴 채) */
-  .dim{position:fixed;inset:0;z-index:30;background:rgba(15,23,42,.5);display:flex;align-items:center;justify-content:center;padding:0 var(--pad-x)}
-  .modal{width:100%;max-width:402px;background:#fff;border-radius:20px;padding:28px 20px 20px;box-shadow:0 12px 32px rgba(15,23,42,.16);display:flex;flex-direction:column;word-break:keep-all}
-  .modal h2{font-size:17px;line-height:24px;font-weight:600;color:var(--gray-900);margin-bottom:8px}
-  .modal .m-body{color:var(--gray-600)}
-  .m-date{margin-top:16px;background:var(--gray-50);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px}
-  .m-date .l{color:var(--gray-500)}
-  .m-date .v{font-size:15px;line-height:23px;font-weight:600;color:var(--gray-900)}
-  .m-close{margin-top:24px;height:48px;border-radius:12px;background:var(--gray-800);color:#fff;font-size:15px;font-weight:700;
-    display:flex;align-items:center;justify-content:center;border:0;width:100%;font:inherit;font-size:15px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
-  .m-close:active{transform:scale(.98)}
+  /* 멤버십이 남아 있을 때 — 화면 위에 공용 가운데 창(/assets/modal.css · 09-B). 버튼은 「닫기」 하나, 누르면 창만 닫힌다(탈퇴하기는 잠긴 채) */
   /* 탈퇴 버튼은 앰버가 아니라 짙은 회색 — 권하는 행동이 아니다 */
   .cta.danger{background:var(--gray-800);box-shadow:none}
   .cta.danger[disabled]{background:var(--gray-100);color:var(--gray-400)}
@@ -205,9 +196,9 @@
 <div class="dim" id="block" hidden role="dialog" aria-modal="true" aria-labelledby="blockTitle">
   <div class="modal">
     <h2 id="blockTitle">멤버십이 남아 있어<br>지금은 탈퇴할 수 없어요</h2>
-    <p class="t-body-s m-body">멤버십 이용 기간이 끝난 뒤에 탈퇴할 수 있어요. 아직 해지하지 않았다면 먼저 해지해 주세요.</p>
-    <div class="m-date" id="blockDate" hidden><span class="t-caption l" id="blockDateL"></span><span class="v" id="blockDateV"></span></div>
-    <button class="m-close" type="button" id="blockClose">닫기</button>
+    <p class="m-body">멤버십 이용 기간이 끝난 뒤에 탈퇴할 수 있어요. 아직 해지하지 않았다면 먼저 해지해 주세요.</p>
+    <div class="m-rows" id="blockDate" hidden><div class="m-row"><span class="l" id="blockDateL"></span><span class="v" id="blockDateV"></span></div></div>
+    <div class="m-btns"><button class="m-btn dark" type="button" id="blockClose">닫기</button></div>
   </div>
 </div>
 <div class="cta-dock leave" id="dock">

@@ -146,18 +146,24 @@
 
 <script type="module">
   // 접속 정보는 /assets/supabase-config.js 한 곳에만 둔다 (2026-08-06 복구 훈련 결과).
-  import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_JS } from '/assets/supabase-config.js';
+  import { SUPABASE_URL, SUPABASE_ANON_KEY, loadSupabase } from '/assets/supabase-config.js';
   import { takeNext } from '/assets/return-to.js';
   import { forgetIfOtherOwner, readState, mergeDraft, readDraft } from '/assets/onboarding-store.js';
   import { 이어갈곳판정, 온보딩마침판정 } from '/assets/mypage-data.js';
-  // 주소는 설정 파일 한 곳에 — 랜딩이 같은 주소를 미리 받아 둔다(index.html 「미리 받아 두기」).
+  // 최상위 await 을 함수로 감싼다 — iOS 14·크롬 88 이하는 최상위 await 이 문법 오류라 모듈 전체가 안 돌았다(2026-10-19 점검).
+  (async function () {  // 주소는 설정 파일 한 곳에 — 랜딩이 같은 주소를 미리 받아 둔다(index.html 「미리 받아 두기」).
   window.ccAlive(20000);   // 여기까지 왔다 — supabase-js(가장 큰 파일 묶음)를 받는 동안 다시 넉넉히 잰다
-  const { createClient } = await import(SUPABASE_JS);
+  const { createClient } = await loadSupabase();
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   window.ccAlive();   // CDN 로딩이 끝났다 — 위 하드 폴백의 8초를 여기서부터 다시 잰다
 
-  const { track, metaCookies } = await import('/assets/track.js');
+  // 기록 모듈을 못 받아도 로그인은 끝낸다 — 여기서 멈추면 8초 뒤 성공한 로그인을 실패로 보냈다(2026-10-19 퍼널 점검).
+  // 못 받으면 기록 없이 진행한다 — 그때는 다음 화면이 기록 모듈을 다시 받아 `callback_track` 실패를 남긴다(아래 표시).
+  const { track, metaCookies } = await import('/assets/track.js').catch(() => {
+    try { sessionStorage.setItem('cc_cb_notrack', '1'); } catch { /* 못 적으면 흔적 없음 */ }
+    return { track() {}, metaCookies: () => ({}) };
+  });
   window.ccAlive();   // track.js 도 별도 fetch 다 — 이 구간에 진척 신호가 없으면
                       // 앞 칸에서 잰 8초가 여기서 터져 성공한 로그인을 실패로 보낸다
 
@@ -310,6 +316,7 @@
     markLogin(data.session);
     if (data.session) 성공(); else window.ccFail('no_session');
   }, 3000);
+  })();
 </script>
 </body>
 </html>

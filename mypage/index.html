@@ -280,10 +280,13 @@
   else {
     /* 🔴 일요일에는 답이 오기 전까지 배너를 세우지 않는다. 마크업 기본(잠김)을 두면 「일요일
        오픈」을 일요일에 보여 주고, 「열람 가능」을 먼저 세우면 이미 쓴 사람에게 다시 고르라고 한다.
-       조회가 실패해도 같다 — 지어낸 상태를 그리느니 배너 없이 둔다(저장소 줄은 그대로 남는다). */
-    showBanner(null);
+       조회가 실패하면 회색 판으로 둔다(아래 D6) — 지어낸 상태는 그리지 않는다. */
+    /* 답을 기다리는 동안은 배너 자리를 회색 판으로 잡아 둔다 — 비워 두면 답이 온 뒤 배너가 끼어들며
+       아래 카드가 밀린다(2026-10-18 shift-audit 휴대폰360 0.0377, 일요일에만). 판은 상태를 말하지 않는다. */
+    var 자리 = document.querySelector('.banner[data-state="locked"]');
+    자리.classList.add('cc-bar-fill');
     window.ccHold?.(requireLogin().then(function (ok) { return ok ? getSunday() : null; })
-      .then(function (s) { if (s) showBanner(sundayStateOf(s)); }, function (e) {
+      .then(function (s) { showBanner(s ? sundayStateOf(s) : null); 자리.classList.remove('cc-bar-fill'); }, function (e) {
         console.error('일요일 상태 조회 실패', e);
         /* 배너 자리를 회색 판으로 두고 실패는 하단 안내로 (2026-10-15 「오류 대체 화면」 D6). 지어낸 상태는 여전히 안 그린다 — 판은 눌리지 않는다 */
         showBanner('locked');
