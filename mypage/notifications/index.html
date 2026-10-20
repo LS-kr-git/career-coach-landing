@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="/assets/no-input-zoom.js"></script>
+<meta name="color-scheme" content="only light">
+<meta name="format-detection" content="telephone=no">
+<title>알림 설정 — 커리어코치</title>
+<meta name="description" content="카카오톡으로 받는 알림을 정합니다.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
+<!-- 미리받기 (tools/preload/build.mjs 가 만든다 — 손으로 고치지 마라) -->
+<link rel="preconnect" href="https://sxooygwggxeplzkfdbth.supabase.co" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.83.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.86.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.88.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.89.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.90.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.91.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="modulepreload" href="/assets/browser-mark.js">
+<link rel="modulepreload" href="/assets/mypage-data.js">
+<link rel="modulepreload" href="/assets/skeleton.js">
+<link rel="modulepreload" href="/assets/supabase-config.js">
+<link rel="modulepreload" href="/assets/toast.js">
+<link rel="modulepreload" href="/assets/track.js">
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/+esm" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/functions-js@2.117.3/+esm" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/postgrest-js@2.117.3/+esm" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/realtime-js@2.117.3/+esm" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/storage-js@2.117.3/+esm" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/auth-js@2.117.3/+esm" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/tslib@2.8.1/+esm" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/phoenix@0.4.5/+esm" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/iceberg-js@0.8.1/+esm" crossorigin>
+<!-- /미리받기 -->
+<link rel="stylesheet" href="/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
+<script src="/assets/steady.js"></script>
+<link rel="stylesheet" href="/assets/toast.css">
+<link rel="stylesheet" href="/assets/skeleton.css">
+<style>
+  :root{
+    color-scheme: only light;
+    --amber-500:#F59E0B; --emerald-50:#ECFDF5; --emerald-500:#10B981; --emerald-700:#047857;
+    --gray-50:#F8FAFC; --gray-100:#F1F5F9; --gray-200:#E2E8F0; --gray-300:#CBD5E1;
+    --gray-400:#94A3B8; --gray-500:#64748B; --gray-600:#475569; --gray-800:#1E293B; --gray-900:#0F172A;
+    --pad-x:24px; --card-max:450px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{background:var(--gray-100)}
+  body{font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;
+    background:#fff;color:var(--gray-800);-webkit-font-smoothing:antialiased}
+  .page{width:100%;max-width:var(--card-max);margin:0 auto;background:#fff;
+    min-height:100vh;min-height:100svh;display:flex;flex-direction:column}
+  .hd{position:sticky;top:0;z-index:20;display:flex;align-items:center;
+    height:calc(48px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 12px 0;background:#fff}
+  .back{width:48px;height:48px;display:flex;align-items:center;justify-content:center;position:relative}
+  .back svg{position:relative;z-index:1}
+  .back::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:36px;height:36px;border-radius:10px;background:transparent;transition:background .12s}
+  .back:active::before{background:var(--gray-100)}
+  main{flex:1;display:flex;flex-direction:column;width:100%;max-width:var(--card-max);margin:0 auto}
+  .t-display{font-size:28px;line-height:36px;font-weight:800;letter-spacing:-.02em;color:var(--gray-900)}
+  [hidden]{display:none!important}
+  .title{padding:20px var(--pad-x) 9px}
+  /* 알림 설정 (2026-10-20 사용자 확정 — 바깥은 시안 B v2, 상자 안은 「B · 디자인 시스템」) */
+  .wrap{padding:24px var(--pad-x) 40px;display:flex;flex-direction:column;gap:28px}
+  .lbl{font-size:13px;line-height:18px;font-weight:600;color:var(--gray-500);margin:0 4px 10px}
+  .card{background:#fff;border:1px solid var(--gray-200);border-radius:16px;overflow:hidden}
+  .row{display:flex;align-items:center;gap:14px;padding:17px 18px}
+  .col{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+  .nm{font-size:15px;line-height:22px;font-weight:600;color:var(--gray-800)}
+  .sub{font-size:13px;line-height:18px;color:var(--gray-500)}
+  .when{font-size:12px;line-height:17px;color:var(--gray-400)}
+  /* 「항상 받음」 — 멤버십·결제의 「구독 중」 칩과 같은 모양 */
+  .live{display:flex;align-items:center;gap:5px;color:var(--emerald-700);flex:none;background:var(--emerald-50);
+    border-radius:9999px;padding:4px 9px;font-size:11px;line-height:14px;font-weight:600}
+  .live i{width:6px;height:6px;border-radius:9999px;background:var(--emerald-500);flex:none}
+  .sw{appearance:none;-webkit-appearance:none;flex:none;width:44px;height:26px;margin:0;border-radius:9999px;
+    background:var(--gray-300);position:relative;cursor:pointer;transition:background .2s}
+  .sw::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;
+    box-shadow:0 1px 2px rgba(17,17,17,.2);transition:transform .2s}
+  .sw:checked{background:var(--amber-500)}
+  .sw:checked::after{transform:translateX(18px)}
+  .sw:disabled{cursor:default}
+  @media (max-width:450px){html,body{background:#fff}}
+  /* 넓은 화면 카드 어포던스 — 랜딩(index.html)의 같은 블록과 값이 같다(2026-09-24 사용자 지시 · 모든 페이지). */
+  @media (min-width:451px){
+    body{background:var(--gray-100)}
+    .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+<header class="hd"><a class="back" href="/mypage/" aria-label="뒤로"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15.75 4.5L8.25 12l7.5 7.5" stroke="#475569" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a></header>
+<main>
+  <div class="title"><h1 class="t-display">알림 설정</h1></div>
+  <div class="wrap">
+    <section>
+      <p class="lbl">꼭 받는 알림</p>
+      <div class="card"><div class="row"><span class="col"><span class="nm">브리핑 · 결제 안내</span><span class="sub">구독 중에는 꺼지지 않아요</span></span><span class="live"><i aria-hidden="true"></i>항상 받음</span></div></div>
+    </section>
+    <section>
+      <p class="lbl">선택 알림</p>
+      <div class="card"><label class="row"><span class="col"><span class="nm">마케팅 정보 수신</span><span class="sub">혜택·이벤트 소식을 카카오톡으로 받아요</span><span class="when" id="mkWhen" data-sk>&nbsp;</span></span><input type="checkbox" class="sw" id="mkSw" role="switch" disabled aria-label="마케팅 정보 수신"></label></div>
+    </section>
+  </div>
+</main>
+</div>
+<p class="cc-toast float" id="mkToast" role="status" hidden></p>
+<p class="cc-toast float" id="errToast" role="alert" hidden></p>
+<script type="module">
+  import '/assets/track.js';   // 회원 화면 오류 자동 보고
+  import { 하단안내, 오류안내 } from '/assets/toast.js';
+  import { requireLogin, getMarketing, setMarketing, marketingResultLine, marketingWhen, FAIL } from '/assets/mypage-data.js';
+  /* 마케팅 정보 수신 — 지금 상태를 받아 세우고, 바꾸면 서버(career-coach 0201)가 이력을 한 줄 더 쌓는다.
+     처리 결과(일자·전송자·결과)는 하단 안내로 알린다(정보통신망법 50조 7항). 못 읽으면 스위치를 잠근 채 둔다. */
+  var sw = document.getElementById('mkSw'), when = document.getElementById('mkWhen');
+  function 세움(r) { sw.checked = !!r.granted; when.textContent = marketingWhen(r); sw.disabled = false; }
+  window.ccHold?.(requireLogin(location.pathname).then(function (ok) { return ok ? getMarketing() : null; })
+    .then(function (r) { if (r) 세움(r); }, function () { when.textContent = ''; 오류안내(document.getElementById('errToast'), FAIL.line); }));
+  sw.addEventListener('change', function () {
+    var 원래 = !sw.checked; sw.disabled = true;
+    setMarketing(sw.checked).then(function (r) {
+      세움(r); var t = document.getElementById('mkToast'); t.textContent = marketingResultLine(r); 하단안내(t);
+    }, function () { sw.checked = 원래; sw.disabled = false; 오류안내(document.getElementById('errToast'), FAIL.line); });
+  });
+</script>
+</body>
+</html>
