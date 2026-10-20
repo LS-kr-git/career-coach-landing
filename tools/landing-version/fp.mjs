@@ -53,21 +53,24 @@ const 표시 = (t, 속) => {
 };
 export function 기록대조(html) {
   html = 주석빼기(html);
-  const 본문 = html.slice(html.indexOf('id="scr"')), 빈자리 = [], 열쇠 = [];
+  // 섹션별 — 섹션마다 그 안의 열쇠와 빈자리 수. 랜딩 버전 보관(capture.mjs)이 versions.json 에 남겨 어드민이 기록 0건인 섹션에도 줄을 세운다.
+  const 본문 = html.slice(html.indexOf('id="scr"')), 빈자리 = [], 열쇠 = [], 섹션별 = [];
   for (const [, 속성, 안] of 본문.matchAll(/<section\b([^>]*)>([\s\S]*?)<\/section>/g)) {
     const 이름 = (속성.match(/\bdata-sec="([^"]*)"/) || [])[1] ?? '';
-    const 쌓임 = [표시('section', 속성)];
-    if (쌓임[0].열쇠) 열쇠.push(...쌓임[0].열쇠.split(/\s+/));
+    const 쌓임 = [표시('section', 속성)], 이섹션 = { 열쇠: [], 빈자리: 0 };
+    섹션별.push(이섹션);
+    if (쌓임[0].열쇠) 이섹션.열쇠.push(...쌓임[0].열쇠.split(/\s+/));
     for (const [통, 닫, 태그, 속] of 안.matchAll(/<(\/?)([a-zA-Z][a-zA-Z0-9]*)\b([^>]*)>/g)) {
       const t = 태그.toLowerCase();
       if (닫) { const i = 쌓임.map((x) => x.t).lastIndexOf(t); if (i > 0) 쌓임.length = i; continue; }
       const 나 = 표시(t, 속);
-      if (나.열쇠) 열쇠.push(...나.열쇠.split(/\s+/));
-      if (!나.덮음 && !쌓임.some((x) => x.덮음) && (조작태그.test(t) || 조작줄.test(나.cls))) 빈자리.push({ 섹션: 이름, 태그: 통.slice(0, 90) });
+      if (나.열쇠) 이섹션.열쇠.push(...나.열쇠.split(/\s+/));
+      if (!나.덮음 && !쌓임.some((x) => x.덮음) && (조작태그.test(t) || 조작줄.test(나.cls))) { 빈자리.push({ 섹션: 이름, 태그: 통.slice(0, 90) }); 이섹션.빈자리++; }
       if (!빈태그.has(t) && !통.endsWith('/>')) 쌓임.push(나);
     }
+    열쇠.push(...이섹션.열쇠);
   }
-  return { 빈자리, 열쇠 };
+  return { 빈자리, 열쇠, 섹션별 };
 }
 
 export const 지문 = (구성) => createHash('sha256').update(JSON.stringify(구성)).digest('hex').slice(0, 10);

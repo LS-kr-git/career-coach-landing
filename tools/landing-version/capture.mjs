@@ -14,7 +14,7 @@ import { 서버열기, 브라우저열기 } from '../ops-audit/harness.mjs';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { 랜딩구성, 지문, 적힌지문 } from './fp.mjs';
+import { 랜딩구성, 지문, 적힌지문, 기록대조 } from './fp.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const 보관 = resolve(process.argv[2] || '');
@@ -26,7 +26,36 @@ const 구성 = 랜딩구성(원문), fp = 지문(구성);
 if (적힌지문(원문) !== fp) throw new Error(`index.html 의 cc-lv(${적힌지문(원문)})가 지금 원문(${fp})과 다르다 — fp.mjs --write`);
 const 목록파일 = join(보관, 'versions.json');
 const 목록 = existsSync(목록파일) ? JSON.parse(readFileSync(목록파일, 'utf8')) : { versions: [] };
-if (목록.versions.some((v) => v.fp === fp)) { console.log(`이미 있는 버전 ${fp} — 할 일 없음`); process.exit(0); }
+
+// ── 0) 인터렉션 기록 칸 (2026-10-21 사용자 지시 — 기록이 0건인 섹션에 어드민 줄이 안 섰다) ─────────────
+// 버전마다 섹션별 기록 열쇠(ix)와 「열쇠 칸 밖에 손으로 만지는 부품이 있나」(iu)를 남긴다. 어드민 「랜딩 섹션 도달률」이
+// 이것으로 기록이 아직 0건인 섹션에도 인터렉션 줄을 세우고, 버전이 걸린 뒤에 생긴 열쇠는 언제부터 쟀는지(ixFrom) 적는다.
+// 같은 지문이어도 기록 코드는 바뀔 수 있다 — 그래서 지문이 이미 있어도 이 칸은 매번 맞춘다.
+const 열쇠칸 = (html) => { const { 섹션별 } = 기록대조(html); return { ix: 섹션별.map((x) => x.열쇠), iu: 섹션별.map((x) => x.빈자리 > 0) }; };
+// data-ix 를 달기 전에 생긴 열쇠의 실제 시작 — 그때 버전 기록에는 열쇠 칸이 없어 따로 적는다. 첫 화면·「이런 카카오톡이
+// 쌓이면」·전문가 칩 기록은 20636e8 배포(페이지 배포 끝 2026-10-20 14:41Z)에 생겼고, 나머지(sal·faq·rv)는 버전 처음부터 쟀다.
+// 🔴 한 번 쓰고 끝나는 값이다 — 칸이 없는 버전을 처음 채울 때만 읽힌다(그 버전은 56e275486c 하나). 새 열쇠는 여기 더하지 않는다
+//   — 이 표가 아니라 「처음 본 때 = 지금」이 새 열쇠의 시작이다.
+const 처음열쇠시작 = Object.fromEntries(['hjob', 'hcard', 'hmore', 'pjob', 'pcard', 'pmore', 'xjob'].map((k) => [k, '2026-10-20T14:41:11Z']));
+const 지금 = new Date().toISOString();
+let 칸바뀜 = false;
+for (const v of 목록.versions) {
+  const 판 = v.fp === fp ? 원문 : existsSync(join(보관, v.fp, 'index.html')) ? readFileSync(join(보관, v.fp, 'index.html'), 'utf8') : null;
+  if (v.ix && v.fp !== fp) continue;                                            // 옛 버전은 한 번 채우면 그대로다
+  if (!판) { console.log(`⚠ ${v.fp} — 보관 사본(index.html)이 없어 인터렉션 기록 칸을 못 채웠다. 어드민은 이 버전의 0건 섹션 줄을 못 세운다`); continue; }
+  const 새 = 열쇠칸(판), 전 = v.ix ? new Set(v.ix.flat()) : null, 언제 = { ...(v.ixFrom ?? {}) };
+  for (const k of 새.ix.flat()) {
+    if (언제[k]) continue;
+    언제[k] = 전 ? 지금 : (처음열쇠시작[k] && 처음열쇠시작[k] > v.at ? 처음열쇠시작[k] : v.at);   // 처음 채울 때는 버전 시작(또는 위 표)
+  }
+  const 다음 = { ...새, ixFrom: 언제 };
+  if (JSON.stringify([v.ix, v.iu, v.ixFrom]) !== JSON.stringify([다음.ix, 다음.iu, 다음.ixFrom])) { Object.assign(v, 다음); 칸바뀜 = true; }
+}
+if (목록.versions.some((v) => v.fp === fp)) {
+  if (칸바뀜) writeFileSync(목록파일, JSON.stringify(목록, null, 1) + '\n');
+  console.log(`이미 있는 버전 ${fp} — ${칸바뀜 ? '인터렉션 기록 칸만 맞췄다' : '할 일 없음'}`);
+  process.exit(0);
+}
 
 // ── 1) 바깥 요청 없이 서는 한 장 ─────────────────────────────────────────────
 function 한장() {
@@ -135,9 +164,11 @@ const 폴더 = join(보관, fp);
 mkdirSync(폴더, { recursive: true });
 writeFileSync(join(폴더, 'index.html'), 한장());
 await 그림들(폴더);
+const 이번칸 = 열쇠칸(원문);
 목록.versions.push({
   fp, commit: process.env.GITHUB_SHA || '', at: new Date().toISOString(),
   sections: 구성.섹션.map((x) => ({ n: x.이름, t: x.제목 })), sw: 구성.스위치,
+  ...이번칸, ixFrom: Object.fromEntries(이번칸.ix.flat().map((k) => [k, 지금])),
 });
 목록.versions.sort((x, y) => (x.at < y.at ? -1 : 1));
 writeFileSync(목록파일, JSON.stringify(목록, null, 1) + '\n');

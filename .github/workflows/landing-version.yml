@@ -11,7 +11,7 @@ name: 랜딩 버전 보관
 on:
   push:
     branches: [main]
-    paths: ['index.html', 'assets/**']
+    paths: ['index.html', 'assets/**', 'tools/landing-version/**']
   workflow_dispatch:
 
 permissions:
