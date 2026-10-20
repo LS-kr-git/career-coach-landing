@@ -76,3 +76,9 @@ jobs:
             git fetch --depth=1 origin landing-versions && git rebase FETCH_HEAD || exit 1
           done
           exit 1
+
+      # 인터렉션 기록 배선 (2026-10-20 사용자 지시 — 첫 화면 인터렉션이 안 재지고 있었다). 선언(data-ix)만 보는
+      # page-audit 과 달리 진짜 화면에서 손 조작을 하고 열쇠가 실제로 기록되는지 본다. 보관을 막지 않게 맨 뒤에 둔다.
+      - name: 인터렉션 기록 배선 점검
+        if: always()
+        run: node tools/ix-audit/run.mjs

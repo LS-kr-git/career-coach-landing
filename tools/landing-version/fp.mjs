@@ -40,6 +40,36 @@ export function 랜딩구성(html) {
   return { 섹션, 스위치 };
 }
 
+/** 인터렉션 기록의 빈자리 (2026-10-20 사용자 지시 — 첫 화면 인터렉션이 안 재지고 있었고, 「앞으로 재발하지 않게」).
+ *  #scr 섹션 안에서 손으로 조작하는 부품(버튼·입력·접는 질문·옆으로 넘기는 줄)은 기록 열쇠를 적은 칸(data-ix="열쇠 …")
+ *  안에 있거나, 안 재는 이유를 적은 칸(data-ix-none="이유") 안에 있어야 한다. 랜딩 기록 코드는 열쇠를 이 속성에서만 읽고,
+ *  어드민(career-coach tests/test_admin_pages.py 의 test_랜딩_인터렉션_열쇠를_어드민이_다_안다)이 같은 열쇠를 아는지 맞댄다. 섹션 자신에 붙여도 된다.
+ *  스크립트가 나중에 채우는 칩·카드는 원문에 없으므로 그것을 담는 줄(chips·swipe·hs·rvp)을 부품으로 센다. */
+const 조작태그 = /^(button|input|select|textarea|details)$/, 조작줄 = /(^|\s)(chips|swipe|hs|rvp)(\s|$)/;
+const 빈태그 = new Set(['area', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr']);
+const 표시 = (t, 속) => {
+  const 열쇠 = (속.match(/\bdata-ix="([^"]*)"/) || [])[1];
+  return { t, 열쇠, 덮음: 열쇠 !== undefined || /\bdata-ix-none="[^"]+"/.test(속), cls: (속.match(/\bclass="([^"]*)"/) || [])[1] ?? '' };
+};
+export function 기록대조(html) {
+  html = 주석빼기(html);
+  const 본문 = html.slice(html.indexOf('id="scr"')), 빈자리 = [], 열쇠 = [];
+  for (const [, 속성, 안] of 본문.matchAll(/<section\b([^>]*)>([\s\S]*?)<\/section>/g)) {
+    const 이름 = (속성.match(/\bdata-sec="([^"]*)"/) || [])[1] ?? '';
+    const 쌓임 = [표시('section', 속성)];
+    if (쌓임[0].열쇠) 열쇠.push(...쌓임[0].열쇠.split(/\s+/));
+    for (const [통, 닫, 태그, 속] of 안.matchAll(/<(\/?)([a-zA-Z][a-zA-Z0-9]*)\b([^>]*)>/g)) {
+      const t = 태그.toLowerCase();
+      if (닫) { const i = 쌓임.map((x) => x.t).lastIndexOf(t); if (i > 0) 쌓임.length = i; continue; }
+      const 나 = 표시(t, 속);
+      if (나.열쇠) 열쇠.push(...나.열쇠.split(/\s+/));
+      if (!나.덮음 && !쌓임.some((x) => x.덮음) && (조작태그.test(t) || 조작줄.test(나.cls))) 빈자리.push({ 섹션: 이름, 태그: 통.slice(0, 90) });
+      if (!빈태그.has(t) && !통.endsWith('/>')) 쌓임.push(나);
+    }
+  }
+  return { 빈자리, 열쇠 };
+}
+
 export const 지문 = (구성) => createHash('sha256').update(JSON.stringify(구성)).digest('hex').slice(0, 10);
 export const 적힌지문 = (html) => (주석빼기(html).match(/<meta name="cc-lv" content="([^"]*)">/) || [])[1] ?? null;
 

@@ -16,6 +16,7 @@
  *   5) 태그   — 블록 태그 여닫음 수가 맞는가
  *   6) CNAME  — 호스트명 한 줄인가
  *   7) 고아 자산 — assets/ 에 아무 페이지도 안 쓰는 파일이 있는가 (경고)
+ *   8) 인터렉션 기록 — 랜딩 섹션의 조작 부품이 기록 열쇠(data-ix) 칸 안에 있는가 (landing-version/fp.mjs 기록대조)
  *
  * 종료코드: BLOCK 0건이면 0, 아니면 1. (WARN 은 출력만 하고 통과)
  */
@@ -23,7 +24,7 @@ import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { dirname, resolve, join, posix } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import vm from 'node:vm';
-import { 랜딩구성, 지문, 적힌지문 } from '../landing-version/fp.mjs';
+import { 랜딩구성, 지문, 적힌지문, 기록대조 } from '../landing-version/fp.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..', '..');
@@ -258,6 +259,18 @@ for (const page of pages) {
     if (이름.some((x) => !x.trim()) || new Set(이름).size !== 이름.length) {
       add('BLOCK', '랜딩 섹션 이름', page, `#scr 의 <section> 마다 겹치지 않는 data-sec 이 있어야 합니다 (지금: ${이름.map((x) => x || '(없음)').join(' · ')})`,
           '어드민 「랜딩 섹션 도달률」의 줄 이름이 이 값입니다');
+    }
+    /* 인터렉션 기록 (2026-10-20 사용자 지시) — 손으로 만지는 부품이 기록 열쇠(data-ix) 칸 밖에 있으면 그 섹션 인터렉션은
+       아무도 모르게 0 이다. 첫 화면이 그렇게 이틀을 지냈다. 안 재기로 한 부품은 data-ix-none="이유" 칸에 넣는다. */
+    const 기록 = 기록대조(raw);
+    for (const x of 기록.빈자리) {
+      add('BLOCK', '인터렉션 기록 빈자리', page, `「${x.섹션}」 ${x.태그}`,
+          '이 부품을 기록하는 칸에 data-ix="열쇠" 를 달고 기록 코드를 붙이거나(실제로 기록되는지는 tools/ix-audit/run.mjs 가 본다), 안 잴 거면 data-ix-none="이유" 칸에 넣으세요 — 새 열쇠는 어드민 조작종류(career-coach pages/funnel.ts)에도 넣어야 합니다');
+    }
+    const 겹친열쇠 = 기록.열쇠.filter((k, i) => 기록.열쇠.indexOf(k) !== i), 틀린열쇠 = 기록.열쇠.filter((k) => !/^[a-z]{1,12}$/.test(k));
+    if (겹친열쇠.length || 틀린열쇠.length) {
+      add('BLOCK', '인터렉션 기록 열쇠', page, `겹침: ${겹친열쇠.join(' ') || '없음'} · 모양이 틀림: ${틀린열쇠.join(' ') || '없음'}`,
+          '열쇠는 소문자 1~12자이고 랜딩 전체에서 하나씩이어야 합니다(DB 0171 이 그 모양만 받는다)');
     }
   }
   const title = live.match(/<title>([\s\S]*?)<\/title>/i);
