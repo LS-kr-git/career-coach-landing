@@ -345,12 +345,15 @@ export async function saveThenGo(재시도, href) {
  * 저장을 기다리는 버튼의 상한 (2026-10-19 퍼널 점검). supabase-js 받기·세션 갱신·저장 요청에는 시간 제한이 없어,
  * 망이 붙잡히면(인앱 브라우저·지하철) 버튼이 아무 반응 없이 수십 초 멈춘다 — 사람은 고장으로 보고 떠난다.
  * 8초가 넘으면 `slow` 로 넘긴다. 저장 전에 pending 을 적어 두므로 다음 화면(재시도)·결제 화면이 다시 보낸다.
+ * 먼저 끝나면 타이머를 끈다 — 안 끄면 화면에 8초 넘게 머문 사람마다 느림 신호가 갔다(결제 화면 3명 중 3명, 2026-10-20).
  */
 export function 상한(p) {
-  return Promise.race([p, new Promise((r) => setTimeout(() => {
+  let t;
+  const 느림 = new Promise((r) => { t = setTimeout(() => {
     track('client_error', { msg: 'onboarding_slow:' + location.pathname.slice(0, 40) });   // 얼마나 자주 걸리는지 보이게
     r({ status: 'slow' });
-  }, 8000))]);
+  }, 8000); });
+  return Promise.race([p, 느림]).finally(() => clearTimeout(t));
 }
 
 /**
