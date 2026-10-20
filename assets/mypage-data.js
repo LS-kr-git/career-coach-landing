@@ -219,7 +219,7 @@ export async function requireOnboarded() {
 /** 구독·결제수단. 서버가 **항상 한 행**을 준다 — 없는 값은 null 이다. */
 export async function getSubscription() { return rpc('mypage_subscription', true); }
 
-/** 마케팅 정보 수신 — { granted, at }. 카카오 가입 때 선택 약관 동의가 첫 줄이고, 여기서 바꾸면 줄이 하나 더 쌓인다(career-coach 0200). */
+/** 마케팅 정보 수신 — { granted, at }. 카카오 가입 때 선택 약관 동의가 첫 줄이고, 여기서 바꾸면 줄이 하나 더 쌓인다(career-coach 0201). */
 export async function getMarketing() {
   const { data, error } = await (await supa()).rpc('mypage_marketing');
   if (error) throw error;
@@ -230,10 +230,14 @@ export async function setMarketing(on) {
   if (error) throw error;
   return data;
 }
+/** 「2026.10.20 동의함」 — 기록이 없으면 빈칸(가입 때 동의 안 한 사람) */
+export function marketingWhen(r) { return r && r.at ? `${kst(r.at)} ${r.granted ? '동의함' : '거부함'}` : ''; }
+function kst(at) {
+  return new Date(at).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\s/g, '').replace(/\.$/, '');
+}
 /** 동의·철회 처리 결과 안내(정보통신망법 50조 7항 — 전송자·일자·처리 결과) */
 export function marketingResultLine(r) {
-  const d = new Date(r.at).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\s/g, '').replace(/\.$/, '');
-  return `${d} 주식회사 오늘의논문 마케팅 정보 수신을 ${r.granted ? '동의' : '거부'}했어요`;
+  return `${kst(r.at)} 주식회사 오늘의논문 마케팅 정보 수신을 ${r.granted ? '동의' : '거부'}했어요`;
 }
 
 /** 해지. 기간 끝 해지라 다음 결제일이 그대로 「이용 종료일」이 된다.
