@@ -4,6 +4,7 @@
 // page-audit 의 「인터렉션 기록 빈자리」는 마크업의 선언(data-ix)만 본다 — 기록 코드가 실제로 그 열쇠를 보내는지는
 // 돌려 봐야 안다. 그래서 여기서는 진짜 화면을 열고, data-ix 칸마다 열쇠에 맞는 손 조작을 한 번씩 한 뒤,
 // 화면을 떠날 때 나가는 landing_engage 기록에 **선언한 열쇠가 전부 실렸는지** 본다.
+// 끝으로 칸(data-ix · data-ix-none) 밖에 손 조작이 남았는지 진짜 화면에서 다시 본다(아래 「칸 밖의 손 조작」).
 // 기록은 운영으로 안 나간다 — 바깥 요청은 전부 여기서 받아 버린다.
 //
 //   node tools/ix-audit/run.mjs          (playwright 가 없으면 건너뛴다 — CI 에서는 실패로 센다)
@@ -29,6 +30,16 @@ await 쪽.route((u) => !u.href.startsWith('https://careercoach.my/'), async (r) 
 });
 // 자동화 브라우저는 기록을 안 보낸다(track.js) — 이 점검에서만 그 표시를 끈다.
 await 쪽.addInitScript(() => Object.defineProperty(navigator, 'webdriver', { get: () => false }));
+// 손 이벤트를 다는 곳을 전부 적어 둔다 — 아래 「칸 밖의 손 조작」이 읽는다. el.onclick = … 처럼 속성으로 단 것도 센다.
+await 쪽.addInitScript(() => {
+  const 손 = ['click', 'pointerdown', 'pointerup', 'mousedown', 'mouseup', 'touchstart', 'touchend', 'touchmove', 'wheel', 'input', 'change', 'keydown', 'keyup', 'scroll', 'dragstart'];
+  const 들은 = (window.__ix손 = []), 원 = EventTarget.prototype.addEventListener;
+  EventTarget.prototype.addEventListener = function (t, f, o) { if (this instanceof Element && 손.includes(t)) 들은.push([this, t]); return 원.call(this, t, f, o); };
+  for (const t of 손) {
+    const d = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'on' + t);
+    if (d?.set) Object.defineProperty(HTMLElement.prototype, 'on' + t, { ...d, set(f) { if (f) 들은.push([this, t]); d.set.call(this, f); } });
+  }
+});
 const 오류 = [];
 쪽.on('pageerror', (e) => 오류.push(e.message));
 await 쪽.goto('https://careercoach.my/', { waitUntil: 'load' });
@@ -80,6 +91,29 @@ for (const [i, 열쇠들] of 칸들.entries()) {
     if (법) await 법[1](칸).catch((e) => ok(`「${k}」 손 조작`, false, e.message.split('\n')[0]));
   }
 }
+
+// 칸 밖의 손 조작 (2026-10-21 사용자 지시 「새 랜딩을 배포해도 인터렉션이 집계에서 누락되지 않게 강하게」).
+// page-audit 의 「빈자리」는 원문 HTML 의 태그·클래스만 본다 — 스크립트가 나중에 만든 부품, div 에 단 손 이벤트,
+// 새 모양의 부품(role·tabindex·가로로 넘어가는 줄)은 못 본다. 그래서 끝까지 내려 그릴 것을 다 그리게 한 뒤 진짜 화면에서
+// ① 섹션 안 요소에 단 손 이벤트와 ② 지금 있는 조작 부품이 전부 data-ix · data-ix-none 칸 안에 있는지 본다.
+// 섹션 밖(문서·창)에 단 위임 이벤트는 어느 부품 것인지 몰라 못 본다 — 부품 칸에 직접 단다.
+// 끝은 매번 다시 잰다 — 늦게 그려져 길어진 아랫부분까지 내려가야 거기 부품도 본다(검사관 ①).
+for (let y = 0; y < await 쪽.evaluate(() => document.body.scrollHeight); y += 500) {
+  await 쪽.evaluate((y) => window.scrollTo({ top: y, behavior: 'instant' }), y);
+  await 쪽.waitForTimeout(100);
+}
+await 쪽.waitForTimeout(600);
+const 칸밖 = await 쪽.evaluate(() => {
+  const 섹션 = (e) => e.closest('#scr section'), 덮음 = (e) => e.closest('[data-ix],[data-ix-none]');
+  const 이름 = (e) => `${e.tagName.toLowerCase()}${e.id ? '#' + e.id : ''}${typeof e.className === 'string' && e.className.trim() ? '.' + e.className.trim().split(/\s+/).join('.') : ''} @${섹션(e).dataset.sec || '?'}`;
+  const 부품 = 'button,input:not([type=hidden]),select,textarea,details,summary,[role=button],[role=tab],[role=slider],[role=switch],[role=checkbox],[tabindex]:not([tabindex="-1"]),[contenteditable]:not([contenteditable=false]),[onclick],[draggable=true]';
+  const 옆으로 = (e) => e.scrollWidth > e.clientWidth + 4 && /auto|scroll/.test(getComputedStyle(e).overflowX);
+  const 들은 = window.__ix손.filter(([e]) => 섹션(e) && !덮음(e)).map(([e, t]) => `${이름(e)} (${t})`);
+  const 있는 = [...document.querySelectorAll('#scr section, #scr section *')].filter((e) => !덮음(e) && (e.matches(부품) || 옆으로(e))).map(이름);
+  return [...new Set([...들은, ...있는])];
+});
+ok('섹션 안 손 조작이 전부 기록 칸(data-ix · data-ix-none) 안에 있다', !칸밖.length,
+  칸밖.length ? `${칸밖.slice(0, 6).join(' / ')}${칸밖.length > 6 ? ` 외 ${칸밖.length - 6}` : ''} — 기록할 칸에 data-ix="열쇠" 를, 안 잴 것은 data-ix-none="이유" 를 단다` : '');
 await 쪽.evaluate(() => { Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
 await 쪽.waitForTimeout(800);
 
