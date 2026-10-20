@@ -192,7 +192,6 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 #scr.screen .r6 .cl span.r6lab{font-size:19px!important;line-height:1.45!important}#rg .r6 em#r6n{font-size:28px}
 </style>
 <style id="v6">
-/* 불안 공감 */
 #anxsec .anx{display:flex;flex-direction:column;gap:12px;margin-top:32px}
 #anxsec .bb{position:relative;max-width:258px;padding:14px 16px 14px 48px;border-radius:18px;background:#fff;border:1px solid var(--g200);font-size:16px;line-height:1.5;font-weight:600;color:var(--g800);text-align:left;word-break:keep-all;box-shadow:0 4px 14px rgba(15,23,42,.06);opacity:0;transform:translateY(12px) scale(.96);transition:opacity .45s ease,transform .5s cubic-bezier(.2,.8,.2,1)}
 #anxsec .bb i{position:absolute;left:14px;top:13px;font-style:normal;font-size:22px;line-height:1}
@@ -207,7 +206,6 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 #anxsec .v6st>span{font-size:13px;line-height:1.45;color:var(--g700);word-break:keep-all}
 #anxsec .v6st small{display:block;margin-top:3px;font-size:11px;color:var(--g400)}#anxsec .v6st:nth-child(2){transition-delay:2.25s}
 #anxsec .anxt{margin-top:44px}
-/* 매일 받는 세 가지 */
 #trisec .tri{display:flex;flex-direction:column;gap:10px;margin-top:32px}
 #trisec .tc{display:flex;gap:14px;align-items:center;text-align:left;background:var(--g50);border:1px solid var(--g200);border-radius:16px;padding:16px;opacity:0;transform:translateX(-24px);transition:opacity .45s ease,transform .5s cubic-bezier(.2,.8,.2,1)}
 #trisec .tc:nth-child(2){transition-delay:.25s}#trisec .tc:nth-child(3){transition-delay:.5s}
@@ -215,34 +213,10 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 #trisec .tc b{display:block;font-size:17px;color:var(--g900)}#trisec .tc span{display:block;margin-top:2px;font-size:14px;color:var(--g600);word-break:keep-all}
 #trisec.in .tc{opacity:1;transform:none}
 /* B 첫 화면: 모여서 한 통 — 8곳이 뜨고(0~1s) → 가운데로 빨려 들고(3~3.8s) → 알림톡 한 통(4s~)이 뜬다. 7.5초 반복 */
-@keyframes mgIn{0%{opacity:0;transform:translate(calc(-50% + var(--x)*1.15),calc(-50% + var(--y)*1.15)) scale(.7)}9%,38%{opacity:1;transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(1)}50%,100%{opacity:0;transform:translate(-50%,-50%) scale(.3)}}
-@keyframes mgOut{0%,50%{opacity:0;transform:translate(-50%,-50%) scale(.5)}58%{opacity:1;transform:translate(-50%,-50%) scale(1.04)}62%,93%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
-@keyframes mgRow{0%,58%{opacity:0;transform:translateY(6px)}63%,93%{opacity:1;transform:none}100%{opacity:0}}
-@keyframes mgRow2{0%,62%{opacity:0;transform:translateY(6px)}67%,93%{opacity:1;transform:none}100%{opacity:0}}
-@keyframes mgRow3{0%,66%{opacity:0;transform:translateY(6px)}71%,93%{opacity:1;transform:none}100%{opacity:0}}
 /* C 첫 화면: 직군 고르기 */
-@keyframes ccIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){#anxsec *,#trisec *{transition:none!important;animation:none!important;opacity:1!important}}
-@keyframes dLn{0%,12%{stroke-dashoffset:1;opacity:.75}30%,36%{stroke-dashoffset:0;opacity:.75}44%,100%{stroke-dashoffset:0;opacity:0}}
-.ds{position:absolute;left:156px;top:168px;padding:8px 12px;border-radius:999px;background:#fff;border:1px solid var(--g200);font-size:14px;font-weight:600;color:var(--g700);white-space:nowrap;box-shadow:0 4px 12px rgba(15,23,42,.07);opacity:0;z-index:1;animation:dIn 8s cubic-bezier(.2,.8,.2,1) infinite;animation-delay:var(--d)}
-@keyframes dIn{0%{opacity:0;transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(.6)}8%,36%{opacity:1;transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(1)}44%,100%{opacity:0;transform:translate(calc(-50% + var(--x)*.6),calc(-50% + var(--y)*.6)) scale(.85)}}
-@keyframes dPt{0%,28%{opacity:0;transform:scale(.3);box-shadow:0 0 0 0 rgba(245,158,11,.5)}32%{opacity:1;transform:scale(1.2)}38%{opacity:1;transform:scale(1);box-shadow:0 0 0 18px rgba(245,158,11,0)}44%,100%{opacity:0;transform:scale(2)}}
-@keyframes dCt{0%,40%{opacity:0;transform:translate(-50%,-50%) scale(.6)}47%{opacity:1;transform:translate(-50%,-50%) scale(1.04)}51%,94%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
 .dap{flex:none;width:22px;height:22px;border-radius:7px;background:#fff;display:inline-grid;place-items:center;border:1px solid rgba(15,23,42,.06)}
-/* ① 5줄 요약 카톡 */
-@keyframes dRow{0%,50%{opacity:0;transform:translateX(-6px)}55%,94%{opacity:1;transform:none}100%{opacity:0}}
-/* ② 1시간 → 1분 */
-@keyframes dStk{0%,52%{transform:scaleX(0)}58%,94%{transform:scaleX(1)}100%{transform:scaleX(1)}}
-@keyframes dPop{0%,58%{opacity:0;transform:scale(.6)}64%{opacity:1;transform:scale(1.12)}68%,94%{opacity:1;transform:scale(1)}100%{opacity:0}}
-.dn{display:flex;align-items:center;gap:10px;margin-top:16px;padding:12px 14px;border-radius:18px;background:#fff;box-shadow:0 10px 28px rgba(15,23,42,.14);border:1px solid var(--g100);text-align:left;opacity:0;animation:dNt 8s cubic-bezier(.2,.8,.2,1) infinite}
-.dn .dap{width:34px;height:34px;border-radius:10px;background:var(--a50)}
-.dn div{flex:1;min-width:0}.dn b{font-size:14px}.dn p{margin:2px 0 0;font-size:13px;color:var(--g700)}.dn em{font-style:normal;font-size:11px;color:var(--g400);align-self:flex-start}
-@keyframes dNt{0%,68%{opacity:0;transform:translateY(12px)}74%,94%{opacity:1;transform:none}100%{opacity:0}}
 /* ③ 카톡 아이콘 → 채팅방 */
-@keyframes d3I{0%,40%{opacity:0;transform:scale(.4)}46%{opacity:1;transform:scale(1.1)}52%{opacity:1;transform:scale(1)}58%,100%{opacity:0;transform:scale(1.6)}}
-@keyframes d3W{0%,54%{opacity:0;transform:scale(.7)}62%{opacity:1;transform:scale(1.03)}66%,94%{opacity:1;transform:scale(1)}100%{opacity:0}}
-/* ④ 잠금 화면 알림 */
-@keyframes d4N{0%,52%{opacity:0;transform:translateY(-70px)}60%{opacity:1;transform:translateY(4px)}64%,94%{opacity:1;transform:none}100%{opacity:0}}
 .f6g{position:relative;height:330px;max-width:312px;margin:20px auto 0!important}
 .f6l{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .f6l .f6b{fill:none;stroke:var(--a500);stroke-width:1.6;stroke-linecap:round;opacity:.7;stroke-dasharray:1;stroke-dashoffset:0}
@@ -259,23 +233,11 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 .f6g.go .f6s{animation:fPop .35s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i)*.04s)}
 .f6g.go .f6b{animation:fDraw .45s ease both;animation-delay:calc(.35s + var(--i)*.03s)}
 .f6g.go .f6c{animation:fCard .45s cubic-bezier(.2,.8,.2,1) .8s both}
-/* F2 흐르는 점 */
 /* F3 흐르는 점선 + 카드 맥박 */
-@keyframes fMarch{from{stroke-dashoffset:.08}to{stroke-dashoffset:0}}
-@keyframes fIn{from{opacity:0}to{opacity:.85}}
-@keyframes fGlow{0%,100%{box-shadow:0 12px 30px rgba(15,23,42,.12),0 0 0 0 rgba(245,158,11,.0)}40%{box-shadow:0 12px 30px rgba(15,23,42,.12),0 0 0 8px rgba(245,158,11,.22)}}
-/* F4 한 줄씩 켜짐 */
-@keyframes fLit{0%{opacity:0}6%,14%{opacity:1}24%,100%{opacity:0}}
-@keyframes fChipLit{0%,24%,100%{border-color:var(--g200);color:var(--g700)}6%,14%{border-color:var(--a500);color:var(--a700)}}
-/* 노란 카톡창 */
 @media (prefers-reduced-motion:reduce){.f6g *{animation:none!important}}
 .k5{list-style:none;margin:10px 0 0;padding:10px 0 0;border-top:1px solid var(--g100);text-align:left}
 .k5 li{display:flex;gap:8px;align-items:flex-start;padding:4px 0;font-size:13.5px;line-height:1.45;color:var(--g800);word-break:keep-all}
 .k5 li b{flex:none;width:18px;height:18px;border-radius:50%;background:var(--g900);color:#fff;font-size:11px;display:grid;place-items:center;margin-top:1px}
-/* S1 */
-/* S2 */
-@keyframes fdS{from{transform:translateY(0)}to{transform:translateY(-50%)}}
-/* S3 */
 .embars{margin-top:24px!important;display:flex;flex-direction:column;gap:18px;text-align:left}
 .embars .emrow{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center}
 .embars .emlb{grid-column:1/-1;font-size:14px;font-weight:700;color:var(--g700)}
@@ -284,34 +246,19 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 .embars .embar.ema i{background:var(--a500)}
 .em6c.in .embars .embar i{width:var(--w)}
 .embars .emt{font-size:17px;font-weight:800;color:var(--g500);min-width:58px;text-align:right}.embars .emt.ema{color:var(--a600)}
-/* S4 */
-/* S5 */
 @media (prefers-reduced-motion:reduce){.em6 *{transition:none!important;animation:none!important}}
 .ex .ext{font-size:16px;font-weight:800;color:var(--g500);text-align:right}.ex .ext.ema{color:var(--a600)}
-/* X1 */
-/* X2 */
-/* X3 */
 .ex .expile{grid-column:1/-1;position:relative;height:146px}
 .ex .expile span{position:absolute;padding:6px 10px;border-radius:999px;background:#fff;border:1px solid var(--g200);font-size:12.5px;font-weight:600;color:var(--g700);white-space:nowrap;box-shadow:0 3px 8px rgba(15,23,42,.08);opacity:0;transform:translateY(-90px) rotate(0);transition:opacity .2s ease,transform .55s cubic-bezier(.3,1.4,.5,1);transition-delay:calc(var(--i)*.07s)}
 .ex.in .expile span{opacity:1;transform:translateY(0) rotate(var(--r))}
-/* X4 */
-/* X5 */
-@keyframes exMq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-/* X6 */
-/* 어두운 바탕 */
 @media (prefers-reduced-motion:reduce){.ex *{transition:none!important;animation:none!important}}.fpile2{margin-top:24px!important}.fpile2 .expile{height:146px}.em6c .embar.emsolid i{background:var(--g300)}
 .fo6 .fomo-end{margin-top:40px!important}
-/* U1 */
-/* U2 */
-/* U3 */
 .fo6 .fot{list-style:none;margin:28px 0 0!important;padding:0 0 0 4px;position:relative}
 .fo6 .fot:before{content:"";position:absolute;left:19px;top:14px;bottom:14px;width:2px;background:var(--g200)}
 .fo6 .fot li{position:relative;display:flex;align-items:center;gap:14px;padding:9px 0;opacity:0;transform:translateX(-8px);transition:opacity .35s ease,transform .35s ease;transition-delay:calc(var(--i)*.12s)}
 .fo6 .fot li b{flex:none;width:32px;height:32px;border-radius:50%;background:var(--a500);color:#fff;font-size:12px;display:grid;place-items:center;z-index:1}
 .fo6 .fot li span{font-size:16px;font-weight:700;color:var(--g800)}
 .fo6.in .fot li{opacity:1;transform:none}
-/* U4 */
-/* U5 */
 .fo6 .for{margin-top:28px!important;padding:22px 16px;border-radius:18px;background:#fff;border:1px solid var(--g200);text-align:center}
 .fo6 .for .rl{animation:foRl 16s cubic-bezier(.6,0,.3,1) infinite}
 .fo6 .for .rl p{height:36px;margin:0;font-size:22px;font-weight:800;line-height:36px;color:var(--a600);white-space:nowrap}
@@ -333,7 +280,7 @@ html.cc-wait .f6g *{animation-play-state:paused!important}
 <path fill-rule="evenodd" clip-rule="evenodd" d="M98.01 2.75L97.78 2.79L97.56 2.88L97.45 2.95L97.27 3.10L97.12 3.28L97.02 3.48L96.95 3.70L96.93 3.83L96.92 5.41L96.93 5.54L96.97 5.76L97.06 5.97L97.20 6.18L97.37 6.35L97.55 6.47L97.66 6.52L97.88 6.59L98.13 6.61L115.47 6.62L115.54 6.64L115.61 6.71L115.65 6.77L115.67 6.87L115.64 8.56L115.57 10.46L115.54 10.56L115.49 10.61L115.40 10.66L115.33 10.68L97.28 11.22L97.04 11.25L96.82 11.32L96.71 11.38L96.52 11.51L96.43 11.60L96.29 11.78L96.19 11.99L96.15 12.12L96.12 12.34L96.13 12.59L96.39 14.41L96.43 14.53L96.53 14.75L96.66 14.93L96.75 15.02L96.94 15.16L97.16 15.26L97.39 15.32L97.62 15.33L114.97 14.41L115.05 14.42L115.11 14.45L115.18 14.51L115.23 14.60L115.23 14.69L114.93 16.93L114.76 18.02L114.45 19.75L114.45 19.98L114.50 20.20L114.54 20.32L114.65 20.51L114.79 20.69L114.97 20.84L115.18 20.95L115.40 21.02L117.91 21.30L118.15 21.30L118.37 21.26L118.48 21.22L118.70 21.10L118.80 21.03L118.96 20.88L119.10 20.67L119.18 20.46L119.21 20.35L119.35 19.65L119.64 18.00L119.88 16.47L120.07 15.00L120.21 13.61L120.32 12.27L120.40 11.02L120.48 8.73L120.49 6.60L120.49 3.94L120.47 3.70L120.40 3.48L120.29 3.27L120.22 3.18L120.06 3.02L119.87 2.89L119.75 2.83L119.52 2.76L119.29 2.74ZM126.92 26.14L127.01 26.23L127.19 26.37L127.31 26.44L127.52 26.52L127.65 26.55L127.87 26.57L128.11 26.54L128.24 26.50L128.45 26.40L129.28 25.91L130.10 25.34L130.87 24.71L131.59 24.03L132.21 23.35L132.84 22.57L133.42 21.74L133.95 20.87L134.43 19.96L134.87 19.02L135.05 18.57L135.13 18.47L135.24 18.43L135.31 18.43L135.38 18.46L135.44 18.50L135.49 18.56L135.66 18.97L136.10 19.85L136.55 20.65L137.08 21.46L137.70 22.30L138.32 23.03L138.94 23.67L139.65 24.30L140.41 24.90L141.22 25.43L142.01 25.88L142.22 25.97L142.35 26.01L142.57 26.03L142.70 26.03L142.92 25.99L143.04 25.95L143.24 25.85L143.35 25.77L143.51 25.62L143.59 25.52L144.80 23.77L144.93 23.55L145.00 23.33L145.01 23.21L145.02 23.07L145.00 22.84L144.92 22.60L144.81 22.40L144.73 22.29L144.65 22.21L144.47 22.07L144.27 21.95L143.10 21.20L142.03 20.33L141.13 19.43L140.31 18.42L139.56 17.27L138.96 16.14L138.48 14.98L138.12 13.83L137.84 12.58L137.69 11.43L137.64 10.25L137.64 9.41L137.66 9.34L137.71 9.28L137.77 9.24L137.84 9.21L143.09 9.21L143.21 9.20L143.43 9.16L143.55 9.12L143.75 9.01L143.93 8.86L144.08 8.68L144.19 8.47L144.26 8.24L144.29 8.01L144.29 6.58L144.26 6.34L144.23 6.22L144.15 6.01L144.08 5.90L143.94 5.73L143.85 5.65L143.75 5.57L143.55 5.47L143.43 5.42L143.21 5.38L137.88 5.37L137.81 5.36L137.75 5.33L137.66 5.24L137.63 5.12L137.63 2.01L137.61 1.78L137.54 1.54L137.44 1.34L137.37 1.25L137.19 1.07L137.01 0.95L136.89 0.89L136.66 0.83L136.44 0.80L133.83 0.81L133.70 0.83L133.47 0.90L133.27 1.01L133.08 1.16L132.94 1.33L132.88 1.44L132.79 1.65L132.74 1.88L132.74 5.12L132.71 5.24L132.66 5.30L132.61 5.34L132.49 5.37L127.09 5.38L126.87 5.42L126.76 5.46L126.64 5.52L126.46 5.64L126.28 5.82L126.16 6.00L126.10 6.12L126.04 6.34L126.01 6.57L126.01 8.01L126.04 8.24L126.11 8.47L126.16 8.58L126.28 8.77L126.45 8.93L126.65 9.07L126.86 9.16L126.97 9.18L127.22 9.21L132.51 9.21L132.61 9.24L132.68 9.30L132.72 9.36L132.74 9.46L132.74 10.24L132.68 11.50L132.53 12.75L132.27 13.97L131.89 15.26L131.42 16.47L130.85 17.60L130.11 18.79L129.30 19.84L128.42 20.78L127.32 21.72L126.21 22.47L125.88 22.68L125.72 22.84L125.64 22.93L125.58 23.04L125.49 23.25L125.44 23.49L125.44 23.72L125.49 23.96L125.58 24.18ZM147.25 31.84L147.27 31.97L147.34 32.19L147.45 32.40L147.60 32.58L147.78 32.73L147.99 32.84L148.22 32.90L148.45 32.93L150.90 32.93L151.03 32.92L151.25 32.88L151.37 32.83L151.57 32.73L151.67 32.65L151.83 32.49L151.91 32.39L152.01 32.19L152.06 32.07L152.10 31.85L152.11 1.23L152.08 1.01L152.02 0.78L151.91 0.58L151.83 0.47L151.66 0.31L151.47 0.18L151.26 0.09L151.03 0.04L148.45 0.04L148.32 0.04L148.10 0.09L147.98 0.13L147.78 0.24L147.68 0.31L147.52 0.47L147.45 0.58L147.34 0.77L147.30 0.89L147.25 1.11ZM94.69 25.29L94.46 25.34L94.24 25.43L94.13 25.49L93.95 25.65L93.80 25.83L93.69 26.04L93.62 26.26L93.60 26.49L93.60 28.00L93.62 28.23L93.69 28.45L93.74 28.57L93.87 28.76L94.04 28.93L94.14 29.00L94.33 29.11L94.46 29.15L94.67 29.19L122.11 29.20L122.34 29.18L122.56 29.11L122.68 29.05L122.87 28.92L123.04 28.76L123.16 28.57L123.26 28.35L123.30 28.12L123.31 26.49L123.29 26.26L123.26 26.13L123.17 25.93L123.10 25.82L123.03 25.72L122.87 25.57L122.67 25.43L122.46 25.34L122.35 25.31L122.11 25.29L109.16 25.29L109.09 25.28L109.02 25.25L108.94 25.16L108.91 25.04L108.91 18.67L108.89 18.44L108.86 18.31L108.77 18.10L108.64 17.91L108.55 17.82L108.38 17.67L108.27 17.61L108.06 17.52L107.83 17.48L105.25 17.47L105.02 17.49L104.79 17.56L104.58 17.67L104.48 17.74L104.33 17.90L104.19 18.11L104.14 18.21L104.07 18.43L104.05 18.67L104.05 25.04L104.04 25.11L104.01 25.18L103.92 25.26L103.80 25.29Z" fill="#F59E0B"/>
 </svg><a class="auth" href="/signup/">시작하기</a></div>
 
-<!-- 첫 화면 -->
+<!-- 첫 화면 (2026-10-21 v6 — 여덟 곳이 카톡 1통으로 모이는 그림) -->
 <section data-sec="첫 화면" class="gap20 s-white" id="sec1" style="padding-top:44px;padding-bottom:64px">
   <div style="text-align:center">
     <h1 class="h1c"><span class="l1">AI가 바꿀 내 직업,</span><br><span class="l2"><span class="n1">어떻게</span> 달라질까요?</span></h1>
@@ -347,6 +294,7 @@ html.cc-wait .f6g *{animation-play-state:paused!important}
   </div>
   
 </section>
+<!-- 요즘 이런 생각 (2026-10-21 v6 신설 · 수치 출처는 화면에서 뺐다 — 한국은행 2023 · 세계경제포럼 2025) -->
 <section data-sec="요즘 이런 생각" class="gap20 s-n50 c" id="anxsec">
   <h2>요즘 이런 생각,<br>한 번쯤 해 보셨죠?</h2>
   <div class="anx">
@@ -360,6 +308,7 @@ html.cc-wait .f6g *{animation-play-state:paused!important}
   </div>
   <p class="big anxt"><span class="ul">모른 채</span> 미래를 맞이하지 마세요.<br>매일 조금씩 대비하세요.</p>
 </section>
+<!-- 매일 받는 세 가지 (2026-10-21 v6 신설) -->
 <section data-sec="매일 받는 세 가지" class="gap20 s-white c" id="trisec">
   <h2>AI 시대에 살아남을 수 있는<br>글들을 드려요</h2>
   <div class="tri">
@@ -368,6 +317,7 @@ html.cc-wait .f6g *{animation-play-state:paused!important}
     <div class="tc"><span class="te">🧭</span><div><b>앞으로 일하는 법</b><span>AI 시대에 살아남는 일하는 법·커리어</span></div></div>
   </div>
 </section>
+<!-- 알림톡 미리보기 (2026-10-18 되살림 — 옛 첫 화면 d837e22^ 의 폰·직군 칩. 첫 칩 「공통」이 기본 선택) -->
 <section data-sec="알림톡 미리보기" class="gap20 s-white crop pv" id="pvsec">
   <h2>실제로 이렇게 와요<br><span class="hl">내 직군을 눌러 보세요</span></h2>
 <div class="pvbox" data-pv data-ix="pjob pcard pmore">
@@ -383,6 +333,7 @@ html.cc-wait .f6g *{animation-play-state:paused!important}
   <p class="chp"><span class="cet">내 직군을 선택해 보세요</span></p>
 </div>
 </section>
+<!-- 전문가 -->
 <section data-sec="전문가 5줄 요약" class="gap20 s-sky pv" id="exsec">
   <h2>아무거나 보내지 않아요<br>현직자가 골라 5줄로 요약해요</h2>
   <p class="exsub">직군마다 최고 수준의 현직자 3명이<br>그날 꼭 알아야 할 것만 골라요</p>
@@ -409,10 +360,12 @@ html.cc-wait .f6g *{animation-play-state:paused!important}
     </div>
   </div></div>
 </section>
+<!-- 1시간 → 5줄 요약 · 정보 피로 (2026-10-21 v6 신설) -->
 <section data-sec="1시간 → 5줄 요약" class="gap20 c em6 em6c ex" id="emsec" style="background:linear-gradient(180deg,#FFF3D1,#FFFBEF)"><h2>정보의 홍수 속,<br>꼭 필요한 것만 뽑아<br><span class="ul">정보 피로</span>를 줄여드려요.</h2>
   <div class="fpile2"><div class="expile"><span style="--i:0;left:2%;top:4px;--r:-6deg">🤖 AI 뉴스레터</span><span style="--i:1;left:34%;top:0px;--r:4deg">💼 링크드인</span><span style="--i:2;left:64%;top:8px;--r:-3deg">📰 해외 기사</span><span style="--i:3;left:6%;top:32px;--r:7deg">▶️ 유튜브</span><span style="--i:4;left:40%;top:30px;--r:-5deg">🏢 업계 뉴스</span><span style="--i:5;left:70%;top:36px;--r:3deg">🗣️ 커뮤니티</span><span style="--i:6;left:12%;top:60px;--r:-8deg">📑 리포트</span><span style="--i:7;left:46%;top:58px;--r:5deg">🧵 X·스레드</span><span style="--i:8;left:0%;top:86px;--r:4deg">✍️ 블로그</span><span style="--i:9;left:30%;top:84px;--r:-4deg">🎧 팟캐스트</span><span style="--i:10;left:60%;top:88px;--r:6deg">💬 오픈채팅방</span><span style="--i:11;left:20%;top:112px;--r:-2deg">📸 인스타그램</span></div></div>
   <div class="embars"><div class="emrow"><span class="emlb">혼자 찾을 때</span><div class="embar emsolid"><i style="--w:100%;--d:1.2s"></i></div><b class="emt">약 1시간 분량</b></div>
   <div class="emrow"><span class="emlb">커리어코치</span><div class="embar ema"><i style="--w:7%;--d:1.9s"></i></div><b class="emt ema">1분</b></div></div></section>
+<!-- 목요일 맞춤 공고 (목요일 채용 브리핑 + 조건 맞춤 공고 병합) -->
 <section data-sec="목요일 맞춤 공고" class="gap20 s-a100b crop" id="thusec" style="padding-bottom:72px">
   <div><p style="text-align:center;font-size:15px;font-weight:700;color:var(--a700);margin-bottom:8px">덤으로, 이직을 생각할 때도</p><h2 class="h2d" style="text-align:center">내 조건에 맞는 <span class="ul">새 공고</span>를<br>목요일마다 모아 드려요</h2>
   <p style="margin-top:16px;text-align:center">현재 채용 시장 트렌드도 알려드려요</p></div>
@@ -445,6 +398,7 @@ html.cc-wait .f6g *{animation-play-state:paused!important}
   </div></div>
   <p class="jmsg" style="color:var(--g800);margin-top:56px;font-weight:500">17개 채용 사이트 공고를 전부 모아<br><span class="ul">시간을 대폭</span> 아껴드려요<em class="em2 je2"> ⏱️</em><em class="em2 je3"> 🙌</em><em class="em2 je4"> ✨</em><em class="em2 je5"> ⏰</em><em class="em2 je6"> ⏳</em><em class="em2 je7"> ⏰</em><em class="em2 je8"> 🧹</em><em class="em2 je9"> 💨</em><em class="em2 je10"> 🎁</em></p>
 </section>
+<!-- 요일별 구성 -->
 <section data-sec="요일별 발송" class="gap20 s-white" id="wksec">
   <div><h2>요일별로 나눠 보내드려요</h2>
   <div class="wk" id="wk" data-v="3">
@@ -466,6 +420,7 @@ html.cc-wait .f6g *{animation-play-state:paused!important}
   </div>
   </div>
 </section>
+<!-- 환경 -->
 <section data-sec="카톡 열람률 6배" class="gap20 s-white" id="envsec" style="background:#FFFDF6">
   <div><h2>내 업계 지식과 인사이트가<br>무조건 늘어납니다.</h2>
   <p class="subn">꾸준함과 누적의 힘이에요</p></div>
@@ -481,12 +436,14 @@ html.cc-wait .f6g *{animation-play-state:paused!important}
   <p class="big soft c" style="margin-top:50px;font-weight:500"><em class="em v5">💡 </em><span class="ul">환경이 바뀌면</span><em class="em v3"> 🌱</em><em class="em v4"> 🔄</em><br>습관의 힘으로<em class="em v3"> 💪</em><br>몸값이 추가로 올라가요<em class="em v2 v3 upe"></em><em class="em v4"> 🚀</em></p>
 
 </section>
+<!-- 250개 -->
 <section data-sec="1년 250개" class="gap20 s-white c" id="sec250" style="background:#FFFDF6">
   <div class="sal" data-v="0">
     <p class="more">1년에 <b>250개</b>의 인사이트를<br>더 쌓은 만큼 역량 상승과<br><span class="ul">연봉 추가 인상</span> 확률도 올라가요</p>
   </div>
   <div class="yr"><div class="yg" id="yg"></div><div class="yl"><span>1월</span><span>6월</span><span>12월</span></div><div class="yc"><span>평일 발송 메시지 총</span><b><span id="ycn">0</span>개</b></div></div>
 </section>
+<!-- 연봉 3% -->
 <section data-sec="연봉 3% 효과" class="gap20 s-n50">
   <h2>연봉 협상·이직 시<br><span class="hl">3%</span> 추가 인상되면<br>매년마다 구독료의 <span class="rxw" id="rx">25배+</span></h2>
   <p class="rxd">1년 구독료를 <span class="rxdn">약 <span class="rxw" id="rxd">12</span>일</span> 만에 돌려받는 셈이에요</p>
@@ -499,7 +456,9 @@ html.cc-wait .f6g *{animation-play-state:paused!important}
     <div class="k33 live"><div class="col"><b id="b0">4.7만</b><i id="h0"></i><span>1년<br>구독료</span></div><div class="col up"><b id="b1">120만</b><i id="h1"></i><span>연봉 3%<br>추가 인상 시</span></div><div class="col up"><b id="b2">160만</b><i id="h2"></i><span>연봉 4%<br>추가 인상 시</span></div></div>
   </div>
 </section>
+<!-- FOMO — 번호 타임라인 (2026-10-21 v6) -->
 <section data-sec="저 사람은 어떻게" class="gap20 s-n50 fo6 fo6c" id="fo6sec"><div><h2>"저 사람은 어떻게<br>다 알고 있지?"</h2><p style="margin-top:16px;font-size:15px">AI 시대엔 이 차이가 더 빨리 벌어져요.</p></div><ol class="fot"><li style="--i:0"><b>01</b><span>🗣️ 팀 회의에서</span></li><li style="--i:1"><b>02</b><span>💼 이직 면접에서</span></li><li style="--i:2"><b>03</b><span>💰 연봉 협상에서</span></li><li style="--i:3"><b>04</b><span>🤖 사내 AI 도입 논의에서</span></li><li style="--i:4"><b>05</b><span>☕ 동료와 점심 대화에서</span></li></ol><div class="fomo-end">아는 사람과 모르는 사람의 차이는<br><span>오늘 아침에도 벌어지고 있습니다.</span></div></section>
+<!-- 가격 -->
 <section data-sec="요금" class="gap20 s-a50" id="pricing">
   <h2>하루 <span class="ul">129원</span>,<br>한 달 커피 한 잔 가격으로<br>AI 시대 대비.</h2>
 <div class="plan">
@@ -517,6 +476,7 @@ html.cc-wait .f6g *{animation-play-state:paused!important}
   <div class="cof out">☕ 한 달 <b>3,933원</b></div>
   <p class="rfd" id="rfd">✓ 첫 브리핑이 마음에 안 들면 <span class="ru">전액 환불</span></p>
 </section>
+<!-- 부담 없이 시작 (2026-10-17 신설 · 문구 근거: terms.html 제6조) -->
 <section data-sec="부담 없이 시작" class="gap20 s-a100b" id="safesec">
   <h2>부담 없이<br>시작해 보세요</h2>
   <ul class="sf">
@@ -525,6 +485,7 @@ html.cc-wait .f6g *{animation-play-state:paused!important}
     <li><i>✓</i><div><b>앱 설치 없이 이용 가능</b><span>카카오 알림톡으로 바로 받아요</span></div></li>
   </ul>
 </section>
+<!-- FAQ -->
 <section data-sec="자주 묻는 질문" class="faq s-white" data-ix="faq">
   <h2 style="margin-bottom:12px">자주 묻는 질문</h2>
   <details><summary><span class="fe" aria-hidden="true">🤖</span>AI 뉴스는 어떤 내용인가요?</summary><ul class="fq"><li>AI 기술 자체보다, 내 일과 커리어에 영향을 주는 변화를 골라요.</li><li>새 도구가 내 직군 업무를 어떻게 바꾸는지, 지금 익혀 두면 좋은 것이 무엇인지 5줄로 요약해요.</li></ul></details>
@@ -534,11 +495,13 @@ html.cc-wait .f6g *{animation-play-state:paused!important}
   <details><summary><span class="fe" aria-hidden="true">📅</span>주말에도 알림톡이 오나요?</summary><ul class="fq"><li>주말과 공휴일을 제외한 평일에만 보내 드려요.</li></ul></details>
   <details><summary><span class="fe" aria-hidden="true">📖</span>전문 보기는 당일에만 가능한가요?</summary><ul class="fq"><li>네. 커리어코치가 직접 만든 아티클의 전문 보기는 받은 날 당일에만 열 수 있어요.</li><li>당일에 아티클을 더 자주 열고, 자연스럽게 더 많이 공부하게 되는 구조예요.</li><li>하지만 한번 열어본 아티클 전문은, 시간이 지나도 계속 다시 열람할 수 있어요.</li></ul></details>
 </section>
+<!-- 후기 -->
 <section data-sec="구독자 후기" class="gap20 s-n50 rvs">
   <div class="score rvc"><span class="sl">평균 별점</span><b>4.8</b><span class="stw" id="stw"><span class="s0"><i>★</i><i>★</i><i>★</i><i>★</i><i>★</i></span><span class="s1">★★★★★</span></span></div>
   <h2>먼저 받아 본 분들은<br>이렇게 말해요</h2>
   <div class="rvw arw" id="rvw" data-step="1" data-ix="rv"><div class="rvp" id="reviews"></div><button class="cpv" type="button" aria-label="이전 후기">‹</button><button class="cnx" type="button" aria-label="다음 후기">›</button></div>
 </section>
+<!-- 마지막 -->
 <section data-sec="마지막 · 아침 8시" class="c gap20 s-key" id="closing" data-v="45">
   <div class="clk"><b>08:00</b><span>내일 아침</span></div>
   <div class="lock"><div class="lt">내일 오전 8:00</div><div class="nt"><span class="ap"><svg width="20" height="20" viewBox="0 0 21 21"><use href="#ccmark"/></svg></span><div><b>커리어코치</b><p>오늘의 인사이트 5줄이 도착했어요</p></div><em>지금</em></div></div>

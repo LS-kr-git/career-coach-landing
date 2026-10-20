@@ -133,7 +133,6 @@ new IntersectionObserver(es=>es.forEach(e=>{const w=$("stw");if(e.isIntersecting
  const replay=()=>{w.classList.remove("in");void w.offsetWidth;setTimeout(()=>w.classList.add("in"),60)};
  let seen=false;new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3&&!seen){seen=true;replay()}else if(e.intersectionRatio===0){seen=false;w.classList.remove("in")}}),{root:null,threshold:[0,.3]}).observe(w);})();
 
-(()=>{const els=[...document.querySelectorAll("#fv .scene")];const chk=()=>{const q=VIEW();els.forEach(el=>{const r=el.getBoundingClientRect();if(r.top<q.top+q.height*.68&&r.bottom>q.top)el.classList.add("in");else if(r.bottom<q.top||r.top>q.bottom)el.classList.remove("in")})};addEventListener("scroll",chk,{passive:true});chk();})();
 
 
 (()=>{const t=$("thusec"),pm=t.querySelector(".pm");new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3){if(!t.classList.contains("play"))t.classList.add("play")}else if(e.intersectionRatio===0)t.classList.remove("play")}),{root:null,threshold:[0,.3]}).observe(pm)})();
