@@ -219,22 +219,13 @@ export async function requireOnboarded() {
 /** 구독·결제수단. 서버가 **항상 한 행**을 준다 — 없는 값은 null 이다. */
 export async function getSubscription() { return rpc('mypage_subscription', true); }
 
-/** 마케팅 정보 수신 — { granted, at }. 카카오 가입 때 선택 약관 동의가 첫 줄이고, 여기서 바꾸면 줄이 하나 더 쌓인다(career-coach 0201). */
-export async function getMarketing() {
-  const { data, error } = await (await supa()).rpc('mypage_marketing');
-  if (error) throw error;
-  return data;
-}
-export async function setMarketing(on) {
-  const { data, error } = await (await supa()).rpc('mypage_set_marketing', { p_granted: !!on });
-  if (error) throw error;
-  return data;
-}
+/** 마케팅 정보 수신 — { granted, at }. 카카오 가입 때 선택 약관 동의가 첫 줄이고, 여기서 바꾸면 줄이 하나 더 쌓인다(career-coach 0202). */
+// rpc() 를 거친다 — 실패하면 그 화면을 「지난 값」으로 적지 않게 한다. 답이 행이 아니라 jsonb 객체라 one=false.
+export async function getMarketing() { return rpc('mypage_marketing', false); }
+export async function setMarketing(on) { return rpc('mypage_set_marketing', false, { p_granted: !!on }); }
 /** 「2026.10.20 동의함」 — 기록이 없으면 빈칸(가입 때 동의 안 한 사람) */
-export function marketingWhen(r) { return r && r.at ? `${kst(r.at)} ${r.granted ? '동의함' : '거부함'}` : ''; }
-function kst(at) {
-  return new Date(at).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\s/g, '').replace(/\.$/, '');
-}
+export function marketingWhen(r) { return r.at ? `${kst(r.at)} ${r.granted ? '동의함' : '거부함'}` : ''; }
+function kst(at) { const { y, m, d } = kstParts(at); return `${y}.${m}.${d}`; }
 /** 동의·철회 처리 결과 안내(정보통신망법 50조 7항 — 전송자·일자·처리 결과) */
 export function marketingResultLine(r) {
   return `${kst(r.at)} 주식회사 오늘의논문 마케팅 정보 수신을 ${r.granted ? '동의' : '거부'}했어요`;
