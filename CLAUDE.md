@@ -726,6 +726,7 @@ node tools/figma-audit/flow-audit.mjs --from 320 --to 1400 --step 4
 - 버튼·입력·접는 질문·옆으로 넘기는 줄(chips·swipe·hs·rvp)은 `data-ix="열쇠 …"` 칸 안에 둔다. 기록 코드(index.html 의 섹션 기록 모듈)는 열쇠를 이 속성에서만 읽는다. 안 잴 부품은 `data-ix-none="이유"` 칸에 넣는다.
 - 칸 밖에 있으면 page-audit 「인터렉션 기록 빈자리」가 푸시를 막는다(판정: `tools/landing-version/fp.mjs` 의 `기록대조`).
 - 선언만으로는 모자란다 — `tools/ix-audit/run.mjs` 가 진짜 화면에서 칸마다 손 조작을 하고 그 열쇠가 실제로 기록되는지 본다(훅 1.7겹 · CI 「랜딩 버전 보관」). 새 열쇠 모양이면 그 파일의 「손」에 건드리는 법을 더한다.
+- PC 에서 푸시 전에 돌게 하려면 그 PC 에 **전역으로 한 번** 깐다(작업 트리마다 node_modules 를 두지 않아도 `tools/ops-audit/harness.mjs` 의 `playwright불러오기` 가 전역에서 찾는다 — 브라우저 검수·flow-audit·doctor 가 다 그것을 쓴다): `npm install -g playwright@1.62.1` 뒤 `npx playwright@1.62.1 install chromium`. 버전은 워크플로의 `PLAYWRIGHT_VERSION`. 2026-10-21 `DESKTOP-F7S1OEL` 에 깔았다(사용자 승인) — 나머지 PC 는 아직이고, 없으면 훅이 건너뛰고 CI 가 다시 본다.
 - 새 열쇠는 career-coach `supabase/functions/ops-1udm1xmi/pages/funnel.ts` 의 `조작종류`에도 넣는다 — 더 안 보내는 열쇠는 거기서 `옛: true`. 양쪽이 어긋나면 career-coach 테스트(`test_랜딩_인터렉션_열쇠를_어드민이_다_안다`)가 막는다. 랜딩을 먼저 밀고 어드민을 민다.
 
 ## 약관·개인정보·브리핑 화면 — 피그마↔웹 동기화 (2026-08-02 신설)

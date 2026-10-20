@@ -106,7 +106,8 @@ dr_probe() {
       [ -n "$p" ] && [ -f "$p" ] && { DR_CHROME="$p"; break; }
     done
     if [ -z "$DR_CHROME" ] && [ -n "$DR_NODE" ] && \
-       "$DR_NODE" -e "import('playwright')" >/dev/null 2>&1; then
+       ( cd "$DR_ROOT" && "$DR_NODE" --input-type=module -e "const m = await import('./tools/ops-audit/harness.mjs'); await m.playwright\uBD88\uB7EC\uC624\uAE30();" ) >/dev/null 2>&1; then
+      # ↑ harness 의 playwright불러오기() — 저장소 안이 없으면 전역(npm -g)에서도 찾는다(2026-10-21). 한글 이름은 인자 깨짐을 피해 \u 로 적었다.
       DR_CHROME="(playwright 기본 브라우저)"
     fi
   fi

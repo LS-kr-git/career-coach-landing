@@ -3,7 +3,8 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { execSync } from 'node:child_process';
 
 /** 저장소 루트. 이 파일이 tools/ops-audit/ 에 있으므로 두 칸 위다. */
 export const ROOT = fileURLToPath(new URL('../../', import.meta.url));
@@ -57,11 +58,29 @@ export function 건너뜀(이유) {
   process.exit(엄격 ? 1 : 0);
 }
 
+/** playwright 를 저장소 안에서 먼저, 없으면 전역(npm -g)에서 불러온다. 둘 다 안 되면 두 이유를 다 붙여 던진다.
+ *  PC 는 클론·작업 트리(git worktree)가 여럿이라 저장소 안 node_modules 가 안 보이는 자리에서 돌 때가 많다 —
+ *  그래서 PC 에는 전역에 한 번 깔고 여기서도 찾는다(2026-10-21 사용자 승인으로 PC 에 설치).
+ *    npm install -g playwright@<워크플로의 PLAYWRIGHT_VERSION> && npx playwright@<같은 판> install chromium
+ *  브라우저를 띄우는 검수(flow-audit · doctor 의 크로미움 줄 포함)는 전부 이 함수 하나로 찾는다. */
+export async function playwright불러오기() {
+  try { return await import('playwright'); }
+  catch (안) {
+    let 전역 = '';
+    try {
+      전역 = path.join(execSync('npm root -g', { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(), 'playwright');
+      return await import(pathToFileURL(path.join(전역, 'index.mjs')).href);
+    } catch (밖) {
+      // 이유를 그대로 붙인다. "미설치" 로 뭉개면 깨진 설치·ESM 로드 실패·npm 없음이 같은 얼굴이 된다.
+      throw new Error(`저장소 안: ${안.message.split('\n')[0]} · 전역${전역 ? `(${전역})` : ''}: ${밖.message.split('\n')[0]}`);
+    }
+  }
+}
+
 export async function 브라우저열기() {
   let chromium;
-  // 이유를 그대로 붙인다. "미설치" 로 뭉개면 깨진 설치·ESM 로드 실패가 같은 얼굴이 된다.
-  try { ({ chromium } = await import('playwright')); }
-  catch (e) { 건너뜀(`playwright 를 못 불렀다 (${e.message.split('\n')[0]})`); }
+  try { ({ chromium } = await playwright불러오기()); }
+  catch (e) { 건너뜀(`playwright 를 못 불렀다 (${e.message})`); }
   const exe = [process.env.CHROMIUM_PATH, '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
     '/opt/pw-browsers/chromium/chrome-linux/chrome'].filter(Boolean).find((p) => fs.existsSync(p));
   try { return await chromium.launch(exe ? { executablePath: exe } : {}); }

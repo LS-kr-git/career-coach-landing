@@ -22,6 +22,7 @@
 import { existsSync } from 'node:fs';
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { playwright불러오기 } from '../ops-audit/harness.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..', '..');
@@ -61,7 +62,7 @@ const bail = (reason) => {
 };
 
 let chromium;
-try { ({ chromium } = await import('playwright')); } catch { bail('playwright 미설치'); }
+try { ({ chromium } = await playwright불러오기()); } catch (e) { bail(`playwright 미설치 (${e.message})`); }
 
 const exe = [process.env.CHROMIUM_PATH, '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
   '/opt/pw-browsers/chromium/chrome-linux/chrome'].filter(Boolean).find((p) => existsSync(p));
