@@ -7,7 +7,7 @@
 <meta name="color-scheme" content="only light">
 <meta name="format-detection" content="telephone=no">
 <!-- 랜딩 버전 지문 — 섹션 구성·제목·시안 값으로 만든다. 손으로 고치지 말고 `node tools/landing-version/fp.mjs --write` (page-audit 이 대조한다) -->
-<meta name="cc-lv" content="1dd8085ab1">
+<meta name="cc-lv" content="b53539bc21">
 <title>커리어코치</title>
 <meta name="description" content="일하는 사람들의 커리어 성장을 위해">
 <link rel="canonical" href="https://careercoach.my/">
@@ -101,10 +101,6 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 .sticky{transition:background .3s,transform .35s ease,opacity .35s ease,visibility 0s}
 .sticky.hide0{transform:translateY(120%);opacity:0;visibility:hidden;pointer-events:none;transition:background .3s,transform .35s ease,opacity .35s ease,visibility 0s .35s}
 @media (prefers-reduced-motion:reduce){.sticky,.sticky.hide0{transition:none}}
-.rfd{margin-top:14px;text-align:center;font-size:13px;font-weight:600;color:var(--g600);word-break:keep-all}
-/* 「전액 환불」 밑줄이 보일 때 한 번 그어진다(R3) */
-.rfd .ru{position:relative;color:var(--g800);font-weight:700}.rfd .ru::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2px;border-radius:2px;background:var(--a500);transform:scaleX(0);transform-origin:left;transition:transform .5s ease-out .3s}.rfd.pl .ru::after{transform:scaleX(1)}
-@media (prefers-reduced-motion:reduce){.rfd .ru::after{transform:scaleX(1);transition:none}}
 #sec1 .hh{text-align:center;word-break:keep-all}
 #sec1 .hh .hk1{display:inline-block;margin-bottom:6px;font-size:17px;line-height:1.75;font-weight:500;color:var(--g800)}
 #sec1 .hh .hc{color:var(--a500)}
@@ -145,8 +141,6 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 
 
 
-.cof.out{margin-top:12px;text-align:center;font-size:14px;font-weight:600;color:var(--g600)}
-.cof b{color:var(--a700)}
 @media (prefers-reduced-motion:reduce){.chipflow .lane{animation:none}}
 </style>
 <style id="tvx-css">
@@ -171,6 +165,8 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 :is(#sec1,#pvsec) .swipe .ab ol{padding-bottom:64px} /* 끝까지 내렸을 때 마지막 줄이 「처음으로」 버튼에 안 가리게 */
 :is(#sec1,#pvsec) .ab .mfd{position:sticky;left:0;right:0;bottom:-1px;height:56px;margin-top:-56px;background:linear-gradient(rgba(255,255,255,0),#fff 55%);pointer-events:none;transition:opacity .25s}
 :is(#sec1,#pvsec) .ab .mbtn{position:sticky;bottom:8px;display:block;margin:-34px auto 0;width:fit-content;padding:6px 12px;border:0;border-radius:999px;background:#1E293B;color:#fff;font:inherit;font-size:12px;font-weight:700;box-shadow:0 4px 10px rgba(15,23,42,.18);z-index:3;cursor:pointer}
+/* FAQ 질문 앞 이모지(E1) — 둘째 줄이 글자 첫머리에 맞도록 이모지는 왼쪽에 따로 세운다 */
+.faq summary{padding-left:28px}.faq summary .fe{position:absolute;left:0;top:0;font-size:16px;line-height:1.5}
 .art .tday{display:inline-block;margin-bottom:8px;padding:3px 9px;border-radius:999px;background:var(--a100);color:var(--a700);font-size:11px;font-weight:700;line-height:1.4}
 </style>
 <style id="v4">
@@ -436,7 +432,8 @@ html.cc-wait .f6g *{animation-play-state:paused!important}
   <h2>연봉 협상·이직 시<br><span class="hl">3%</span> 추가 인상되면<br>매년마다 구독료의 <span class="rxw" id="rx">25배+</span></h2>
   <p class="rxd">1년 구독료를 <span class="rxdn">약 <span class="rxw" id="rxd">12</span>일</span> 만에 돌려받는 셈이에요</p>
   <p class="rxn">*아래 연봉 기준</p>
-  <div class="sal" id="sal" data-v="6" data-ix="sal">
+  <!-- 1년 구독료(12개월권 금액)는 data-sub 가 정본 — page-audit 요금 대조가 서버 plan 과 맞댄다 -->
+  <div class="sal" id="sal" data-v="6" data-ix="sal" data-sub="47200">
     <label class="u1"><span>내 연봉</span><input type="number" inputmode="numeric" class="sv" value="4000" min="1000" max="30000" step="100"><em>만원</em></label>
     <div class="u2"><div class="rvv"><span>내 연봉</span><b class="sd">5,000만원</b></div><div class="rngw"><span class="tipb">← 밀어서 내 연봉 넣어보기 →</span><span class="fing">👆</span><input type="range" class="sv" min="2000" max="10000" step="100" value="5000"></div><div class="rl"><span>2천만원</span><span>1억원</span></div></div>
     <div class="u3"><span class="lb">내 연봉은</span><div class="pc"><button data-s="3000">3천만</button><button data-s="4000" class="on">4천만</button><button data-s="5000">5천만</button><button data-s="7000">7천만</button><button data-s="10000">1억</button></div><label class="dx">직접 입력 <input type="number" inputmode="numeric" class="sv" value="4000"> 만원</label></div>
@@ -446,23 +443,15 @@ html.cc-wait .f6g *{animation-play-state:paused!important}
 </section>
 <!-- FOMO — 번호 타임라인 (2026-10-21 v6) -->
 <section data-sec="저 사람은 어떻게" class="gap20 s-n50 fo6 fo6c" id="fo6sec"><div><h2>"저 사람은 어떻게<br>다 알고 있지?"</h2><p style="margin-top:16px;font-size:15px">AI 시대엔 이 차이가 더 빨리 벌어져요.</p></div><ol class="fot"><li style="--i:0"><b>01</b><span>🗣️ 팀 회의에서</span></li><li style="--i:1"><b>02</b><span>💼 이직 면접에서</span></li><li style="--i:2"><b>03</b><span>💰 연봉 협상에서</span></li><li style="--i:3"><b>04</b><span>🤖 사내 AI 도입 논의에서</span></li><li style="--i:4"><b>05</b><span>☕ 동료와 점심 대화에서</span></li></ol><div class="fomo-end">아는 사람과 모르는 사람의 차이는<br><span>오늘 아침에도 벌어지고 있습니다.</span></div></section>
-<!-- 가격 -->
-<section data-sec="요금" class="gap20 s-a50" id="pricing">
-  <h2>하루 <span class="ul">129원</span>,<br>한 달 커피 한 잔 가격으로<br>AI 시대 대비.</h2>
-<div class="plan">
-    <div class="pn">1개월</div>
-    <div class="row"><span class="pr">5,900원<small>/월</small></span></div>
-    <div class="dayp">하루 약 <span class="a6">197원</span></div>
-  </div>
-  <div class="plan best">
-    <div class="badge">추천 · 기간 한정 특가</div>
-    <div class="gift">4개월 무료 증정</div>
-    <div class="pn">8개월 + 4개월</div>
-    <div class="row"><s id="ps">70,800원</s><span class="pct" id="ppc">33%</span><span class="pr" id="ppr">47,200원</span></div>
-    <div class="dayp">하루 약 <span class="a6">129원</span></div>
-  </div>
-  <div class="cof out">☕ 한 달 <b>3,933원</b></div>
-  <p class="rfd" id="rfd">✓ 첫 브리핑이 마음에 안 들면 <span class="ru">전액 환불</span></p>
+<!-- FAQ -->
+<section data-sec="자주 묻는 질문" class="faq s-white" data-ix="faq">
+  <h2 style="margin-bottom:12px">자주 묻는 질문</h2>
+  <details><summary><span class="fe" aria-hidden="true">🤖</span>AI 뉴스는 어떤 내용인가요?</summary><ul class="fq"><li>AI 기술 자체보다, 내 일과 커리어에 영향을 주는 변화를 골라요.</li><li>새 도구가 내 직군 업무를 어떻게 바꾸는지, 지금 익혀 두면 좋은 것이 무엇인지 5줄로 요약해요.</li></ul></details>
+  <details><summary><span class="fe" aria-hidden="true">💡</span>개발자가 아니어도 도움이 되나요?</summary><ul class="fq"><li>네. 마케팅·디자인·재무·인사 등 19개 직군마다 내 일에 맞는 소식만 보내 드려요.</li><li>코딩이나 기술 용어를 몰라도 읽을 수 있게 써요.</li></ul></details>
+  <details><summary><span class="fe" aria-hidden="true">💼</span>내 직군에 맞는 노하우를 받을 수 있나요?</summary><ul class="fq"><li>네. 기본적으로는 가입할 때 고른 직군에 맞춰지지만, 원하는 분야로 조정도 가능해요.</li></ul></details>
+  <details><summary><span class="fe" aria-hidden="true">📋</span>원하는 조건들로 최신 채용공고<br>취합 브리핑을 받을 수 있나요?</summary><ul class="fq"><li>네. 원하는 관심 직군·연차·지역을 선택해 주시면 돼요.</li><li>매주 목요일마다 최근 7일간 열린 공고 중 조건에 맞는 것만 모아 보내 드려요.</li><li>설정은 언제든 바꿀 수 있어요.</li></ul></details>
+  <details><summary><span class="fe" aria-hidden="true">📅</span>주말에도 알림톡이 오나요?</summary><ul class="fq"><li>주말과 공휴일을 제외한 평일에만 보내 드려요.</li></ul></details>
+  <details><summary><span class="fe" aria-hidden="true">📖</span>전문 보기는 당일에만 가능한가요?</summary><ul class="fq"><li>네. 커리어코치가 직접 만든 아티클의 전문 보기는 받은 날 당일에만 열 수 있어요.</li><li>당일에 아티클을 더 자주 열고, 자연스럽게 더 많이 공부하게 되는 구조예요.</li><li>하지만 한번 열어본 아티클 전문은, 시간이 지나도 계속 다시 열람할 수 있어요.</li></ul></details>
 </section>
 <!-- 후기 -->
 <section data-sec="구독자 후기" class="gap20 s-n50 rvs">
@@ -678,6 +667,14 @@ const 세기=s=>s.querySelectorAll(".cu").forEach(c=>{const to=+c.dataset.to,t0=
       연봉.addEventListener('click', (e) => { if (e.target.closest('button')) 바꿈(e); });
     }
 
+    // 자주 묻는 질문 — 펼쳐 본 질문 수(같은 질문을 다시 펼쳐도 한 번).
+    const 질문칸 = document.querySelector('#scr > section.faq[data-ix]');
+    const 질문들 = 질문칸 ? [...질문칸.querySelectorAll('details')] : [], 편질문 = new Set();
+    질문들.forEach((q, i) => q.addEventListener('toggle', () => {
+      if (!q.open) return;
+      편질문.add(i);
+      조작[질문칸.dataset.ix] = [섹션번호(q), 편질문.size, 질문들.length];
+    }));
   }
   // 가입·로그인 입구 — 두 버튼 모두 카카오로 바로 간다 (2026-10-14 /signup/ 화면 삭제, 사용자 지시).
   // 마크업의 /signup/ 은 이 모듈이 못 돌 때만 쓰이는 길이다(그 주소는 카카오로 넘겨주기만 한다).

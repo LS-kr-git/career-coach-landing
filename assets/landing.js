@@ -19,8 +19,6 @@ window.ccJob=k=>{if(!LABEL[k])return;JOB=k;PVS.forEach(r=>{r.querySelectorAll(".
 document.querySelectorAll(".chips").forEach(t=>t.addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;const k=b.dataset.k;
  if(t.classList.contains("pvchips")){const r=t.closest("[data-pv]");if(r)r.touched=true;ccJob(k);return}
  t.querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x.dataset.k===k))}));
-// 금액은 가격 블록 마크업(#ps·#ppr)이 정본 — page-audit 요금 대조가 그 마크업을 서버 plan 과 맞댄다.
-const won=id=>+$(id).textContent.replace(/\D/g,"");
 // 시안은 폰 안 .screen 이 스크롤했다. 실제 페이지는 문서가 스크롤하므로 기준 사각형은 뷰포트다.
 const VIEW=()=>({top:0,bottom:innerHeight,height:innerHeight});
 function fitLine(el,min){el.style.fontSize="";const cs=getComputedStyle(el),room=el.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight),r=document.createRange(),need=()=>(r.selectNodeContents(el),r.getBoundingClientRect().width);let f=parseFloat(cs.fontSize);while(need()>room+0.5&&f>min){f-=0.5;el.style.fontSize=f+"px"}}   // 글자 폭을 안쪽 여백까지 빼고 잰다 — .t 가 넘친 글자를 잘라 scrollWidth 로는 안 보였다(2026-10-15)
@@ -88,10 +86,9 @@ document.querySelectorAll(".slot").forEach(sl=>{const txt=sl.dataset.n;
 // 슬롯머신 숫자 — 「32배+」(#rx)와 「약 12일」의 숫자(#rxd)이 같은 방식으로 굴러간다. 화면에서 한 번 본 뒤부터 값이 바뀔 때마다 굴린다
 const slotRoll=(el,t)=>{const n=el._n=(el._n||0)+1;el.innerHTML=[...t].map(ch=>/\d/.test(ch)?`<span class="d"><i>${[...Array(20).keys()].map(n=>n%10).concat([+ch]).map(n=>`<b>${n}</b>`).join("")}</i></span>`:`<span class="c">${ch}</span>`).join("");const is=[...el.querySelectorAll(".d i")];el.querySelectorAll(".d").forEach((d,k)=>{const m=document.createElement("span");m.className="c";m.style.visibility="hidden";m.style.position="absolute";m.textContent=[...t].filter(c=>/\d/.test(c))[k];el.appendChild(m);d.style.width=m.getBoundingClientRect().width+"px";m.remove()});requestAnimationFrame(()=>requestAnimationFrame(()=>is.forEach((x,k)=>{x.style.transitionDuration=(.9+k*.18)+"s";x.style.transform="translateY(-"+(2000/21)+"%)"})));setTimeout(()=>{if(n===el._n)el.textContent=t},(.9+(is.length-1)*.18)*1000+120)};
 const slotSet=(id,t)=>{const el=$(id);el.dataset.t=t;clearTimeout(el._t);if(!el._seen){el.textContent=t;return}el._t=setTimeout(()=>slotRoll(el,t),220)};
-{const e=$("rfd");if(e)new IntersectionObserver((es,o)=>{if(es[0].isIntersecting){e.classList.add("pl");o.disconnect()}},{root:null,threshold:.6}).observe(e)}
 ["rx","rxd"].forEach(id=>new IntersectionObserver(es=>{if(es[0].isIntersecting)$(id)._seen=true},{root:null,threshold:.8}).observe($(id)));
 
-(()=>{const SUB=won("ppr")/1e4,f=n=>(Math.round(n*10)/10).toLocaleString("ko-KR")+"만원";
+(()=>{const SUB=+$("sal").dataset.sub/1e4,f=n=>(Math.round(n*10)/10).toLocaleString("ko-KR")+"만원";
  const set=v=>{v=Math.max(1000,Math.min(10000,+v||0));const p1=v*.03,p2=v*.04,mx=Math.max(p2,SUB);
   document.querySelectorAll("#sal .sv").forEach(i=>{if(document.activeElement!==i)i.value=v});
   document.querySelectorAll("#sal .pc button").forEach(b=>b.classList.toggle("on",+b.dataset.s===v));
@@ -150,9 +147,6 @@ new IntersectionObserver(es=>es.forEach(e=>{const w=$("stw");if(e.isIntersecting
 (()=>{const g=$("rg"),n=$("r6n");let t=0;const play=()=>{g.classList.remove("in");void g.offsetWidth;clearInterval(t);n.textContent="x 6배";setTimeout(()=>{g.classList.add("in");if($("va").dataset.v==="3"){let x=1;n.textContent="1배";t=setInterval(()=>{x++;n.textContent=x+"배";if(x>=6)clearInterval(t)},160)}},60)};
  let seen=false;new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.5&&!seen){seen=true;play()}else if(e.intersectionRatio===0){seen=false;g.classList.remove("in")}}),{root:null,threshold:[0,.5]}).observe(g);})();
 
-
-(()=>{const sec=$("pricing"),pr=$("ppr"),FROM=won("ps"),TO=won("ppr");let t=0;const play=()=>{sec.classList.remove("in");void sec.offsetWidth;clearInterval(t);pr.textContent=TO.toLocaleString("ko-KR")+"원";setTimeout(()=>{sec.classList.add("in");if($("pa").dataset.v==="4"){const t0=performance.now();t=setInterval(()=>{const k=Math.min(1,(performance.now()-t0)/1000),v=Math.round(FROM-(FROM-TO)*(1-Math.pow(1-k,3)));pr.textContent=v.toLocaleString("ko-KR")+"원";if(k>=1)clearInterval(t)},30)}},60)};
- let seen=false;new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3&&!seen){seen=true;play()}else if(e.intersectionRatio===0){seen=false;sec.classList.remove("in")}}),{root:null,threshold:[0,.3]}).observe(sec.querySelector(".plan.best"));})();
 
 (()=>{const r=document.getElementById("reviews");let done=false,stop=false,raf=0;
  const halt=()=>{if(stop)return;stop=true;cancelAnimationFrame(raf);r.classList.remove("rvflow")};let tx=0,ty=0;
