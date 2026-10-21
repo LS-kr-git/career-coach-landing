@@ -7,7 +7,7 @@
 <meta name="color-scheme" content="only light">
 <meta name="format-detection" content="telephone=no">
 <!-- 랜딩 버전 지문 — 섹션 구성·제목·시안 값으로 만든다. 손으로 고치지 말고 `node tools/landing-version/fp.mjs --write` (page-audit 이 대조한다) -->
-<meta name="cc-lv" content="d926cde3c1">
+<meta name="cc-lv" content="1dd8085ab1">
 <title>커리어코치</title>
 <meta name="description" content="일하는 사람들의 커리어 성장을 위해">
 <link rel="canonical" href="https://careercoach.my/">
@@ -144,20 +144,10 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 
 
 
-.sf{list-style:none;display:flex;flex-direction:column;gap:12px}
-.sf li{display:flex;gap:14px;align-items:flex-start;background:#fff;border-radius:16px;padding:18px 16px;opacity:0;transform:translateY(14px);transition:opacity .45s,transform .45s}
-.sf li i{font-style:normal;width:28px;height:28px;border-radius:50%;background:var(--e100);color:var(--e700);display:grid;place-items:center;font-size:15px;font-weight:900;flex:none;transform:scale(0);transition:transform .35s cubic-bezier(.3,1.6,.5,1)}
-.sf b{display:block;font-size:16px;line-height:1.45;font-weight:700;color:var(--g900);word-break:keep-all}
-.sf span{display:block;margin-top:4px;font-size:14px;line-height:1.5;color:var(--g500);word-break:keep-all}
-#safesec.in .sf li{opacity:1;transform:none}
-#safesec.in .sf li i{transform:scale(1)}
-#safesec.in .sf li:nth-child(2),#safesec.in .sf li:nth-child(2) i{transition-delay:.2s}
-#safesec.in .sf li:nth-child(3),#safesec.in .sf li:nth-child(3) i{transition-delay:.4s}
-#safesec.in .sf li i{transition-delay:.25s}
 
 .cof.out{margin-top:12px;text-align:center;font-size:14px;font-weight:600;color:var(--g600)}
 .cof b{color:var(--a700)}
-@media (prefers-reduced-motion:reduce){.sf li,.sf li i{opacity:1!important;transform:none!important;transition:none!important}.chipflow .lane{animation:none}}
+@media (prefers-reduced-motion:reduce){.chipflow .lane{animation:none}}
 </style>
 <style id="tvx-css">
 /* 아티클 화면 제목 위 「오늘만」 배지(86) — 전문 보기는 받은 날 당일에만 열린다 */
@@ -181,8 +171,6 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 :is(#sec1,#pvsec) .swipe .ab ol{padding-bottom:64px} /* 끝까지 내렸을 때 마지막 줄이 「처음으로」 버튼에 안 가리게 */
 :is(#sec1,#pvsec) .ab .mfd{position:sticky;left:0;right:0;bottom:-1px;height:56px;margin-top:-56px;background:linear-gradient(rgba(255,255,255,0),#fff 55%);pointer-events:none;transition:opacity .25s}
 :is(#sec1,#pvsec) .ab .mbtn{position:sticky;bottom:8px;display:block;margin:-34px auto 0;width:fit-content;padding:6px 12px;border:0;border-radius:999px;background:#1E293B;color:#fff;font:inherit;font-size:12px;font-weight:700;box-shadow:0 4px 10px rgba(15,23,42,.18);z-index:3;cursor:pointer}
-/* FAQ 질문 앞 이모지(E1) — 둘째 줄이 글자 첫머리에 맞도록 이모지는 왼쪽에 따로 세운다 */
-.faq summary{padding-left:28px}.faq summary .fe{position:absolute;left:0;top:0;font-size:16px;line-height:1.5}
 .art .tday{display:inline-block;margin-bottom:8px;padding:3px 9px;border-radius:999px;background:var(--a100);color:var(--a700);font-size:11px;font-weight:700;line-height:1.4}
 </style>
 <style id="v4">
@@ -476,25 +464,6 @@ html.cc-wait .f6g *{animation-play-state:paused!important}
   <div class="cof out">☕ 한 달 <b>3,933원</b></div>
   <p class="rfd" id="rfd">✓ 첫 브리핑이 마음에 안 들면 <span class="ru">전액 환불</span></p>
 </section>
-<!-- 부담 없이 시작 (2026-10-17 신설 · 문구 근거: terms.html 제6조) -->
-<section data-sec="부담 없이 시작" class="gap20 s-a100b" id="safesec">
-  <h2>부담 없이<br>시작해 보세요</h2>
-  <ul class="sf">
-    <li><i>✓</i><div><b>첫 브리핑이 마음에 안 들면 전액 환불</b><span>요청만 하면 돼요 · 첫 결제 1회</span></div></li>
-    <li><i>✓</i><div><b>원할 때 바로 해지 가능</b><span>마이페이지에서 바로 해지 가능</span></div></li>
-    <li><i>✓</i><div><b>앱 설치 없이 이용 가능</b><span>카카오 알림톡으로 바로 받아요</span></div></li>
-  </ul>
-</section>
-<!-- FAQ -->
-<section data-sec="자주 묻는 질문" class="faq s-white" data-ix="faq">
-  <h2 style="margin-bottom:12px">자주 묻는 질문</h2>
-  <details><summary><span class="fe" aria-hidden="true">🤖</span>AI 뉴스는 어떤 내용인가요?</summary><ul class="fq"><li>AI 기술 자체보다, 내 일과 커리어에 영향을 주는 변화를 골라요.</li><li>새 도구가 내 직군 업무를 어떻게 바꾸는지, 지금 익혀 두면 좋은 것이 무엇인지 5줄로 요약해요.</li></ul></details>
-  <details><summary><span class="fe" aria-hidden="true">💡</span>개발자가 아니어도 도움이 되나요?</summary><ul class="fq"><li>네. 마케팅·디자인·재무·인사 등 19개 직군마다 내 일에 맞는 소식만 보내 드려요.</li><li>코딩이나 기술 용어를 몰라도 읽을 수 있게 써요.</li></ul></details>
-  <details><summary><span class="fe" aria-hidden="true">💼</span>내 직군에 맞는 노하우를 받을 수 있나요?</summary><ul class="fq"><li>네. 기본적으로는 가입할 때 고른 직군에 맞춰지지만, 원하는 분야로 조정도 가능해요.</li></ul></details>
-  <details><summary><span class="fe" aria-hidden="true">📋</span>원하는 조건들로 최신 채용공고<br>취합 브리핑을 받을 수 있나요?</summary><ul class="fq"><li>네. 원하는 관심 직군·연차·지역을 선택해 주시면 돼요.</li><li>매주 목요일마다 최근 7일간 열린 공고 중 조건에 맞는 것만 모아 보내 드려요.</li><li>설정은 언제든 바꿀 수 있어요.</li></ul></details>
-  <details><summary><span class="fe" aria-hidden="true">📅</span>주말에도 알림톡이 오나요?</summary><ul class="fq"><li>주말과 공휴일을 제외한 평일에만 보내 드려요.</li></ul></details>
-  <details><summary><span class="fe" aria-hidden="true">📖</span>전문 보기는 당일에만 가능한가요?</summary><ul class="fq"><li>네. 커리어코치가 직접 만든 아티클의 전문 보기는 받은 날 당일에만 열 수 있어요.</li><li>당일에 아티클을 더 자주 열고, 자연스럽게 더 많이 공부하게 되는 구조예요.</li><li>하지만 한번 열어본 아티클 전문은, 시간이 지나도 계속 다시 열람할 수 있어요.</li></ul></details>
-</section>
 <!-- 후기 -->
 <section data-sec="구독자 후기" class="gap20 s-n50 rvs">
   <div class="score rvc"><span class="sl">평균 별점</span><b>4.8</b><span class="stw" id="stw"><span class="s0"><i>★</i><i>★</i><i>★</i><i>★</i><i>★</i></span><span class="s1">★★★★★</span></span></div>
@@ -529,7 +498,7 @@ const 켜기=(el,th,cls,첫)=>{if(el)new IntersectionObserver(es=>es.forEach(e=>
 const $=id=>document.getElementById(id);
 /* 「요즘 이런 생각」 숫자 — 마크업에는 최종값, 켜질 때 0 부터 센다 */
 const 세기=s=>s.querySelectorAll(".cu").forEach(c=>{const to=+c.dataset.to,t0=performance.now()+1900;c.textContent="0";const f=n=>{const k=Math.max(0,Math.min(1,(n-t0)/1200));c.textContent=Math.round(to*(1-Math.pow(1-k,3))).toLocaleString();if(k<1)requestAnimationFrame(f)};requestAnimationFrame(f)});
-켜기($("safesec"),.3,"in");켜기($("anxsec"),.3,"in",세기);켜기($("trisec"),.3,"in");켜기($("emsec"),.35,"in");켜기($("fo6sec"),.25,"in");
+켜기($("anxsec"),.3,"in",세기);켜기($("trisec"),.3,"in");켜기($("emsec"),.35,"in");켜기($("fo6sec"),.25,"in");
 켜기(document.querySelector(".f6g"),.4,"go")})();</script>
 <script src="/assets/landing.js"></script>
 <script type="module">
@@ -709,14 +678,6 @@ const 세기=s=>s.querySelectorAll(".cu").forEach(c=>{const to=+c.dataset.to,t0=
       연봉.addEventListener('click', (e) => { if (e.target.closest('button')) 바꿈(e); });
     }
 
-    // 자주 묻는 질문 — 펼쳐 본 질문 수(같은 질문을 다시 펼쳐도 한 번).
-    const 질문칸 = document.querySelector('#scr > section.faq[data-ix]');
-    const 질문들 = 질문칸 ? [...질문칸.querySelectorAll('details')] : [], 편질문 = new Set();
-    질문들.forEach((q, i) => q.addEventListener('toggle', () => {
-      if (!q.open) return;
-      편질문.add(i);
-      조작[질문칸.dataset.ix] = [섹션번호(q), 편질문.size, 질문들.length];
-    }));
   }
   // 가입·로그인 입구 — 두 버튼 모두 카카오로 바로 간다 (2026-10-14 /signup/ 화면 삭제, 사용자 지시).
   // 마크업의 /signup/ 은 이 모듈이 못 돌 때만 쓰이는 길이다(그 주소는 카카오로 넘겨주기만 한다).
