@@ -27,6 +27,7 @@ permissions:
   contents: read
   actions: read
   checks: read
+  statuses: read           # 커밋 상태(/commits/{sha}/status) — 비공개 저장소는 이것 없이 403 이다(2026-10-22 첫 시험)
   pull-requests: write     # 제외 영역 댓글
 
 jobs:
