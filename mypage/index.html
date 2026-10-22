@@ -24,7 +24,7 @@
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.90.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.91.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="modulepreload" href="/assets/browser-mark.js?v=55ab00c8">
-<link rel="modulepreload" href="/assets/mypage-data.js?v=3a60e775">
+<link rel="modulepreload" href="/assets/mypage-data.js?v=4737b984">
 <link rel="modulepreload" href="/assets/onboarding-store.js?v=b6c28dd2">
 <link rel="modulepreload" href="/assets/skeleton.js?v=ac8118b7">
 <link rel="modulepreload" href="/assets/supabase-config.js?v=1389b656">
@@ -266,7 +266,7 @@
 <script type="module">
   /* 자료는 assets/mypage-data.js 한 곳에서 온다. 마크업의 값은 피그마 기준 프레임 상태(= 빈 상태,
      대조용)이고, 실제 화면은 여기서 받은 값으로 다시 채운다. */
-  import { requireLogin, getProfile, profileView, profileFail, getSunday, sundayStateOf, kstToday, FAIL } from '/assets/mypage-data.js?v=3a60e775';
+  import { requireLogin, getProfile, profileView, profileFail, getSunday, sundayStateOf, kstToday, FAIL } from '/assets/mypage-data.js?v=4737b984';
   import { 오류안내 } from '/assets/toast.js?v=f8247e72';
   import { 막대로 } from '/assets/skeleton.js?v=ac8118b7';
 
@@ -395,7 +395,7 @@
      일이 거의 없어서, 그 사람은 자기가 고른 주제를 영영 못 받는다 — 아무 표시도 없이.
      `retryPending()` 은 보낼 것이 없거나 로그인 전이면 조용히 아무것도 안 한다. */
   import { retryPending, pullFromServer, readState, complete, client, forgetLocal } from '/assets/onboarding-store.js?v=b6c28dd2';
-  import { requireLogin, getTopics, COMMON_TOPIC, onboardingDone, FAIL, 이어갈곳, surveyNeeded } from '/assets/mypage-data.js?v=3a60e775';
+  import { requireLogin, getTopics, COMMON_TOPIC, onboardingDone, FAIL, 이어갈곳, surveyNeeded } from '/assets/mypage-data.js?v=4737b984';
   import { readTopicMap, trackFromJobs } from '/assets/topic-map.js?v=8f9d5bc9';
   import { 하단안내, 오류안내 } from '/assets/toast.js?v=f8247e72';
   import { 막대로 } from '/assets/skeleton.js?v=ac8118b7';

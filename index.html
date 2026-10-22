@@ -485,7 +485,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 (()=>{
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3)e.target.classList.add("in");else if(e.intersectionRatio===0)e.target.classList.remove("in")}),{threshold:[0,.3]});
 io.observe(document.getElementById("safesec"))})();</script>
-<script src="/assets/landing.js?v=98241af4"></script>
+<script src="/assets/landing.js?v=d3698d53"></script>
 <script type="module">
   // 유입 경로 기록. 실패해도 화면에 영향이 없다 (track.js 가 예외를 삼킨다).
   import { track } from '/assets/track.js?v=8a4c7dcf';
@@ -735,7 +735,7 @@ io.observe(document.getElementById("safesec"))})();</script>
     // 온보딩만 다 함 → 결제 화면, 하는 중 → 확정한 다음 단계(서버 진행 기록 0163 을 깐 뒤).
     const 물음 = import('/assets/onboarding-store.js?v=b6c28dd2').then((s) => s.pullFromServer().then(async (답) => {
       if (답 === 'no-session') { 로그인전(); return; }   // 탈퇴·삭제로 세션이 죽었다 — 카카오 길로
-      const 갈곳 = await (await import('/assets/mypage-data.js?v=3a60e775')).이어갈곳({ 받음: true });
+      const 갈곳 = await (await import('/assets/mypage-data.js?v=4737b984')).이어갈곳({ 받음: true });
       for (const a of 버튼) a.href = 갈곳;
     })).catch(실패).finally(() => { 정함 = true; });
     let 기다림 = false;
