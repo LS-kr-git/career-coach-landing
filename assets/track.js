@@ -398,6 +398,10 @@ function optionalSrc(src) {
 // 의 「Error invoking postMessage: Java object is gone」 이 일주일 11건 쌓였다). 어드민 errors.ts 의 SQL_CLIENT 가 같은 것을 거른다.
 const FOREIGN_SCHEME = /^(iabjs|chrome-extension|moz-extension|safari-extension|safari-web-extension|webkit-masked-url):/i;
 function foreignSrc(src) { return FOREIGN_SCHEME.test(String(src || '')); }
+// iOS 앱 안 브라우저(인스타·페이스북)가 끼운 스크립트는 주소가 페이지 자신(1번 줄)으로 찍혀 위로는 못 거른다 — 메시지로 거른다.
+// 우리 코드는 `webkit.messageHandlers` 를 한 번도 안 부른다(2026-10-22: 메타 광고 유입 1건, index.html 1번 줄 724칸은 <head> 의 meta).
+// 어드민 errors.ts 의 SQL_CLIENT 가 같은 것을 거른다(이미 퍼진 옛 track.js 몫).
+const IOS_IAB_MSG = /\(evaluating .window\.webkit\.messageHandlers/i;
 // 화면 넘김 효과(view transition)가 건너뛰어지거나 취소됐다는 거절 — 넘김 효과만 못 냈을 뿐 화면은 멀쩡하다(steady.js 가 보여 준다).
 // steady.js 가 받아 두지만, 받을 틈이 없는 자리(떠나는 화면 쪽·브라우저 안쪽)에서 난 것까지 여기서 한 번 더 거른다.
 function transitionAbort(r) {
@@ -455,7 +459,7 @@ if (typeof window !== 'undefined') {
       reportError('resource load failed: ' + (el.tagName || '?'), cutUrl(el.src || el.href), 0, 0);
       return;
     }
-    if (foreignSrc(e.filename)) return;
+    if (foreignSrc(e.filename) || IOS_IAB_MSG.test(String(e.message || ''))) return;
     reportError(e.message, e.filename, e.lineno, e.colno);
     화면오류(e.filename);
   }, true);                            // 캡처 단계 — 리소스 오류는 버블링하지 않는다
