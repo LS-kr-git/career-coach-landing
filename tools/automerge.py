@@ -21,6 +21,7 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -28,6 +29,7 @@ from pathlib import Path
 API = "https://api.github.com"
 표식 = "<!-- automerge:excluded -->"
 통과_결론 = {"success", "skipped", "neutral"}
+검사_다시보기, 검사_간격초 = 7, 10       # CI 완료로 불렸는데 아직 진행 중으로 보이면 최대 1분 다시 본다
 
 
 def 패턴_정규식(패턴: str) -> re.Pattern:
@@ -147,6 +149,19 @@ def 판정(gh: GitHub, pr: dict, 돌아야: list[str], 자기잡: str) -> tuple[
     return "합친다", f"돌아야 할 워크플로 {len(돌아야)}개 초록" if 돌아야 else "돌아야 할 CI 없음(문서 등)"
 
 
+def 다시보며_판정(gh: GitHub, pr: dict, 돌아야: list[str], 자기잡: str, 번수: int) -> tuple[str, str]:
+    """🔴 (2026-10-22 #415·랜딩 #86) CI 완료로 불린 직후에도 API 는 그 실행·검사 칸을 몇 초간 「진행 중」으로
+    보여 줬다. 「기다린다」로 끝나면 다시 불릴 사건이 없어 PR 이 멈추므로, 그 경우엔 간격을 두고 다시 본다."""
+    for 번 in range(번수):
+        결정 = 판정(gh, pr, 돌아야, 자기잡)
+        if 결정[0] != "기다린다" or 번 + 1 == 번수:
+            break
+        time.sleep(검사_간격초)
+    if 번수 > 1 and 결정[0] == "기다린다":
+        print(f"::warning title=자동 병합::{결정[1]} — 1분 다시 봐도 안 끝나 이번엔 안 합친다", file=sys.stderr)
+    return 결정
+
+
 class 설정:
     """워크플로가 환경변수로 넘기는 값들."""
     def __init__(self, 환경: dict):
@@ -182,7 +197,7 @@ def _합친다(gh: GitHub, pr: dict, 머리: str, 토큰: str) -> None:
         raise SystemExit(1)
 
 
-def 한_PR(gh: GitHub, 번호: int, 설: 설정) -> None:
+def 한_PR(gh: GitHub, 번호: int, 설: 설정, 번수: int) -> None:
     pr = gh.부른다("GET", f"/pulls/{번호}")
     머리 = f"PR #{번호} ({pr['head']['ref']} @ {pr['head']['sha'][:8]})"
     if not 대상인가(pr, gh.저장소):
@@ -198,10 +213,15 @@ def 한_PR(gh: GitHub, 번호: int, 설: 설정) -> None:
     돌아야 = 돌아야_할_워크플로(설.폴더, 바뀐, pr["base"]["ref"], 설.자기)
     for 이름 in set(돌아야) - set(설.듣는):
         print(f"::warning::「{이름}」 이 auto-merge.yml 의 workflow_run 목록에 없다 — 끝나도 다시 불리지 않는다")
-    결정, 이유 = 판정(gh, pr, 돌아야, 설.자기잡)
+    결정, 이유 = 다시보며_판정(gh, pr, 돌아야, 설.자기잡, 번수)
     print(f"{머리}: {결정} — {이유}")
     if 결정 == "합친다":
         _합친다(gh, pr, 머리, 설.합칠토큰)
+
+
+def 다시볼_번수(사건이름: str) -> int:
+    """PR 이 막 열린 때는 기다려도 CI 완료가 다시 부른다 — CI 완료로 불린 때만 다시 본다."""
+    return 검사_다시보기 if 사건이름 == "workflow_run" else 1
 
 
 def PR_번호들(gh: GitHub, 사건: dict, 사건이름: str) -> list[int]:
@@ -222,8 +242,9 @@ def main() -> int:
         return 1
     gh = GitHub(os.environ["GITHUB_REPOSITORY"], os.environ["GITHUB_TOKEN"])
     사건 = json.loads(Path(os.environ["GITHUB_EVENT_PATH"]).read_text(encoding="utf-8"))
-    for 번호 in PR_번호들(gh, 사건, os.environ.get("GITHUB_EVENT_NAME", "")):
-        한_PR(gh, 번호, 설)
+    사건이름 = os.environ.get("GITHUB_EVENT_NAME", "")
+    for 번호 in PR_번호들(gh, 사건, 사건이름):
+        한_PR(gh, 번호, 설, 다시볼_번수(사건이름))
     return 0
 
 
