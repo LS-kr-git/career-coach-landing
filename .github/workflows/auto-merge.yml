@@ -1,0 +1,65 @@
+name: PR 자동 병합
+
+# `claude/` 가지 PR 을 CI 가 초록일 때 squash 로 합친다 (2026-10-22 사용자 지시).
+# 규칙의 정본은 CLAUDE.md 「claude/ 가지 + PR 로 올린다」 절, 판정은 tools/automerge.py 머리말.
+#
+# 🔴 `pull_request_target` 인 이유: 이 워크플로와 판정 스크립트를 **PR 쪽이 아니라 main 쪽**에서
+#    돌린다. `pull_request` 로 돌면 PR 이 이 파일이나 스크립트를 고쳐 제외 검사를 스스로 끌 수 있다.
+#    PR 의 코드는 체크아웃하지 않는다 — 바뀐 파일 목록과 실행 결과는 API 로만 읽는다.
+# 🔴 합치는 토큰은 AUTOMERGE_TOKEN(사람이 만든 세분화 토큰)이다. 기본 GITHUB_TOKEN 으로 합치면
+#    그 뒤 main 푸시로 도는 배포 워크플로(landing-version 등)가 안 돈다 — GitHub 규칙이다.
+# ⚠️ 아래 `workflow_run.workflows` 는 PR 에서 도는 워크플로의 이름 전부다. 새 PR 검사 워크플로를
+#    만들면 여기 더한다 — 빠지면 그 검사가 끝나도 다시 불리지 않아 합쳐지지 않는다(안전한 쪽).
+#    빠뜨리면 판정이 실행 로그에 ::warning 을 남긴다.
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review]
+  workflow_run:
+    workflows: ["랜딩 검수", "어드민 셸 검수"]
+    types: [completed]
+
+concurrency:
+  group: auto-merge-${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read
+  checks: read
+  pull-requests: write     # 제외 영역 댓글
+
+jobs:
+  merge:
+    name: 자동 병합 판정
+    # 러너를 안 띄울 실행은 트리거에서 거른다 — 같은 저장소의 claude/ 가지 PR 만.
+    if: >-
+      (github.event_name == 'pull_request_target' &&
+       startsWith(github.event.pull_request.head.ref, 'claude/') &&
+       github.event.pull_request.head.repo.full_name == github.repository &&
+       !github.event.pull_request.draft) ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.event == 'pull_request' &&
+       startsWith(github.event.workflow_run.head_branch, 'claude/'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - run: python3 -m pip install --quiet pyyaml==6.0.3
+      - name: 판정하고 합친다
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          AUTOMERGE_TOKEN: ${{ secrets.AUTOMERGE_TOKEN }}
+          AUTOMERGE_SELF: PR 자동 병합
+          AUTOMERGE_SELF_JOB: 자동 병합 판정
+          AUTOMERGE_LISTEN: |
+            랜딩 검수
+            어드민 셸 검수
+          # 하나라도 걸리면 합치지 않고 「사람 병합 필요」 댓글만 단다.
+          AUTOMERGE_EXCLUDE: |
+            .github/workflows/**
+            checkout/**
+            tools/automerge.py
+        run: python3 tools/automerge.py
