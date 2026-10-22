@@ -240,6 +240,24 @@ export async function cancelSubscription(reason) {
 /** 해지 취소 — 이용 종료일 전의 해지 예약을 되돌린다(career-coach 0124). */
 export async function resumeSubscription() { return rpc('mypage_resume_subscription', true); }
 
+/**
+ * 결제 직후 설문 (career-coach 0208). 구독은 결제로 이미 시작됐다 — 설문은 구독과 무관하다.
+ * surveyNeeded — 살아 있는 구독(설문을 받기 시작한 뒤의 것)에 아직 답이 없으면 참. 마이페이지가 이것을 보고 설문으로 보낸다.
+ * saveSurvey — 'ok'(저장 · 이미 있음) | 'short'(공백 뺀 5자 미만) | 'no_sub'(살아 있는 구독 없음). 실패는 그대로 올린다.
+ */
+export async function surveyNeeded() {
+  const supabase = await supa();
+  const { data, error } = await supabase.rpc('purchase_survey_needed');
+  if (error) throw error;
+  return data === true;
+}
+export async function saveSurvey(reason, wish) {
+  const supabase = await supa();
+  const { data, error } = await supabase.rpc('save_purchase_survey', { p_reason: reason, p_wish: wish });
+  if (error) throw error;
+  return data;
+}
+
 /** 소장한 편 전부 — { insight_id, title, track, publish_date }. */
 export async function getArchive() { return rpc('mypage_archive', false); }
 

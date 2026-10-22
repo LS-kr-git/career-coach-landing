@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<script src="/assets/no-input-zoom.js"></script>
+<meta name="color-scheme" content="only light">
+<meta name="format-detection" content="telephone=no">
+<meta name="robots" content="noindex,nofollow"><title>두 가지만 알려 주세요 — 커리어코치</title>
+<link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
+<!-- 미리받기 (tools/preload/build.mjs 가 만든다 — 손으로 고치지 마라) -->
+<link rel="preconnect" href="https://sxooygwggxeplzkfdbth.supabase.co" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.82.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.85.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.86.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.87.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.88.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.89.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.90.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.91.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="modulepreload" href="/assets/browser-mark.js">
+<link rel="modulepreload" href="/assets/mypage-data.js">
+<link rel="modulepreload" href="/assets/supabase-config.js">
+<link rel="modulepreload" href="/assets/toast.js">
+<link rel="modulepreload" href="/assets/track.js">
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/+esm" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/functions-js@2.117.3/+esm" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/postgrest-js@2.117.3/+esm" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/realtime-js@2.117.3/+esm" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/storage-js@2.117.3/+esm" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/auth-js@2.117.3/+esm" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/tslib@2.8.1/+esm" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/phoenix@0.4.5/+esm" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/iceberg-js@0.8.1/+esm" crossorigin>
+<!-- /미리받기 -->
+<link rel="stylesheet" href="/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
+<link rel="stylesheet" href="/assets/toast.css">
+<script src="/assets/steady.js"></script>
+<style>
+  /* 결제 직후 필수 설문 — 2026-10-22 사용자 컨펌(목업 「구매후설문-구독자-v10」).
+     결제 → 이 화면 → 결제 완료(/checkout/done/) → 마이페이지. 구독은 결제로 이미 시작됐다 — 이 화면은 구독과 무관하다.
+     값은 온보딩(진행 바 없는 자리)·회원 탈퇴 「기타」 글칸과 같은 토큰이다. */
+  :root{
+    color-scheme: only light;   /* meta 와 같은 값 — CSS 로도 선언해 확실히 적용한다 */
+    --amber-500:#F59E0B;--amber-600:#D97706;
+    --gray-100:#F1F5F9;--gray-200:#E2E8F0;--gray-400:#94A3B8;--gray-500:#64748B;--gray-800:#1E293B;--gray-900:#0F172A;
+    --pad-x:24px; --card-max:450px;
+    /* CTA 규칙(2026-08-03) — 제품 공통. 값·근거는 CLAUDE.md "CTA 규칙" */
+    --cta-h:54px; --cta-radius:14px; --cta-fs:15px; --cta-fw:700;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{background:var(--gray-100)}
+  body{font-family:'Pretendard Variable',Pretendard,'Noto Sans CJK KR',-apple-system,'Apple SD Gothic Neo',sans-serif;
+    background:#fff;color:var(--gray-800);-webkit-font-smoothing:antialiased}
+  .page{width:100%;max-width:var(--card-max);margin:0 auto;background:#fff;
+    min-height:100vh;min-height:100svh;padding-bottom:calc(110px + env(safe-area-inset-bottom));position:relative}
+  /* 헤더 — 뒤로가기 없음(결제가 끝난 뒤라 결제 화면으로 돌아가지 않게). 높이만 표준값 48 을 지킨다 */
+  .hd{height:calc(48px + env(safe-area-inset-top));padding-top:env(safe-area-inset-top)}
+  .title{padding:20px var(--pad-x) 0;font-size:24px;line-height:32px;font-weight:700;letter-spacing:-.01em;color:var(--gray-900);word-break:keep-all}
+  /* 「(필수)」 — 작은 회색 글자(2026-10-22 사용자 지시 「좀만 더 크고 좀만 더 진하게」) */
+  .rq{font-size:17px;font-weight:500;color:var(--gray-500);letter-spacing:0}
+  .qh{padding:36px var(--pad-x) 0;font-size:20px;line-height:28px;font-weight:700;color:var(--gray-900)}
+  .title+.qh{padding-top:32px}
+  /* 글칸 — 탈퇴 화면 「기타」 글칸(mypage/leave .other)을 키운 모양. 비었을 땐 회색 테두리, 누르거나 5자 미만이면 앰버 */
+  .ta{margin:14px var(--pad-x) 0;border:1.5px solid var(--gray-200);border-radius:12px;padding:14px 16px 12px;
+    display:flex;flex-direction:column;gap:10px;transition:border-color .12s}
+  .ta:focus-within{border-color:var(--amber-500)}
+  .ta textarea{border:0;outline:0;resize:none;height:132px;font:inherit;font-size:15px;line-height:23px;color:var(--gray-900);background:transparent}
+  .ta textarea::placeholder{color:var(--gray-400)}
+  .tf{display:flex;justify-content:space-between;align-items:center;font-size:12px;line-height:16px}
+  /* 「5자 이상 써 주세요」 — 비어 있을 땐 숨기고, 쓰기 시작해 5자 미만일 때만 앰버 600 굵게 뜬다(2026-10-22 사용자 지시) */
+  .need{visibility:hidden;color:var(--amber-600);font-weight:600}
+  .ta.typing:not(.ok) .need{visibility:visible}
+  .ta.typing:not(.ok){border-color:var(--amber-500)}
+  .cnt{color:var(--gray-400)}
+  /* 플로팅 CTA — 온보딩 3·4단계와 같은 값 */
+  .fade{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:var(--card-max);height:100px;
+    background:linear-gradient(180deg,rgba(255,255,255,0),#fff 55%);pointer-events:none;z-index:9}
+  .cta{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
+    width:calc(100% - 40px);max-width:410px;height:var(--cta-h);border:0;font:inherit;
+    display:block;text-align:center;line-height:var(--cta-h);
+    background:var(--amber-500);color:#fff;border-radius:var(--cta-radius);
+    font-size:var(--cta-fs);font-weight:var(--cta-fw);
+    box-shadow:0 12px 32px rgba(217,119,6,.28);cursor:pointer;z-index:10;-webkit-tap-highlight-color:transparent}
+  .cta:active{transform:translateX(-50%) scale(.98)}
+  .cta.off{background:var(--gray-100);color:var(--gray-400);box-shadow:none;cursor:default}
+  .cta.off:active{transform:translateX(-50%)}
+  /* 저장 실패 — 버튼 바로 위 10px 에 공용 하단 안내 (2026-10-15 「오류 대체 화면」) */
+  #errToast{position:fixed;left:50%;transform:translateX(-50%);width:100%;max-width:var(--card-max);
+    bottom:calc(84px + env(safe-area-inset-bottom));z-index:11}
+  [hidden]{display:none!important}
+  @media (max-width:450px){html,body{background:#fff}}
+  @media (min-width:451px){
+    body{background:var(--gray-100)}
+    .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
+  }
+  :focus-visible{outline:2px solid var(--amber-500);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="hd"></div>
+  <h1 class="title">마지막으로, 더 좋은 레터를 위해<br>두 가지만 알려 주세요 <span class="rq">(필수)</span></h1>
+  <h2 class="qh" id="q1">구독하신 이유</h2>
+  <div class="ta" data-ta><textarea id="reason" maxlength="500" rows="5" aria-labelledby="q1" placeholder="(예시)&#10;· AI 변화가 불안해요&#10;· 여기저기 찾아보지 않아도 돼요&#10;· 이직 준비 중이에요&#10;· 채용 공고를 놓치기 싫어요"></textarea>
+    <div class="tf"><span class="need">5자 이상 써 주세요</span><span class="cnt">0/500</span></div></div>
+  <h2 class="qh" id="q2">더 바라는 점</h2>
+  <div class="ta" data-ta><textarea id="wish" maxlength="500" rows="5" aria-labelledby="q2" placeholder="(예시)&#10;· 채용 공고 알림톡이 매일 오면 좋겠어요&#10;· 5줄 요약이 AI 내용만 있으면 좋겠어요"></textarea>
+    <div class="tf"><span class="need">5자 이상 써 주세요</span><span class="cnt">0/500</span></div></div>
+</div>
+<div class="fade"></div>
+<p class="cc-toast" id="errToast" role="alert" hidden></p>
+<button class="cta off" type="button" id="next" aria-disabled="true">다음</button>
+
+<script type="module">
+  import { metaEvent } from '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
+  import { requireLogin, getSubscription, billingView, surveyNeeded, saveSurvey } from '/assets/mypage-data.js';
+  import { 오류안내 } from '/assets/toast.js';
+  var $ = function (id) { return document.getElementById(id); };
+  var 칸들 = [$('reason'), $('wish')];
+  var 다음 = $('next');
+  var 초안키 = 'cc_survey_draft';
+
+  /* 쓰던 글은 기기에 남겨 둔다 — 창을 닫았다 다시 와도(마이페이지가 이리로 다시 보낸다) 이어 쓴다 */
+  try { var 초안 = JSON.parse(localStorage.getItem(초안키) || 'null'); if (초안) { $('reason').value = 초안.r || ''; $('wish').value = 초안.w || ''; } } catch (e) { /* 못 읽으면 빈 칸 */ }
+
+  function 됐나(t) { return t.value.trim().length >= 5; }
+  function 맞추기() {
+    칸들.forEach(function (t) {
+      var 상자 = t.closest('[data-ta]');
+      상자.querySelector('.cnt').textContent = t.value.length + '/500';
+      상자.classList.toggle('ok', 됐나(t));
+      상자.classList.toggle('typing', t.value.length > 0);
+    });
+    var 켬 = 칸들.every(됐나);
+    다음.classList.toggle('off', !켬);
+    다음.setAttribute('aria-disabled', String(!켬));
+  }
+  칸들.forEach(function (t) {
+    t.addEventListener('input', function () {
+      맞추기();
+      try { localStorage.setItem(초안키, JSON.stringify({ r: $('reason').value, w: $('wish').value })); } catch (e) { /* 못 적으면 이어 쓰기만 안 된다 */ }
+    });
+  });
+  addEventListener('pageshow', 맞추기);
+  맞추기();
+
+  var 보내는중 = false;
+  다음.addEventListener('click', function () {
+    if (다음.classList.contains('off') || 보내는중) return;
+    보내는중 = true;
+    saveSurvey($('reason').value, $('wish').value).then(function (r) {
+      if (r === 'short') { 보내는중 = false; 맞추기(); return; }
+      // 'ok' — 저장했다. 'no_sub' — 살아 있는 구독이 없다(해지·만료). 둘 다 이 화면에 남을 까닭이 없다.
+      try { localStorage.removeItem(초안키); } catch (e) { /* 남아도 다음 설문 때 지워진다 */ }
+      location.href = r === 'ok' ? '/checkout/done/' : '/mypage/';
+    }, function (e) {
+      console.error('설문 저장 실패', e);
+      보내는중 = false;
+      오류안내($('errToast'), '저장하지 못했어요.\n잠시 뒤 다시 눌러 주세요.');
+    });
+  });
+
+  /* 들어오면 — 로그인 · 구독 · 이 구독의 설문이 남았는지 본다.
+     결제 화면에서 막 넘어왔으면(cc_paid_pop) 메타 「구매」 신호를 여기서 보낸다 — 전에는 결제 완료 화면이 보냈는데
+     설문이 그 앞에 서면서 설문에서 나간 사람의 구매가 광고 쪽에서 빠지게 된다(2026-10-22). 결제 완료 화면도 같은
+     키(cc_px_buy · eventID)로 한 번만 보내므로 두 번 나가지 않는다. 표식(cc_paid_pop)은 완료 화면의 체크 애니메이션이 쓰므로 지우지 않는다. */
+  var 막결제 = false;
+  try { 막결제 = !!sessionStorage.getItem('cc_paid_pop'); } catch (e) { /* 못 읽으면 막 결제한 것으로 안 본다 */ }
+  window.ccHold?.(requireLogin().then(function (ok) {
+    if (!ok) return;
+    return Promise.all([getSubscription(), surveyNeeded()]).then(function (v) {
+      var s = v[0], 필요 = v[1];
+      if (!s || !billingView(s).live) { window.ccLeave?.(); location.replace('/mypage/'); return; }
+      if (막결제) {
+        var 결제키 = 'purchase-' + s.current_period_end, 처음 = true;
+        try { 처음 = localStorage.getItem('cc_px_buy') !== 결제키; localStorage.setItem('cc_px_buy', 결제키); } catch (e) { /* 못 적으면 eventID 에 맡긴다 */ }
+        if (처음) metaEvent('Purchase', { value: s.price_krw, currency: 'KRW' }, 결제키);
+      }
+      // 이미 답했다(뒤로 가기·새로고침) — 다음 화면으로 보낸다
+      if (!필요) { window.ccLeave?.(); location.replace(막결제 ? '/checkout/done/' : '/mypage/'); }
+    }, function (e) {
+      // 못 물어봤다 — 화면은 그대로 두고 쓰게 한다. 저장이 서버에서 다시 본다.
+      console.error('구독·설문 상태 조회 실패', e);
+    });
+  }));
+</script>
+</body>
+</html>

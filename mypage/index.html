@@ -395,7 +395,7 @@
      일이 거의 없어서, 그 사람은 자기가 고른 주제를 영영 못 받는다 — 아무 표시도 없이.
      `retryPending()` 은 보낼 것이 없거나 로그인 전이면 조용히 아무것도 안 한다. */
   import { retryPending, pullFromServer, readState, complete, client, forgetLocal } from '/assets/onboarding-store.js';
-  import { requireLogin, getTopics, COMMON_TOPIC, onboardingDone, FAIL, 이어갈곳 } from '/assets/mypage-data.js';
+  import { requireLogin, getTopics, COMMON_TOPIC, onboardingDone, FAIL, 이어갈곳, surveyNeeded } from '/assets/mypage-data.js';
   import { readTopicMap, trackFromJobs } from '/assets/topic-map.js';
   import { 하단안내, 오류안내 } from '/assets/toast.js';
   import { 막대로 } from '/assets/skeleton.js';
@@ -411,6 +411,12 @@
       return true;
     });
   };
+
+  /* 결제 직후 설문을 안 끝낸 사람은 설문으로 다시 보낸다 (2026-10-22 사용자 확정 — career-coach 0208).
+     구독·발송은 막지 않는다 — 이 화면 대신 설문을 먼저 보일 뿐이다. 못 물어봤으면 보내지 않는다(그대로 마이페이지). */
+  var 설문남음 = requireLogin().then(function (ok) { return ok ? surveyNeeded().catch(function () { return false; }) : false; });
+  window.ccMaybeLeave?.(설문남음);
+  설문남음.then(function (남음) { if (남음) { window.ccLeave?.(); location.replace('/checkout/survey/'); } });
 
   /* 월·수·금 줄 — 고치는 화면(mypage/topics)이 읽는 것과 같은 서버 값이다 */
   var 확인 = requireLogin().then(마친사람);

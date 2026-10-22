@@ -792,7 +792,7 @@
       if (charged === '개시') {
         try { sessionStorage.removeItem('cc_newcard'); } catch (e) { /* 이 탭의 「다른 카드로」 표시 — 걷혔으면 지운다 */ }
         try { sessionStorage.setItem('cc_paid_pop', '1'); } catch (e) { /* 못 적으면 완료 화면 체크가 튀지 않고 그냥 보인다 */ }
-        location.href = '/checkout/done/';
+        location.href = '/checkout/survey/';   // 결제 직후 필수 설문 → 결제 완료(2026-10-22 사용자 확정 — 구독은 이미 열렸다)
       }
       // 카드 변경은 걷지 않는다 — 카드는 보관됐다. 단 「변경 주소로 왔지만 구독 중이 아닌」 사람(변경요청 && !변경)은 요금제를 실어
       // 첫 결제를 걸었으므로, 그 청구실패·준비실패는 아래 첫 결제 갈래(창)로 말한다 — 「변경 완료」로 덮으면 결제가 안 된 것을 모른다(2026-10-19 점검).
