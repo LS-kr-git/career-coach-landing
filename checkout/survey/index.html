@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<script src="/assets/no-input-zoom.js"></script>
+<script src="/assets/no-input-zoom.js?v=7bdea81a"></script>
 <meta name="color-scheme" content="only light">
 <meta name="format-detection" content="telephone=no">
 <meta name="robots" content="noindex,nofollow"><title>두 가지만 알려 주세요 — 커리어코치</title>
@@ -17,11 +17,11 @@
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.89.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.90.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.91.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="modulepreload" href="/assets/browser-mark.js">
-<link rel="modulepreload" href="/assets/mypage-data.js">
-<link rel="modulepreload" href="/assets/supabase-config.js">
-<link rel="modulepreload" href="/assets/toast.js">
-<link rel="modulepreload" href="/assets/track.js">
+<link rel="modulepreload" href="/assets/browser-mark.js?v=55ab00c8">
+<link rel="modulepreload" href="/assets/mypage-data.js?v=3a60e775">
+<link rel="modulepreload" href="/assets/supabase-config.js?v=1389b656">
+<link rel="modulepreload" href="/assets/toast.js?v=f8247e72">
+<link rel="modulepreload" href="/assets/track.js?v=8a4c7dcf">
 <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/+esm" crossorigin>
 <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/functions-js@2.117.3/+esm" crossorigin>
 <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/postgrest-js@2.117.3/+esm" crossorigin>
@@ -33,8 +33,8 @@
 <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/iceberg-js@0.8.1/+esm" crossorigin>
 <!-- /미리받기 -->
 <link rel="stylesheet" href="/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
-<link rel="stylesheet" href="/assets/toast.css">
-<script src="/assets/steady.js"></script>
+<link rel="stylesheet" href="/assets/toast.css?v=ede5d5ac">
+<script src="/assets/steady.js?v=a2c1cb99"></script>
 <style>
   /* 결제 직후 필수 설문 — 2026-10-22 사용자 컨펌(목업 「구매후설문-구독자-v10」).
      결제 → 이 화면 → 결제 완료(/checkout/done/) → 마이페이지. 구독은 결제로 이미 시작됐다 — 이 화면은 구독과 무관하다.
@@ -112,9 +112,9 @@
 <button class="cta off" type="button" id="next" aria-disabled="true">다음</button>
 
 <script type="module">
-  import { metaEvent } from '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
-  import { requireLogin, getSubscription, billingView, surveyNeeded, saveSurvey } from '/assets/mypage-data.js';
-  import { 오류안내 } from '/assets/toast.js';
+  import { metaEvent } from '/assets/track.js?v=8a4c7dcf';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
+  import { requireLogin, getSubscription, billingView, surveyNeeded, saveSurvey } from '/assets/mypage-data.js?v=3a60e775';
+  import { 오류안내 } from '/assets/toast.js?v=f8247e72';
   var $ = function (id) { return document.getElementById(id); };
   var 칸들 = [$('reason'), $('wish')];
   var 다음 = $('next');

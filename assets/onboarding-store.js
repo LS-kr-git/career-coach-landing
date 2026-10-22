@@ -24,7 +24,7 @@
  *   보낼 것이 실제로 있을 때만 동적 import 한다. 1·2 단계는 CDN 을 아예 건드리지 않아
  *   화면이 그만큼 빨리 뜬다. (auth/callback/index.html 이 쓰는 방식과 같은 CDN·같은 설정 파일)
  */
-import { track } from '/assets/track.js';
+import { track } from '/assets/track.js?v=8a4c7dcf';
 
 const KEY = 'cc_onboarding';
 
@@ -132,9 +132,9 @@ export function client() {
       const [{ createClient }, cfg] = await Promise.all([
         // 판을 고정한다 — `@2` 면 상위 릴리스 하나가 우리 배포 없이 로그인·마이페이지 전체를 바꾼다
         // (2026-10-14 출시 전 점검. 그날 `@2` 가 풀리던 판 그대로다). 올릴 때는 일부러 올린다.
-        import('/assets/supabase-config.js').then((c) => c.loadSupabase()),
+        import('/assets/supabase-config.js?v=1389b656').then((c) => c.loadSupabase()),
         // 접속 정보는 /assets/supabase-config.js 한 곳에만 둔다 (2026-08-06 복구 훈련 결과).
-        import('/assets/supabase-config.js'),
+        import('/assets/supabase-config.js?v=1389b656'),
       ]);
       return createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
     })();
@@ -242,7 +242,7 @@ async function commit(state, supabase, session, retry) {
     // 다시 로그인하면 서버가 회원 행을 메운다(career-coach 0155). 핑퐁을 막으려고 10분에 한 번만 보낸다.
     if (/인증된 회원이 아닙니다/.test(error.message || '') && 다시로그인해도되나()) {
       await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
-      location.href = (await import('/assets/supabase-config.js')).KAKAO_LOGIN;
+      location.href = (await import('/assets/supabase-config.js?v=1389b656')).KAKAO_LOGIN;
       return { status: 'no-session' };
     }
     return { status: 'error' };
@@ -283,7 +283,7 @@ export async function saveOnboarding() {
     }
     const supabase = await client();
     const session = await liveSession(supabase);
-    if (!session) { location.href = (await import('/assets/supabase-config.js')).KAKAO_LOGIN; return { status: 'no-session' }; }
+    if (!session) { location.href = (await import('/assets/supabase-config.js?v=1389b656')).KAKAO_LOGIN; return { status: 'no-session' }; }
     // 지금 로그인한 사람이 이 화면에서 직접 고르고 누른 값이다 — 그 사람 것으로 표시한다.
     writeState({ owner: session.user.id });
     return await commit(state, supabase, session, false);

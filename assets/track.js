@@ -24,8 +24,8 @@
 // 접속 정보는 /assets/supabase-config.js 한 곳에만 둔다 (2026-08-06 복구 훈련 결과).
 // 복원하면 프로젝트 ref 가 바뀌는데, 그때 고칠 곳이 세 군데였다. 이제 한 군데다.
 // 같은 오리진 파일이라 서드파티 CDN 의존이 생기지 않는다 — 그건 아래 주의사항 그대로다.
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from '/assets/supabase-config.js';
-import { browserMark } from '/assets/browser-mark.js';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '/assets/supabase-config.js?v=1389b656';
+import { browserMark } from '/assets/browser-mark.js?v=55ab00c8';
 
 const API = SUPABASE_URL;
 const KEY = SUPABASE_ANON_KEY;
@@ -438,9 +438,9 @@ function 화면오류(src) {
   if (화면오류안내) return;
   try { if (new URL(src).origin !== location.origin) return; } catch { return; }
   화면오류안내 = true;
-  import('/assets/toast.js').then(({ 오류안내 }) => {
-    if (!document.querySelector('link[href="/assets/toast.css"]')) {
-      const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = '/assets/toast.css'; document.head.appendChild(l);
+  import('/assets/toast.js?v=f8247e72').then(({ 오류안내 }) => {
+    if (!document.querySelector('link[href="/assets/toast.css?v=ede5d5ac"]')) {
+      const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = '/assets/toast.css?v=ede5d5ac'; document.head.appendChild(l);
     }
     const p = document.createElement('p');
     p.className = 'cc-toast float'; p.setAttribute('role', 'alert'); p.hidden = true;

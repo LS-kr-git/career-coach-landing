@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="/assets/no-input-zoom.js"></script>
+<script src="/assets/no-input-zoom.js?v=7bdea81a"></script>
 <meta name="color-scheme" content="only light">
 <meta name="format-detection" content="telephone=no">
 <title>회원 탈퇴 — 커리어코치</title>
@@ -23,12 +23,12 @@
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.89.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.90.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.91.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="modulepreload" href="/assets/browser-mark.js">
-<link rel="modulepreload" href="/assets/mypage-data.js">
-<link rel="modulepreload" href="/assets/onboarding-store.js">
-<link rel="modulepreload" href="/assets/supabase-config.js">
-<link rel="modulepreload" href="/assets/toast.js">
-<link rel="modulepreload" href="/assets/track.js">
+<link rel="modulepreload" href="/assets/browser-mark.js?v=55ab00c8">
+<link rel="modulepreload" href="/assets/mypage-data.js?v=3a60e775">
+<link rel="modulepreload" href="/assets/onboarding-store.js?v=b6c28dd2">
+<link rel="modulepreload" href="/assets/supabase-config.js?v=1389b656">
+<link rel="modulepreload" href="/assets/toast.js?v=f8247e72">
+<link rel="modulepreload" href="/assets/track.js?v=8a4c7dcf">
 <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/+esm" crossorigin>
 <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/functions-js@2.117.3/+esm" crossorigin>
 <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/postgrest-js@2.117.3/+esm" crossorigin>
@@ -40,10 +40,10 @@
 <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/iceberg-js@0.8.1/+esm" crossorigin>
 <!-- /미리받기 -->
 <link rel="stylesheet" href="/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
-<link rel="stylesheet" href="/assets/toast.css">
-<link rel="stylesheet" href="/assets/modal.css">
-<script src="/assets/modal.js" defer></script>
-<script src="/assets/steady.js"></script>
+<link rel="stylesheet" href="/assets/toast.css?v=ede5d5ac">
+<link rel="stylesheet" href="/assets/modal.css?v=afc88399">
+<script src="/assets/modal.js?v=028639ce" defer></script>
+<script src="/assets/steady.js?v=a2c1cb99"></script>
 <style>
   :root{
     color-scheme: only light;
@@ -209,9 +209,9 @@
   <button class="cta danger" type="button" id="go" disabled><span id="lab">탈퇴하기</span></button>
 </div>
 <script type="module">
-  import { requireLogin, getSubscription, billingView, withdraw, FAIL } from '/assets/mypage-data.js';
-  import { 오류안내 } from '/assets/toast.js';
-  import { client, forgetLocal } from '/assets/onboarding-store.js';
+  import { requireLogin, getSubscription, billingView, withdraw, FAIL } from '/assets/mypage-data.js?v=3a60e775';
+  import { 오류안내 } from '/assets/toast.js?v=f8247e72';
+  import { client, forgetLocal } from '/assets/onboarding-store.js?v=b6c28dd2';
   const $ = (id) => document.getElementById(id);
   const go = $('go'), lab = $('lab'), agree = $('agree');
   let 막힘 = true;          // 구독 상태를 읽기 전에는 누를 수 없다

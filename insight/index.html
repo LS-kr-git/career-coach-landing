@@ -8,7 +8,7 @@
      GitHub Pages 는 HTTP 헤더를 못 준다 — 이 meta 가 유일한 수단이다 (전문-열람-규칙 4절). -->
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="/assets/no-input-zoom.js"></script>
+<script src="/assets/no-input-zoom.js?v=7bdea81a"></script>
 <meta name="color-scheme" content="only light">
 <meta name="format-detection" content="telephone=no">
 <meta name="robots" content="noindex,nofollow">
@@ -21,17 +21,17 @@
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.89.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.90.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.91.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="modulepreload" href="/assets/browser-mark.js">
-<link rel="modulepreload" href="/assets/mypage-data.js">
-<link rel="modulepreload" href="/assets/skeleton.js">
-<link rel="modulepreload" href="/assets/supabase-config.js">
-<link rel="modulepreload" href="/assets/toast.js">
-<link rel="modulepreload" href="/assets/track.js">
+<link rel="modulepreload" href="/assets/browser-mark.js?v=55ab00c8">
+<link rel="modulepreload" href="/assets/mypage-data.js?v=3a60e775">
+<link rel="modulepreload" href="/assets/skeleton.js?v=ac8118b7">
+<link rel="modulepreload" href="/assets/supabase-config.js?v=1389b656">
+<link rel="modulepreload" href="/assets/toast.js?v=f8247e72">
+<link rel="modulepreload" href="/assets/track.js?v=8a4c7dcf">
 <!-- /미리받기 -->
 <link rel="stylesheet" href="/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
-<link rel="stylesheet" href="/assets/toast.css">
-<link rel="stylesheet" href="/assets/skeleton.css">
-<script src="/assets/steady.js"></script>
+<link rel="stylesheet" href="/assets/toast.css?v=ede5d5ac">
+<link rel="stylesheet" href="/assets/skeleton.css?v=13150b73">
+<script src="/assets/steady.js?v=a2c1cb99"></script>
 <style>
   /* 커리어코치 디자인 시스템 — terms.html 과 같은 토큰·폭·헤더를 쓴다.
      이 페이지에서 새로 둔 값은 --amber-800(잠김 알약 글자색, 2026-10-04)과 --ink-*(아래)다. */
@@ -291,12 +291,12 @@
 </div>
 
 <script type="module">
-  import '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
+  import '/assets/track.js?v=8a4c7dcf';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
   // 접속 정보는 /assets/supabase-config.js 한 곳에만 둔다 (2026-08-06 복구 훈련 결과).
-  import { SUPABASE_URL, SUPABASE_ANON_KEY } from '/assets/supabase-config.js';
-  import { 오류안내, 하단안내 } from '/assets/toast.js';
-  import { 막대 } from '/assets/skeleton.js';
-  import { FAIL } from '/assets/mypage-data.js';
+  import { SUPABASE_URL, SUPABASE_ANON_KEY } from '/assets/supabase-config.js?v=1389b656';
+  import { 오류안내, 하단안내 } from '/assets/toast.js?v=f8247e72';
+  import { 막대 } from '/assets/skeleton.js?v=ac8118b7';
+  import { FAIL } from '/assets/mypage-data.js?v=3a60e775';
 
   // supabase-js 를 부르지 않는다. 여기서 하는 일은 RPC POST 한두 번이고,
   // 그것 때문에 SDK 수백 KB 를 내려보낼 이유가 없다 (assets/track.js 와 같은 판단).

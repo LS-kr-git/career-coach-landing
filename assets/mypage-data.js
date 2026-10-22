@@ -32,7 +32,7 @@
  *    아래 view 함수들은 순수 함수라 이 갈래를 안 지나고, 그래서 검사가 브라우저 없이 돈다.
  */
 async function supa() {
-  const { client } = await import('/assets/onboarding-store.js');
+  const { client } = await import('/assets/onboarding-store.js?v=b6c28dd2');
   return client();
 }
 
@@ -120,11 +120,11 @@ export const SUNDAY_STATIC = [
  * `next` 를 주면 로그인 뒤 그리로 돌아온다(assets/return-to.js 의 허용 목록 안에서만).
  */
 export async function requireLogin(next) {
-  const { client, liveSession } = await import('/assets/onboarding-store.js');
+  const { client, liveSession } = await import('/assets/onboarding-store.js?v=b6c28dd2');
   if (!(await liveSession(await client()))) {   // 탈퇴·삭제돼 서버가 모르는 세션도 로그인 안 한 것으로 본다
-    if (next) (await import('/assets/return-to.js')).rememberNext(next);
+    if (next) (await import('/assets/return-to.js?v=6b0ef5d8')).rememberNext(next);
     window.ccLeave?.();   // 떠나는 중이다 — 이 화면을 내보이지 않는다(assets/steady.js)
-    location.replace((await import('/assets/supabase-config.js')).KAKAO_LOGIN);   // 가입·로그인 공통 입구
+    location.replace((await import('/assets/supabase-config.js?v=1389b656')).KAKAO_LOGIN);   // 가입·로그인 공통 입구
     return false;
   }
   return true;
@@ -185,12 +185,12 @@ export function 온보딩마침판정(pref, jobs) {
  * 못 물어봤으면 던진다 — 부르는 쪽이 지금까지의 길로 간다.
  */
 export async function 이어갈곳({ 받음 = false } = {}) {
-  const store = await import('/assets/onboarding-store.js');
+  const store = await import('/assets/onboarding-store.js?v=b6c28dd2');
   // 서버 값(마쳤으면 선호, 하는 중이면 1·2단계 진행 기록 — 0163)을 이 기기에 먼저 깐다. 못 받으면 이 기기 값으로 가되 남긴다.
   // 방금 받아 둔 쪽(랜딩)은 `받음` 으로 건너뛴다 — 같은 조회를 두 번 하면 3초 폴백으로 빠지기 쉽다(검사관 ⑩).
   if (!받음) {
     await store.pullFromServer().catch(async (e) => {
-      (await import('/assets/track.js')).track('client_error', { msg: 'resume_pull:' + String(e?.message || e).slice(0, 80) });
+      (await import('/assets/track.js?v=8a4c7dcf')).track('client_error', { msg: 'resume_pull:' + String(e?.message || e).slice(0, 80) });
     });
   }
   const 마침 = await onboardingDone();
@@ -304,7 +304,7 @@ const BILLING_FN = 'portone-6r2k9tvq';
 // `billingKey` 가 없으면 **이미 보관된 카드**로 고른 요금제를 걷는다(`/charge-stored` — 다시 구독하는 사람의
 // 확인 창, 2026-10-19 사용자 지시). 답의 모양은 같다 — 결제 화면이 같은 갈래로 읽는다.
 export async function saveBillingKey(billingKey, plan) {
-  const { SUPABASE_URL } = await import('/assets/supabase-config.js');
+  const { SUPABASE_URL } = await import('/assets/supabase-config.js?v=1389b656');
   const supabase = await supa();
   const { data, error } = await supabase.auth.getSession();
   if (error) throw error;
@@ -315,7 +315,7 @@ export async function saveBillingKey(billingKey, plan) {
       authorization: `Bearer ${data.session.access_token}`,
       'content-type': 'application/json',
     },
-    body: JSON.stringify({ billingKey: billingKey || undefined, plan: plan || undefined, meta: (await import('/assets/track.js')).metaCookies() }),
+    body: JSON.stringify({ billingKey: billingKey || undefined, plan: plan || undefined, meta: (await import('/assets/track.js?v=8a4c7dcf')).metaCookies() }),
     // 인앱 브라우저에서 연결이 끊기면 답이 영영 안 와 「창을 닫지 말고」 덮개가 계속 돈다. 서버 쪽 청구·되묻기
     // 상한(30초+15초)보다 넉넉히 기다린 뒤 끊는다 — 끊기면 TimeoutError 로, 결제 화면이 구독이 열렸는지 물어 보고 다시 누르게 한다.
     // iOS 15 이하 사파리에는 AbortSignal.timeout 이 없다 — 없으면 시간 제한 없이 보낸다(결제를 막지 않는다).
@@ -670,7 +670,7 @@ export async function withdraw(reason) {
  * 'ok' 만 저장된 것이다. 'incomplete' 면 보낼 것이 없어 재시도 대상도 아니므로 `before` 로 되돌린다.
  */
 export async function savePrefs(before) {
-  const { saveOnboarding, writeState } = await import('/assets/onboarding-store.js');
+  const { saveOnboarding, writeState } = await import('/assets/onboarding-store.js?v=b6c28dd2');
   for (let 남은기회 = 5; ; 남은기회--) {
     const { status } = await saveOnboarding();
     if (status === 'busy' && 남은기회 > 0) { await new Promise((r) => setTimeout(r, 400)); continue; }

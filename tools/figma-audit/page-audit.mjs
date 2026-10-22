@@ -178,7 +178,7 @@ const checkScriptRefs = (file, src) => {
      2026-08-03 에 track.js 를 추가하고 실제로 '안 쓰는 자산' 오탐이 났다.
      경로가 틀렸을 때 잡아 주는 쪽이 더 중요하므로 존재 여부도 함께 본다. */
   for (const m of src.matchAll(/(?:from|import)\s*\(?\s*['"](\/assets\/[^'"]+)['"]/g)) {
-    const rel = m[1].replace(/^\//, '');
+    const rel = m[1].replace(/^\//, '').split(/[?#]/)[0];   // 판(?v=…, tools/asset-version)은 떼고 본다
     if (!existsSync(join(ROOT, rel))) {
       add('BLOCK', '깨진 모듈 import', file, m[1], '그 경로에 파일이 없습니다');
     } else {

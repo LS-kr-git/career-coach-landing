@@ -105,11 +105,12 @@ function visibleText(html) {
 }
 
 /* ── 모듈 그래프 ── */
-const importsOf = (src) => [...src.matchAll(/import\s+(?:[^'"()]*?\s+from\s+)?['"](\/assets\/[^'"]+\.js)['"]/g)].map((m) => m[1]);
+// 주소에 판(?v=…, tools/asset-version)이 붙어 있다 — 그대로 옮겨 적어야 브라우저가 같은 모듈로 알아본다. 파일은 판을 떼고 읽는다.
+const importsOf = (src) => [...src.matchAll(/import\s+(?:[^'"()]*?\s+from\s+)?['"](\/assets\/[^'"?]+\.js(?:\?v=[0-9a-f]+)?)['"]/g)].map((m) => m[1]);
 function moduleGraph(html) {
   const mods = [...html.matchAll(/<script\b[^>]*type="module"[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
   const all = new Set(); const q = mods.flatMap(importsOf);
-  while (q.length) { const f = q.shift(); if (all.has(f)) continue; all.add(f); q.push(...importsOf(read(f.slice(1)))); }
+  while (q.length) { const f = q.shift(); if (all.has(f)) continue; all.add(f); q.push(...importsOf(read(f.slice(1).split('?')[0]))); }
   return { files: [...all].sort(), code: mods.join('\n') };
 }
 
@@ -120,7 +121,7 @@ let CORE = new Set();
 
 function block(html, page) {
   const { files, code } = moduleGraph(html);
-  const usesApi = files.some((f) => /\/(track|supabase-config)\.js$/.test(f)) || /supabase-config\.js/.test(code);
+  const usesApi = files.some((f) => /\/(track|supabase-config)\.js(\?|$)/.test(f)) || /supabase-config\.js/.test(code);
   const sdk = NEEDS_SDK.test(code);
   const fonts = NO_FONT_PRELOAD.has(page) ? new Set() : new Set([...fontsOf(html), ...CORE]);
   const lines = [BEGIN];

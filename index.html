@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="/assets/no-input-zoom.js"></script>
+<script src="/assets/no-input-zoom.js?v=7bdea81a"></script>
 <meta name="color-scheme" content="only light">
 <meta name="format-detection" content="telephone=no">
 <!-- 랜딩 버전 지문 — 섹션 구성·제목·시안 값으로 만든다. 손으로 고치지 말고 `node tools/landing-version/fp.mjs --write` (page-audit 이 대조한다) -->
@@ -42,20 +42,20 @@ m=document.querySelector('meta[name="cc-lv"]');if(!돌아옴&&!바로가기&&m)l
 if(lv)vid=Array.prototype.map.call(crypto.getRandomValues(new Uint8Array(8)),function(x){return(x<16?'0':'')+x.toString(16)}).join('');
 }catch(e){lv='';vid='';var err=String(e&&e.message||e).slice(0,80)}window.ccVisit={lv:lv,vid:vid,err:err};})();</script>
 <script type="module" async>
-  import { pageView, track } from '/assets/track.js';
+  import { pageView, track } from '/assets/track.js?v=8a4c7dcf';
   const { lv, vid, err } = window.ccVisit;
   pageView('visit', lv ? { p: 'landing', lv, vid } : { p: 'landing' });
   if (err) track('client_error', { msg: 'landing_lv:' + err });
 </script>
 <!-- 미리받기 (tools/preload/build.mjs 가 만든다 — 손으로 고치지 마라) -->
 <link rel="preconnect" href="https://sxooygwggxeplzkfdbth.supabase.co" crossorigin>
-<link rel="modulepreload" href="/assets/browser-mark.js">
-<link rel="modulepreload" href="/assets/supabase-config.js">
-<link rel="modulepreload" href="/assets/toast.js">
-<link rel="modulepreload" href="/assets/track.js">
+<link rel="modulepreload" href="/assets/browser-mark.js?v=55ab00c8">
+<link rel="modulepreload" href="/assets/supabase-config.js?v=1389b656">
+<link rel="modulepreload" href="/assets/toast.js?v=f8247e72">
+<link rel="modulepreload" href="/assets/track.js?v=8a4c7dcf">
 <!-- /미리받기 -->
 <link rel="stylesheet" href="/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
-<script src="/assets/steady.js"></script>
+<script src="/assets/steady.js?v=a2c1cb99"></script>
 <!-- 🔴 로딩 속도 장치 — 아래 섹션 나중에 그리기 (2026-10-15 사용자 지시: 「랜딩이 바뀌어도 항상 유지」).
      셋째 섹션부터는 화면에 가까워질 때 그린다 — 첫 화면이 보통 망 2.9초 → 1.8초로 빨라졌다(실측).
      섹션 순서·개수·디자인이 바뀌어도 그대로 둔다. 지우거나 섹션을 다른 상자로 감싸면 page-audit 과 shift-audit 이 막는다.
@@ -68,10 +68,10 @@ addEventListener('click',function(e){if(e.target.closest&&e.target.closest('a[hr
 addEventListener('load',function(){setTimeout(function(){(window.requestIdleCallback||setTimeout)(off)},1500)})})();</script>
 <!-- 랜딩 스타일 — 시안 v71 의 <style> 을 순서 그대로 셋으로 나눠 옮겼다(2026-10-12 · 한 파일이 커서 올리는 길이 막혀). 순서를 바꾸지 마라 -->
 <!-- 🔴 2026-10-15: 시안 스위치(아래 hidden <i id=… data-v=…>)가 지금 값이 아닐 때만 맞는 규칙 332개를 뺐다(화면 변화 없음 · 계산 스타일 전수 대조). 스위치 값을 바꾸려면 커밋 dfab0f2 의 landing-*.css 에서 그 규칙을 되살려라 -->
-<link rel="stylesheet" href="/assets/landing-1.css">
-<link rel="stylesheet" href="/assets/landing-2.css">
-<link rel="stylesheet" href="/assets/landing-3.css">
-<link rel="stylesheet" href="/assets/toast.css">
+<link rel="stylesheet" href="/assets/landing-1.css?v=39eea740">
+<link rel="stylesheet" href="/assets/landing-2.css?v=8c9d4152">
+<link rel="stylesheet" href="/assets/landing-3.css?v=ffabb1a8">
+<link rel="stylesheet" href="/assets/toast.css?v=ede5d5ac">
 <style>
 /* ===== 첫 화면 카톡 카드 (2026-10-13 · 아티클 폰과 같은 크기, 파란 바탕 + 흰 카드) ===== */
 /* 카카오 로그인 실패로 돌아왔을 때 버튼 위 짧은 안내 (2026-10-14 · auth/callback 이 /?login=fail 로 보낸다)
@@ -485,12 +485,12 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 (()=>{
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3)e.target.classList.add("in");else if(e.intersectionRatio===0)e.target.classList.remove("in")}),{threshold:[0,.3]});
 io.observe(document.getElementById("safesec"))})();</script>
-<script src="/assets/landing.js"></script>
+<script src="/assets/landing.js?v=98241af4"></script>
 <script type="module">
   // 유입 경로 기록. 실패해도 화면에 영향이 없다 (track.js 가 예외를 삼킨다).
-  import { track } from '/assets/track.js';
-  import { KAKAO_LOGIN, SUPABASE_URL } from '/assets/supabase-config.js';
-  import { 오류안내 } from '/assets/toast.js';
+  import { track } from '/assets/track.js?v=8a4c7dcf';
+  import { KAKAO_LOGIN, SUPABASE_URL } from '/assets/supabase-config.js?v=1389b656';
+  import { 오류안내 } from '/assets/toast.js?v=f8247e72';
   // 랜딩 섹션 도달률 (2026-10-15 사용자 확정) — 방문마다 버전 지문(lv)과 무작위 표(vid)를 붙이고,
   // 더 아래 섹션에 닿을 때마다 「가장 깊이 간 섹션 번호」를 보낸다. 어드민 「가입 퍼널」이 그 방문의 가장 큰 값을 센다.
   // 닿았다 = 섹션의 절반이 보였거나 섹션이 화면의 절반을 채웠다. 첫 섹션은 방문 자체가 도달이라 안 보낸다.
@@ -721,7 +721,7 @@ io.observe(document.getElementById("safesec"))})();</script>
     }
     // 휴대폰이면 카카오 웹 로그인 화면을 건너뛰고 카카오톡 앱으로 바로 (2026-10-14 사용자 지시 · assets/kakao-login.js).
     // 준비가 안 됐거나 실패하면 위 a.href(웹 로그인)로 그대로 간다.
-    import('/assets/kakao-login.js').then((k) => {
+    import('/assets/kakao-login.js?v=1eaca9db').then((k) => {
       if (!k.앱전환) return;
       앱 = k;
       return k.준비(앱실패);
@@ -733,9 +733,9 @@ io.observe(document.getElementById("safesec"))})();</script>
     let 정함 = false;
     // 행선지는 로그인 콜백과 같은 판정이다(mypage-data `이어갈곳` — 2026-10-16 사용자 지시): 온보딩·결제 다 함 → 마이페이지,
     // 온보딩만 다 함 → 결제 화면, 하는 중 → 확정한 다음 단계(서버 진행 기록 0163 을 깐 뒤).
-    const 물음 = import('/assets/onboarding-store.js').then((s) => s.pullFromServer().then(async (답) => {
+    const 물음 = import('/assets/onboarding-store.js?v=b6c28dd2').then((s) => s.pullFromServer().then(async (답) => {
       if (답 === 'no-session') { 로그인전(); return; }   // 탈퇴·삭제로 세션이 죽었다 — 카카오 길로
-      const 갈곳 = await (await import('/assets/mypage-data.js')).이어갈곳({ 받음: true });
+      const 갈곳 = await (await import('/assets/mypage-data.js?v=3a60e775')).이어갈곳({ 받음: true });
       for (const a of 버튼) a.href = 갈곳;
     })).catch(실패).finally(() => { 정함 = true; });
     let 기다림 = false;
@@ -751,7 +751,7 @@ io.observe(document.getElementById("safesec"))})();</script>
       // 살아 있는 동안(브라우저가 1초 남짓 쳐 준다)만 되므로, 답을 기다리는 사이 앱 전환 준비를 같이 해 둔다.
       let 앱 = null;
       // 기록은 남기지 않는다 — 세션이 멀쩡한 사람은 곧 다른 화면으로 넘어가며 이 요청이 끊기는 게 정상이다.
-      import('/assets/kakao-login.js').then((k) => k.앱전환 && k.준비(() => {}).then(() => { 앱 = k; })).catch(() => {});
+      import('/assets/kakao-login.js?v=1eaca9db').then((k) => k.앱전환 && k.준비(() => {}).then(() => { 앱 = k; })).catch(() => {});
       Promise.race([물음, new Promise((r) => setTimeout(r, 3000))]).then(() => {
         if (!a.href.startsWith(SUPABASE_URL)) { location.href = a.href; return; }
         const 기록 = track('signup_start', 버튼표(a));   // 카카오 로그인 입구로 간다
@@ -769,8 +769,8 @@ io.observe(document.getElementById("safesec"))})();</script>
   // 지금 브라우저에 받아 둔다. 그 화면에서 가장 오래 걸리던 것이 supabase-js(9개 파일·약 75KB, 세 겹으로 이어 받음)다.
   // 화면을 다 그린 뒤 한가할 때만 받는다 — 랜딩이 늦게 뜨면 안 된다. 실패해도 그 화면이 평소처럼 받는다.
   if (!로그인됨) addEventListener('load', () => (window.requestIdleCallback || setTimeout)(() => {
-    import('/assets/supabase-config.js').then((c) => import(c.SUPABASE_JS)).catch(() => {});
-    for (const u of ['/auth/callback/', '/assets/return-to.js', '/assets/onboarding-store.js', '/onboarding/1/']) fetch(u).catch(() => {});
+    import('/assets/supabase-config.js?v=1389b656').then((c) => import(c.SUPABASE_JS)).catch(() => {});
+    for (const u of ['/auth/callback/', '/assets/return-to.js?v=6b0ef5d8', '/assets/onboarding-store.js?v=b6c28dd2', '/onboarding/1/']) fetch(u).catch(() => {});
   }, { timeout: 3000 }), { once: true });
   // 카카오 로그인이 끝나지 못하고 돌아온 경우 — 안내를 띄우고 한 건 남긴다. `why`·`code` 는 콜백이 실어 보낸 것이다.
   const 돌아옴 = new URLSearchParams(location.search);

@@ -103,7 +103,7 @@ const slotSet=(id,t)=>{const el=$(id);el.dataset.t=t;clearTimeout(el._t);if(!el.
  set(5000)})();
 // 첫 카톡까지 — 결제 화면 시계와 같은 자(firstSendDay: 영업일·공휴일·서울 시각 08:00)로 센다. 기기 시간대·주말을 따로 세지 않는다(2026-10-15).
 // 이 파일은 모듈이 아니라 동적 import 로 받는다. 못 받으면 마크업의 「--:--:--」 그대로 둔다 — 틀린 시각을 세지 않는다.
-import("/assets/mypage-data.js").then(({firstSendDay})=>{const el=$("cdv");let last="";const tick=()=>{const n=new Date(),t=new Date(Date.parse(firstSendDay(n)+"T08:00:00+09:00"));const d=Math.floor((t-n)/1000),p=x=>String(x).padStart(2,"0");const v=$("ck").dataset.v,ms=(t-n)%1000,fr=v==="2"?`.${Math.floor(ms/100)}`:v==="3"||v==="4"?`.${String(Math.floor(ms/10)).padStart(2,"0")}`:v==="5"?`.${String(ms).padStart(3,"0")}`:"";const h=`<span>${p(Math.floor(d/3600))}</span>:<span>${p(Math.floor(d%3600/60))}</span>:<span>${p(d%60)}</span>`+(fr?`<i class="cfr${v==="4"?" big":""}">${fr}</i>`:"");if(h!==last){el.innerHTML=h;last=h}};const loop=()=>{tick();requestAnimationFrame(loop)};loop()});   // 실패는 삼키지 않는다 — track.js 의 오류 보고가 받는다 · 글자가 바뀔 때만 쓴다(매 프레임 innerHTML 을 갈면 프레임마다 스타일 재계산이 돈다 — 2026-10-15 실측)
+import("/assets/mypage-data.js?v=3a60e775").then(({firstSendDay})=>{const el=$("cdv");let last="";const tick=()=>{const n=new Date(),t=new Date(Date.parse(firstSendDay(n)+"T08:00:00+09:00"));const d=Math.floor((t-n)/1000),p=x=>String(x).padStart(2,"0");const v=$("ck").dataset.v,ms=(t-n)%1000,fr=v==="2"?`.${Math.floor(ms/100)}`:v==="3"||v==="4"?`.${String(Math.floor(ms/10)).padStart(2,"0")}`:v==="5"?`.${String(ms).padStart(3,"0")}`:"";const h=`<span>${p(Math.floor(d/3600))}</span>:<span>${p(Math.floor(d%3600/60))}</span>:<span>${p(d%60)}</span>`+(fr?`<i class="cfr${v==="4"?" big":""}">${fr}</i>`:"");if(h!==last){el.innerHTML=h;last=h}};const loop=()=>{tick();requestAnimationFrame(loop)};loop()});   // 실패는 삼키지 않는다 — track.js 의 오류 보고가 받는다 · 글자가 바뀔 때만 쓴다(매 프레임 innerHTML 을 갈면 프레임마다 스타일 재계산이 돈다 — 2026-10-15 실측)
 (()=>{const sal=$("sal"),rg=sal.querySelector('input[type=range]');let demo=0;
  const fill=()=>rg.style.setProperty("--fill",((rg.value-rg.min)/(rg.max-rg.min)*100)+"%");rg.addEventListener("input",fill);fill();
  const run=()=>{if(sal.dataset.v!=="7")return;let t=0;clearInterval(demo);demo=setInterval(()=>{t+=1;const v=Math.round(4000+3000*Math.sin(t/12*Math.PI));rg.value=v;rg.dispatchEvent(new Event("input"));if(t>=24){clearInterval(demo);rg.value=4000;rg.dispatchEvent(new Event("input"))}},70)};
@@ -172,7 +172,7 @@ new IntersectionObserver(es=>es.forEach(e=>{const w=$("stw");if(e.isIntersecting
 /* 맨 위에서 더 당긴 자리 = 흰 머리줄 색 (2026-10-15 사용자 지시) — 공용 assets/overscroll-top.js 를 붙인다.
    맨 아래는 html·body 바탕(--g100, footer 와 같은 색) 그대로. */
 document.documentElement.style.setProperty("--overscroll-top", "#fff");
-document.body.appendChild(document.createElement("script")).src = "/assets/overscroll-top.js";
+document.body.appendChild(document.createElement("script")).src = "/assets/overscroll-top.js?v=c959236e";
 
 // 첫 화면 카드는 높이를 줄이고(3줄 남짓), 카드 아래 「아래로 더 보기」로 나머지를 읽는다(S2). 한 번 누르면 버튼이 가리던 줄부터 한 화면만큼 내려간다
 function moreBtn(ab){const f=document.createElement("div");f.className="mfd";const bt=document.createElement("button");bt.type="button";bt.className="mbtn";ab.append(f,bt);

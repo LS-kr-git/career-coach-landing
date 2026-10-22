@@ -15,7 +15,7 @@
  *    앱을 안 연다. 그래서 SDK 와 state 를 미리 받아 두고, 준비가 안 됐으면 웹 로그인 주소(a.href)로 그냥 간다.
  *    이 파일의 어느 단계가 죽어도 가입은 지금까지의 웹 로그인으로 이어진다.
  */
-import { KAKAO_LOGIN } from '/assets/supabase-config.js';
+import { KAKAO_LOGIN } from '/assets/supabase-config.js?v=1389b656';
 
 const JS_KEY = 'b2a5af1cfa45793727755867f2dd53db';   // 공개 값 — 카카오 콘솔 「JavaScript SDK 도메인」에 careercoach.my 만 열려 있다
 const START = 'https://sxooygwggxeplzkfdbth.supabase.co/functions/v1/kakao-start-3bc341t0';

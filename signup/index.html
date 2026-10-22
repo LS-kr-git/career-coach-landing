@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="/assets/no-input-zoom.js"></script>
+<script src="/assets/no-input-zoom.js?v=7bdea81a"></script>
 <meta name="color-scheme" content="only light">
 <meta name="robots" content="noindex">
 <title>커리어코치</title>
@@ -13,13 +13,13 @@
 <!-- 옛 가입 화면 자리 (2026-10-14 화면 삭제, 사용자 지시). 약관 동의는 카카오 동의 화면이 받으므로
      이 주소는 옛 광고·북마크로 들어온 사람을 카카오 로그인으로 넘겨주기만 한다. 화면이 없다. -->
 <script type="module">
-  import { KAKAO_LOGIN } from '/assets/supabase-config.js';
+  import { KAKAO_LOGIN } from '/assets/supabase-config.js?v=1389b656';
   // 기록은 넘기기를 막지 않는다 — 랜딩 스크립트가 죽었을 때 오는 안전망이라, 같은 track.js 가 죽어 있으면
   // 정적 import 로는 이 화면도 흰 화면이 됐다(2026-10-15 출시 검수 · 598b09f 때 실제로 그랬다).
   // 기록의 응답까지 0.6초만 기다린다 — track 이 약속을 돌려주기 전에는 기다림이 바로 풀려, 첫 기록이
   // 사전 확인을 오가는 사이에 카카오로 넘어가 통째로 끊겼다(2026-10-16 실측).
   Promise.race([
-    import('/assets/track.js').then((m) => m.track('signup_start', { p: 'signup_redirect' })),
+    import('/assets/track.js?v=8a4c7dcf').then((m) => m.track('signup_start', { p: 'signup_redirect' })),
     new Promise((r) => setTimeout(r, 600)),
   ]).catch(() => {}).finally(() => location.replace(KAKAO_LOGIN));
 </script>

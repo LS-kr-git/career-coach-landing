@@ -65,6 +65,10 @@ jobs:
       - name: 약관·개인정보·가입·온보딩 문구 대조 (2겹a)
         run: node tools/figma-audit/docs-audit.mjs
 
+      # 훅에도 단다(1.8겹) — 낡으면 배포 직후 10분 동안 새 HTML 이 옛 모듈을 써서 화면이 멈출 수 있다(2026-10-22).
+      - name: 자산 주소의 판이 최신인가 (tools/asset-version)
+        run: node tools/asset-version/build.mjs --check
+
       # 훅에는 안 단다 — 문구 한 줄 고칠 때마다 푸시가 막히면 안 된다. 낡아도 화면은 그대로이고 미리받기만 덜 된다.
       - name: 미리받기 묶음이 최신인가 (tools/preload)
         run: node tools/preload/build.mjs --check

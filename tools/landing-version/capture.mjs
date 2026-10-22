@@ -19,7 +19,9 @@ import { 랜딩구성, 지문, 적힌지문, 기록대조 } from './fp.mjs';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const 보관 = resolve(process.argv[2] || '');
 if (!process.argv[2] || !existsSync(보관)) throw new Error('landing-versions 가지를 펼친 폴더를 넘겨라');
-const A = (p) => readFileSync(join(ROOT, p.replace(/^\//, '')), 'utf8');
+// 보관본은 한 장에 다 넣으므로 자산 주소의 판(?v=…, tools/asset-version)은 뜻이 없다 — 떼고 읽고, 떼고 맞댄다.
+const 판떼기 = (t) => t.replace(/(\/assets\/[A-Za-z0-9_.-]+\.(?:js|css))\?v=[0-9a-f]+/g, '$1');
+const A = (p) => 판떼기(readFileSync(join(ROOT, p.replace(/^\//, '').split('?')[0]), 'utf8'));
 
 const 원문 = A('index.html');
 const 구성 = 랜딩구성(원문), fp = 지문(구성);

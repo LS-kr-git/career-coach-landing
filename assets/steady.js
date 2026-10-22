@@ -1,7 +1,7 @@
 /**
  * 페이지에 들어설 때 화면이 덜컹이지 않게 한다 (2026-10-14 사용자 지시 — 모든 페이지 · 모든 전환).
  * 모든 페이지의 <head> 에서 Pretendard 스타일시트 **바로 다음에** 동기로 부른다(async·defer·module 아님):
- *   <script src="/assets/steady.js"></script>
+ *   <script src="/assets/steady.js?v=a2c1cb99"></script>
  *
  * 덜컹임의 정체 (2026-10-14 실측 — 360px · 느린 망·CPU 4배에서 화면을 프레임 단위로 녹화)
  *   ① 글꼴 바꿔치기 — 첫 그림은 기본 글꼴로 그렸다가 Pretendard 조각이 도착할 때마다 다시 그린다.

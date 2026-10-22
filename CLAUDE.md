@@ -133,6 +133,7 @@ git fetch --unshallow          # 얕게 클론됐다면. 이미 깊으면 아무
 | 1.2 | `tools/figma-audit/tree-audit.mjs` | 모든 푸시 (node 있을 때) | 섹션 밖으로 나간 고아 노드 |
 | 1.5 | `tools/roles/build.mjs --check` | 모든 푸시 (node 있을 때) | 온보딩 직군 목록 ↔ `taxonomy.json` |
 | 1.6 | `tools/mypage-data-check.mjs` | 모든 푸시 (node 있을 때) | 마이페이지 데이터 층(`assets/mypage-data.js`) ↔ 정적 마크업 (docs-audit 이 못 보는 JS 렌더 값). CI 에는 아직 없다 |
+| 1.8 | `tools/asset-version/build.mjs --check` | 모든 푸시 (node 있을 때) | `/assets/*.js·css` 주소의 판(`?v=` 내용 해시)이 지금 내용과 맞는가 (2026-10-22) |
 | 2a | `tools/figma-audit/docs-audit.mjs` | **`*.html` 이 하나라도 바뀐 푸시** | 약관·개인정보·가입·온보딩·마이페이지·결제 등 피그마가 기준인 화면 (커밋된 스냅샷 대조, 라이브 덤프 불필요) |
 | 2b | ~~`tools/figma-audit/audit.mjs`~~ | **2026-10-06 은퇴 · 10-13 삭제** | 랜딩 피그마 프레임이 레거시로 옮겨져 대조하지 않는다 |
 
@@ -218,6 +219,19 @@ node tools/transition-audit/run.mjs   # 구독자 화면의 링크를 다 눌러
 `assets/steady.js` 나 화면 전환·숨김에 닿는 것을 건드렸으면 돌린다. 5분 남짓, 크로미움이 없으면
 건너뛴다(훅에 안 단 이유는 위와 같다). 화면 목록은 저장소의 `*/index.html` 에서 저절로 들어온다.
 전환을 건너뛰던 옛 코드로 돌리면 누름·뒤로 항목이 거의 다 빨갛고(2026-10-15 실측 69개 중 68개), 링크가 안 눌려도 빨갛다 — 무엇을 왜 세는지는 그 파일 머리말.
+
+### 자산 주소의 판 (`tools/asset-version/`) (2026-10-22 사용자 지시)
+
+```
+node tools/asset-version/build.mjs     # /assets/*.js·css 주소에 ?v=<내용 해시> 를 다시 붙인다
+node tools/preload/build.mjs           # 그다음 미리받기 묶음 (import 주소를 그대로 옮겨 적는다)
+```
+
+**`assets/` 의 js·css 를 고쳤으면 이 두 줄을 돌려 같이 커밋한다** — 훅(1.8겹)과 CI 가 `--check` 로 막는다.
+Pages 는 모든 파일을 10분 기억하므로, 판이 없으면 배포 직후 새 HTML 이 옛 모듈을 불러 화면 스크립트가 통째로 멈춘다
+(2026-10-15 598b09f). 판은 내용 해시라 안 고친 파일은 그대로다. **주소를 손으로 쓰지 마라** — 같은 파일을 두 주소로
+부르면 브라우저가 모듈을 두 벌 띄워 상태가 갈라진다. 새 자산 참조는 판 없이 `"/assets/x.js"` 로 적고 도구를 돌리면 붙는다.
+글꼴(`assets/fonts/`)은 대상이 아니다.
 
 ### 훅에 없는 검사 — 미리받기 묶음 (`tools/preload/`) (2026-10-15)
 
