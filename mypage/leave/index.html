@@ -209,7 +209,7 @@
   <button class="cta danger" type="button" id="go" disabled><span id="lab">탈퇴하기</span></button>
 </div>
 <script type="module">
-  import { requireLogin, getSubscription, dayText, withdraw, FAIL } from '/assets/mypage-data.js';
+  import { requireLogin, getSubscription, billingView, withdraw, FAIL } from '/assets/mypage-data.js';
   import { 오류안내 } from '/assets/toast.js';
   import { client, forgetLocal } from '/assets/onboarding-store.js';
   const $ = (id) => document.getElementById(id);
@@ -220,13 +220,15 @@
     const ok = agree.getAttribute('aria-checked') === 'true';
     go.disabled = 막힘 || 실패 || !ok;
   }
-  /* 멤버십이 남아 있으면 — 이유·동의는 거두고 안내를 세운다. 날짜는 그 사람의 기간 끝이다 */
+  /* 멤버십이 남아 있으면 — 이유·동의는 거두고 안내를 세운다. 날짜는 결제 화면과 같은 값이다(billingView) —
+     `current_period_end` 를 그대로 쓰면 미납인 사람에게 이미 지난 날을, 05:40 뒤 결제한 사람에게 하루 이른 날을 말했다(2026-10-21 점검) */
   function block(s) {
     막힘 = true;
+    const v = s ? billingView(s) : {};
     $('block').hidden = false;
-    if (s && s.current_period_end) {
+    if (v.next) {
       $('blockDateL').textContent = s.cancel_at_period_end ? '이번 구독 종료일' : '다음 결제일';
-      $('blockDateV').textContent = dayText(s.current_period_end);
+      $('blockDateV').textContent = v.next;
       $('blockDate').hidden = false;
     }
     refresh();
@@ -278,6 +280,8 @@
   refresh();
   window.ccHold?.(requireLogin().then((ok) => ok ? getSubscription() : undefined).then((s) => {
     if (s === undefined) return;
+    // 판정은 서버(private.withdraw_member 의 'membership')와 같은 status 로 한다 — 종료일이 지난 해지 예약도 새벽 정리 전엔
+    // 서버가 막으므로 여기서도 막는다. 그때 billingView 는 날짜를 비워 지난 날을 말하지 않는다.
     if (s && ['trialing', 'active', 'past_due'].includes(s.status)) block(s);
     else { 막힘 = false; refresh(); }
   }, () => { 실패 = true; refresh(); 오류안내($('err'), FAIL.line); }));   // 버튼은 원래 글자로 잠그고 실패는 알약으로 (A3)

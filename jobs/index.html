@@ -83,6 +83,8 @@
   .row:last-child{border-bottom:1px solid var(--gray-200)}
   .grow{flex:1;min-width:0}
   .co-line{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  /* 띄어쓰기 없는 긴 글자열(주소·영문 이어쓰기)만 칸 안에서 접는다 — 보통 글은 그대로다. 360 에서 가로 스크롤이 생겼다(2026-10-21 점검) */
+  .co,.ttl{overflow-wrap:anywhere}
   .co{font-size:14px;line-height:20px;font-weight:700;color:var(--gray-800)}
   .meta{font-size:12px;line-height:16px;font-weight:500;color:var(--gray-400)}   /* 캡슐 없이 글자만 (M3) */
   .ttl{font-size:14px;line-height:20px;font-weight:400;color:var(--gray-600);margin-top:4px}
@@ -384,7 +386,8 @@
     try {
       const d = await load();
       $('loading').hidden = true;
-      if (d['상태'] === '구독필요') { $('closed').hidden = false; return; }
+      // 「지난 값부터」(assets/steady.js)가 #open 을 깔아 둔 채로 올 수 있다 — 끝난 구독 안내와 겹치지 않게 숨긴다(2026-10-21 점검)
+      if (d['상태'] === '구독필요') { $('open').hidden = true; $('closed').hidden = false; return; }
       if (d['상태'] !== '열림') return notice(MSG.blocked, '', MSG.askBlocked);   // 모르는 상태를 구독필요로 읽지 않는다
       숫자칸(d['지표'] || []);
       $('when').textContent = 기간(d['지표'] || []);

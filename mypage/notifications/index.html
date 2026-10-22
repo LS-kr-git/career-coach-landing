@@ -126,7 +126,7 @@
     var 원래 = !sw.checked; sw.disabled = true;
     setMarketing(sw.checked).then(function (r) {
       세움(r); var t = document.getElementById('mkToast'); t.textContent = marketingResultLine(r); 하단안내(t);
-    }, function () { sw.checked = 원래; sw.disabled = false; 오류안내(document.getElementById('errToast'), FAIL.line); });
+    }, function () { sw.checked = 원래; sw.disabled = false; 오류안내(document.getElementById('errToast'), FAIL.save); });   // 저장 실패는 불러오기 실패(line)와 다른 말(A2) — 2026-10-21 점검
   });
 </script>
 </body>

@@ -155,6 +155,8 @@
   .caret{color:var(--caret-new)}
   .sub{color:var(--muted)}
   .card-me .prof{gap:12px;padding:18px 18px 16px;border-bottom-color:var(--line)}
+  /* 긴 이메일(띄어쓰기 없음)이 카드 밖으로 나가 잘렸다 — 칸 안에서 접는다(2026-10-21 점검) */
+  #profName,#profAccount{overflow-wrap:anywhere}
   .card-me .avatar{width:40px;height:40px;background:#F59E0B;color:var(--ink);font-size:16px;font-weight:700}
   .card-me .t-h3{color:var(--ink)}
   .card-me .arch{padding:0 12px 12px}

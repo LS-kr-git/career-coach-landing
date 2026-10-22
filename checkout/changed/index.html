@@ -130,11 +130,12 @@
     if (!v.subscribed) { window.ccLeave?.(); location.replace('/mypage/billing/'); return; }
     // 미납 중이면 카드를 바꾼 그 자리에서 서버가 새 카드로 걷어 본다(2026-10-15 사용자 지시). 걷혔으면 구독이 active 로 돌아와
     // 아래 기본 문구가 된다. 그래도 미납이면 새 카드도 거절된 것 — 다음 재시도일(매일 새벽)이 다시 걷는다. 해지 예약이면 더 걷지 않는다.
-    if (s.status === 'past_due') $('lead').textContent = 밀린것걷어봄
+    // 미납이라도 해지 예약이면 서버가 새 카드로 걷지 않는다 — 「다시 결제돼요」가 결제 화면의 「…멤버십이 끝나요」와 엇갈렸다(2026-10-21 점검)
+    if (s.cancel_at_period_end && !밀린것걷어봄) $('lead').textContent = '해지 예약은 그대로예요.';
+    else if (s.status === 'past_due') $('lead').textContent = 밀린것걷어봄
       ? '새 카드로도 밀린 요금이 결제되지 않았어요. 카드 한도나 잔액을 확인해 주세요.'
       : '밀린 요금은 새 카드로 다시 결제돼요.';
     else if (밀린것걷어봄) $('lead').textContent = '밀린 요금을 새 카드로 결제했어요.';
-    else if (s.cancel_at_period_end) $('lead').textContent = '해지 예약은 그대로예요.';
     $('card').textContent = v.card;
     $('cardSub').textContent = v.cardSub;
     $('nextLabel').textContent = v.nextLabel;

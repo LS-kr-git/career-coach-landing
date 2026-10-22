@@ -26,6 +26,7 @@
 <link rel="stylesheet" href="/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
 <link rel="stylesheet" href="/assets/toast.css">
 <script src="/assets/steady.js"></script>
+<script src="/assets/kbd-press.js" data-sel=".arow,.c,.cta" defer></script>
 <style>
   :root{
     color-scheme: only light;   /* meta 와 같은 값 — CSS 로도 선언해 확실히 적용한다 */
@@ -184,10 +185,13 @@ document.querySelector('.cta').addEventListener('click',()=>{
     // 이미 마친 사람이면 마이페이지로 보낸다. 다시 골라 저장하면 서버 직군·근무지를 갈아엎는다(2026-10-15 출시 검수).
     import('/assets/onboarding-store.js')
       // 서버 값을 받아 적었을 때만 owner 가 찍힌다 — 로그인 전에 1단계에서 고른 값(owner 없음)을 「마친 사람」으로 읽지 않는다.
-      .then((m) => m.pullFromServer().then((r) => { const s = m.readState(); return r !== 'no-session' && !!s.owner && !s.pending && s.jobs?.length > 0; }))
+      .then((m) => m.pullFromServer().then((r) => { const s = m.readState(); return { 받음: r !== 'no-session', 마침: r !== 'no-session' && !!s.owner && !s.pending && s.jobs?.length > 0, jobs: s.jobs }; }))
       .catch(() => null)
-      .then((마침) => {
-        if (마침) location.replace('/mypage/');
+      .then((x) => {
+        if (x && x.마침) location.replace('/mypage/');
+        // 받아 왔으면(하는 중이던 진행 기록 포함) 실패가 아니다 — 받은 직무를 칩에 다시 그린다. 안 그리면 0개로 보이고
+        // 하나를 누르는 순간 받은 기록을 덮어썼다(2026-10-21 점검). 못 받았을 때만 알린다.
+        else if (x && x.받음) { if (x.jobs?.length) { window.ccStep1.set(x.jobs); window.ccOnChange?.(); } }
         else 오류안내(document.getElementById('errToast'), '설정을 불러오지 못해 처음 화면을 열었어요');
       });
   }

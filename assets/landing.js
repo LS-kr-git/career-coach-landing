@@ -158,6 +158,8 @@ new IntersectionObserver(es=>es.forEach(e=>{const w=$("stw");if(e.isIntersecting
 (()=>{const r=document.getElementById("reviews");let done=false,stop=false,raf=0;
  const halt=()=>{if(stop)return;stop=true;cancelAnimationFrame(raf);r.classList.remove("rvflow")};let tx=0,ty=0;
  r.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse")halt()});
+ /* ‹ › 는 #reviews 밖(형제)이라 위 멈춤이 안 걸려, 흐르는 동안 누르면 매 프레임 scrollLeft 덮어쓰기에 넘김이 지워졌다(2026-10-21 점검) */
+ r.parentElement.addEventListener("click",e=>{if(done&&e.target.closest(".cpv,.cnx"))halt()},true);   // 흐르기 전에 누른 것은 멈춤으로 남기지 않는다(되살림은 한 번 흐른 뒤에만 돈다)
  r.addEventListener("wheel",e=>{if(Math.abs(e.deltaX)>Math.abs(e.deltaY))halt()},{passive:true});
  r.addEventListener("touchstart",e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
  r.addEventListener("touchmove",e=>{const dx=Math.abs(e.touches[0].clientX-tx),dy=Math.abs(e.touches[0].clientY-ty);if(dx>8&&dx>dy)halt()},{passive:true});

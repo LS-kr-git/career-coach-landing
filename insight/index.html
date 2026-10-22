@@ -54,6 +54,8 @@
     background:#fff; color:var(--ink-800); line-height:1.6; -webkit-font-smoothing:antialiased;
   }
   .page{width:100%;max-width:var(--card-max);margin:0 auto;background:#fff;min-height:100vh;min-height:100svh}
+  /* 띄어쓰기 없는 긴 글자열(주소·영문 이어쓰기)만 칸 안에서 접는다 — 보통 글은 그대로다. 360 에서 가로 스크롤이 생겼다(2026-10-21 점검) */
+  #title,#body,.idx-t{overflow-wrap:anywhere}
 
   header{display:flex;align-items:center;gap:10px;padding:24px var(--pad-x)}
   .app-icon{width:29px;height:29px;border-radius:25%;background:#fff;display:flex;align-items:center;justify-content:center}
@@ -405,6 +407,8 @@
     window.ccNoKeep?.();   // 안내·실패 화면은 「지난 값」으로 적지 않는다(assets/steady.js)
     $('noticeT').textContent = t; $('noticeB').textContent = b || ''; $('noticeB').hidden = !b; $('noticeAsk').textContent = MSG.ask;
     $('noticeCard').hidden = false; $('notice').hidden = true; $('letter').hidden = true;
+    // 소장 목록·바닥 버튼은 #letter 밖에 있다 — 「이 편 열기」 뒤에 실패하면 안내 카드 밑에 남았다(2026-10-21 점검)
+    $('saved').hidden = true; $('makeup').hidden = true; $('subscribe').hidden = true;
   };
 
   /** RPC 한 번. 토큰은 본문(POST)으로만 나간다 — 쿼리스트링·로그·이벤트에 싣지 않는다.

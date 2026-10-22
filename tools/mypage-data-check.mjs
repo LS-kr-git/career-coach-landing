@@ -225,6 +225,14 @@ if (프로필.count !== 3) problems.push('01 프로필: 소장 편수가 그대�
 if (프로필.received !== 0 || 프로필.receivedFail) problems.push('01 프로필: 받은 편수 0 이 숫자로 안 나옵니다');
 const 옛서버 = data.profileView({ name: '가', provider: 'kakao', email: 'user@careercoach.my', saved_count: 3 });
 if (옛서버.received !== null || !옛서버.receivedFail) problems.push('01 프로필: 받은 편수가 없는데 실패 문구가 아닙니다 (지어낸 0)');
+// 머리글자는 글자 단위로 — 이모지를 반쪽 잘라 「�」 가 찍혔다. 공백뿐인 이름은 없는 것이다 — 「 님」 이 찍혔다(2026-10-21 점검).
+const 이모지 = data.profileView({ name: '🐶가', provider: 'kakao', email: 'u@x' });
+if (이모지.initial !== '🐶') problems.push(`01 프로필: 이모지 이름의 머리글자가 「${이모지.initial}」 입니다 (「🐶」 이어야 합니다)`);
+const 공백 = data.profileView({ name: '   ', provider: 'kakao', email: 'u@x' });
+if (공백.name !== EMPTY.name || 공백.initial !== '') problems.push(`01 프로필: 공백뿐인 이름이 「${공백.name}」 로 그려집니다 (EMPTY.name 이어야 합니다)`);
+/* 탈퇴 막힘 창의 날짜는 결제 화면과 같은 값(billingView.next)이다 — current_period_end 를 그대로 쓰면 미납인 사람에게 지난 날을 말했다(2026-10-21 점검) */
+{ const 탈퇴 = scriptOnly('mypage/leave/index.html');
+  if (/current_period_end/.test(탈퇴) || !/billingView\(/.test(탈퇴)) problems.push('탈퇴 화면: 막힘 창 날짜가 billingView 를 안 거치고 current_period_end 를 그대로 씁니다'); }
 
 /* 05 은 값이 서버에서 오지만 **표기 규칙은 피그마 기준 마크업**이다 — 날짜 「08. 07」,
    월 칩 「8월」, 해가 바뀌는 자리의 연도 구분. 그 세 모양이 마크업에 그대로 있는지 본다. */

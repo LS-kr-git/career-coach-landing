@@ -496,7 +496,8 @@ export function closeText(s) {
  * 전용 옛 화면을 걷으며 그 화면만 쓰던 빈 상태 문구(EMPTY.insight · insight 칸)를 지웠다.
  */
 export function profileView(p) {
-  const name = (p && p.name) || null;
+  // 공백뿐인 이름은 없는 것으로 본다 — 「 님」·빈 동그라미가 그려졌다. 머리글자는 글자 단위(Array.from)로 — 이모지를 반쪽 잘라 「�」가 찍혔다(2026-10-21 점검)
+  const name = (p && typeof p.name === 'string' && p.name.trim()) || null;
   const label = p && PROVIDER_LABEL[p.provider];
   const count = p && p.saved_count > 0 ? p.saved_count : null;
   // 받은 편 수(새 화면 머리 숫자) — 0 도 숫자다. 서버가 안 주면 null 이고 화면은 실패 문구를 그린다.
@@ -505,7 +506,7 @@ export function profileView(p) {
     count,
     received,
     receivedFail: p && received == null ? FAIL.line : null,
-    initial: name ? name.trim()[0] : '',
+    initial: name ? Array.from(name)[0] : '',
     name: name ? `${name} 님` : EMPTY.name,
     account: label && p.email ? `${label} · ${p.email}` : EMPTY.account,
   };
