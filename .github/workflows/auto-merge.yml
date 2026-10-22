@@ -59,8 +59,7 @@ jobs:
             랜딩 검수
             어드민 셸 검수
           # 하나라도 걸리면 합치지 않고 「사람 병합 필요」 댓글만 단다.
+          # 2026-10-22 사용자 지시 — 결제 화면만 사람이 합친다(워크플로·판정 스크립트는 풀었다).
           AUTOMERGE_EXCLUDE: |
-            .github/workflows/**
             checkout/**
-            tools/automerge.py
         run: python3 tools/automerge.py
