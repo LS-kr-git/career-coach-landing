@@ -21,6 +21,7 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -28,6 +29,7 @@ from pathlib import Path
 API = "https://api.github.com"
 표식 = "<!-- automerge:excluded -->"
 통과_결론 = {"success", "skipped", "neutral"}
+검사_다시보기, 검사_간격초 = 7, 10       # 검사 칸이 실행보다 늦게 끝날 때 최대 1분 다시 본다
 
 
 def 패턴_정규식(패턴: str) -> re.Pattern:
@@ -134,11 +136,24 @@ def _검사_판정(검사: list, 자기잡: str) -> tuple[str, str] | None:
     return None
 
 
+def _검사_다시보며(gh, sha: str, 자기잡: str) -> tuple[str, str] | None:
+    for 번 in range(검사_다시보기):
+        막힘 = _검사_판정(gh.전부(f"/commits/{sha}/check-runs", "check_runs"), 자기잡)
+        if not (막힘 and 막힘[0] == "기다린다"):
+            return 막힘
+        if 번 + 1 == 검사_다시보기:
+            print(f"::warning title=자동 병합::{막힘[1]} — 1분 기다려도 안 끝나 이번엔 안 합친다", file=sys.stderr)
+            return 막힘
+        time.sleep(검사_간격초)
+
+
 def 판정(gh: GitHub, pr: dict, 돌아야: list[str], 자기잡: str) -> tuple[str, str]:
     """('합친다'|'기다린다'|'안 합친다', 이유)."""
     sha = pr["head"]["sha"]
-    막힘 = (_실행_판정(gh.전부(f"/actions/runs?head_sha={sha}&event=pull_request", "workflow_runs"), 돌아야)
-          or _검사_판정(gh.전부(f"/commits/{sha}/check-runs", "check_runs"), 자기잡))
+    막힘 = _실행_판정(gh.전부(f"/actions/runs?head_sha={sha}&event=pull_request", "workflow_runs"), 돌아야)
+    # 🔴 (2026-10-22 #415) 「테스트」가 끝나 이 판정이 불린 2초 사이 그 job 의 검사 칸은 아직 「진행 중」이었고,
+    #    「기다린다」로 끝난 뒤 다시 불릴 사건이 없어 PR 이 멈췄다. 실행이 다 끝났는데 검사 칸만 늦으면 잠깐 다시 본다.
+    막힘 = 막힘 or _검사_다시보며(gh, sha, 자기잡)
     if 막힘:
         return 막힘
     상태 = gh.부른다("GET", f"/commits/{sha}/status")
