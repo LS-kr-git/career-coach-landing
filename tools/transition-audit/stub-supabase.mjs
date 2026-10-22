@@ -55,7 +55,7 @@ function receivedRows() {                                             // 이번 
 function subscriptionRow() {
   const end = addDays(kstNow(), 214);
   const base = {
-    code: 'm12', name: '12개월권', price_krw: 47200, period_unit: 'month', period_count: 12,
+    code: 'm12', name: '12개월권', price_krw: 47200, period_unit: 'month', period_count: 12, bonus_months: 4,
     status: 'active', cancel_at_period_end: false,
     current_period_end: end.toISOString().slice(0, 10) + 'T15:00:00+00:00',
     card_issuer: '현대카드', card_brand: 'VISA', card_last4: '4417',
@@ -81,7 +81,7 @@ const TABLE = {
   user_preference_job: () => [{ user_id: USER.id, job_code: '퍼포먼스마케팅' }, { user_id: USER.id, job_code: 'CRM마케팅' }],
   user_preference_region: () => [{ user_id: USER.id, region_code: '서울' }, { user_id: USER.id, region_code: '경기' }],
   plan: () => [
-    { code: 'm12', name: '12개월권', price_krw: 47200, period_unit: 'month', period_count: 12, is_active: true },
+    { code: 'm12', name: '12개월권', price_krw: 47200, period_unit: 'month', period_count: 12, bonus_months: 4, is_active: true },
     { code: 'm1', name: '1개월권', price_krw: 5900, period_unit: 'month', period_count: 1, is_active: true },
   ],
 };

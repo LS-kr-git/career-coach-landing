@@ -272,7 +272,7 @@ export async function getPlan() {
 export async function getPlans() {
   const supabase = await supa();
   const { data, error } = await supabase
-    .from('plan').select('code, name, price_krw, period_unit, period_count').eq('is_active', true);
+    .from('plan').select('code, name, price_krw, period_unit, period_count, bonus_months').eq('is_active', true);
   if (error) throw error;
   if (!data || !data.length) throw new Error('살아 있는 요금제가 없습니다');
   const 못그림 = data.find((p) => p.period_unit !== 'month');
@@ -403,19 +403,20 @@ const PERIOD_LABEL = { day: '일', month: '월', year: '년' };
 /** 「3,900원」 — 금액만. 결제 화면의 「오늘 결제 금액」처럼 기간이 붙지 않는 자리가 있다. */
 export function wonText(krw) { return krw.toLocaleString('ko-KR') + '원'; }
 
-/* 여러 달짜리 요금제가 덤으로 얹어 주는 달 수 — 「12개월권 = 8개월 값 + 4개월」(2026-10-05 사용자 확정).
-   금액이 아니라 기간 구성이라 여기 둔다. 금액은 여전히 서버 값만 쓴다. */
-const BONUS_MONTHS = { 12: 4 };
+/* 여러 달짜리 요금제가 덤으로 얹어 주는 달 수 — 요금제마다 서버 값(plan.bonus_months)이다.
+   12개월권(8+4개월)이면 4, 12개월권(4+8개월)이면 8. 전에는 여기서 「12개월이면 4」로 박아 두어서, 12개월권을 4+8 로
+   바꾸면 이미 8+4 로 산 사람의 마이페이지까지 틀리게 그렸다(career-coach 0208 · 2026-10-22). 값이 없으면 덤 없음. */
+const 덤달 = (plan) => Number(plan.bonus_months) || 0;
 
 /** 「8개월+4개월」 · 「1개월」 — 요금 카드 이름(결제 화면 26판과 같은 표기). */
-function 기간이름(n) {
-  const 덤 = BONUS_MONTHS[n];
+function 기간이름(plan) {
+  const n = plan.period_count, 덤 = 덤달(plan);
   return 덤 ? `${n - 덤}개월+${덤}개월` : `${n}개월`;
 }
 
 /** 「12개월권(8+4개월)」 · 「1개월권」 — 이용 중인 요금제의 「요금제」 칸. */
 export function planLabel(plan) {
-  const n = plan.period_count, 덤 = BONUS_MONTHS[n];
+  const n = plan.period_count, 덤 = 덤달(plan);
   return `${n}개월권${덤 ? `(${n - 덤}+${덤}개월)` : ''}`;
 }
 
@@ -423,7 +424,7 @@ export function planLabel(plan) {
 export function priceText(plan) {
   const n = plan.period_count;
   if (plan.period_unit === 'month' && n > 1) {
-    const 덤 = BONUS_MONTHS[n];
+    const 덤 = 덤달(plan);
     return `${n}개월${덤 ? `(${n - 덤}+${덤}개월)` : ''} ${wonText(plan.price_krw)}`;
   }
   return `${PERIOD_LABEL[plan.period_unit] || plan.period_unit} ${wonText(plan.price_krw)}`;
@@ -443,7 +444,7 @@ export function planCards(plans) {
     const 정가 = 한달 && n > 1 ? 한달.price_krw * n : null;
     return {
       code: p.code,
-      name: 기간이름(n),
+      name: 기간이름(p),
       day: wonText(Math.round(p.price_krw / 날수)),
       strike: 정가 && 정가 > p.price_krw ? wonText(정가) : null,
       pct: 정가 && 정가 > p.price_krw ? `${Math.round((1 - p.price_krw / 정가) * 100)}%` : null,
@@ -454,8 +455,8 @@ export function planCards(plans) {
       // 결제 화면 27판(2026-10-18 사용자 확정)만 쓰는 칸 — 마이페이지 「멤버십·결제」는 위 칸 그대로 쓴다.
       ticket: `${n}개월권`,
       buy: `${n}개월권 구독하기`,
-      gift: BONUS_MONTHS[n] ? `${BONUS_MONTHS[n]}개월 무료 증정` : null,
-      parts: BONUS_MONTHS[n] ? `${n - BONUS_MONTHS[n]}개월 + ${BONUS_MONTHS[n]}개월` : null,
+      gift: 덤달(p) ? `${덤달(p)}개월 무료 증정` : null,
+      parts: 덤달(p) ? `${n - 덤달(p)}개월 + ${덤달(p)}개월` : null,
       month: n > 1 ? wonText(Math.round(p.price_krw / n)) : null,
     };
   });

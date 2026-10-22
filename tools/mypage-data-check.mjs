@@ -150,8 +150,14 @@ for (const [화면, a, b] of [['01 프로필', 빈것, 실패한것], ['03 결�
 /* 03 요금 표기 — 금액은 아무 값이나(위와 같은 이유). 결제 화면 26판의 칸과 같은 모양이어야 한다. */
 {
   const 한달 = { code: 'm', price_krw: 1000, period_unit: 'month', period_count: 1 };
-  const 일년 = { code: 'y', price_krw: 8000, period_unit: 'month', period_count: 12 };
+  const 일년 = { code: 'y', price_krw: 8000, period_unit: 'month', period_count: 12, bonus_months: 4 };
+  // 덤 달 수는 요금제마다 서버 값이다 — 같은 12개월이어도 4+8 로 그린다(career-coach 0208 · 2026-10-22)
+  const 일년48 = { code: 'y2', price_krw: 8000, period_unit: 'month', period_count: 12, bonus_months: 8 };
   const 기대 = [
+    [data.planLabel(일년48), '12개월권(4+8개월)'],
+    [data.priceText(일년48), '12개월(4+8개월) 8,000원'],
+    [(([c]) => `${c.name}|${c.gift}|${c.parts}`)(data.planCards([일년48])), '4개월+8개월|8개월 무료 증정|4개월 + 8개월'],
+    [data.planLabel({ code: 'z', price_krw: 8000, period_unit: 'month', period_count: 12 }), '12개월권'],
     [data.priceText(한달), '월 1,000원'],
     [data.priceText(일년), '12개월(8+4개월) 8,000원'],
     [data.planLabel(일년), '12개월권(8+4개월)'],
