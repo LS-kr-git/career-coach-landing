@@ -197,7 +197,7 @@
 <p class="cc-toast float" id="toast" role="status" hidden>해지를 취소했어요. 멤버십이 이어져요</p>
 <p class="cc-toast float" id="errToast" role="alert" hidden></p>
 <script type="module">
-  import '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
+  import { track } from '/assets/track.js';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
   import { 하단안내, 오류안내 } from '/assets/toast.js';
   import { 막대로 } from '/assets/skeleton.js';
   /* 값은 전부 서버에서 온다 (career-coach 0086 `mypage_subscription` · `plan` 표).
@@ -212,6 +212,7 @@
     from '/assets/mypage-data.js';
 
   var $ = function (id) { return document.getElementById(id); };
+  var 지금 = null;   // 마지막으로 그린 구독 — 해지 취소 뒤 다시 읽기만 실패했을 때 쓴다(아래 되돌리기)
   var page = document.querySelector('.page');
   var live = document.querySelector('.live');
   var cancel = document.querySelector('.cancel');
@@ -249,6 +250,7 @@
     if (s === undefined) return;
     var v = billingView(s);
     if (!v.subscribed) { location.replace('/checkout/'); return; }
+    지금 = s;
     paint(v, false);
   }, function () {
     /* 실패를 빈 상태로 그리면 결제한 사람이 「등록된 결제수단 없음」을 본다. */
@@ -274,12 +276,21 @@
   function 되돌리기() {
     if (되돌리는중) return;
     되돌리는중 = true;
-    resumeSubscription().then(getSubscription).then(function (s) {
-      paint(billingView(s), false);
-      하단안내($('toast'));   // 해지 취소 뒤 안내 — 공용 「하단 안내」(글자 수 규칙)
+    /* 해지 취소 실패와 그 뒤 다시 읽기 실패를 가른다 — 한 갈래로 받으면 서버는 취소했는데 「취소하지 못했어요」가 떴다
+       (2026-10-22 전체 점검 ③ 3바퀴째). 다시 읽기만 실패하면 마지막 구독에서 해지 예약만 걷어 그린다. */
+    resumeSubscription().then(function () {
+      return getSubscription().then(null, function (e) {
+        // 서버가 확인하지 않은 값으로 그리므로 오류 보고에 남긴다(콘솔만으로는 자동 보고에 안 잡힌다)
+        track('client_error', { msg: 'billing_resume:reread_failed ' + String((e && e.message) || e).slice(0, 80) });
+        return Object.assign({}, 지금, { cancel_at_period_end: false });
+      }).then(function (s) {
+        지금 = s;
+        paint(billingView(s), false);
+        하단안내($('toast'));   // 해지 취소 뒤 안내 — 공용 「하단 안내」(글자 수 규칙)
+      });
     }, function () {
       오류안내($('resumeErr'), '해지를 취소하지 못했어요. 잠시 후 다시 눌러 주세요');
-    }).then(function () { 되돌리는중 = false; });
+    }).finally(function () { 되돌리는중 = false; });   // 그리기 오류가 나도 잠금은 푼다 — 오류는 삼키지 않아 track.js 가 보고한다
   }
 </script>
 </div>
