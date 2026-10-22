@@ -252,13 +252,14 @@ if (칩.length !== 2) problems.push(`05 저장소: 두 달치인데 월 칩이 $
 /* 랜딩 마크업이 말하는 요금. 심사가 로그인 없이 보는 자리라 거기만 글자로 남는다
    (page-audit 이 그 값과 서버 plan 을 맞댄다). 여기서는 **그 값이 다른 화면 스크립트에
    되살아났는지**를 본다 — 상수 이름만 보면 `var 요금 = 3900` 으로 이름을 바꿔 빠져나간다. */
-/* 2026-10-21 랜딩 요금 섹션을 뺐다 — 랜딩이 말하는 금액은 연봉 섹션 #sal 의 data-sub(12개월권) 하나다.
-   그 값과 마크업에 남은 금액(1천원 이상)을 모아, 다른 화면 스크립트에 되살아났는지 본다. */
-const 랜딩요금 = (read('index.html').replace(/<!--[\s\S]*?-->/g, '').match(/id="sal"[^>]*\bdata-sub="(\d+)"/) || [])[1];
-if (!랜딩요금) problems.push('index.html: 연봉 섹션 #sal 의 data-sub(1년 구독료)를 찾지 못했습니다 — page-audit 의 요금 대조와 같이 보세요');
+/* 랜딩은 루트 `index.html` 이다(2026-10-12 PG 통과 뒤). 1개월권은 「N원 /월」로 적는다. */
+const 요금표기 = (h) => (h.match(/월\s*([0-9][0-9,]*)원/) || h.match(/([0-9][0-9,]*)원\s*(?:<[^>]+>\s*)*\/\s*월/) || [])[1];
+const 랜딩요금 = 요금표기(read('index.html').replace(/<!--[\s\S]*?-->/g, ''));
+if (!랜딩요금) problems.push('index.html: 「월 N원」·「N원 /월」 표기를 찾지 못했습니다 — page-audit 의 요금 대조와 같이 보세요');
+/* 요금제가 둘 이상이라 첫 매치 하나만 보면 나머지 금액이 스크립트에 되살아나도 못 문다(2026-10-12 검사관 ②).
+   랜딩 마크업의 1천원 이상 금액을 전부 모아 같이 본다. */
 const 랜딩마크업 = read('index.html').replace(/<!--[\s\S]*?-->/g, '').replace(/<script[\s\S]*?<\/script>/gi, '');
-const 랜딩금액들 = [...new Set([...랜딩마크업.matchAll(/([0-9]{1,3}(?:,[0-9]{3})+)원/g)].map((m) => m[1])
-  .concat(랜딩요금 ? [Number(랜딩요금).toLocaleString('en-US')] : []))];
+const 랜딩금액들 = [...new Set([...랜딩마크업.matchAll(/([0-9]{1,3}(?:,[0-9]{3})+)원/g)].map((m) => m[1]))];
 for (const rel of ['checkout/index.html', 'mypage/billing/index.html']) {
   const src = scriptOnly(rel);
   const 이름으로 = src.match(/(?:PRICE_KRW|priceKrw|price_krw)\s*[=:]\s*\d/);

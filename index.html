@@ -7,7 +7,7 @@
 <meta name="color-scheme" content="only light">
 <meta name="format-detection" content="telephone=no">
 <!-- 랜딩 버전 지문 — 섹션 구성·제목·시안 값으로 만든다. 손으로 고치지 말고 `node tools/landing-version/fp.mjs --write` (page-audit 이 대조한다) -->
-<meta name="cc-lv" content="b53539bc21">
+<meta name="cc-lv" content="7850587e7a">
 <title>커리어코치</title>
 <meta name="description" content="일하는 사람들의 커리어 성장을 위해">
 <link rel="canonical" href="https://careercoach.my/">
@@ -101,6 +101,10 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 .sticky{transition:background .3s,transform .35s ease,opacity .35s ease,visibility 0s}
 .sticky.hide0{transform:translateY(120%);opacity:0;visibility:hidden;pointer-events:none;transition:background .3s,transform .35s ease,opacity .35s ease,visibility 0s .35s}
 @media (prefers-reduced-motion:reduce){.sticky,.sticky.hide0{transition:none}}
+.rfd{margin-top:14px;text-align:center;font-size:13px;font-weight:600;color:var(--g600);word-break:keep-all}
+/* 「전액 환불」 밑줄이 보일 때 한 번 그어진다(R3) */
+.rfd .ru{position:relative;color:var(--g800);font-weight:700}.rfd .ru::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2px;border-radius:2px;background:var(--a500);transform:scaleX(0);transform-origin:left;transition:transform .5s ease-out .3s}.rfd.pl .ru::after{transform:scaleX(1)}
+@media (prefers-reduced-motion:reduce){.rfd .ru::after{transform:scaleX(1);transition:none}}
 #sec1 .hh{text-align:center;word-break:keep-all}
 #sec1 .hh .hk1{display:inline-block;margin-bottom:6px;font-size:17px;line-height:1.75;font-weight:500;color:var(--g800)}
 #sec1 .hh .hc{color:var(--a500)}
@@ -140,10 +144,43 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 
 
 
+.sf{list-style:none;display:flex;flex-direction:column;gap:12px}
+.sf li{display:flex;gap:14px;align-items:flex-start;background:#fff;border-radius:16px;padding:18px 16px;opacity:0;transform:translateY(14px);transition:opacity .45s,transform .45s}
+.sf li i{font-style:normal;width:28px;height:28px;border-radius:50%;background:var(--e100);color:var(--e700);display:grid;place-items:center;font-size:15px;font-weight:900;flex:none;transform:scale(0);transition:transform .35s cubic-bezier(.3,1.6,.5,1)}
+.sf b{display:block;font-size:16px;line-height:1.45;font-weight:700;color:var(--g900);word-break:keep-all}
+.sf span{display:block;margin-top:4px;font-size:14px;line-height:1.5;color:var(--g500);word-break:keep-all}
+#safesec.in .sf li{opacity:1;transform:none}
+#safesec.in .sf li i{transform:scale(1)}
+#safesec.in .sf li:nth-child(2),#safesec.in .sf li:nth-child(2) i{transition-delay:.2s}
+#safesec.in .sf li:nth-child(3),#safesec.in .sf li:nth-child(3) i{transition-delay:.4s}
+#safesec.in .sf li i{transition-delay:.25s}
 
-@media (prefers-reduced-motion:reduce){.chipflow .lane{animation:none}}
+.cof.out{margin-top:12px;text-align:center;font-size:14px;font-weight:600;color:var(--g600)}
+.cof b{color:var(--a700)}
+@media (prefers-reduced-motion:reduce){.sf li,.sf li i{opacity:1!important;transform:none!important;transition:none!important}.chipflow .lane{animation:none}}
 </style>
 <style id="tvx-css">
+/* 「하루 1시간」 그래픽 — 한 줄 아이콘 넷 (2026-10-18 사용자 확정 · 옛 .a4 지그재그를 대신한다) */
+.tvx{margin-top:36px}
+.tvx .no{font-style:normal;width:20px;height:20px;border-radius:50%;background:#1E293B;color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center;flex:none}
+.vC{display:grid;position:relative;grid-template-columns:repeat(4,1fr);gap:6px}
+.vC .ln{position:absolute;left:12%;right:12%;top:27px;border-top:2px dashed #CBD5E1;transform-origin:left;transition:transform .9s ease .1s}
+.tvx:not(.play) .vC .ln{transform:scaleX(0)}
+.vC .it{position:relative;display:flex;flex-direction:column;align-items:center;gap:16px;transition:opacity .4s ease,transform .45s cubic-bezier(.2,.8,.2,1);transition-delay:calc(var(--k)*.15s)}
+.vC .ic{position:relative;width:54px;height:54px;border-radius:50%;background:#fff;border:1px solid var(--g200);box-shadow:0 4px 12px rgba(15,23,42,.06);display:grid;place-items:center;font-size:24px}
+.vC .ic .no{position:absolute;top:-4px;right:-6px}
+.vC small{font-size:13px;line-height:1.4;color:var(--g700);text-align:center;word-break:keep-all}
+.tvx:not(.play) .vC .it{opacity:0;transform:scale(.6)}
+/* 4곳 → 카톡 1통 깔때기 (2026-10-19 v5 · H2) — 아이콘이 다 뜬 뒤 네 선이 한 점으로 그려지고, 그 끝에 노란 알약이 뜬다 */
+.tvo{margin-top:6px;text-align:center}
+.tvf{display:block;width:100%;height:56px}
+.tvf path{fill:none;stroke:#CBD5E1;stroke-width:2;vector-effect:non-scaling-stroke;stroke-dasharray:1;stroke-dashoffset:0;transition:stroke-dashoffset .9s ease .9s}
+.tvx:not(.play) .tvf path{stroke-dashoffset:1}
+.tvo b{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:14px;background:#1E293B;font-weight:800;font-size:15px;color:#fff;transition:opacity .4s ease 1.7s,transform .4s cubic-bezier(.2,.8,.2,1) 1.7s}
+.tvx:not(.play) .tvo b{opacity:0;transform:scale(.8)}
+/* 「카톡 1통」이 뜬 뒤에 이어서 나온다(80) */
+.tvo .tvm{margin:8px 0 0;font-size:13px;font-weight:600;color:var(--g500);transition:opacity .4s ease 2.2s,transform .4s ease 2.2s}
+.tvx:not(.play) .tvo .tvm{opacity:0;transform:translateY(4px)}
 /* 아티클 화면 제목 위 「오늘만」 배지(86) — 전문 보기는 받은 날 당일에만 열린다 */
 /* 전문가 — 직군마다 현직자 세 칸 카드 + 미리보기와 같은 직군 칩 띠(바탕만 다름). 연차는 아주 작은 연한 알약(Y1-c) */
 #exsec{padding-bottom:0!important}#exsec .exsub{margin-top:12px!important;font-size:15px;line-height:1.5;color:#475569;word-break:keep-all}
@@ -168,6 +205,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 /* FAQ 질문 앞 이모지(E1) — 둘째 줄이 글자 첫머리에 맞도록 이모지는 왼쪽에 따로 세운다 */
 .faq summary{padding-left:28px}.faq summary .fe{position:absolute;left:0;top:0;font-size:16px;line-height:1.5}
 .art .tday{display:inline-block;margin-bottom:8px;padding:3px 9px;border-radius:999px;background:var(--a100);color:var(--a700);font-size:11px;font-weight:700;line-height:1.4}
+@media (prefers-reduced-motion:reduce){.tvx *{transition:none!important}}
 </style>
 <style id="v4">
 /* 2026-10-18 섹션 순서 개편(v4) — 연봉 기본 5,000만원 손가락 자리 · 목요일 폰은 새 공고 셋째 줄에서 자름 · 열람률 글씨 키움·형광펜 */
@@ -175,135 +213,74 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 #thusec .pm{max-height:313px;overflow:hidden;zoom:.7;width:312px;margin-left:auto;margin-right:auto}#thusec .pm .hd .ttl{display:flex}
 #scr.screen .r6 .cl span.r6lab{font-size:19px!important;line-height:1.45!important}#rg .r6 em#r6n{font-size:28px}
 </style>
-<style id="v6">
-#anxsec .anx{display:flex;flex-direction:column;gap:12px;margin-top:32px}
-#anxsec .bb{position:relative;max-width:258px;padding:14px 16px 14px 48px;border-radius:18px;background:#fff;border:1px solid var(--g200);font-size:16px;line-height:1.5;font-weight:600;color:var(--g800);text-align:left;word-break:keep-all;box-shadow:0 4px 14px rgba(15,23,42,.06);opacity:0;transform:translateY(12px) scale(.96);transition:opacity .45s ease,transform .5s cubic-bezier(.2,.8,.2,1)}
-#anxsec .bb i{position:absolute;left:14px;top:13px;font-style:normal;font-size:22px;line-height:1}
-#anxsec .bb:nth-child(1){align-self:flex-start;border-bottom-left-radius:6px}
-#anxsec .bb:nth-child(2){align-self:flex-end;border-bottom-right-radius:6px;transition-delay:.7s}
-#anxsec .bb:nth-child(3){align-self:flex-start;border-bottom-left-radius:6px;transition-delay:1.4s}
-#anxsec.in .bb{opacity:1;transform:none}
-#anxsec .anxst{display:flex;flex-direction:column;gap:10px;margin-top:40px}
-#anxsec .v6st{background:#fff;border:1px solid var(--g200);border-radius:16px;padding:16px 18px;display:grid;grid-template-columns:118px 1fr;align-items:center;gap:12px;text-align:left;opacity:0;transform:translateY(10px);transition:opacity .5s ease 2s,transform .5s ease 2s}
-#anxsec.in .v6st{opacity:1;transform:none}
-#anxsec .v6st b{font-size:27px;white-space:nowrap;font-weight:800;color:var(--a600);letter-spacing:-.5px;line-height:1.2}
-#anxsec .v6st>span{font-size:13px;line-height:1.45;color:var(--g700);word-break:keep-all}
-#anxsec .v6st small{display:block;margin-top:3px;font-size:11px;color:var(--g400)}#anxsec .v6st:nth-child(2){transition-delay:2.25s}
-#anxsec .anxt{margin-top:44px}
-#trisec .tri{display:flex;flex-direction:column;gap:10px;margin-top:32px}
-#trisec .tc{display:flex;gap:14px;align-items:center;text-align:left;background:var(--g50);border:1px solid var(--g200);border-radius:16px;padding:16px;opacity:0;transform:translateX(-24px);transition:opacity .45s ease,transform .5s cubic-bezier(.2,.8,.2,1)}
-#trisec .tc:nth-child(2){transition-delay:.25s}#trisec .tc:nth-child(3){transition-delay:.5s}
-#trisec .tc .te{flex:none;width:44px;height:44px;border-radius:12px;background:#fff;border:1px solid var(--g200);display:grid;place-items:center;font-size:22px}
-#trisec .tc b{display:block;font-size:17px;color:var(--g900)}#trisec .tc span{display:block;margin-top:2px;font-size:14px;color:var(--g600);word-break:keep-all}
-#trisec.in .tc{opacity:1;transform:none}
-/* B 첫 화면: 모여서 한 통 — 8곳이 뜨고(0~1s) → 가운데로 빨려 들고(3~3.8s) → 알림톡 한 통(4s~)이 뜬다. 7.5초 반복 */
-/* C 첫 화면: 직군 고르기 */
-@media (prefers-reduced-motion:reduce){#anxsec *,#trisec *{transition:none!important;animation:none!important;opacity:1!important}}
-.dap{flex:none;width:22px;height:22px;border-radius:7px;background:#fff;display:inline-grid;place-items:center;border:1px solid rgba(15,23,42,.06)}
-/* ③ 카톡 아이콘 → 채팅방 */
-.f6g{position:relative;height:330px;max-width:312px;margin:20px auto 0!important}
-.f6l{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.f6l .f6b{fill:none;stroke:var(--a500);stroke-width:1.6;stroke-linecap:round;opacity:.7;stroke-dasharray:1;stroke-dashoffset:0}
-.f6s{position:absolute;transform:translate(-50%,-50%);padding:8px 12px;border-radius:999px;background:#fff;border:1px solid var(--g200);font-size:14px;font-weight:600;color:var(--g700);white-space:nowrap;box-shadow:0 4px 12px rgba(15,23,42,.07);z-index:1}
-.f6c{position:absolute;left:50%;width:292px;transform:translate(-50%,-50%);z-index:2;text-align:center;background:#fff;border:1px solid var(--g200);border-radius:20px;padding:12px 14px;box-shadow:0 12px 30px rgba(15,23,42,.12)}
-.f6c p{margin:0}
-.f6n{display:flex;align-items:center;gap:12px;text-align:left}
-.f6n .dap{width:40px;height:40px;border-radius:12px;background:var(--a50)}
-.f6n div{flex:1;min-width:0}.f6n b{font-size:15px}.f6n p{margin:2px 0 0!important;font-size:13.5px;color:var(--g700)}.f6n em{font-style:normal;font-size:11px;color:var(--g400);align-self:flex-start}
-/* 처음 한 번 짜이기 — 화면에 들어올 때마다(.go) */
-@keyframes fPop{from{opacity:0;transform:translate(-50%,-50%) scale(.6)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
-@keyframes fDraw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
-@keyframes fCard{0%{opacity:0;transform:translate(-50%,-50%) scale(.7)}70%{opacity:1;transform:translate(-50%,-50%) scale(1.04)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
-.f6g.go .f6s{animation:fPop .35s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i)*.04s)}
-.f6g.go .f6b{animation:fDraw .45s ease both;animation-delay:calc(.35s + var(--i)*.03s)}
-.f6g.go .f6c{animation:fCard .45s cubic-bezier(.2,.8,.2,1) .8s both}
-/* F3 흐르는 점선 + 카드 맥박 */
-@media (prefers-reduced-motion:reduce){.f6g *{animation:none!important}}
-.k5{list-style:none;margin:10px 0 0;padding:10px 0 0;border-top:1px solid var(--g100);text-align:left}
-.k5 li{display:flex;gap:8px;align-items:flex-start;padding:4px 0;font-size:13.5px;line-height:1.45;color:var(--g800);word-break:keep-all}
-.k5 li b{flex:none;width:18px;height:18px;border-radius:50%;background:var(--g900);color:#fff;font-size:11px;display:grid;place-items:center;margin-top:1px}
-.embars{margin-top:24px!important;display:flex;flex-direction:column;gap:18px;text-align:left}
-.embars .emrow{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center}
-.embars .emlb{grid-column:1/-1;font-size:14px;font-weight:700;color:var(--g700)}
-.embars .embar{display:flex;height:34px;border-radius:10px;background:#fff;border:1px solid var(--g200);overflow:hidden}
-.embars .embar i{flex:none;width:0;display:grid;place-items:center;font-style:normal;font-size:11px;font-weight:700;color:var(--g700);white-space:nowrap;overflow:hidden;transition:width .5s ease;transition-delay:var(--d)}
-.embars .embar.ema i{background:var(--a500)}
-.em6c.in .embars .embar i{width:var(--w)}
-.embars .emt{font-size:17px;font-weight:800;color:var(--g500);min-width:58px;text-align:right}.embars .emt.ema{color:var(--a600)}
-@media (prefers-reduced-motion:reduce){.em6 *{transition:none!important;animation:none!important}}
-.ex .ext{font-size:16px;font-weight:800;color:var(--g500);text-align:right}.ex .ext.ema{color:var(--a600)}
-.ex .expile{grid-column:1/-1;position:relative;height:146px}
-.ex .expile span{position:absolute;padding:6px 10px;border-radius:999px;background:#fff;border:1px solid var(--g200);font-size:12.5px;font-weight:600;color:var(--g700);white-space:nowrap;box-shadow:0 3px 8px rgba(15,23,42,.08);opacity:0;transform:translateY(-90px) rotate(0);transition:opacity .2s ease,transform .55s cubic-bezier(.3,1.4,.5,1);transition-delay:calc(var(--i)*.07s)}
-.ex.in .expile span{opacity:1;transform:translateY(0) rotate(var(--r))}
-@media (prefers-reduced-motion:reduce){.ex *{transition:none!important;animation:none!important}}.fpile2{margin-top:24px!important}.fpile2 .expile{height:146px}.em6c .embar.emsolid i{background:var(--g300)}
-.fo6 .fomo-end{margin-top:40px!important}
-.fo6 .fot{list-style:none;margin:28px 0 0!important;padding:0 0 0 4px;position:relative}
-.fo6 .fot:before{content:"";position:absolute;left:19px;top:14px;bottom:14px;width:2px;background:var(--g200)}
-.fo6 .fot li{position:relative;display:flex;align-items:center;gap:14px;padding:9px 0;opacity:0;transform:translateX(-8px);transition:opacity .35s ease,transform .35s ease;transition-delay:calc(var(--i)*.12s)}
-.fo6 .fot li b{flex:none;width:32px;height:32px;border-radius:50%;background:var(--a500);color:#fff;font-size:12px;display:grid;place-items:center;z-index:1}
-.fo6 .fot li span{font-size:16px;font-weight:700;color:var(--g800)}
-.fo6.in .fot li{opacity:1;transform:none}
-.fo6 .for{margin-top:28px!important;padding:22px 16px;border-radius:18px;background:#fff;border:1px solid var(--g200);text-align:center}
-.fo6 .for .rl{animation:foRl 16s cubic-bezier(.6,0,.3,1) infinite}
-.fo6 .for .rl p{height:36px;margin:0;font-size:22px;font-weight:800;line-height:36px;color:var(--a600);white-space:nowrap}
-.fo6 .for b{display:block;margin-top:4px;font-size:22px;font-weight:800;color:var(--g900)}
-@keyframes foRl{0.00%,10.00%{transform:translateY(-0px)}12.50%,22.50%{transform:translateY(-36px)}25.00%,35.00%{transform:translateY(-72px)}37.50%,47.50%{transform:translateY(-108px)}50.00%,60.00%{transform:translateY(-144px)}62.50%,72.50%{transform:translateY(-180px)}75.00%,85.00%{transform:translateY(-216px)}87.50%,97.50%{transform:translateY(-252px)}100%{transform:translateY(-288px)}}
-@media (prefers-reduced-motion:reduce){.fo6 *{transition:none!important;animation:none!important;opacity:1!important;transform:none!important}}
-.rvs .rgt{margin:0 0 8px;text-align:left;font-size:15px;font-weight:800;color:var(--g800)}
-/* 글꼴을 기다리는 동안(steady.js 가 화면을 가림) 첫 화면 그림은 멈춰 둔다 — 보이기 전에 다 짜여 버리지 않게 */
-html.cc-wait .f6g *{animation-play-state:paused!important}
-</style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute"><defs><path id="ccmark" d="M12.464 4.662L12.439 4.702L12.421 4.757L12.420 4.814L12.436 4.869L12.467 4.917L12.556 5.006L12.596 5.033L12.642 5.050L12.687 5.055L14.813 5.055L14.850 5.066L14.886 5.099L14.900 5.134L14.900 5.173L14.891 5.200L14.872 5.225L12.747 7.350L12.655 7.433L12.581 7.486L12.504 7.532L12.422 7.570L12.336 7.600L12.262 7.618L12.173 7.632L12.057 7.639L9.982 7.639L9.884 7.644L9.794 7.658L9.707 7.680L9.631 7.707L9.549 7.746L9.463 7.797L9.398 7.845L9.330 7.906L9.263 7.980L9.209 8.053L9.163 8.131L9.125 8.213L9.098 8.289L9.073 8.387L9.060 8.476L9.056 8.564L9.056 10.184L9.051 10.293L9.038 10.383L9.013 10.484L8.987 10.556L8.949 10.638L8.904 10.716L8.850 10.789L8.790 10.856L8.723 10.918L8.651 10.972L8.574 11.019L8.493 11.058L8.408 11.090L8.320 11.112L8.216 11.128L8.107 11.133L6.553 11.133L6.456 11.138L6.366 11.152L6.279 11.174L6.202 11.202L6.120 11.240L6.034 11.291L5.962 11.346L5.895 11.407L5.841 11.467L5.787 11.539L5.740 11.617L5.700 11.698L5.667 11.793L5.647 11.871L5.633 11.961L5.628 12.058L5.628 13.612L5.623 13.721L5.608 13.825L5.589 13.899L5.559 13.984L5.521 14.066L5.475 14.144L5.413 14.228L5.352 14.295L5.284 14.355L5.211 14.408L5.146 14.447L5.051 14.492L4.966 14.522L4.892 14.540L4.788 14.556L4.679 14.561L3.125 14.561L3.037 14.565L2.948 14.578L2.850 14.602L2.765 14.633L2.684 14.672L2.614 14.714L2.541 14.768L2.467 14.835L2.413 14.895L2.358 14.967L2.307 15.053L2.269 15.135L2.239 15.221L2.219 15.299L2.205 15.389L2.200 15.486L2.200 17.069L2.205 17.161L2.219 17.251L2.241 17.339L2.272 17.424L2.307 17.497L2.353 17.575L2.413 17.655L2.474 17.722L2.541 17.783L2.606 17.831L2.684 17.878L2.765 17.917L2.850 17.948L2.948 17.972L3.037 17.985L3.125 17.989L12.614 17.989L12.711 17.984L12.801 17.970L12.889 17.948L12.974 17.917L13.047 17.882L13.125 17.836L13.205 17.776L13.272 17.715L13.332 17.648L13.386 17.575L13.432 17.497L13.467 17.424L13.498 17.339L13.522 17.241L13.535 17.152L13.539 17.069L13.539 10.658L13.544 10.549L13.557 10.459L13.578 10.372L13.608 10.286L13.646 10.204L13.700 10.114L13.754 10.042L13.828 9.961L16.586 7.203L16.611 7.184L16.657 7.172L16.704 7.184L16.740 7.216L16.756 7.261L16.756 9.058L16.759 9.094L16.778 9.149L16.816 9.202L16.906 9.287L16.940 9.307L16.977 9.319L17.025 9.323L17.073 9.316L17.117 9.298L17.158 9.267L18.740 7.685L18.764 7.658L18.790 7.606L18.800 7.541L18.800 3.211L18.795 3.165L18.769 3.103L18.724 3.053L18.664 3.021L18.605 3.011L14.140 3.011L14.093 3.016L14.038 3.038L13.993 3.073Z" fill="#F59E0B"/></defs></svg>
 <!-- 🔴 아래 시안 스위치(<i … data-v>)의 값을 바꿔도 지금은 아무 변화가 없다 — 지금 값이 아닌 변형 규칙은 2026-10-15 에 CSS 에서 뺐다. 바꾸려면 커밋 dfab0f2 의 landing-*.css 에서 그 규칙을 먼저 되살려라 -->
-<div class="screen" id="scr" data-v="1"><i id="chv" data-v="2" hidden></i><i id="chf" data-v="5" hidden></i><i id="wkl" data-v="4" hidden></i><i id="bgv" data-v="1" hidden></i><i id="kyb" data-v="1" hidden></i><i id="cbg" data-v="2" hidden></i><i id="cg" data-v="2" hidden></i><i id="wko" data-v="1" hidden></i><i id="hb" data-v="1" hidden></i><i id="emj" data-v="2" hidden></i><i id="bc" data-v="7" hidden></i><i id="pb" data-v="3" hidden></i><i id="ra" data-v="1" hidden></i><i id="qp" data-v="1" hidden></i><i id="az" data-v="4" hidden></i><i id="rb" data-v="3" hidden></i><i id="te" data-v="4" hidden></i><i id="je" data-v="7" hidden></i><i id="sa" data-v="4" hidden></i><i id="qg" data-v="2" hidden></i><i id="ck" data-v="1" hidden></i><i id="lk" data-v="1" hidden></i><i id="sp" data-v="2" hidden></i><i id="hs" data-v="3" hidden></i><i id="cem" data-v="1" hidden></i><i id="dn" data-v="1" hidden></i><i id="hc" data-v="4" hidden></i><i id="cdz" data-v="11" hidden></i><i id="upe" data-v="2" hidden></i><i id="hal" data-v="2" hidden></i><i id="rlx" data-v="2" hidden></i><i id="sfs" data-v="1" hidden></i><i id="s2h" data-v="3" hidden></i><i id="ce" data-v="2" hidden></i><i id="ha" data-v="2" hidden></i><i id="cb2" data-v="1" hidden></i><i id="bl" data-v="2" hidden></i><i id="fa" data-v="6" hidden></i><i id="ca" data-v="4" hidden></i><i id="ja" data-v="2" hidden></i><i id="ga" data-v="2" hidden></i><i id="wa" data-v="2" hidden></i><i id="tm" data-v="1" hidden></i><i id="pa" data-v="1" hidden></i><i id="ea" data-v="2" hidden></i><i id="aa" data-v="2" hidden></i><i id="va" data-v="2" hidden></i><i id="scv" data-v="4" hidden></i><i id="kw" data-v="2" hidden></i><i id="gone" data-v="1" hidden></i>
+<div class="screen" id="scr" data-v="1"><i id="lvn" data-v="8" hidden></i><i id="chv" data-v="2" hidden></i><i id="chf" data-v="5" hidden></i><i id="wkl" data-v="4" hidden></i><i id="bgv" data-v="1" hidden></i><i id="kyb" data-v="1" hidden></i><i id="cbg" data-v="2" hidden></i><i id="cg" data-v="2" hidden></i><i id="wko" data-v="1" hidden></i><i id="hb" data-v="1" hidden></i><i id="emj" data-v="2" hidden></i><i id="bc" data-v="7" hidden></i><i id="pb" data-v="3" hidden></i><i id="ra" data-v="1" hidden></i><i id="qp" data-v="1" hidden></i><i id="az" data-v="4" hidden></i><i id="rb" data-v="3" hidden></i><i id="te" data-v="4" hidden></i><i id="je" data-v="7" hidden></i><i id="sa" data-v="4" hidden></i><i id="qg" data-v="2" hidden></i><i id="ck" data-v="1" hidden></i><i id="lk" data-v="1" hidden></i><i id="sp" data-v="2" hidden></i><i id="hs" data-v="3" hidden></i><i id="cem" data-v="1" hidden></i><i id="dn" data-v="1" hidden></i><i id="hc" data-v="4" hidden></i><i id="cdz" data-v="11" hidden></i><i id="upe" data-v="2" hidden></i><i id="hal" data-v="2" hidden></i><i id="rlx" data-v="2" hidden></i><i id="sfs" data-v="1" hidden></i><i id="s2h" data-v="3" hidden></i><i id="ce" data-v="2" hidden></i><i id="ha" data-v="2" hidden></i><i id="cb2" data-v="1" hidden></i><i id="bl" data-v="2" hidden></i><i id="fa" data-v="6" hidden></i><i id="ca" data-v="4" hidden></i><i id="ja" data-v="2" hidden></i><i id="ga" data-v="2" hidden></i><i id="wa" data-v="2" hidden></i><i id="tm" data-v="1" hidden></i><i id="pa" data-v="1" hidden></i><i id="ea" data-v="2" hidden></i><i id="aa" data-v="2" hidden></i><i id="va" data-v="2" hidden></i><i id="scv" data-v="4" hidden></i><i id="kw" data-v="2" hidden></i><i id="gone" data-v="1" hidden></i>
 
 <div class="top"><span class="appicon"><svg width="29" height="29" viewBox="0 0 21 21"><use href="#ccmark"/></svg></span><svg class="wmk" role="img" aria-label="커리어코치" viewBox="0 0 152.11 33.00" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M37.87 15.81L37.91 15.72L37.96 15.66L38.02 15.62L38.12 15.60L47.34 15.60L47.57 15.55L47.79 15.47L47.98 15.34L48.16 15.16L48.29 14.96L48.37 14.76L48.41 14.63L48.43 14.40L48.43 4.02L48.40 3.77L48.34 3.56L48.29 3.45L48.15 3.25L47.98 3.08L47.79 2.95L47.58 2.87L47.46 2.84L47.23 2.81L34.06 2.81L33.82 2.84L33.61 2.90L33.50 2.95L33.29 3.09L33.14 3.25L33.07 3.34L33.00 3.45L32.91 3.66L32.87 3.90L32.86 5.48L32.88 5.72L32.95 5.95L33.06 6.15L33.14 6.25L33.29 6.41L33.40 6.49L33.60 6.59L33.71 6.63L33.83 6.67L34.06 6.69L43.25 6.69L43.32 6.70L43.40 6.74L43.47 6.82L43.50 6.94L43.50 11.52L43.48 11.61L43.42 11.69L43.34 11.75L43.25 11.77L34.02 11.77L33.78 11.82L33.56 11.91L33.37 12.04L33.20 12.21L33.07 12.41L32.99 12.61L32.96 12.74L32.93 12.97L32.93 24.16L32.96 24.39L32.99 24.52L33.07 24.72L33.14 24.83L33.29 25.01L33.46 25.16L33.57 25.22L33.78 25.31L34.01 25.36L37.33 25.36L40.16 25.32L42.86 25.23L44.20 25.15L45.50 25.06L46.78 24.95L48.07 24.81L49.38 24.64L50.72 24.44L50.84 24.40L51.05 24.31L51.23 24.17L51.38 24.02L51.45 23.91L51.55 23.72L51.62 23.50L51.64 23.38L51.64 21.70L51.62 21.46L51.55 21.24L51.49 21.12L51.42 21.01L51.28 20.84L51.18 20.75L50.98 20.63L50.86 20.58L50.64 20.52L50.51 20.50L50.27 20.51L48.14 20.80L47.02 20.93L45.92 21.03L43.71 21.20L42.57 21.26L40.27 21.34L38.12 21.38L38.05 21.37L37.98 21.33L37.90 21.24L37.87 21.13ZM9.23 15.24L9.32 15.27L9.40 15.34L9.44 15.42L9.45 15.52L9.42 15.62L9.15 16.09L8.60 16.94L8.00 17.76L7.33 18.56L6.60 19.35L5.81 20.11L4.98 20.83L4.05 21.57L3.03 22.29L1.98 22.97L0.70 23.74L0.51 23.90L0.36 24.09L0.26 24.30L0.22 24.41L0.18 24.66L0.17 24.78L0.20 25.00L0.28 25.24L0.40 25.44L1.64 27.15L1.80 27.33L1.98 27.47L2.18 27.57L2.30 27.61L2.54 27.65L2.76 27.64L2.88 27.62L3.11 27.54L5.08 26.40L7.48 24.70L9.46 23.00L11.20 21.14L12.74 19.08L13.93 17.04L14.86 14.92L15.57 12.72L16.09 10.45L16.42 8.17L16.61 5.72L16.64 4.41L16.63 4.18L16.56 3.95L16.45 3.73L16.31 3.55L16.12 3.39L15.91 3.28L15.79 3.23L15.56 3.19L2.78 3.18L2.65 3.19L2.44 3.23L2.21 3.32L2.11 3.39L1.93 3.53L1.85 3.62L1.72 3.81L1.63 4.04L1.58 4.26L1.58 4.38L1.58 5.82L1.58 5.94L1.63 6.16L1.72 6.38L1.85 6.57L2.01 6.74L2.21 6.87L2.44 6.97L2.65 7.01L2.78 7.02L11.62 7.02L11.71 7.06L11.76 7.11L11.81 7.19L11.82 7.27L11.72 8.15L11.62 8.88L11.43 9.96L11.16 11.15L11.13 11.22L11.09 11.27L10.98 11.33L1.14 11.88L0.90 11.92L0.78 11.95L0.58 12.05L0.39 12.19L0.24 12.36L0.17 12.45L0.07 12.68L0.01 12.89L0.00 13.01L0.01 13.25L0.25 14.89L0.30 15.11L0.41 15.33L0.56 15.53L0.73 15.69L0.83 15.75L0.95 15.81L1.17 15.88L1.42 15.91ZM53.70 31.91L53.74 32.14L53.83 32.36L53.96 32.56L54.05 32.65L54.23 32.80L54.44 32.91L54.66 32.98L54.89 33.00L57.39 33.00L57.51 32.99L57.73 32.95L57.85 32.91L58.05 32.80L58.15 32.72L58.31 32.57L58.39 32.46L58.49 32.26L58.54 32.14L58.58 31.92L58.59 1.20L58.57 0.97L58.50 0.75L58.39 0.54L58.31 0.43L58.14 0.27L57.95 0.14L57.74 0.05L57.51 0.01L54.89 0.00L54.77 0.01L54.55 0.05L54.43 0.09L54.23 0.20L54.13 0.28L53.97 0.43L53.89 0.54L53.79 0.74L53.74 0.86L53.70 1.08ZM72.36 2.33L71.37 2.27L70.28 2.35L70.09 2.38L69.15 2.61L68.96 2.68L67.99 3.09L67.08 3.67L66.92 3.78L66.16 4.45L66.03 4.57L65.34 5.39L65.24 5.52L64.55 6.61L63.96 7.84L63.49 9.22L63.17 10.60L62.95 12.23L62.87 13.99L62.94 15.74L63.15 17.38L63.49 18.89L63.96 20.27L64.55 21.52L65.24 22.61L65.34 22.74L66.03 23.56L66.16 23.68L67.00 24.42L67.90 24.99L68.07 25.09L69.05 25.50L70.09 25.76L70.28 25.79L71.29 25.87L71.47 25.87L72.49 25.79L73.54 25.56L74.45 25.20L74.62 25.12L75.39 24.68L75.53 24.59L76.26 24.02L76.39 23.90L77.06 23.20L77.84 22.15L78.44 21.08L78.94 19.89L79.34 18.59L79.62 17.28L79.80 15.91L79.84 15.82L79.89 15.77L79.97 15.72L80.04 15.71L84.91 15.71L85.00 15.73L85.06 15.77L85.11 15.83L85.15 15.89L85.16 15.96L85.16 31.80L85.16 31.92L85.21 32.14L85.25 32.26L85.36 32.46L85.43 32.57L85.59 32.72L85.80 32.86L86.00 32.95L86.13 32.98L86.36 33.00L88.78 33.00L88.90 32.99L89.12 32.95L89.35 32.86L89.54 32.73L89.63 32.64L89.71 32.56L89.84 32.37L89.93 32.14L89.97 31.92L89.98 31.80L89.98 1.20L89.97 1.08L89.93 0.86L89.84 0.63L89.70 0.43L89.55 0.28L89.45 0.21L89.24 0.09L89.01 0.02L88.78 0.00L86.36 0.00L86.23 0.01L86.01 0.05L85.89 0.09L85.69 0.20L85.59 0.28L85.43 0.43L85.36 0.54L85.25 0.74L85.18 0.96L85.16 1.20L85.16 11.55L85.14 11.65L85.10 11.71L85.02 11.77L84.93 11.80L80.00 11.80L79.92 11.79L79.86 11.76L79.80 11.71L79.76 11.62L79.54 10.33L79.24 9.11L78.77 7.78L78.24 6.66L77.69 5.77L77.01 4.89L76.26 4.13L76.13 4.02L75.42 3.48L74.52 2.97L74.36 2.90L73.56 2.60L73.39 2.55L72.54 2.36ZM71.36 6.73L71.99 6.79L72.50 6.94L73.00 7.20L73.46 7.56L73.84 8.00L74.24 8.61L74.55 9.27L74.79 9.98L75.01 10.89L75.17 11.85L75.26 12.86L75.29 14.02L75.26 15.22L75.17 16.25L75.01 17.22L74.79 18.15L74.55 18.87L74.24 19.54L73.84 20.16L73.46 20.60L73.00 20.97L72.46 21.25L71.94 21.40L71.39 21.45L70.83 21.40L70.33 21.25L69.79 20.97L69.34 20.60L68.96 20.16L68.57 19.54L68.25 18.87L68.01 18.15L67.78 17.22L67.63 16.25L67.54 15.22L67.51 14.05L67.54 12.86L67.63 11.85L67.78 10.89L68.01 9.98L68.25 9.27L68.57 8.61L68.96 8.00L69.34 7.56L69.79 7.20L70.33 6.92L70.83 6.78ZM16.96 15.10L16.94 15.34L16.96 15.58L17.02 15.79L17.13 16.00L17.28 16.19L17.46 16.34L17.67 16.46L17.79 16.50L18.01 16.55L18.14 16.55L22.34 16.55L22.41 16.57L22.48 16.60L22.56 16.69L22.59 16.80L22.59 31.76L22.60 31.89L22.64 32.11L22.69 32.23L22.79 32.42L22.87 32.53L23.03 32.69L23.13 32.76L23.33 32.87L23.56 32.94L23.79 32.96L26.29 32.96L26.41 32.96L26.63 32.91L26.86 32.82L26.96 32.76L27.13 32.62L27.22 32.52L27.34 32.33L27.44 32.11L27.48 31.89L27.49 31.76L27.49 1.28L27.46 1.03L27.43 0.92L27.35 0.71L27.21 0.51L27.13 0.42L26.96 0.28L26.85 0.21L26.64 0.13L26.40 0.08L23.68 0.08L23.44 0.13L23.22 0.22L23.04 0.34L22.95 0.42L22.80 0.60L22.73 0.71L22.65 0.92L22.61 1.05L22.59 1.28L22.59 12.36L22.57 12.45L22.53 12.52L22.48 12.57L22.37 12.61L18.64 12.61L18.41 12.63L18.29 12.66L18.09 12.74L17.90 12.87L17.80 12.95L17.65 13.13L17.55 13.32Z" fill="#423429"/>
 <path fill-rule="evenodd" clip-rule="evenodd" d="M98.01 2.75L97.78 2.79L97.56 2.88L97.45 2.95L97.27 3.10L97.12 3.28L97.02 3.48L96.95 3.70L96.93 3.83L96.92 5.41L96.93 5.54L96.97 5.76L97.06 5.97L97.20 6.18L97.37 6.35L97.55 6.47L97.66 6.52L97.88 6.59L98.13 6.61L115.47 6.62L115.54 6.64L115.61 6.71L115.65 6.77L115.67 6.87L115.64 8.56L115.57 10.46L115.54 10.56L115.49 10.61L115.40 10.66L115.33 10.68L97.28 11.22L97.04 11.25L96.82 11.32L96.71 11.38L96.52 11.51L96.43 11.60L96.29 11.78L96.19 11.99L96.15 12.12L96.12 12.34L96.13 12.59L96.39 14.41L96.43 14.53L96.53 14.75L96.66 14.93L96.75 15.02L96.94 15.16L97.16 15.26L97.39 15.32L97.62 15.33L114.97 14.41L115.05 14.42L115.11 14.45L115.18 14.51L115.23 14.60L115.23 14.69L114.93 16.93L114.76 18.02L114.45 19.75L114.45 19.98L114.50 20.20L114.54 20.32L114.65 20.51L114.79 20.69L114.97 20.84L115.18 20.95L115.40 21.02L117.91 21.30L118.15 21.30L118.37 21.26L118.48 21.22L118.70 21.10L118.80 21.03L118.96 20.88L119.10 20.67L119.18 20.46L119.21 20.35L119.35 19.65L119.64 18.00L119.88 16.47L120.07 15.00L120.21 13.61L120.32 12.27L120.40 11.02L120.48 8.73L120.49 6.60L120.49 3.94L120.47 3.70L120.40 3.48L120.29 3.27L120.22 3.18L120.06 3.02L119.87 2.89L119.75 2.83L119.52 2.76L119.29 2.74ZM126.92 26.14L127.01 26.23L127.19 26.37L127.31 26.44L127.52 26.52L127.65 26.55L127.87 26.57L128.11 26.54L128.24 26.50L128.45 26.40L129.28 25.91L130.10 25.34L130.87 24.71L131.59 24.03L132.21 23.35L132.84 22.57L133.42 21.74L133.95 20.87L134.43 19.96L134.87 19.02L135.05 18.57L135.13 18.47L135.24 18.43L135.31 18.43L135.38 18.46L135.44 18.50L135.49 18.56L135.66 18.97L136.10 19.85L136.55 20.65L137.08 21.46L137.70 22.30L138.32 23.03L138.94 23.67L139.65 24.30L140.41 24.90L141.22 25.43L142.01 25.88L142.22 25.97L142.35 26.01L142.57 26.03L142.70 26.03L142.92 25.99L143.04 25.95L143.24 25.85L143.35 25.77L143.51 25.62L143.59 25.52L144.80 23.77L144.93 23.55L145.00 23.33L145.01 23.21L145.02 23.07L145.00 22.84L144.92 22.60L144.81 22.40L144.73 22.29L144.65 22.21L144.47 22.07L144.27 21.95L143.10 21.20L142.03 20.33L141.13 19.43L140.31 18.42L139.56 17.27L138.96 16.14L138.48 14.98L138.12 13.83L137.84 12.58L137.69 11.43L137.64 10.25L137.64 9.41L137.66 9.34L137.71 9.28L137.77 9.24L137.84 9.21L143.09 9.21L143.21 9.20L143.43 9.16L143.55 9.12L143.75 9.01L143.93 8.86L144.08 8.68L144.19 8.47L144.26 8.24L144.29 8.01L144.29 6.58L144.26 6.34L144.23 6.22L144.15 6.01L144.08 5.90L143.94 5.73L143.85 5.65L143.75 5.57L143.55 5.47L143.43 5.42L143.21 5.38L137.88 5.37L137.81 5.36L137.75 5.33L137.66 5.24L137.63 5.12L137.63 2.01L137.61 1.78L137.54 1.54L137.44 1.34L137.37 1.25L137.19 1.07L137.01 0.95L136.89 0.89L136.66 0.83L136.44 0.80L133.83 0.81L133.70 0.83L133.47 0.90L133.27 1.01L133.08 1.16L132.94 1.33L132.88 1.44L132.79 1.65L132.74 1.88L132.74 5.12L132.71 5.24L132.66 5.30L132.61 5.34L132.49 5.37L127.09 5.38L126.87 5.42L126.76 5.46L126.64 5.52L126.46 5.64L126.28 5.82L126.16 6.00L126.10 6.12L126.04 6.34L126.01 6.57L126.01 8.01L126.04 8.24L126.11 8.47L126.16 8.58L126.28 8.77L126.45 8.93L126.65 9.07L126.86 9.16L126.97 9.18L127.22 9.21L132.51 9.21L132.61 9.24L132.68 9.30L132.72 9.36L132.74 9.46L132.74 10.24L132.68 11.50L132.53 12.75L132.27 13.97L131.89 15.26L131.42 16.47L130.85 17.60L130.11 18.79L129.30 19.84L128.42 20.78L127.32 21.72L126.21 22.47L125.88 22.68L125.72 22.84L125.64 22.93L125.58 23.04L125.49 23.25L125.44 23.49L125.44 23.72L125.49 23.96L125.58 24.18ZM147.25 31.84L147.27 31.97L147.34 32.19L147.45 32.40L147.60 32.58L147.78 32.73L147.99 32.84L148.22 32.90L148.45 32.93L150.90 32.93L151.03 32.92L151.25 32.88L151.37 32.83L151.57 32.73L151.67 32.65L151.83 32.49L151.91 32.39L152.01 32.19L152.06 32.07L152.10 31.85L152.11 1.23L152.08 1.01L152.02 0.78L151.91 0.58L151.83 0.47L151.66 0.31L151.47 0.18L151.26 0.09L151.03 0.04L148.45 0.04L148.32 0.04L148.10 0.09L147.98 0.13L147.78 0.24L147.68 0.31L147.52 0.47L147.45 0.58L147.34 0.77L147.30 0.89L147.25 1.11ZM94.69 25.29L94.46 25.34L94.24 25.43L94.13 25.49L93.95 25.65L93.80 25.83L93.69 26.04L93.62 26.26L93.60 26.49L93.60 28.00L93.62 28.23L93.69 28.45L93.74 28.57L93.87 28.76L94.04 28.93L94.14 29.00L94.33 29.11L94.46 29.15L94.67 29.19L122.11 29.20L122.34 29.18L122.56 29.11L122.68 29.05L122.87 28.92L123.04 28.76L123.16 28.57L123.26 28.35L123.30 28.12L123.31 26.49L123.29 26.26L123.26 26.13L123.17 25.93L123.10 25.82L123.03 25.72L122.87 25.57L122.67 25.43L122.46 25.34L122.35 25.31L122.11 25.29L109.16 25.29L109.09 25.28L109.02 25.25L108.94 25.16L108.91 25.04L108.91 18.67L108.89 18.44L108.86 18.31L108.77 18.10L108.64 17.91L108.55 17.82L108.38 17.67L108.27 17.61L108.06 17.52L107.83 17.48L105.25 17.47L105.02 17.49L104.79 17.56L104.58 17.67L104.48 17.74L104.33 17.90L104.19 18.11L104.14 18.21L104.07 18.43L104.05 18.67L104.05 25.04L104.04 25.11L104.01 25.18L103.92 25.26L103.80 25.29Z" fill="#F59E0B"/>
 </svg><a class="auth" href="/signup/">시작하기</a></div>
 
-<!-- 첫 화면 (2026-10-21 v6 — 여덟 곳이 카톡 1통으로 모이는 그림) -->
-<section data-sec="첫 화면" class="gap20 s-white" id="sec1" style="padding-top:44px;padding-bottom:64px">
-  <div style="text-align:center">
-    <h1 class="h1c"><span class="l1">AI가 바꿀 내 직업,</span><br><span class="l2"><span class="n1">어떻게</span> 달라질까요?</span></h1>
-    <p class="sub" style="margin-top:18px;word-break:keep-all"><span class="sub1">AI 트렌드 · 내 직군의 미래 · 업계 소식</span><br><span class="ul hk" style="color:var(--g800)">매일 카톡 5줄로 1분 요약 해 드려요</span></p>
+<!-- 첫 화면 -->
+<section data-sec="첫 화면" class="gap20 s-white crop pv" id="sec1" style="padding-top:44px">
+  <div>
+    <h1 class="h1c"><span class="l1">하루 <span class="n1">129원</span>으로</span><br><span class="l2">연봉 <span class="n2">300만원</span> 올리기</span></h1>
+    <p class="sub" style="margin-top:18px;word-break:keep-all"><span class="sub1">내 직군 현직자가 매일 아침 보내는</span><br><span class="ul hk" style="color:var(--g800)">업계 실전 노하우·뉴스 5줄 요약 카카오톡</span></p>
   </div>
-  
-  <div class="f6g f6gF1 k-ring" style="height:330px" aria-hidden="true">
-    <svg class="f6l" viewBox="0 0 312 330"><path class="f6b" pathLength="1" style="--i:0" d="M64 27 C64 79.5 156 79.5 156 132"/><path class="f6b" pathLength="1" style="--i:1" d="M248 27 C248 79.5 156 79.5 156 132"/><path class="f6b" pathLength="1" style="--i:2" d="M44 79 C44 105.5 156 105.5 156 132"/><path class="f6b" pathLength="1" style="--i:3" d="M268 79 C268 105.5 156 105.5 156 132"/><path class="f6b" pathLength="1" style="--i:4" d="M44 251 C44 224.5 156 224.5 156 198"/><path class="f6b" pathLength="1" style="--i:5" d="M268 251 C268 224.5 156 224.5 156 198"/><path class="f6b" pathLength="1" style="--i:6" d="M64 303 C64 250.5 156 250.5 156 198"/><path class="f6b" pathLength="1" style="--i:7" d="M248 303 C248 250.5 156 250.5 156 198"/></svg>
-    <span class="f6s" style="left:64px;top:27px;--i:0">🤖 AI 뉴스레터</span><span class="f6s" style="left:248px;top:27px;--i:1">💼 링크드인</span><span class="f6s" style="left:44px;top:79px;--i:2">📰 해외 기사</span><span class="f6s" style="left:268px;top:79px;--i:3">▶️ 유튜브</span><span class="f6s" style="left:44px;top:251px;--i:4">🏢 업계 뉴스</span><span class="f6s" style="left:268px;top:251px;--i:5">🗣️ 커뮤니티</span><span class="f6s" style="left:64px;top:303px;--i:6">📑 리포트</span><span class="f6s" style="left:248px;top:303px;--i:7">🧵 X · 스레드</span>
-    <div class="f6c" style="top:165px"><div class="f6n"><span class="dap"><svg width="16" height="16" viewBox="0 0 21 21"><use href="#ccmark"/></svg></span><div><b>커리어코치</b><p>5줄 요약 카톡이 도착했어요</p></div><em>지금</em></div></div>
+<div class="pvbox" data-pv data-ix="hjob hcard hmore">
+<div class="herow" data-v="1"><i class="lkn"></i><div class="sarwb atS" hidden><button class="cpv" type="button" aria-label="이전 카톡">‹</button><button class="cnx" type="button" aria-label="다음 카톡">›</button></div><div class="lkb"><b class="lkk">마케팅·그로스</b> 직군 카톡</div>
+  <div class="pm pm-hero"><div class="sc"><div class="nbn"><span class="ap"><svg width="18" height="18" viewBox="0 0 21 21"><use href="#ccmark"/></svg></span><div><b>커리어코치</b><p>오늘의 인사이트 5줄이 도착했어요</p></div><em>지금</em></div><div class="typing"><i></i><i></i><i></i></div>
+    <div class="sb"><span>8:01</span><span class="ic"><span class="sig"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:10px"></i></span>5G<span class="bat"><i></i></span></span></div>
+    <div class="hd"><span class="bk"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="ttl"><svg width="20" height="20" viewBox="0 0 21 21"><use href="#ccmark"/></svg>커리어코치</span><span class="ics"><svg viewBox="0 0 24 24" width="21" height="21"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 15.5l4.5 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><svg viewBox="0 0 24 24" width="21" height="21"><path d="M4 6.5h16M4 12h16M4 17.5h16" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></svg></span></div>
+        <div class="dtabs"></div><div class="scrollwrap"><div class="body swipe"></div><div class="hint pvhint"><span>옆으로 밀어서 더 보기</span><b>›</b></div></div><div class="dots pvdots"><i class="on">1</i><i>2</i><i>3</i></div>
+    <div class="inp"><span class="plus">+</span><span class="field"></span><span class="hash">#</span></div>
+  </div></div>
   </div>
-  
+  <div class="chw arw pvchw"><span class="chint">👆 직군을 누르면 내용이 바뀌어요</span><div class="chips two pvchips" data-group="sample"></div><button class="cpv" type="button" aria-label="앞으로">‹</button><button class="cnx" type="button" aria-label="직군 더 보기">›</button><span class="fing">👆</span></div>
+  <p class="chp"><span class="cet">내 직군을 선택해 보세요</span></p>
+</div>
 </section>
-<!-- 요즘 이런 생각 (2026-10-21 v6 신설 · 수치 출처는 화면에서 뺐다 — 한국은행 2023 · 세계경제포럼 2025) -->
-<section data-sec="요즘 이런 생각" class="gap20 s-n50 c" id="anxsec">
-  <h2>요즘 이런 생각,<br>한 번쯤 해 보셨죠?</h2>
-  <div class="anx">
-    <div class="bb"><i>😟</i>AI 때문에 내 자리,<br>5년 뒤에도 있을까?</div>
-    <div class="bb"><i>🤔</i>다들 AI 쓴다는데<br>나만 모르는 것 같아</div>
-    <div class="bb"><i>😩</i>읽을 건 쏟아지는데<br>뭐가 중요한지 모르겠어</div>
+<!-- 250개 -->
+<section data-sec="1년 250개" class="gap20 s-white c" id="sec250" style="background:#FFFDF6">
+  <div class="sal" data-v="0">
+    <p class="more">1년에 <b>250개</b>의 노하우를<br>더 쌓은 만큼 역량 상승과<br><span class="ul">연봉 추가 인상</span>은 당연하죠</p>
   </div>
-  <div class="anxst">
-    <div class="v6st"><b><span class="cu" data-to="341">341</span>만 개</b><span>AI로 대체될 가능성이<br>높은 국내 일자리</span></div>
-    <div class="v6st"><b><span class="cu" data-to="39">39</span>%</b><span>2030년까지 바뀔<br>핵심 직무 역량</span></div>
-  </div>
-  <p class="big anxt"><span class="ul">모른 채</span> 미래를 맞이하지 마세요.<br>매일 조금씩 대비하세요.</p>
+  <div class="yr"><div class="yg" id="yg"></div><div class="yl"><span>1월</span><span>6월</span><span>12월</span></div><div class="yc"><span>평일 발송 메시지 총</span><b><span id="ycn">0</span>개</b></div></div>
 </section>
-<!-- 매일 받는 세 가지 (2026-10-21 v6 신설) -->
-<section data-sec="매일 받는 세 가지" class="gap20 s-white c" id="trisec">
-  <h2>AI 시대에 살아남을 수 있는<br>글들을 드려요</h2>
-  <div class="tri">
-    <div class="tc"><span class="te">🤖</span><div><b>내 직군 AI 뉴스</b><span>내 일에 영향을 주는 AI 변화들</span></div></div>
-    <div class="tc"><span class="te">📰</span><div><b>내 직군 현직자 노하우·뉴스</b><span>업계 현직자의 노하우와 업계 소식</span></div></div>
-    <div class="tc"><span class="te">🧭</span><div><b>앞으로 일하는 법</b><span>AI 시대에 살아남는 일하는 법·커리어</span></div></div>
+<!-- 연봉 3% -->
+<section data-sec="연봉 3% 효과" class="gap20 s-n50">
+  <h2>연봉 협상·이직 시<br><span class="hl">3%</span> 추가 인상되면<br>매년마다 구독료의 <span class="rxw" id="rx">25배+</span></h2>
+  <p class="rxd">1년 구독료를 <span class="rxdn">약 <span class="rxw" id="rxd">12</span>일</span> 만에 돌려받는 셈이에요</p>
+  <p class="rxn">*아래 연봉 기준</p>
+  <div class="sal" id="sal" data-v="6" data-ix="sal">
+    <label class="u1"><span>내 연봉</span><input type="number" inputmode="numeric" class="sv" value="4000" min="1000" max="30000" step="100"><em>만원</em></label>
+    <div class="u2"><div class="rvv"><span>내 연봉</span><b class="sd">5,000만원</b></div><div class="rngw"><span class="tipb">← 밀어서 내 연봉 넣어보기 →</span><span class="fing">👆</span><input type="range" class="sv" min="2000" max="10000" step="100" value="5000"></div><div class="rl"><span>2천만원</span><span>1억원</span></div></div>
+    <div class="u3"><span class="lb">내 연봉은</span><div class="pc"><button data-s="3000">3천만</button><button data-s="4000" class="on">4천만</button><button data-s="5000">5천만</button><button data-s="7000">7천만</button><button data-s="10000">1억</button></div><label class="dx">직접 입력 <input type="number" inputmode="numeric" class="sv" value="4000"> 만원</label></div>
+    <p class="u4">내 연봉은 <input type="number" inputmode="numeric" class="sv" value="4000">만원이에요</p>
+    <div class="k33 live"><div class="col"><b id="b0">4.7만</b><i id="h0"></i><span>1년<br>구독료</span></div><div class="col up"><b id="b1">120만</b><i id="h1"></i><span>연봉 3%<br>추가 인상 시</span></div><div class="col up"><b id="b2">160만</b><i id="h2"></i><span>연봉 4%<br>추가 인상 시</span></div></div>
   </div>
+</section>
+<!-- 시간 -->
+<section data-sec="하루 1시간 절약" class="gap20 s-a100b" style="padding-top:104px">
+  <h2>링크드인·뉴스레터<br><span class="hl">다 안 봐도 괜찮아요.</span><br>이것만 보면 따라가요.</h2>
+  <div class="tvx" id="tvx"><div class="vC"><i class="ln"></i><div class="it" style="--k:0"><span class="ic">📧<em class="no">1</em></span><small>뉴스레터<br>여러 통</small></div><div class="it" style="--k:1"><span class="ic">💼<em class="no">2</em></span><small>링크드인<br>게시글</small></div><div class="it" style="--k:2"><span class="ic">📰<em class="no">3</em></span><small>해외<br>기사</small></div><div class="it" style="--k:3"><span class="ic">🗣️<em class="no">4</em></span><small>커뮤니티<br>정보</small></div></div><div class="tvo"><svg class="tvf" viewBox="0 0 400 70" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M50 0C50 40 200 30 200 70"/><path pathLength="1" d="M150 0C150 40 200 30 200 70"/><path pathLength="1" d="M250 0C250 40 200 30 200 70"/><path pathLength="1" d="M350 0C350 40 200 30 200 70"/></svg><b>💬 커리어코치 카톡 1통으로</b><p class="tvm">⏱ 읽는 데 1분</p></div></div>
+  <p class="big c" style="margin-top:64px;font-weight:400">새 읽을 건 매일 쌓이는데…<br>시간은 늘 모자라니까요 🥺</p>
 </section>
 <!-- 알림톡 미리보기 (2026-10-18 되살림 — 옛 첫 화면 d837e22^ 의 폰·직군 칩. 첫 칩 「공통」이 기본 선택) -->
+<!-- 전문가 -->
+<section data-sec="전문가 5줄 요약" class="gap20 s-sky pv" id="exsec">
+  <h2>현직자의 업무 노하우를<br>따라할 수 있게 알려드려요</h2>
+  <p class="exsub">현직자 3명이 업계 노하우·뉴스를 5줄로 요약해요</p>
+  <p class="expn">*현직자인 관계로 본명은 가림 처리 되었습니다.</p>
+  <div id="ezl"></div>
+  <div class="chw arw pvchw" id="chw9" data-ix="xjob"><span class="chint">👆 직군을 누르면 내용이 바뀌어요</span><div class="chips two pvchips" id="exChips"></div><button class="cpv" type="button" aria-label="앞으로">‹</button><button class="cnx" type="button" aria-label="직군 더 보기">›</button><span class="fing">👆</span></div>
+  <p class="chp"><span class="cet">내 직군을 선택해 보세요</span></p>
+</section>
 <section data-sec="알림톡 미리보기" class="gap20 s-white crop pv" id="pvsec">
-  <h2>실제로 이렇게 와요<br><span class="hl">내 직군을 눌러 보세요</span></h2>
+  <h2>이런 카카오톡이 쌓이면<br><span class="hl">면접·연봉 협상이 달라져요</span></h2>
 <div class="pvbox" data-pv data-ix="pjob pcard pmore">
 <div class="herow" data-v="1"><i class="lkn"></i><div class="sarwb atS" hidden><button class="cpv" type="button" aria-label="이전 카톡">‹</button><button class="cnx" type="button" aria-label="다음 카톡">›</button></div><div class="lkb"><b class="lkk">마케팅·그로스</b> 직군 카톡</div>
   <div class="pm pm-hero"><div class="sc"><div class="nbn"><span class="ap"><svg width="18" height="18" viewBox="0 0 21 21"><use href="#ccmark"/></svg></span><div><b>커리어코치</b><p>오늘의 인사이트 5줄이 도착했어요</p></div><em>지금</em></div><div class="typing"><i></i><i></i><i></i></div>
@@ -317,15 +294,6 @@ html.cc-wait .f6g *{animation-play-state:paused!important}
   <p class="chp"><span class="cet">내 직군을 선택해 보세요</span></p>
 </div>
 </section>
-<!-- 전문가 -->
-<section data-sec="전문가 5줄 요약" class="gap20 s-sky pv" id="exsec">
-  <h2>아무거나 보내지 않아요<br>현직자가 골라 5줄로 요약해요</h2>
-  <p class="exsub">직군마다 최고 수준의 현직자 3명이<br>그날 꼭 알아야 할 것만 골라요</p>
-  <p class="expn">*현직자인 관계로 본명은 가림 처리 되었습니다.</p>
-  <div id="ezl"></div>
-  <div class="chw arw pvchw" id="chw9" data-ix="xjob"><span class="chint">👆 직군을 누르면 내용이 바뀌어요</span><div class="chips two pvchips" id="exChips"></div><button class="cpv" type="button" aria-label="앞으로">‹</button><button class="cnx" type="button" aria-label="직군 더 보기">›</button><span class="fing">👆</span></div>
-  <p class="chp"><span class="cet">내 직군을 선택해 보세요</span></p>
-</section>
 <section data-sec="아티클 전문" class="gap20 s-white crop" id="artsec" style="background:#F8FAFC">
   <div><h2>5줄로 부족한 날엔<br><span class="ul">따라 할 수 있는 전문</span>까지</h2>
   <p class="artp" style="margin-top:16px">전문 보기는 당일에만 가능해 더 자주 보게 돼요.<br><span class="ul">그만큼 내가 더 많이 성장</span>해요.</p></div>
@@ -333,25 +301,20 @@ html.cc-wait .f6g *{animation-play-state:paused!important}
     <div class="hd"><span class="bk"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="ttl"><svg width="20" height="20" viewBox="0 0 21 21"><use href="#ccmark"/></svg>커리어코치</span><span class="ics"><svg viewBox="0 0 24 24" width="21" height="21"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 15.5l4.5 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><svg viewBox="0 0 24 24" width="21" height="21"><path d="M4 6.5h16M4 12h16M4 17.5h16" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></svg></span></div>
     <div class="art">
       <span class="tday">⏰ 오늘만 열람 가능</span>
-      <h4>AI가 회의록을 써 주는 시대,<br>사람에게 남는 일</h4>
+      <h4>연봉 협상이 거절됐을 때,<br>다음을 여는 한마디</h4>
       <p class="meta"><span>#일 잘하는 법·커리어</span><span>⏱ 4분</span></p>
-      <p>회의가 끝나면 AI가 요약과 할 일 목록을 바로 정리해 주는 팀이 늘었어요. 문서 만드는 시간은 확실히 줄었는데, 이상하게 결정은 그만큼 빨라지지 않아요.</p>
-      <p>이유는 단순해요. 요약은 「무엇이 말해졌는지」를 정리할 뿐, 「무엇을 정했는지」는 정하지 않거든요. 회의록이 길어질수록 정작 결론을 찾기는 더 어려워지기도 해요.</p>
-      <p>그래서 AI가 정리를 맡은 팀일수록 사람이 하는 일이 분명해져요. 회의 끝 1분 동안 「누가 무엇을 언제까지」를 소리 내어 확인하는 거예요. 이 한 줄이 요약 문서 열 장보다 힘이 세요.</p>
-      <p>AI가 만든 요약을 공유하기 전에는 숫자와 반대 의견이 빠지지 않았는지 꼭 훑어보세요. 틀린 요약이 한 번 퍼지면, 그걸 바로잡는 회의가 하나 더 생겨요.</p>
-      <p>도구는 계속 바뀌어도 결정을 정리하는 사람은 계속 필요해요. 반복 업무를 AI에 넘기고 그 시간을 판단에 쓰는 사람이, 같은 자리에서 다른 일을 하게 돼요.</p>
+      <p>연봉 인상 요청이 거절되면 대부분 그 자리에서 대화를 끝내요. 그런데 거절 직후가 다음 협상을 준비하기 가장 좋은 때예요.</p>
+      <p>이때 흔히 하는 실수가 둘 있어요. 하나는 서운한 티를 내며 「알겠습니다」로 끝내는 것, 다른 하나는 「그럼 이직을 생각해 볼게요」처럼 압박으로 바꾸는 거예요. 앞의 것은 아무것도 남기지 못하고, 뒤의 것은 다음 대화의 문을 닫아요.</p>
+      <p>대신 "그럼 어떤 성과를 내면 다음에 반영될 수 있을까요?"라고 물어보세요. 막연한 거절이 구체적인 조건으로 바뀌어요. 감정이 아니라 다음 단계를 묻는 말이라 팀장도 편하게 답할 수 있어요.</p>
+      <p>들은 조건은 메일로 정리해 팀장과 함께 확인해 두세요. 이때도 「약속하신 대로」 같은 표현은 피하는 게 좋아요. 확인을 부탁하는 말투여야 팀장이 부담 없이 답장을 해요.</p>
+      <p>조건을 채운 순간이 다음 협상의 시작이에요. 그때는 "말씀하신 조건을 채웠다"는 한 줄이 가장 강한 근거가 돼요. 결과가 나오기 전에 먼저 꺼내지 말고, 채운 것을 보여 줄 수 있을 때 말하는 것이 좋아요.</p>
       <p>커리어코치가 정리했어요.</p>
     </div>
   </div></div>
 </section>
-<!-- 1시간 → 5줄 요약 · 정보 피로 (2026-10-21 v6 신설) -->
-<section data-sec="1시간 → 5줄 요약" class="gap20 c em6 em6c ex" id="emsec" style="background:linear-gradient(180deg,#FFF3D1,#FFFBEF)"><h2>정보의 홍수 속,<br>꼭 필요한 것만 뽑아<br><span class="ul">정보 피로</span>를 줄여드려요.</h2>
-  <div class="fpile2"><div class="expile"><span style="--i:0;left:2%;top:4px;--r:-6deg">🤖 AI 뉴스레터</span><span style="--i:1;left:34%;top:0px;--r:4deg">💼 링크드인</span><span style="--i:2;left:64%;top:8px;--r:-3deg">📰 해외 기사</span><span style="--i:3;left:6%;top:32px;--r:7deg">▶️ 유튜브</span><span style="--i:4;left:40%;top:30px;--r:-5deg">🏢 업계 뉴스</span><span style="--i:5;left:70%;top:36px;--r:3deg">🗣️ 커뮤니티</span><span style="--i:6;left:12%;top:60px;--r:-8deg">📑 리포트</span><span style="--i:7;left:46%;top:58px;--r:5deg">🧵 X·스레드</span><span style="--i:8;left:0%;top:86px;--r:4deg">✍️ 블로그</span><span style="--i:9;left:30%;top:84px;--r:-4deg">🎧 팟캐스트</span><span style="--i:10;left:60%;top:88px;--r:6deg">💬 오픈채팅방</span><span style="--i:11;left:20%;top:112px;--r:-2deg">📸 인스타그램</span></div></div>
-  <div class="embars"><div class="emrow"><span class="emlb">혼자 찾을 때</span><div class="embar emsolid"><i style="--w:100%;--d:1.2s"></i></div><b class="emt">약 1시간 분량</b></div>
-  <div class="emrow"><span class="emlb">커리어코치</span><div class="embar ema"><i style="--w:7%;--d:1.9s"></i></div><b class="emt ema">1분</b></div></div></section>
 <!-- 목요일 맞춤 공고 (목요일 채용 브리핑 + 조건 맞춤 공고 병합) -->
 <section data-sec="목요일 맞춤 공고" class="gap20 s-a100b crop" id="thusec" style="padding-bottom:72px">
-  <div><p style="text-align:center;font-size:15px;font-weight:700;color:var(--a700);margin-bottom:8px">덤으로, 이직을 생각할 때도</p><h2 class="h2d" style="text-align:center">내 조건에 맞는 <span class="ul">새 공고</span>를<br>목요일마다 모아 드려요</h2>
+  <div><p style="text-align:center;font-size:17px;font-weight:600;color:var(--g700);margin-bottom:8px">일주일에 한번은</p><h2 class="h2d" style="text-align:center">이직하고 싶은 곳의 <span class="ul">새 공고,</span><br><span class="ul">내 조건에 맞춰</span> 먼저 보내드려요</h2>
   <p style="margin-top:16px;text-align:center">현재 채용 시장 트렌드도 알려드려요</p></div>
   <div class="cond"><span class="ck" aria-hidden="true"><svg viewBox="0 0 12 12" width="12" height="12"><path d="M2.5 6.2l2.3 2.3 4.7-4.9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/></svg></span>내 조건 <b>마케팅·그로스 · 3~7년 · 서울</b></div>
   <div class="pm"><div class="sc">
@@ -384,15 +347,15 @@ html.cc-wait .f6g *{animation-play-state:paused!important}
 </section>
 <!-- 요일별 구성 -->
 <section data-sec="요일별 발송" class="gap20 s-white" id="wksec">
-  <div><h2>요일별로 나눠 보내드려요</h2>
+  <div><h2>월요일부터 금요일까지<br>이렇게 받아요</h2>
   <div class="wk" id="wk" data-v="3">
     <p class="wa1">평일 아침마다 <b>내 직무 인사이트</b>, <b>일 잘하는 법·커리어</b>, <b>채용시장 · 공고 브리핑</b>, 세 가지를 요일에 맞춰 보내드려요.</p>
     <p class="wa2">세 가지가 요일별로 나눠 도착해요<br><span class="tg1">내 직무 인사이트</span><span class="tg2">일 잘하는 법·커리어</span><span class="tg3">채용시장 · 공고 브리핑</span></p>
-    <div class="wbx" id="wbx" data-v="1"><ul class="wa3"><li><i class="tg1"></i><b>월·수·금</b><span class="lt">내 직군 소식 · AI 변화<small>현직자가 골라 5줄로 요약해요</small></span></li><li><i class="tg2"></i><b>화</b><span class="lt">AI 시대 일하는 법·커리어<small>AI 활용·앞으로 쓸모 있는 역량처럼<br>모든 직군에 통하는 이야기</small></span></li><li><i class="tg3"></i><b>목</b><span class="lt">채용시장 · 공고 브리핑<small>최근 7일 새 공고와 시장 흐름</small></span></li></ul></div>
+    <div class="wbx" id="wbx" data-v="1"><ul class="wa3"><li><i class="tg1"></i><b>월·수·금</b><span class="lt">업계 노하우·뉴스<small>내 직군 현직자가 5줄로 요약해요</small></span></li><li><i class="tg2"></i><b>화</b><span class="lt">일 잘하는 법·커리어<small>연봉 협상·이직처럼<br>모든 직군에 통하는 이야기</small></span></li><li><i class="tg3"></i><b>목</b><span class="lt">채용시장 · 공고 브리핑<small>최신 7일 공고와 채용시장 트렌드</small></span></li></ul></div>
     <p class="wa4"><b class="n">3</b><span>가지 종류로 나눠 보내드려요<br><small>직무 인사이트 · 일 잘하는 법·커리어 · 채용시장 · 공고 브리핑</small></span></p>
   </div></div>
   <div class="wkh" id="wkh" data-v="2">
-  <div class="k2" id="k2"><div class="ct a"><b>월</b><span>내 직군</span></div><div class="ct n"><b>화</b><span>AI·커리어</span></div><div class="ct a"><b>수</b><span>내 직군</span></div><div class="ct e"><b>목</b><span>공고</span></div><div class="ct a"><b>금</b><span>내 직군</span></div></div>
+  <div class="k2" id="k2"><div class="ct a"><b>월</b><span>직무</span></div><div class="ct n"><b>화</b><span>커리어</span></div><div class="ct a"><b>수</b><span>직무</span></div><div class="ct e"><b>목</b><span>시장</span></div><div class="ct a"><b>금</b><span>직무</span></div></div>
   <div class="k3"><div class="ln"></div><div class="tp a"><i></i><b>월</b><span>직무</span></div><div class="tp n"><i></i><b>화</b><span>커리어</span></div><div class="tp a"><i></i><b>수</b><span>직무</span></div><div class="tp e"><i></i><b>목</b><span>공고</span></div><div class="tp a"><i></i><b>금</b><span>직무</span></div></div>
   <div class="k5"><div class="row"><div class="bs a"><b>월</b></div><div class="bs n"><b>화</b></div><div class="bs a"><b>수</b></div><div class="bs e"><b>목</b></div><div class="bs a"><b>금</b></div></div><div class="lg"><span class="a">직무 인사이트</span><span class="n">일 잘하는 법·커리어</span><span class="e">채용시장 · 공고 브리핑</span></div></div>
   <div class="week">
@@ -420,34 +383,71 @@ html.cc-wait .f6g *{animation-play-state:paused!important}
   <p class="big soft c" style="margin-top:50px;font-weight:500"><em class="em v5">💡 </em><span class="ul">환경이 바뀌면</span><em class="em v3"> 🌱</em><em class="em v4"> 🔄</em><br>습관의 힘으로<em class="em v3"> 💪</em><br>몸값이 추가로 올라가요<em class="em v2 v3 upe"></em><em class="em v4"> 🚀</em></p>
 
 </section>
-<!-- 250개 -->
-<section data-sec="1년 250개" class="gap20 s-white c" id="sec250" style="background:#FFFDF6">
-  <div class="sal" data-v="0">
-    <p class="more">1년에 <b>250개</b>의 인사이트를<br>더 쌓은 만큼 역량 상승과<br><span class="ul">연봉 추가 인상</span> 확률도 올라가요</p>
+<!-- 가격 -->
+<section data-sec="요금" class="gap20 s-a50" id="pricing">
+  <h2>연봉이 100만원만 올라도<br>1년 구독료의 <span class="ul">21배</span>예요</h2>
+<div class="plan">
+    <div class="pn">1개월</div>
+    <div class="row"><span class="pr">5,900원<small>/월</small></span></div>
+    <div class="dayp">하루 약 <span class="a6">197원</span></div>
   </div>
-  <div class="yr"><div class="yg" id="yg"></div><div class="yl"><span>1월</span><span>6월</span><span>12월</span></div><div class="yc"><span>평일 발송 메시지 총</span><b><span id="ycn">0</span>개</b></div></div>
-</section>
-<!-- 연봉 3% -->
-<section data-sec="연봉 3% 효과" class="gap20 s-n50">
-  <h2>연봉 협상·이직 시<br><span class="hl">3%</span> 추가 인상되면<br>매년마다 구독료의 <span class="rxw" id="rx">25배+</span></h2>
-  <p class="rxd">1년 구독료를 <span class="rxdn">약 <span class="rxw" id="rxd">12</span>일</span> 만에 돌려받는 셈이에요</p>
-  <p class="rxn">*아래 연봉 기준</p>
-  <!-- 1년 구독료(12개월권 금액)는 data-sub 가 정본 — page-audit 요금 대조가 서버 plan 과 맞댄다 -->
-  <div class="sal" id="sal" data-v="6" data-ix="sal" data-sub="47200">
-    <label class="u1"><span>내 연봉</span><input type="number" inputmode="numeric" class="sv" value="4000" min="1000" max="30000" step="100"><em>만원</em></label>
-    <div class="u2"><div class="rvv"><span>내 연봉</span><b class="sd">5,000만원</b></div><div class="rngw"><span class="tipb">← 밀어서 내 연봉 넣어보기 →</span><span class="fing">👆</span><input type="range" class="sv" min="2000" max="10000" step="100" value="5000"></div><div class="rl"><span>2천만원</span><span>1억원</span></div></div>
-    <div class="u3"><span class="lb">내 연봉은</span><div class="pc"><button data-s="3000">3천만</button><button data-s="4000" class="on">4천만</button><button data-s="5000">5천만</button><button data-s="7000">7천만</button><button data-s="10000">1억</button></div><label class="dx">직접 입력 <input type="number" inputmode="numeric" class="sv" value="4000"> 만원</label></div>
-    <p class="u4">내 연봉은 <input type="number" inputmode="numeric" class="sv" value="4000">만원이에요</p>
-    <div class="k33 live"><div class="col"><b id="b0">4.7만</b><i id="h0"></i><span>1년<br>구독료</span></div><div class="col up"><b id="b1">120만</b><i id="h1"></i><span>연봉 3%<br>추가 인상 시</span></div><div class="col up"><b id="b2">160만</b><i id="h2"></i><span>연봉 4%<br>추가 인상 시</span></div></div>
+  <div class="plan best">
+    <div class="badge">추천 · 기간 한정 특가</div>
+    <div class="gift">4개월 무료 증정</div>
+    <div class="pn">8개월 + 4개월</div>
+    <div class="row"><s id="ps">70,800원</s><span class="pct" id="ppc">33%</span><span class="pr" id="ppr">47,200원</span></div>
+    <div class="dayp">하루 약 <span class="a6">129원</span></div>
   </div>
+  <div class="cof out">☕ 한 달 <b>3,933원</b></div>
+  <p class="rfd" id="rfd">✓ 첫 브리핑이 마음에 안 들면 <span class="ru">전액 환불</span></p>
 </section>
-<!-- FOMO — 번호 타임라인 (2026-10-21 v6) -->
-<section data-sec="저 사람은 어떻게" class="gap20 s-n50 fo6 fo6c" id="fo6sec"><div><h2>"저 사람은 어떻게<br>다 알고 있지?"</h2><p style="margin-top:16px;font-size:15px">AI 시대엔 이 차이가 더 빨리 벌어져요.</p></div><ol class="fot"><li style="--i:0"><b>01</b><span>🗣️ 팀 회의에서</span></li><li style="--i:1"><b>02</b><span>💼 이직 면접에서</span></li><li style="--i:2"><b>03</b><span>💰 연봉 협상에서</span></li><li style="--i:3"><b>04</b><span>🤖 사내 AI 도입 논의에서</span></li><li style="--i:4"><b>05</b><span>☕ 동료와 점심 대화에서</span></li></ol><div class="fomo-end">아는 사람과 모르는 사람의 차이는<br><span>오늘 아침에도 벌어지고 있습니다.</span></div></section>
+<!-- 부담 없이 시작 (2026-10-17 신설 · 문구 근거: terms.html 제6조) -->
+<section data-sec="부담 없이 시작" class="gap20 s-a100b" id="safesec">
+  <h2>부담 없이<br>시작해 보세요</h2>
+  <ul class="sf">
+    <li><i>✓</i><div><b>첫 브리핑이 마음에 안 들면 전액 환불</b><span>요청만 하면 돼요 · 첫 결제 1회</span></div></li>
+    <li><i>✓</i><div><b>원할 때 바로 해지 가능</b><span>마이페이지에서 바로 해지 가능</span></div></li>
+    <li><i>✓</i><div><b>앱 설치 없이 이용 가능</b><span>카카오 알림톡으로 바로 받아요</span></div></li>
+  </ul>
+</section>
+<!-- 왜 커리어코치 (2026-10-17 신설) -->
+<section data-sec="왜 커리어코치" class="gap20 s-n50 why c" id="whysec">
+  <div><div class="tag">WHY</div><h2>왜 커리어코치를<br>매일 열어 볼까요?</h2></div>
+  <div class="whyn"><div><b>5줄</b><span>핵심만 요약</span></div><div><b>1분</b><span>읽는 데 걸려요</span></div><div><b>3명</b><span>직군별 현직자</span></div></div>
+  <div class="chipflow"><div class="lane l1"><b>🚇 출근길 1분이면 끝</b><b>🎯 내 직군 이야기만 와요</b><b>💬 카톡이라 안 놓쳐요</b><b>🧠 업계 흐름이 보여요</b><b>☕ 커피 한 잔보다 저렴해요</b><b>🚇 출근길 1분이면 끝</b><b>🎯 내 직군 이야기만 와요</b><b>💬 카톡이라 안 놓쳐요</b><b>🧠 업계 흐름이 보여요</b><b>☕ 커피 한 잔보다 저렴해요</b></div><div class="lane l2"><b>🗣 회의에서 할 말이 생겨요</b><b>📈 면접 답변이 달라져요</b><b>🔁 그냥 계속 열게 돼요</b><b>📋 목요일엔 새 공고까지</b><b>💼 이직·연봉 협상에 바로 써요</b><b>🗣 회의에서 할 말이 생겨요</b><b>📈 면접 답변이 달라져요</b><b>🔁 그냥 계속 열게 돼요</b><b>📋 목요일엔 새 공고까지</b><b>💼 이직·연봉 협상에 바로 써요</b></div></div>
+</section>
+<!-- FOMO -->
+<section data-sec="저 사람은 어떻게" class="gap20 s-n50">
+  <div><h2>"저 사람은 어떻게<br>다 알고 있지?"</h2>
+  <p style="margin-top:16px;font-size:15px">매일 아침 카카오톡 한 통의 차이입니다.</p></div>
+  <div class="yb" id="yb" data-v="3"><div class="dv" id="dv" data-v="1">
+  <div class="nob" id="nob" data-v="2">
+  <div class="fl" id="fl" data-v="2">
+  <div class="fv" id="fv" data-v="2">
+  <div class="scene">
+    <div class="where">연봉 협상에서</div>
+    <div class="q">"희망 연봉은<br>어느 정도 생각하세요?"</div>
+    <div class="vs"><div class="no"><b>모르는 사람</b>"회사 기준에 맞추겠습니다…"</div><div class="yes"><b>아는 사람</b>"시장 시세를 보면 이 정도라,<br>이 범위를 생각하고 있습니다"</div></div>
+  </div>
+  <div class="scene">
+    <div class="where">이직 면접에서</div>
+    <div class="q">"요즘 우리 업계에서<br>가장 큰 변화가 뭐라고 보세요?"</div>
+    <div class="vs"><div class="no"><b>모르는 사람</b>"음… 아무래도 AI…?"</div><div class="yes"><b>아는 사람</b>"두 가지 정도 말씀드리겠습니다.<br>하나는…"</div></div>
+  </div>
+  <div class="scene">
+    <div class="where">회의에서</div>
+    <div class="q">"경쟁사가 이번에 바꾼 거 보셨어요?"</div>
+    <div class="vs"><div class="no"><b>모르는 사람</b>회의가 끝나고 몰래 검색한다</div><div class="yes"><b>아는 사람</b>"그거 이런 배경에서<br>A지표 목적으로 한 거예요"</div></div>
+  </div>
+  </div>
+  </div>
+  </div>
+  </div></div>
+  <div class="fomo-end">아는 사람과 모르는 사람의 차이는<br><span>오늘 아침에도 벌어지고 있습니다.</span></div>
+</section>
 <!-- FAQ -->
 <section data-sec="자주 묻는 질문" class="faq s-white" data-ix="faq">
   <h2 style="margin-bottom:12px">자주 묻는 질문</h2>
-  <details><summary><span class="fe" aria-hidden="true">🤖</span>AI 뉴스는 어떤 내용인가요?</summary><ul class="fq"><li>AI 기술 자체보다, 내 일과 커리어에 영향을 주는 변화를 골라요.</li><li>새 도구가 내 직군 업무를 어떻게 바꾸는지, 지금 익혀 두면 좋은 것이 무엇인지 5줄로 요약해요.</li></ul></details>
-  <details><summary><span class="fe" aria-hidden="true">💡</span>개발자가 아니어도 도움이 되나요?</summary><ul class="fq"><li>네. 마케팅·디자인·재무·인사 등 19개 직군마다 내 일에 맞는 소식만 보내 드려요.</li><li>코딩이나 기술 용어를 몰라도 읽을 수 있게 써요.</li></ul></details>
   <details><summary><span class="fe" aria-hidden="true">💼</span>내 직군에 맞는 노하우를 받을 수 있나요?</summary><ul class="fq"><li>네. 기본적으로는 가입할 때 고른 직군에 맞춰지지만, 원하는 분야로 조정도 가능해요.</li></ul></details>
   <details><summary><span class="fe" aria-hidden="true">📋</span>원하는 조건들로 최신 채용공고<br>취합 브리핑을 받을 수 있나요?</summary><ul class="fq"><li>네. 원하는 관심 직군·연차·지역을 선택해 주시면 돼요.</li><li>매주 목요일마다 최근 7일간 열린 공고 중 조건에 맞는 것만 모아 보내 드려요.</li><li>설정은 언제든 바꿀 수 있어요.</li></ul></details>
   <details><summary><span class="fe" aria-hidden="true">📅</span>주말에도 알림톡이 오나요?</summary><ul class="fq"><li>주말과 공휴일을 제외한 평일에만 보내 드려요.</li></ul></details>
@@ -456,14 +456,14 @@ html.cc-wait .f6g *{animation-play-state:paused!important}
 <!-- 후기 -->
 <section data-sec="구독자 후기" class="gap20 s-n50 rvs">
   <div class="score rvc"><span class="sl">평균 별점</span><b>4.8</b><span class="stw" id="stw"><span class="s0"><i>★</i><i>★</i><i>★</i><i>★</i><i>★</i></span><span class="s1">★★★★★</span></span></div>
-  <h2>먼저 받아 본 분들은<br>이렇게 말해요</h2>
+  <h2>생생한 구독자 후기</h2>
   <div class="rvw arw" id="rvw" data-step="1" data-ix="rv"><div class="rvp" id="reviews"></div><button class="cpv" type="button" aria-label="이전 후기">‹</button><button class="cnx" type="button" aria-label="다음 후기">›</button></div>
 </section>
 <!-- 마지막 -->
 <section data-sec="마지막 · 아침 8시" class="c gap20 s-key" id="closing" data-v="45">
   <div class="clk"><b>08:00</b><span>내일 아침</span></div>
   <div class="lock"><div class="lt">내일 오전 8:00</div><div class="nt"><span class="ap"><svg width="20" height="20" viewBox="0 0 21 21"><use href="#ccmark"/></svg></span><div><b>커리어코치</b><p>오늘의 인사이트 5줄이 도착했어요</p></div><em>지금</em></div></div>
-  <h2 class="kk" id="kk" data-v="1">당장 내일부터<br><span class="nw">5줄 요약 <span class="hl kt"><em class="ti">TALK</em>카카오톡<sup class="bd">1</sup></span>을</span><br>아침 8시마다 받아보세요.</h2>
+  <h2 class="kk" id="kk" data-v="1">당장 내일부터<br>현직자 노하우가 담긴 <span class="nw"><span class="hl kt"><em class="ti">TALK</em>카카오톡<sup class="bd">1</sup></span>을</span><br>아침 8시마다 받아보세요.</h2>
   <div class="cdw" id="cdw" data-v="3"><div class="cd"><small>첫 카톡까지</small><b id="cdv">--:--:--</b></div></div>
   <p class="cdn">*돌아오는 영업일 오전 8시부터 발송</p>
 </section>
@@ -483,12 +483,8 @@ html.cc-wait .f6g *{animation-play-state:paused!important}
 
 <script>/* 새 소구 섹션 애니메이션 (2026-10-17) — 들어오면 켜고, 화면을 완전히 벗어나면 꺼서 다시 볼 때 또 움직인다 */
 (()=>{
-const 켜기=(el,th,cls,첫)=>{if(el)new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=th){if(!el.classList.contains(cls)){el.classList.add(cls);첫&&첫(el)}}else if(e.intersectionRatio===0)el.classList.remove(cls)}),{threshold:[0,th]}).observe(el)};
-const $=id=>document.getElementById(id);
-/* 「요즘 이런 생각」 숫자 — 마크업에는 최종값, 켜질 때 0 부터 센다 */
-const 세기=s=>s.querySelectorAll(".cu").forEach(c=>{const to=+c.dataset.to,t0=performance.now()+1900;c.textContent="0";const f=n=>{const k=Math.max(0,Math.min(1,(n-t0)/1200));c.textContent=Math.round(to*(1-Math.pow(1-k,3))).toLocaleString();if(k<1)requestAnimationFrame(f)};requestAnimationFrame(f)});
-켜기($("anxsec"),.3,"in",세기);켜기($("trisec"),.3,"in");켜기($("emsec"),.35,"in");켜기($("fo6sec"),.25,"in");
-켜기(document.querySelector(".f6g"),.4,"go")})();</script>
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3)e.target.classList.add("in");else if(e.intersectionRatio===0)e.target.classList.remove("in")}),{threshold:[0,.3]});
+io.observe(document.getElementById("safesec"))})();</script>
 <script src="/assets/landing.js"></script>
 <script type="module">
   // 유입 경로 기록. 실패해도 화면에 영향이 없다 (track.js 가 예외를 삼킨다).
