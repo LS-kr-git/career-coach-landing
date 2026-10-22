@@ -151,7 +151,7 @@ for (const [화면, a, b] of [['01 프로필', 빈것, 실패한것], ['03 결�
 {
   const 한달 = { code: 'm', price_krw: 1000, period_unit: 'month', period_count: 1 };
   const 일년 = { code: 'y', price_krw: 8000, period_unit: 'month', period_count: 12, bonus_months: 4 };
-  // 덤 달 수는 요금제마다 서버 값이다 — 같은 12개월이어도 4+8 로 그린다(career-coach 0208 · 2026-10-22)
+  // 덤 달 수는 요금제마다 서버 값이다 — 같은 12개월이어도 4+8 로 그린다(career-coach 0209 · 2026-10-22)
   const 일년48 = { code: 'y2', price_krw: 8000, period_unit: 'month', period_count: 12, bonus_months: 8 };
   const 기대 = [
     [data.planLabel(일년48), '12개월권(4+8개월)'],
