@@ -61,6 +61,7 @@
   .app-icon{width:29px;height:29px;border-radius:25%;background:#fff;display:flex;align-items:center;justify-content:center}
   .app-icon img{width:29px;height:29px;display:block}
   header .wordmark{height:21px;display:block}
+  .home{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:inherit;border-radius:10px}
 
   /* 텍스트 스타일 — 피그마 text/* 의 값을 그대로 옮긴다 */
   .t-h2{font-size:20px;line-height:28px;font-weight:700;letter-spacing:-0.01em}
@@ -228,8 +229,11 @@
   <div class="prog" aria-hidden="true"><i id="prog"></i></div>
   <header class="hd" id="backHd" hidden><a class="back" id="backLink" href="/mypage/" aria-label="뒤로"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15.75 4.5L8.25 12l7.5 7.5" stroke="#475569" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a></header>
   <header id="logoHd">
-    <div class="app-icon"><img src="/assets/mark-amber.svg" alt=""></div>
-    <img class="wordmark" src="/assets/wordmark.svg" alt="커리어코치">
+    <!-- 로고를 누르면 마이페이지로 간다 (2026-10-24 사용자 지시 — /jobs/ 와 같은 꼴). -->
+    <a class="home" href="/mypage/" aria-label="커리어코치 — 마이페이지로">
+      <span class="app-icon"><img src="/assets/mark-amber.svg" alt=""></span>
+      <img class="wordmark" src="/assets/wordmark.svg" alt="커리어코치">
+    </a>
   </header>
 
   <main class="brief">
