@@ -410,7 +410,7 @@ addEventListener('load',function(){setTimeout(function(){(window.requestIdleCall
 (()=>{
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3)e.target.classList.add("in");else if(e.intersectionRatio===0)e.target.classList.remove("in")}),{threshold:[0,.3]});
 io.observe(document.getElementById("safesec"))})();</script>
-<script src="/assets/landing.js?v=75c5b393"></script>
+<script src="/assets/landing.js?v=ae590411"></script>
 <script type="module">
   // 유입 경로 기록. 실패해도 화면에 영향이 없다 (track.js 가 예외를 삼킨다).
   import { track } from '/assets/track.js?v=8a4c7dcf';
