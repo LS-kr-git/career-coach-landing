@@ -57,7 +57,7 @@ const 옆으로 = async (loc) => {
 };
 // 열쇠마다 그 기록을 일으키는 손 조작. 칸(data-ix 를 단 요소) 안에서만 한다.
 const 손 = [
-  [/job$/, async (칸) => { const c = 칸.locator('.chip:not(.on)').nth(1); await 가운데로(c); await c.click(); }],
+  [/job$|^quiz$/, async (칸) => { const c = 칸.locator('.chip:not(.on)').nth(1); await 가운데로(c); await c.click(); }],
   [/card$/, async (칸) => { const s = 칸.locator('.swipe'); await 가운데로(s); await 옆으로(s); await 쪽.waitForTimeout(900); }],
   [/more$/, async (칸) => {
     const 단추 = 칸.locator('.mbtn'), n = await 단추.count();

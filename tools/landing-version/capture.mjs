@@ -94,7 +94,8 @@ function 한장() {
     if (src === '/assets/landing.js') {
       const 덧 = 'document.body.appendChild(document.createElement("script")).src = "/assets/overscroll-top.js";';
       const 부름 = 'import("/assets/mypage-data.js")';
-      if (!js.includes(덧) || !js.includes(부름)) throw new Error('landing.js 의 외부 파일 부르는 자리가 바뀌었다 — 이 도구를 같이 고쳐라');
+      // 첫 카톡 시계(mypage-data.js 를 부르는 자리)는 마지막 섹션과 함께 빠질 수 있다(2026-10-25 v10) — 아예 없으면 지나가고, 다른 모양으로 있으면 멈춘다.
+      if (!js.includes(덧) || (js.includes('mypage-data.js') && !js.includes(부름))) throw new Error('landing.js 의 외부 파일 부르는 자리가 바뀌었다 — 이 도구를 같이 고쳐라');
       // 🔴 바꿀 글을 **함수로** 넘긴다 — 글로 넘기면 그 안의 `$&`·`$'` 같은 글자를 replace 가 특수 기호로 읽어 코드가 조용히 깨진다.
       js = js.replace(덧, () => `(function(){var t=document.createElement("script");t.text=${JSON.stringify(A('/assets/overscroll-top.js'))};document.body.appendChild(t)})();`)
         .replace(부름, () => `(function(){${휴일};${첫날}return Promise.resolve({firstSendDay:firstSendDay});})()`);
