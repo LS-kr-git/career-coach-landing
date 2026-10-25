@@ -136,8 +136,7 @@
   .week-box{background:var(--gray-50);border-radius:16px;padding:16px 12px;display:flex;flex-direction:column;gap:14px}
   .wrow{display:flex;gap:6px;align-items:flex-start}
   .wrow .sq{width:10px;height:10px;border-radius:3px;margin-top:6px;flex:none}
-  .wrow .dd{width:56px;flex:none;font-size:14px;line-height:22px;font-weight:700;color:var(--gray-900)}
-  .wrow .nm{display:flex;flex-direction:column}
+  .wrow .nm{display:flex;flex-direction:column;padding-left:14px}   /* 피그마 26판: 요일 자리를 지우고 남긴 띄어쓰기 4칸 폭 */
   .wrow .nm b{font-size:15px;line-height:22px;font-weight:700;color:var(--gray-900)}
   .wrow .nm span{font-size:12.5px;line-height:18px;color:var(--gray-500)}
 
@@ -261,11 +260,11 @@
 
       <section class="week" aria-labelledby="weekTitle">
         <p class="eyebrow">받게 될 내용</p>
-        <h2 class="t-title" id="weekTitle">요일별로 이렇게 보내드려요</h2>
+        <h2 class="t-title" id="weekTitle">평일 카톡 브리핑 구성이에요</h2>
         <div class="week-box">
-          <div class="wrow"><i class="sq" style="background:#FEF3C7" aria-hidden="true"></i><span class="dd">월·수·금</span><span class="nm"><b>내 직무 인사이트</b><span>내 분야의 중요 트렌드·인사이트</span></span></div>
-          <div class="wrow"><i class="sq" style="background:#DBEAFE" aria-hidden="true"></i><span class="dd">화</span><span class="nm"><b>일 잘하는 법·커리어</b><span>모든 직군에 통하는 일과 커리어 이야기</span></span></div>
-          <div class="wrow"><i class="sq" style="background:#D1FAE5" aria-hidden="true"></i><span class="dd">목</span><span class="nm"><b>채용 공고 브리핑</b><span>최신 7일 공고와 채용시장 트렌드</span></span></div>
+          <div class="wrow"><i class="sq" style="background:#FEF3C7" aria-hidden="true"></i><span class="nm"><b>내 직무 인사이트·뉴스</b><span>내 분야의 중요 트렌드·인사이트</span></span></div>
+          <div class="wrow"><i class="sq" style="background:#DBEAFE" aria-hidden="true"></i><span class="nm"><b>커리어 아티클</b><span>모든 직군에 통하는 일과 커리어 이야기</span></span></div>
+          <div class="wrow"><i class="sq" style="background:#D1FAE5" aria-hidden="true"></i><span class="nm"><b>채용 공고 브리핑</b><span>맞춤형 최신 공고와 채용시장 트렌드</span></span></div>
         </div>
       </section>
     </main>
