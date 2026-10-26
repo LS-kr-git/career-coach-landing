@@ -10,6 +10,7 @@
 #   1.5겹 · 온보딩 직군 목록 ↔ taxonomy.json (roles/build.mjs --check) — 모든 푸시
 #   1.6겹 · 마이페이지 데이터 층 ↔ 정적 마크업 (mypage-data-check.mjs) — 모든 푸시
 #   1.7겹 · 옛 브라우저 문법 (syntax/check.mjs, ES2020 으로 읽힘) — 모든 푸시
+#   1.9겹 · 다른 화면에 옮겨 실은 랜딩 섹션 ↔ 랜딩 원문 (landing-sections/build.mjs --check) — 모든 푸시
 #   2겹a  · 약관·개인정보·가입·온보딩 문구 대조 (docs-audit.mjs) — *.html 이 바뀐 푸시
 #   2겹b  · (2026-10-06 은퇴) 랜딩 피그마 대조 — 랜딩 프레임이 레거시 페이지로 옮겨져 기준이 아니다
 #
@@ -283,6 +284,21 @@ if ! node tools/asset-version/build.mjs --check; then
 
 ✋ 푸시 중단 — /assets 파일을 고쳤는데 그 주소의 판(?v=)이 옛 값입니다.
 node tools/asset-version/build.mjs 다음 node tools/preload/build.mjs 를 돌려 같이 커밋하세요.
+MSG
+fi
+fi
+
+# ───────────────────────────────────────────────────
+# 1.9겹 — 다른 화면에 옮겨 실은 랜딩 섹션 (tools/landing-sections · 2026-10-26 랜딩 v12)
+#   결제 화면이 랜딩 3·4·5·6·8 섹션과 그 스타일의 사본을 싣는다. 랜딩만 고치면 결제 화면이 옛 섹션으로 남는다.
+# ───────────────────────────────────────────────────
+if [ "$HAVE_NODE" = "1" ]; then
+echo "▶ 옮겨 실은 랜딩 섹션…"
+if ! node tools/landing-sections/build.mjs --check; then
+  fail <<'MSG'
+
+✋ 푸시 중단 — 랜딩 섹션·스타일을 고쳤는데 결제 화면의 사본이 옛것입니다.
+node tools/landing-sections/build.mjs 다음 node tools/asset-version/build.mjs · node tools/preload/build.mjs 를 돌려 같이 커밋하세요.
 MSG
 fi
 fi

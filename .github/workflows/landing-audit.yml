@@ -69,6 +69,10 @@ jobs:
       - name: 자산 주소의 판이 최신인가 (tools/asset-version)
         run: node tools/asset-version/build.mjs --check
 
+      # 훅에도 단다(1.9겹) — 결제 화면에 옮겨 실은 랜딩 섹션·스타일이 랜딩 원문과 같은가(2026-10-26 랜딩 v12).
+      - name: 옮겨 실은 랜딩 섹션이 랜딩과 같은가 (tools/landing-sections)
+        run: node tools/landing-sections/build.mjs --check
+
       # 훅에는 안 단다 — 문구 한 줄 고칠 때마다 푸시가 막히면 안 된다. 낡아도 화면은 그대로이고 미리받기만 덜 된다.
       - name: 미리받기 묶음이 최신인가 (tools/preload)
         run: node tools/preload/build.mjs --check
