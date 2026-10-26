@@ -649,7 +649,10 @@
   // 섹션 도달·머문 시간·인터렉션 (2026-10-26 사용자 지시 — 어드민 「가입 퍼널」의 「결제」 줄을 펼치면 보인다).
   // 세는 규칙은 랜딩과 같은 코드다(assets/section-record.js 머리말). 방문은 위 checkout_view 와 같은 조건이고,
   // 새로고침·뒤로가기로 돌아온 것은 뺀다 — 브라우저가 아래 자리로 데려다 놓아 안 읽고도 깊이 닿는다(랜딩 머리 「방문 기록」과 같은 이유).
-  if (!변경요청 && !결제창다녀옴 && 'IntersectionObserver' in window) 결제섹션기록();
+  // 요금 카드를 그리고 안심 구역을 가릴지 정한 **뒤에** 시작한다 — 가려진 섹션(연봉 3% 효과 · 환불 안심)을 목록에 넣으면
+  // 아무도 못 본 그 섹션이 다음 섹션에 닿은 방문 수만큼 「도달」로 세진다(검사관 ①). 가려진 섹션을 뺀 목록이 곧 구성(cv)이다.
+  var 안심확인 = Promise.resolve();
+  var 기록켬 = !변경요청 && !결제창다녀옴 && 'IntersectionObserver' in window;
   var 구독 = 변경요청 ? getSubscription().catch(function () { return null; }) : Promise.resolve(null);
   var 준비 = 구독.then(function (s) {
     var v = s && billingView(s);
@@ -663,7 +666,7 @@
     if (!변경요청) 다시구독(앞구독);
     // 결제창에서 결과를 달고 돌아온 길은 위 확인을 건너뛰어 앞구독이 없다 — 구독한 적이 있으면 안심 구역(첫 결제에만 걸린다)만 숨긴다.
     if (!변경요청 && !앞구독 && (들어온주소.has('billingKey') || 들어온주소.has('code')))
-      getSubscription().then(function (s) { if (s && s.status && !billingView(s).live) $('safe').hidden = true; }, function () {});
+      안심확인 = getSubscription().then(function (s) { if (s && s.status && !billingView(s).live) $('safe').hidden = true; }, function () {});
     return getPlans().then(function (plans) {
       plans.forEach(function (p) { 요금제[p.code] = p; });
       // 랜딩 「연봉 3% 효과」 섹션의 1년 구독료 — 랜딩과 같은 12개월권 금액(assets/landing.js ccSalSub).
@@ -690,14 +693,15 @@
     note(FAIL.line);
   });
   준비.then(다그림);
+  if (기록켬) 준비.then(function () { return 안심확인; }, function () {}).then(결제섹션기록);
   // cv = 섹션 이름들의 지문 — 섹션 구성이 바뀌면 어드민이 두 구성을 섞어 세지 않는다.
   // 첫 기록(s=1)이 방문 표시이고, 거기에 섹션 이름·제목·기록 열쇠를 실어 어드민이 그 목록으로 줄을 그린다(DB career-coach 0216).
   function 결제섹션기록() {
     try {
       var 들어옴 = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
       if (들어옴 && (들어옴.type === 'reload' || 들어옴.type === 'back_forward')) return;
-      var 섹션들 = [...document.querySelectorAll('#pickView [data-sec]')];
-      if (!섹션들.length) return;
+      var 섹션들 = [...document.querySelectorAll('#pickView [data-sec]')].filter(function (x) { return !x.closest('[hidden]'); });
+      if (!섹션들.length) { track('client_error', { msg: 'checkout_sec:섹션 없음' }); return; }
       var h = 5381;
       for (var c of 섹션들.map(function (x) { return x.dataset.sec; }).join('|')) h = ((h * 33) ^ c.codePointAt(0)) >>> 0;
       var cv = h.toString(16).padStart(8, '0');
