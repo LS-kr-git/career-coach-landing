@@ -778,11 +778,12 @@ pre-push 2겹(a)에서 **`*.html` 이 하나라도 바뀐 푸시**마다 자동�
    const underChart = n => { let p=n.parent; while(p){ if(p.name==='chart-viz') return true; p=p.parent; } return false; };
    // 상태바(9:41·배터리 등)는 웹에 없는 목업 요소다. 안 빼면 검수가 '웹에서 못 찾음' 으로 막는다.
    const underStatusBar = n => { let p=n.parent; while(p){ if(p.name==='상태바') return true; p=p.parent; } return false; };
+   const underLandingCopy = n => { let p=n.parent; while(p){ if(p.name.startsWith('랜딩 섹션 (웹 사본')) return true; p=p.parent; } return false; };   // 결제 화면에 실은 랜딩 섹션 사본(2026-10-26 · 웹은 docs-audit 이 landing:sections 표시 사이를 뺀다 — 짝)
    const pages = [];
    for (const [fid, html] of Object.entries(frames)) {
      const f = await figma.getNodeByIdAsync(fid);
      const texts = f.findAllWithCriteria({ types:['TEXT'] })
-       .filter(t=>t.name!=='marker' && !/^(\d+\.|•)$/.test(t.characters.trim()) && !underChart(t) && !underStatusBar(t)).map(t=>t.characters);   // 마커·차트 눈금·상태바 제외
+       .filter(t=>t.name!=='marker' && !/^(\d+\.|•)$/.test(t.characters.trim()) && !underChart(t) && !underStatusBar(t) && !underLandingCopy(t)).map(t=>t.characters);   // 마커·차트 눈금·상태바 제외
      pages.push({ html, figmaNode: fid, name: f.name, ignoreWebText: [], texts });
    }
    return { fileKey: figma.fileKey, pages };
