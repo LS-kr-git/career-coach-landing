@@ -25,6 +25,7 @@
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.91.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="modulepreload" href="/assets/browser-mark.js?v=55ab00c8">
 <link rel="modulepreload" href="/assets/mypage-data.js?v=969c8b97">
+<link rel="modulepreload" href="/assets/section-record.js?v=74658ed7">
 <link rel="modulepreload" href="/assets/skeleton.js?v=ac8118b7">
 <link rel="modulepreload" href="/assets/supabase-config.js?v=1389b656">
 <link rel="modulepreload" href="/assets/toast.js?v=f8247e72">
@@ -254,7 +255,7 @@
 
   <!-- 구독 신청 (기본) — 피그마 2369:1325. 요금 카드는 서버 plan 표의 살아 있는 요금제로 스크립트가 그린다 -->
   <div id="pickView">
-    <main class="pick">
+    <main class="pick" data-sec="요금 카드">
       <div class="head"><p class="eyebrow">구독권을 골라 주세요</p><h1 class="t-hero">한 달 <span class="hl">커피 한 잔</span> 보다 저렴해요</h1></div>
       <div class="plans" id="plans" role="radiogroup" aria-label="구독권" data-sk="box" style="--skh:112px;--sk2:block"></div>
     </main>
@@ -313,7 +314,7 @@
 
     <main class="pick">
       <!-- 안심 구역 (2026-10-18 신설 · 문구 근거: terms.html 제6조 · 랜딩 「부담 없이 시작해 보세요」) -->
-      <section class="safe" id="safe" aria-labelledby="safeTitle">
+      <section class="safe" id="safe" data-sec="환불 안심" aria-labelledby="safeTitle">
         <p class="eyebrow">부담 없이 시작해 보세요</p>
         <h2 class="t-title" id="safeTitle">마음에 안 들면 돌려드려요</h2>
         <ul class="safe-box" id="safeBox">
@@ -322,7 +323,7 @@
         </ul>
       </section>
 
-      <section class="week" aria-labelledby="weekTitle">
+      <section class="week" data-sec="요일별 구성" aria-labelledby="weekTitle">
         <p class="eyebrow">받게 될 내용</p>
         <h2 class="t-title" id="weekTitle">평일 카톡 브리핑 구성이에요</h2>
         <div class="week-box">
@@ -465,6 +466,7 @@
   import { metaEvent, track } from '/assets/track.js?v=8a4c7dcf';   // 회원 화면 오류 자동 보고 — import 만으로 걸린다
   import { 오류안내 } from '/assets/toast.js?v=f8247e72';
   import { 막대 } from '/assets/skeleton.js?v=ac8118b7';
+  import { 섹션기록 } from '/assets/section-record.js?v=74658ed7';
   import { getPlans, planCards, getSubscription, billingView, saveBillingKey, billingCustomerId, requireLogin, FAIL, firstSendDay, onboardingDone, 이어갈곳 } from '/assets/mypage-data.js?v=969c8b97';
   // 최상위 await 을 함수로 감싼다 — iOS 14·크롬 88 이하는 최상위 await 이 문법 오류라 모듈 전체가 안 돌았다(2026-10-19 점검).
   (async function () {
@@ -644,6 +646,10 @@
   // 🔴 pageView 가 아니라 track 이다 — pageView 는 첫 유입을 적는데(captureAttribution), 결제창에서 이 주소로 돌아올 때는
   //    앞 주소가 결제사라 그 도메인이 「첫 유입」으로 박혀 그 브라우저의 퍼널 경로가 통째로 바뀐다.
   if (!변경요청 && !결제창다녀옴) track('checkout_view');
+  // 섹션 도달·머문 시간·인터렉션 (2026-10-26 사용자 지시 — 어드민 「가입 퍼널」의 「결제」 줄을 펼치면 보인다).
+  // 세는 규칙은 랜딩과 같은 코드다(assets/section-record.js 머리말). 방문은 위 checkout_view 와 같은 조건이고,
+  // 새로고침·뒤로가기로 돌아온 것은 뺀다 — 브라우저가 아래 자리로 데려다 놓아 안 읽고도 깊이 닿는다(랜딩 머리 「방문 기록」과 같은 이유).
+  if (!변경요청 && !결제창다녀옴 && 'IntersectionObserver' in window) 결제섹션기록();
   var 구독 = 변경요청 ? getSubscription().catch(function () { return null; }) : Promise.resolve(null);
   var 준비 = 구독.then(function (s) {
     var v = s && billingView(s);
@@ -684,6 +690,30 @@
     note(FAIL.line);
   });
   준비.then(다그림);
+  // cv = 섹션 이름들의 지문 — 섹션 구성이 바뀌면 어드민이 두 구성을 섞어 세지 않는다.
+  // 첫 기록(s=1)이 방문 표시이고, 거기에 섹션 이름·제목·기록 열쇠를 실어 어드민이 그 목록으로 줄을 그린다(DB career-coach 0216).
+  function 결제섹션기록() {
+    try {
+      var 들어옴 = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+      if (들어옴 && (들어옴.type === 'reload' || 들어옴.type === 'back_forward')) return;
+      var 섹션들 = [...document.querySelectorAll('#pickView [data-sec]')];
+      if (!섹션들.length) return;
+      var h = 5381;
+      for (var c of 섹션들.map(function (x) { return x.dataset.sec; }).join('|')) h = ((h * 33) ^ c.codePointAt(0)) >>> 0;
+      var cv = h.toString(16).padStart(8, '0');
+      var vid = Array.prototype.map.call(crypto.getRandomValues(new Uint8Array(8)), function (x) { return (x < 16 ? '0' : '') + x.toString(16); }).join('');
+      var n = 섹션들.map(function (x) {
+        var 제목 = x.querySelector('h1,h2');
+        return { n: x.dataset.sec, t: 제목 ? (제목.innerText || 제목.textContent).replace(/\s+/g, ' ').trim().slice(0, 40) : '',
+          x: [...x.querySelectorAll('[data-ix]')].flatMap(function (e) { return e.dataset.ix.split(/\s+/); }) };
+      });
+      track('checkout_reach', { cv: cv, vid: vid, s: 1, n: n });
+      섹션기록(섹션들, {
+        도달: function (s) { track('checkout_reach', { cv: cv, vid: vid, s: s }); },
+        머묾: function (d, x) { track('checkout_engage', { cv: cv, vid: vid, d: d, x: x }); },
+      });
+    } catch (e) { track('client_error', { msg: 'checkout_sec:' + String((e && e.message) || e).slice(0, 80) }); }   // 결제 화면은 그대로 선다
+  }
   function 연봉숨김() { var x = document.querySelector('#lpsec section[data-sec="연봉 3% 효과"]'); if (x) x.hidden = true; }
 
   /* 다시 구독 (2026-10-19 사용자 지시) — 구독한 적이 있고 지금은 아닌 사람. 구독 행은 첫 결제가 걷혀야 생기므로
