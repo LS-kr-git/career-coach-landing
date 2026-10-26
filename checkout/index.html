@@ -660,9 +660,10 @@
       getSubscription().then(function (s) { if (s && s.status && !billingView(s).live) $('safe').hidden = true; }, function () {});
     return getPlans().then(function (plans) {
       plans.forEach(function (p) { 요금제[p.code] = p; });
-      // 랜딩 「연봉 3% 효과」 섹션의 1년 구독료 — 랜딩과 같은 12개월권 금액(assets/landing.js ccSalSub)
+      // 랜딩 「연봉 3% 효과」 섹션의 1년 구독료 — 랜딩과 같은 12개월권 금액(assets/landing.js ccSalSub).
+      // 12개월권이 없으면 그 섹션을 숨긴다 — 두면 마크업의 옛 예시 금액·배수가 그대로 선다(검사관 ①).
       var 일년 = plans.find(function (p) { return p.period_count === 12; });
-      if (일년) window.ccSalSub?.(일년.price_krw);
+      if (일년 && window.ccSalSub) window.ccSalSub(일년.price_krw); else 연봉숨김();
       카드그리기(planCards(plans).reverse());   // 27판: 1개월권이 위, 12개월권(기본 선택)이 아래
       $('submit').disabled = 저장안됨;
       if (저장안됨) note('고르신 직무·근무지가 아직 저장되지 않았어요.\n잠시 후 이 화면을 다시 열어 주세요.');
@@ -673,6 +674,7 @@
                 표식 ? 'ic-' + new Date(Date.now() + 9 * 36e5).toISOString().slice(0, 10) + '-' + 표식 : undefined);
     });
   }).catch(function () {
+    연봉숨김();
     $('submit').classList.add('locked');
     // 카드 두 장 자리에 스켈레톤(줄 세 개) — 고른 것처럼 보이지 않게 라디오·배지는 그리지 않는다
     var 판 = '<div class="pc sk" aria-hidden="true">' + 막대('84px', 20)
@@ -682,6 +684,7 @@
     note(FAIL.line);
   });
   준비.then(다그림);
+  function 연봉숨김() { var x = document.querySelector('#lpsec section[data-sec="연봉 3% 효과"]'); if (x) x.hidden = true; }
 
   /* 다시 구독 (2026-10-19 사용자 지시) — 구독한 적이 있고 지금은 아닌 사람. 구독 행은 첫 결제가 걷혀야 생기므로
      「최근 구독 행이 있다」가 곧 「결제한 적이 있다」다(첫 결제가 실패해 카드만 남은 사람은 첫 결제로 본다).
