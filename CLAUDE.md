@@ -134,7 +134,6 @@ git fetch --unshallow          # 얕게 클론됐다면. 이미 깊으면 아무
 | 1.5 | `tools/roles/build.mjs --check` | 모든 푸시 (node 있을 때) | 온보딩 직군 목록 ↔ `taxonomy.json` |
 | 1.6 | `tools/mypage-data-check.mjs` | 모든 푸시 (node 있을 때) | 마이페이지 데이터 층(`assets/mypage-data.js`) ↔ 정적 마크업 (docs-audit 이 못 보는 JS 렌더 값). CI 에는 아직 없다 |
 | 1.8 | `tools/asset-version/build.mjs --check` | 모든 푸시 (node 있을 때) | `/assets/*.js·css` 주소의 판(`?v=` 내용 해시)이 지금 내용과 맞는가 (2026-10-22) |
-| 1.9 | `tools/landing-sections/build.mjs --check` | 모든 푸시 (node 있을 때) | 결제 화면에 옮겨 실은 랜딩 섹션·스타일(`assets/landing-sections.css`)이 랜딩 원문과 같은가 (2026-10-26 랜딩 v12). 랜딩 섹션·`landing-*.css` 를 고쳤으면 이 도구를 돌려 같이 커밋한다 |
 | 2a | `tools/figma-audit/docs-audit.mjs` | **`*.html` 이 하나라도 바뀐 푸시** | 약관·개인정보·가입·온보딩·마이페이지·결제 등 피그마가 기준인 화면 (커밋된 스냅샷 대조, 라이브 덤프 불필요) |
 | 2b | ~~`tools/figma-audit/audit.mjs`~~ | **2026-10-06 은퇴 · 10-13 삭제** | 랜딩 피그마 프레임이 레거시로 옮겨져 대조하지 않는다 |
 
@@ -778,12 +777,11 @@ pre-push 2겹(a)에서 **`*.html` 이 하나라도 바뀐 푸시**마다 자동�
    const underChart = n => { let p=n.parent; while(p){ if(p.name==='chart-viz') return true; p=p.parent; } return false; };
    // 상태바(9:41·배터리 등)는 웹에 없는 목업 요소다. 안 빼면 검수가 '웹에서 못 찾음' 으로 막는다.
    const underStatusBar = n => { let p=n.parent; while(p){ if(p.name==='상태바') return true; p=p.parent; } return false; };
-   const underLandingCopy = n => { let p=n.parent; while(p){ if(p.name.startsWith('랜딩 섹션 (웹 사본')) return true; p=p.parent; } return false; };   // 결제 화면에 실은 랜딩 섹션 사본(2026-10-26 · 웹은 docs-audit 이 landing:sections 표시 사이를 뺀다 — 짝)
    const pages = [];
    for (const [fid, html] of Object.entries(frames)) {
      const f = await figma.getNodeByIdAsync(fid);
      const texts = f.findAllWithCriteria({ types:['TEXT'] })
-       .filter(t=>t.name!=='marker' && !/^(\d+\.|•)$/.test(t.characters.trim()) && !underChart(t) && !underStatusBar(t) && !underLandingCopy(t)).map(t=>t.characters);   // 마커·차트 눈금·상태바 제외
+       .filter(t=>t.name!=='marker' && !/^(\d+\.|•)$/.test(t.characters.trim()) && !underChart(t) && !underStatusBar(t)).map(t=>t.characters);   // 마커·차트 눈금·상태바 제외
      pages.push({ html, figmaNode: fid, name: f.name, ignoreWebText: [], texts });
    }
    return { fileKey: figma.fileKey, pages };

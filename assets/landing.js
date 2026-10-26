@@ -13,9 +13,9 @@ const samplesHTML=k=>{const d=DAYS[k]||["월요일","화요일","수요일"];ret
 const CHIP_ORDER=[...COMMON,...JOBS.map(j=>j[0]==="dev"?JOBS.find(x=>x[0]==="mkt"):j[0]==="mkt"?JOBS.find(x=>x[0]==="dev"):j)];
 // 알림톡 미리보기는 첫 화면과 「이런 카카오톡이 쌓이면」 두 곳에 있다(2026-10-19). 칩은 어디서 골라도 모든 곳이 같은 직군이 된다
 const PVS=[...document.querySelectorAll("[data-pv]")];
-PVS.forEach(r=>{const c=r.querySelector(".pvchips");if(c)c.innerHTML=chipHTML(CHIP_ORDER,"career")});
+PVS.forEach(r=>{r.querySelector(".pvchips").innerHTML=chipHTML(CHIP_ORDER,"career")});
 let JOB="career";
-window.ccJob=k=>{if(!LABEL[k])return;JOB=k;PVS.forEach(r=>{r.querySelectorAll(".pvchips .chip").forEach(x=>x.classList.toggle("on",x.dataset.k===k));r.pv&&r.dataset.pv!=="still"&&r.pv.render(k)});document.dispatchEvent(new CustomEvent("ccjob",{detail:k}))};
+window.ccJob=k=>{if(!LABEL[k])return;JOB=k;PVS.forEach(r=>{r.querySelectorAll(".pvchips .chip").forEach(x=>x.classList.toggle("on",x.dataset.k===k));r.pv&&r.pv.render(k)});document.dispatchEvent(new CustomEvent("ccjob",{detail:k}))};
 document.querySelectorAll(".chips").forEach(t=>t.addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;const k=b.dataset.k;
  if(t.classList.contains("pvchips")){const r=t.closest("[data-pv]");if(r)r.touched=true;ccJob(k);return}
  t.querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x.dataset.k===k))}));
@@ -56,7 +56,7 @@ const TRIO={
  draw(list[0][0])})();
 const RVC=["#D89628", "#299BCE", "#3E6CD2", "#DD7832", "#697586", "#25A47A"];let rvi=0;const rvCard=r=>`<div class="rv"><div class="rh"><span class="rp"><i style="background:${RVC[(rvi++)%6]}"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i>${r[0]} · ${r[1]}</span><span class="stars">${stars(r[2])}</span></div><p>${r[3]}</p></div>`;
 const rvPages=[];for(let i=0;i<REVIEWS.length;i+=3)rvPages.push(REVIEWS.slice(i,i+3));
-const rvSet=rvPages.map(pg=>`<div class="rpg">${pg.map(rvCard).join("")}</div>`).join("");if($("reviews"))$("reviews").innerHTML=rvSet;
+const rvSet=rvPages.map(pg=>`<div class="rpg">${pg.map(rvCard).join("")}</div>`).join("");$("reviews").innerHTML=rvSet;
 
 
 document.querySelectorAll(".chips,.hs,[data-pv] .swipe,#reviews").forEach(el=>{
@@ -73,35 +73,37 @@ document.querySelectorAll(".chips,.hs,[data-pv] .swipe,#reviews").forEach(el=>{
 });
 document.querySelectorAll(".fit").forEach(el=>{el.style.whiteSpace="nowrap";el.style.overflow="hidden";fitLine(el,11)});
 // 슬롯머신: 화면에 들어올 때마다 자리마다 0~9 띠가 굴러가 멈춘다
-document.querySelectorAll(".slot[data-n]").forEach(sl=>{const txt=sl.dataset.n;
+document.querySelectorAll(".slot").forEach(sl=>{const txt=sl.dataset.n;
  sl.innerHTML=[...txt].map(ch=>/\d/.test(ch)?`<span class="d" aria-hidden="true"><i>${[...Array(30).keys()].map(n=>n%10).concat([+ch]).join("<br>")}</i></span>`:`<span aria-hidden="true">${ch}</span>`).join("");
  const ds=[...sl.querySelectorAll(".d i")];
  const roll=on=>ds.forEach((i,idx)=>{i.style.transitionDuration=on?(1.4+idx*0.22)+"s":"0s";i.style.transform=on?`translateY(-${30*1.25}em)`:"translateY(0)"});
  new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){roll(false);requestAnimationFrame(()=>requestAnimationFrame(()=>roll(true)))}}),{root:null,threshold:.6}).observe(sl)});
-// 바닥 버튼: 늘 같은 자리(하단에서 띄운 채)에 고정. 마지막 섹션 빛내기는 그 섹션과 함께 뺐다(2026-10-25)
-(()=>{const st=$("sticky");if(!st)return;
+// 바닥 버튼: 늘 같은 자리(하단에서 띄운 채)에 고정. 마지막 섹션에서는 배경만 바뀐다(글자는 그대로)
+(()=>{const st=$("sticky");
+ // 마지막 섹션에 들어설 때마다 버튼 둘레로 노란 빛이 두 번 퍼진다(90). 그림자는 !important 로 묶여 있어 빛은 ::after 에 그린다
+ const bt=st.querySelector(".btn");bt.addEventListener("animationend",e=>{if(e.target===bt)bt.classList.remove("glow")});
+ new IntersectionObserver(es=>es.forEach(en=>{const was=st.classList.contains("ride");st.classList.toggle("ride",en.isIntersecting);if(en.isIntersecting&&!was){bt.classList.remove("glow");void bt.offsetWidth;bt.classList.add("glow")}}),{root:null,threshold:.35}).observe($("closing"));
  const up=()=>st.classList.toggle("hide0",scrollY<400);addEventListener("scroll",up,{passive:true});up();})();
 
-// 슬롯머신 숫자 — 「32배+」(#rx). 「약 12일」(#rxd)은 2026-10-25 뺐다. 화면에서 한 번 본 뒤부터 값이 바뀔 때마다 굴린다
+// 슬롯머신 숫자 — 「32배+」(#rx)와 「약 12일」의 숫자(#rxd)이 같은 방식으로 굴러간다. 화면에서 한 번 본 뒤부터 값이 바뀔 때마다 굴린다
 const slotRoll=(el,t)=>{const n=el._n=(el._n||0)+1;el.innerHTML=[...t].map(ch=>/\d/.test(ch)?`<span class="d"><i>${[...Array(20).keys()].map(n=>n%10).concat([+ch]).map(n=>`<b>${n}</b>`).join("")}</i></span>`:`<span class="c">${ch}</span>`).join("");const is=[...el.querySelectorAll(".d i")];el.querySelectorAll(".d").forEach((d,k)=>{const m=document.createElement("span");m.className="c";m.style.visibility="hidden";m.style.position="absolute";m.textContent=[...t].filter(c=>/\d/.test(c))[k];el.appendChild(m);d.style.width=m.getBoundingClientRect().width+"px";m.remove()});requestAnimationFrame(()=>requestAnimationFrame(()=>is.forEach((x,k)=>{x.style.transitionDuration=(.9+k*.18)+"s";x.style.transform="translateY(-"+(2000/21)+"%)"})));setTimeout(()=>{if(n===el._n)el.textContent=t},(.9+(is.length-1)*.18)*1000+120)};
 const slotSet=(id,t)=>{const el=$(id);el.dataset.t=t;clearTimeout(el._t);if(!el._seen){el.textContent=t;return}el._t=setTimeout(()=>slotRoll(el,t),220)};
 {const e=$("rfd");if(e)new IntersectionObserver((es,o)=>{if(es[0].isIntersecting){e.classList.add("pl");o.disconnect()}},{root:null,threshold:.6}).observe(e)}
-["rx"].forEach(id=>new IntersectionObserver(es=>{if(es[0].isIntersecting)$(id)._seen=true},{root:null,threshold:.8}).observe($(id)));
+["rx","rxd"].forEach(id=>new IntersectionObserver(es=>{if(es[0].isIntersecting)$(id)._seen=true},{root:null,threshold:.8}).observe($(id)));
 
-// 1년 구독료(만원) — 랜딩은 요금 섹션 마크업(#ppr)에서, 랜딩 섹션을 옮겨 실은 결제 화면은 서버 요금제를 읽은 뒤 ccSalSub 로 넣는다(2026-10-26).
-// 값이 오기 전에는 막대·배수를 마크업 그대로 둔다 — 0 으로 나눠 「Infinity배」가 서지 않게.
-(()=>{let SUB=$("ppr")?won("ppr")/1e4:0,cur=5000;const f=n=>(Math.round(n*10)/10).toLocaleString("ko-KR")+"만원";
- const set=v=>{v=cur=Math.max(1000,Math.min(10000,+v||0));const p1=v*.03,p2=v*.04,mx=Math.max(p2,SUB);
+(()=>{const SUB=won("ppr")/1e4,f=n=>(Math.round(n*10)/10).toLocaleString("ko-KR")+"만원";
+ const set=v=>{v=Math.max(1000,Math.min(10000,+v||0));const p1=v*.03,p2=v*.04,mx=Math.max(p2,SUB);
   document.querySelectorAll("#sal .sv").forEach(i=>{if(document.activeElement!==i)i.value=v});
   document.querySelectorAll("#sal .pc button").forEach(b=>b.classList.toggle("on",+b.dataset.s===v));
   document.querySelector("#sal .sd").textContent=v.toLocaleString("ko-KR")+"만원";
-  if(!SUB)return;
   [[SUB,0],[p1,1],[p2,2]].forEach(([x,k])=>{$("h"+k).style.height=Math.max(3,x/mx*100)+"%";$("b"+k).textContent=(k?"+":"")+f(x)});
-  const r=p1/SUB;slotSet("rx",(r>=10?Math.round(r):Math.round(r*10)/10)+"배+")};
+  const r=p1/SUB;slotSet("rx",(r>=10?Math.round(r):Math.round(r*10)/10)+"배+");slotSet("rxd",String(Math.ceil(365*SUB/p1)))};
  document.querySelectorAll("#sal .sv").forEach(i=>i.addEventListener("input",()=>{if(i.value!=="")set(i.value)}));
  document.querySelector("#sal .pc").addEventListener("click",e=>{const b=e.target.closest("button");if(b)set(b.dataset.s)});
- window.ccSalSub=w=>{SUB=w/1e4;set(cur)};
  set(5000)})();
+// 첫 카톡까지 — 결제 화면 시계와 같은 자(firstSendDay: 영업일·공휴일·서울 시각 08:00)로 센다. 기기 시간대·주말을 따로 세지 않는다(2026-10-15).
+// 이 파일은 모듈이 아니라 동적 import 로 받는다. 못 받으면 마크업의 「--:--:--」 그대로 둔다 — 틀린 시각을 세지 않는다.
+import("/assets/mypage-data.js?v=4737b984").then(({firstSendDay})=>{const el=$("cdv");let last="";const tick=()=>{const n=new Date(),t=new Date(Date.parse(firstSendDay(n)+"T08:00:00+09:00"));const d=Math.floor((t-n)/1000),p=x=>String(x).padStart(2,"0");const v=$("ck").dataset.v,ms=(t-n)%1000,fr=v==="2"?`.${Math.floor(ms/100)}`:v==="3"||v==="4"?`.${String(Math.floor(ms/10)).padStart(2,"0")}`:v==="5"?`.${String(ms).padStart(3,"0")}`:"";const h=`<span>${p(Math.floor(d/3600))}</span>:<span>${p(Math.floor(d%3600/60))}</span>:<span>${p(d%60)}</span>`+(fr?`<i class="cfr${v==="4"?" big":""}">${fr}</i>`:"");if(h!==last){el.innerHTML=h;last=h}};const loop=()=>{tick();requestAnimationFrame(loop)};loop()});   // 실패는 삼키지 않는다 — track.js 의 오류 보고가 받는다 · 글자가 바뀔 때만 쓴다(매 프레임 innerHTML 을 갈면 프레임마다 스타일 재계산이 돈다 — 2026-10-15 실측)
 (()=>{const sal=$("sal"),rg=sal.querySelector('input[type=range]');let demo=0;
  const fill=()=>rg.style.setProperty("--fill",((rg.value-rg.min)/(rg.max-rg.min)*100)+"%");rg.addEventListener("input",fill);fill();
  const run=()=>{if(sal.dataset.v!=="7")return;let t=0;clearInterval(demo);demo=setInterval(()=>{t+=1;const v=Math.round(4000+3000*Math.sin(t/12*Math.PI));rg.value=v;rg.dispatchEvent(new Event("input"));if(t>=24){clearInterval(demo);rg.value=4000;rg.dispatchEvent(new Event("input"))}},70)};
@@ -115,7 +117,7 @@ document.querySelectorAll(".arw").forEach(w=>{const c=w.querySelector(".chips,.h
  c.addEventListener("click",e=>{if(e.target.closest(".chip"))w.classList.add("used")})});
 
 
-(()=>{const top=document.querySelector(".top");if(!top)return;let last=0;
+(()=>{const top=document.querySelector(".top");let last=0;
  window.addEventListener("scroll",()=>{const y=scrollY,d=y-last;if(y<60)top.classList.remove("hid");else if(d>4)top.classList.add("hid");else if(d<-4)top.classList.remove("hid");last=y},{passive:true});})();
 
 (()=>{const g=$("yg");g.innerHTML="<i></i>".repeat(250);const cells=[...g.children],n=$("ycn");let t=0,run=false;
@@ -125,29 +127,35 @@ document.querySelectorAll(".arw").forEach(w=>{const c=w.querySelector(".chips,.h
 
 
 
-if($("stw"))new IntersectionObserver(es=>es.forEach(e=>{const w=$("stw");if(e.isIntersecting){window.stwFit&&stwFit();w.classList.remove("go");void w.offsetWidth;w.classList.add("go")}}),{root:null,threshold:.6}).observe($("stw"));
+new IntersectionObserver(es=>es.forEach(e=>{const w=$("stw");if(e.isIntersecting){window.stwFit&&stwFit();w.classList.remove("go");void w.offsetWidth;w.classList.add("go")}}),{root:null,threshold:.6}).observe($("stw"));
 
-(()=>{const w=$("rvw");if(!w)return;w.querySelectorAll(".rv").forEach((c,k)=>c.style.setProperty("--dl",(k*.38)+"s"));
+(()=>{const w=$("rvw");w.querySelectorAll(".rv").forEach((c,k)=>c.style.setProperty("--dl",(k*.38)+"s"));
  const replay=()=>{w.classList.remove("in");void w.offsetWidth;setTimeout(()=>w.classList.add("in"),60)};
  let seen=false;new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3&&!seen){seen=true;replay()}else if(e.intersectionRatio===0){seen=false;w.classList.remove("in")}}),{root:null,threshold:[0,.3]}).observe(w);})();
 
 (()=>{const els=[...document.querySelectorAll("#fv .scene")];const chk=()=>{const q=VIEW();els.forEach(el=>{const r=el.getBoundingClientRect();if(r.top<q.top+q.height*.68&&r.bottom>q.top)el.classList.add("in");else if(r.bottom<q.top||r.top>q.bottom)el.classList.remove("in")})};addEventListener("scroll",chk,{passive:true});chk();})();
 
 
+(()=>{const t=$("thusec"),pm=t.querySelector(".pm");new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3){if(!t.classList.contains("play"))t.classList.add("play")}else if(e.intersectionRatio===0)t.classList.remove("play")}),{root:null,threshold:[0,.3]}).observe(pm)})();
 
-(()=>{const k=$("k2");if(!k)return;const play=()=>{k.classList.remove("play");void k.offsetWidth;k.classList.add("play")};
+(()=>{const k=$("k2");const play=()=>{k.classList.remove("play");void k.offsetWidth;k.classList.add("play")};
  let seen=false;new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.6&&!seen){seen=true;play()}else if(e.intersectionRatio===0){seen=false;k.classList.remove("play")}}),{root:null,threshold:[0,.6]}).observe(k);})();
 
-(()=>{const w=$("stw");if(!w)return;const is=w.querySelectorAll(".s0 i"),l=is[4];const f=()=>{const x=l.offsetLeft+l.offsetWidth*0.62;w.style.setProperty("--sw",x+"px")};f();window.stwFit=f;document.fonts&&document.fonts.ready.then(f);window.addEventListener("resize",f)})();
+(()=>{const w=$("stw"),is=w.querySelectorAll(".s0 i"),l=is[4];const f=()=>{const x=l.offsetLeft+l.offsetWidth*0.62;w.style.setProperty("--sw",x+"px")};f();window.stwFit=f;document.fonts&&document.fonts.ready.then(f);window.addEventListener("resize",f)})();
 
 
+(()=>{const sec=$("artsec");[...sec.querySelectorAll("#pmart .art>*")].forEach((e,k)=>e.style.setProperty("--ad",(.3+k*.2)+"s"));
+ const play=()=>{sec.classList.remove("in");void sec.offsetWidth;setTimeout(()=>sec.classList.add("in"),60)};
+ let seen=false;new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3&&!seen){seen=true;play()}else if(e.intersectionRatio===0){seen=false;sec.classList.remove("in")}}),{root:null,threshold:[0,.3]}).observe($("pmart"));})();
+
+(()=>{const g=$("rg"),n=$("r6n");let t=0;const play=()=>{g.classList.remove("in");void g.offsetWidth;clearInterval(t);n.textContent="x 6배";setTimeout(()=>{g.classList.add("in");if($("va").dataset.v==="3"){let x=1;n.textContent="1배";t=setInterval(()=>{x++;n.textContent=x+"배";if(x>=6)clearInterval(t)},160)}},60)};
+ let seen=false;new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.5&&!seen){seen=true;play()}else if(e.intersectionRatio===0){seen=false;g.classList.remove("in")}}),{root:null,threshold:[0,.5]}).observe(g);})();
 
 
-
-(()=>{const sec=$("pricing");if(!sec)return;const pr=$("ppr"),FROM=won("ps"),TO=won("ppr");let t=0;const play=()=>{sec.classList.remove("in");void sec.offsetWidth;clearInterval(t);pr.textContent=TO.toLocaleString("ko-KR")+"원";setTimeout(()=>{sec.classList.add("in");if($("pa").dataset.v==="4"){const t0=performance.now();t=setInterval(()=>{const k=Math.min(1,(performance.now()-t0)/1000),v=Math.round(FROM-(FROM-TO)*(1-Math.pow(1-k,3)));pr.textContent=v.toLocaleString("ko-KR")+"원";if(k>=1)clearInterval(t)},30)}},60)};
+(()=>{const sec=$("pricing"),pr=$("ppr"),FROM=won("ps"),TO=won("ppr");let t=0;const play=()=>{sec.classList.remove("in");void sec.offsetWidth;clearInterval(t);pr.textContent=TO.toLocaleString("ko-KR")+"원";setTimeout(()=>{sec.classList.add("in");if($("pa").dataset.v==="4"){const t0=performance.now();t=setInterval(()=>{const k=Math.min(1,(performance.now()-t0)/1000),v=Math.round(FROM-(FROM-TO)*(1-Math.pow(1-k,3)));pr.textContent=v.toLocaleString("ko-KR")+"원";if(k>=1)clearInterval(t)},30)}},60)};
  let seen=false;new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3&&!seen){seen=true;play()}else if(e.intersectionRatio===0){seen=false;sec.classList.remove("in")}}),{root:null,threshold:[0,.3]}).observe(sec.querySelector(".plan.best"));})();
 
-(()=>{const r=document.getElementById("reviews");if(!r)return;let done=false,stop=false,raf=0;
+(()=>{const r=document.getElementById("reviews");let done=false,stop=false,raf=0;
  const halt=()=>{if(stop)return;stop=true;cancelAnimationFrame(raf);r.classList.remove("rvflow")};let tx=0,ty=0;
  r.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse")halt()});
  /* ‹ › 는 #reviews 밖(형제)이라 위 멈춤이 안 걸려, 흐르는 동안 누르면 매 프레임 scrollLeft 덮어쓰기에 넘김이 지워졌다(2026-10-21 점검) */
@@ -163,11 +171,8 @@ if($("stw"))new IntersectionObserver(es=>es.forEach(e=>{const w=$("stw");if(e.is
 (()=>{const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.9)e.target.classList.add("on");else if(!e.isIntersecting)e.target.classList.remove("on")}),{root:null,rootMargin:"0px 0px -90px 0px",threshold:[0,.9]});document.querySelectorAll(".draw").forEach(x=>io.observe(x));})();
 /* 맨 위에서 더 당긴 자리 = 흰 머리줄 색 (2026-10-15 사용자 지시) — 공용 assets/overscroll-top.js 를 붙인다.
    맨 아래는 html·body 바탕(--g100, footer 와 같은 색) 그대로. */
-// 랜딩에서만 — 랜딩 섹션을 옮겨 실은 다른 화면(결제)은 자기 맨 위 색을 그대로 둔다(2026-10-26).
-if ($("sticky")) {
 document.documentElement.style.setProperty("--overscroll-top", "#fff");
 document.body.appendChild(document.createElement("script")).src = "/assets/overscroll-top.js?v=c959236e";
-}
 
 // 첫 화면 카드는 높이를 줄이고(3줄 남짓), 카드 아래 「아래로 더 보기」로 나머지를 읽는다(S2). 한 번 누르면 버튼이 가리던 줄부터 한 화면만큼 내려간다
 function moreBtn(ab){const f=document.createElement("div");f.className="mfd";const bt=document.createElement("button");bt.type="button";bt.className="mbtn";ab.append(f,bt);
@@ -177,28 +182,27 @@ function moreBtn(ab){const f=document.createElement("div");f.className="mfd";con
 // 알림톡 미리보기 한 벌 — 넘기기·번호·높이 고정·직군 이름 (옛 첫 화면 그대로, 두 곳에 같은 것을 붙인다)
 function mountPv(r){const q=c=>r.querySelector(c),b=q(".swipe"),dots=q(".pvdots"),dt=q(".dtabs"),hint=q(".pvhint"),h=q(".herow"),w=q(".sarwb"),sw=q(".scrollwrap");
  const step=()=>{const sl=b.children;return sl[1]?sl[1].offsetLeft-sl[0].offsetLeft:b.clientWidth},idx=()=>b.children.length?Math.round(b.scrollLeft/step()):0;
- const upd=()=>{if(!w)return;const i=idx();hint.classList.toggle("hide",b.scrollLeft>20);[...dots.children].forEach((d,k)=>d.classList.toggle("on",k===i));[...dt.children].forEach((d,k)=>d.classList.toggle("on",k===i));
+ const upd=()=>{const i=idx();hint.classList.toggle("hide",b.scrollLeft>20);[...dots.children].forEach((d,k)=>d.classList.toggle("on",k===i));[...dt.children].forEach((d,k)=>d.classList.toggle("on",k===i));
   const max=b.scrollWidth-b.clientWidth;w.classList.toggle("atS",b.scrollLeft<=2);w.classList.toggle("atE",b.scrollLeft>=max-2)};
  const go=i=>{const sl=b.children[i];if(sl)b.scrollTo({left:sl.offsetLeft-b.children[0].offsetLeft,behavior:"smooth"})};
  const play=()=>{h.classList.remove("play");void h.offsetWidth;h.classList.add("play")};
- const still=r.dataset.pv==="still";
- const render=k=>{if(still){b.innerHTML=q("template.pvt").innerHTML;play();return}b.innerHTML=samplesHTML(k);b.scrollLeft=0;b.querySelectorAll(".ab").forEach(moreBtn);upd();play();const on=q(".pvchips .chip.on");if(on)q(".lkk").textContent=on.textContent.trim();if(r.pv){h.classList.remove("flash");void h.offsetWidth;h.classList.add("flash")}};
+ const render=k=>{b.innerHTML=samplesHTML(k);b.scrollLeft=0;b.querySelectorAll(".ab").forEach(moreBtn);upd();play();const on=q(".pvchips .chip.on");if(on)q(".lkk").textContent=on.textContent.trim();if(r.pv){h.classList.remove("flash");void h.offsetWidth;h.classList.add("flash")}};
  b.addEventListener("scroll",upd,{passive:true});new ResizeObserver(upd).observe(b);
  new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)play()}),{root:null,threshold:.5}).observe(h);
- if(w){ const pos=()=>{const a=sw.getBoundingClientRect(),hr=h.getBoundingClientRect();w.style.top=(a.top-hr.top+a.height/2)+"px"};new ResizeObserver(pos).observe(sw);pos();
+ const pos=()=>{const a=sw.getBoundingClientRect(),hr=h.getBoundingClientRect();w.style.top=(a.top-hr.top+a.height/2)+"px"};new ResizeObserver(pos).observe(sw);pos();
  w.querySelector(".cnx").addEventListener("click",()=>go(Math.min(b.children.length-1,idx()+1)));w.querySelector(".cpv").addEventListener("click",()=>go(Math.max(0,idx()-1)));
- [...dots.children].forEach((d,k)=>d.addEventListener("click",()=>go(k)));}
+ [...dots.children].forEach((d,k)=>d.addEventListener("click",()=>go(k)));
  // 자동 넘김은 껐다(2026-10-19 사용자 지시) — 카드는 손으로만 넘긴다
  r.pv={render};render(JOB)}
 PVS.forEach(mountPv);
-// 한정된 기회 — 보이면 반달이 0→57% 차고 숫자가 같이 오른다. 다 차면 「30일 안에 마감」 칩이 튀어나온다(2026-10-25). 나갔다 오면 다시
-{const h=document.querySelector(".half");if(h&&!matchMedia("(prefers-reduced-motion: reduce)").matches){const n=h.querySelector(".num b");let raf=0;h.classList.add("wait");n.textContent="0";
- const run=()=>{h.classList.add("go");h.classList.remove("wait");const t0=performance.now();cancelAnimationFrame(raf);const st=t=>{const k=Math.min(1,(t-t0)/1600);n.textContent=Math.round(57*(1-Math.pow(1-k,3)));if(k<1)raf=requestAnimationFrame(st)};raf=requestAnimationFrame(st)};
- new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.45&&h.classList.contains("wait"))run();else if(!e.isIntersecting){cancelAnimationFrame(raf);h.classList.remove("go");h.classList.add("wait");n.textContent="0"}}),{root:null,threshold:[0,.45]}).observe(h)}}
-// 빨리 지원할수록 — 도착 순서 카드가 보이면 위에서부터 차례로 올라온다(2026-10-25). 화면 밖으로 나가면 다시 숨겨 두었다가 돌아오면 또 올린다
-{const a=document.querySelector(".arr");if(a&&!matchMedia("(prefers-reduced-motion: reduce)").matches){a.classList.add("wait");new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.35)a.classList.remove("wait");else if(!e.isIntersecting)a.classList.add("wait")}),{root:null,threshold:[0,.35]}).observe(a)}}
-
-// 면접 질문 퀴즈 — v1(2026-10-15) 「직군 퀴즈」를 되살렸다(2026-10-25). 칩을 누르면 그 직군 질문 넷으로 바뀐다
-const QUIZ={"dev": ["결제 API에서 '멱등성'이 왜 중요할까?", "AI 코딩 시대, 코드 리뷰는 뭐가 바뀔까?", "배포와 출시는 왜 분리해야 할까?", "기술 부채, 언제 갚아야 할까?"], "uiux": ["디자인 토큰은 왜 '의미'로 이름 지을까?", "AI 기능, 신뢰받는 화면은 뭐가 다를까?", "사용성 테스트, 몇 명이면 충분할까?", "첫 화면이 비었을 때 무엇을 둘까?"], "dsn": ["로고보다 브랜드를 먼저 각인시키는 건?", "생성형 AI 이미지, 브랜드에 쓸 기준은?", "패키지에서 매대 3초가 중요한 이유는?", "글꼴이 브랜드 인상을 바꾸는 이유는?"], "mkt": ["마지막 클릭 기여 모델이 놓치는 것은?", "쿠키 없는 시대, 성과는 어떻게 잴까?", "가입자 수보다 먼저 봐야 할 숫자는?", "할인은 왜 브랜드를 갉아먹을까?"], "prd": ["북극성 지표가 하위 지표와 부딪히면?", "AI 기능, 정확도보다 먼저 정할 것은?", "기능 요청, 그대로 만들면 왜 안 될까?", "로드맵에 날짜보다 먼저 적을 것은?"], "sales": ["할인 없이 가격 저항을 넘는 방법은?", "AI 검색이 구매 검토를 어떻게 바꿀까?", "파이프라인 예측, 자꾸 빗나가는 이유는?", "고객 갱신은 언제부터 준비할까?"], "mfg": ["공정 능력 지수가 낮다는 건 무슨 뜻일까?", "디지털 트윈, 어디부터 쓰면 효과가 클까?", "불량이 반복될 때 먼저 할 일은?", "연구 과제를 멈출 기준은 언제 정할까?"], "fin": ["운전자본이 늘면 왜 현금이 줄어들까?", "결산 자동화, 사람은 무엇에 집중할까?", "이익이 나는데 현금이 부족한 이유는?", "예산 회의에서 먼저 맞출 것은?"], "hr": ["보상 밴드가 없으면 생기는 문제는?", "AI 시대, 채용 평가 기준은 어떻게 될까?", "1on1 의제는 누가 정해야 할까?", "보상 이야기는 언제 꺼내야 할까?"], "com": ["공헌이익으로 봐야 보이는 적자 상품은?", "숏폼이 상세페이지를 바꾸는 방식은?", "신규 고객보다 먼저 볼 숫자는?", "가격을 올릴 때 놓치기 쉬운 것은?"], "log": ["'채찍 효과'는 왜 생길까?", "물류 자동화, 사람 일은 어디로 옮겨갈까?", "재고를 늘리면 무엇을 잃을까?", "공급처를 하나로 몰면 생기는 위험은?"], "law": ["손해배상 한도 조항이 힘을 잃는 경우는?", "AI 규제가 세지면 기업이 먼저 할 일은?", "계약서에서 가장 먼저 볼 조항은?", "개인정보, 얼마나 모아야 할까?"], "money": ["장단기 금리 역전, 무엇을 의심할까?", "기술 투자 붐, 숫자로 가려내는 법은?", "환율이 오르면 누가 웃을까?", "종목을 많이 담으면 분산이 될까?"], "media": ["구독형과 광고형, 기획이 왜 다를까?", "알고리즘이 바뀌어도 살아남는 채널은?", "조회수보다 먼저 볼 숫자는?", "플랫폼 의존을 줄이는 방법은?"], "cx": ["고객 노력 점수가 NPS보다 나을 때는?", "AI 상담원, 어디까지 맡기면 좋을까?", "상담을 줄이는 가장 좋은 방법은?", "챗봇 도입 때 꼭 남겨 둘 것은?"], "med": ["의료 AI, 민감도와 특이도는 뭐가 다를까?", "원격 진료가 늘면 병원은 어떻게 바뀔까?", "환자 경험은 어디서 만들어질까?", "헬스 데이터가 안 이어지는 이유는?"], "build": ["주공정선이 밀리면 왜 전체가 늦을까?", "모듈러 건축이 현장을 바꾸는 방식은?", "설계 변경이 늦어지면 무엇이 커질까?", "현장 사고를 줄이는 작은 습관은?"], "space": ["같은 면적이 더 넓어 보이는 동선은?", "하이브리드 근무 시대, 사무실의 역할은?", "매장 입구 3m가 중요한 이유는?", "조명이 체류 시간을 바꾸는 방식은?"], "game": ["게임 경제에 인플레가 생기는 이유는?", "AI로 게임 개발은 무엇이 빨라질까?", "이용자가 가장 많이 떠나는 구간은?", "라이브 게임에서 신뢰를 만드는 것은?"], "career": ["연봉 협상, 먼저 숫자를 말하면 유리할까?", "1on1에서 매니저에게 꼭 물을 것은?", "성과 리뷰 전에 준비할 세 가지는?", "이직 타이밍, 무엇으로 판단할까?"]};
-function renderQuiz(k){$("quiz").innerHTML=QUIZ[k].map((q,i)=>`<li><span>Q${i+1}</span><span class="t">${q}</span></li>`).join("");const fit=()=>document.querySelectorAll("#quiz li").forEach(li=>fitLine(li,13));fit();document.fonts&&document.fonts.ready.then(fit)}
-{const qc=$("quizChips");if(qc){qc.innerHTML=chipHTML(CHIP_ORDER.filter(([k])=>k!=="career"),"mkt");qc.addEventListener("click",e=>{const b=e.target.closest(".chip");if(b)renderQuiz(b.dataset.k)});renderQuiz("mkt")}}
+// 목요일 「내 조건」 말풍선 — 보이면 체크가 그려지고(C7) 조건이 하나씩 붙는다(A2).
+// 위에서 직군을 고르면 말풍선과 공고 세 줄도 그 직군으로 바뀐다(77). 「공통」이면 처음 예시(마케팅·그로스) 그대로
+const THU_JOBS={dev:["백엔드 개발자","프론트엔드 개발자","데브옵스 엔지니어"],uiux:["프로덕트 디자이너","UX 리서처","UI 디자이너"],mkt:["퍼포먼스 마케터","그로스 매니저","CRM 마케터"],dsn:["브랜드 디자이너","그래픽 디자이너","아트디렉터"],prd:["프로덕트 매니저","사업 전략 매니저","서비스 기획자"],sales:["B2B 영업 매니저","어카운트 매니저","GTM 매니저"],mfg:["공정 엔지니어","품질 엔지니어","R&D 연구원"],fin:["재무회계 담당","FP&A 매니저","세무 담당"],hr:["HRBP","채용 담당","조직문화 담당"],com:["온라인 MD","카테고리 매니저","리테일 영업"],log:["SCM 매니저","물류 운영 매니저","구매 담당"],law:["사내 변호사","컴플라이언스 담당","법무 담당"],money:["투자 애널리스트","리스크 매니저","자산운용 매니저"],media:["콘텐츠 PD","에디터","영상 기획자"],cx:["CX 매니저","고객지원 리드","VOC 분석가"],med:["임상 연구원","의료정보 담당","제약 마케터"],build:["현장 엔지니어","공무 담당","설계 엔지니어"],space:["공간 디자이너","인테리어 설계자","VMD"],game:["게임 기획자","사업 PM","라이브 운영 PD"]};
+(()=>{const c=document.querySelector("#thusec .cond"),b=c&&c.querySelector("b");if(!b)return;
+ const still=matchMedia("(prefers-reduced-motion: reduce)").matches,first=b.textContent,rest=" · "+first.split(" · ").slice(1).join(" · ");
+ const tn=[...document.querySelector("#thusec .tpl").childNodes].find(n=>n.nodeType===3&&n.data.includes("1. A사 - ")),tpl0=tn&&tn.data;
+ const put=t=>{b.textContent="";if(still){b.textContent=t;return}t.split(" · ").forEach((x,i)=>{const s=document.createElement("span");s.className="cp";s.style.animationDelay=.2+i*.35+"s";s.textContent=(i?" · ":"")+x;b.appendChild(s)})};
+ if(!still)c.classList.add("wt");put(first);
+ const replay=()=>{if(!c.classList.contains("pl"))return;c.classList.remove("pl");void c.offsetWidth;c.classList.add("pl")};
+ document.addEventListener("ccjob",e=>{const k=e.detail,J=THU_JOBS[k];put(J?LABEL[k]+rest:first);if(tn)tn.data=J?tpl0.replace(/1\. A사 - .*\n2\. B사 - .*\n3\. C사 - .*/,`1. A사 - ${J[0]}\n2. B사 - ${J[1]}\n3. C사 - ${J[2]}`):tpl0;replay()});
+ if(!still)new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){c.classList.add("pl");o.disconnect()}}),{threshold:.6}).observe(c)})();
