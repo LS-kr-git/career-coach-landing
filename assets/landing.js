@@ -56,7 +56,7 @@ const TRIO={
  draw(list[0][0])})();
 const RVC=["#D89628", "#299BCE", "#3E6CD2", "#DD7832", "#697586", "#25A47A"];let rvi=0;const rvCard=r=>`<div class="rv"><div class="rh"><span class="rp"><i style="background:${RVC[(rvi++)%6]}"><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="#fff" fill-opacity=".92"/><path d="M6 38c1.5-8 7.2-12 14-12s12.5 4 14 12z" fill="#fff" fill-opacity=".92"/></svg></i>${r[0]} · ${r[1]}</span><span class="stars">${stars(r[2])}</span></div><p>${r[3]}</p></div>`;
 const rvPages=[];for(let i=0;i<REVIEWS.length;i+=3)rvPages.push(REVIEWS.slice(i,i+3));
-const rvSet=rvPages.map(pg=>`<div class="rpg">${pg.map(rvCard).join("")}</div>`).join("");$("reviews").innerHTML=rvSet;
+const rvSet=rvPages.map(pg=>`<div class="rpg">${pg.map(rvCard).join("")}</div>`).join("");if($("reviews"))$("reviews").innerHTML=rvSet;
 
 
 document.querySelectorAll(".chips,.hs,[data-pv] .swipe,#reviews").forEach(el=>{
@@ -73,13 +73,13 @@ document.querySelectorAll(".chips,.hs,[data-pv] .swipe,#reviews").forEach(el=>{
 });
 document.querySelectorAll(".fit").forEach(el=>{el.style.whiteSpace="nowrap";el.style.overflow="hidden";fitLine(el,11)});
 // 슬롯머신: 화면에 들어올 때마다 자리마다 0~9 띠가 굴러가 멈춘다
-document.querySelectorAll(".slot").forEach(sl=>{const txt=sl.dataset.n;
+document.querySelectorAll(".slot[data-n]").forEach(sl=>{const txt=sl.dataset.n;
  sl.innerHTML=[...txt].map(ch=>/\d/.test(ch)?`<span class="d" aria-hidden="true"><i>${[...Array(30).keys()].map(n=>n%10).concat([+ch]).join("<br>")}</i></span>`:`<span aria-hidden="true">${ch}</span>`).join("");
  const ds=[...sl.querySelectorAll(".d i")];
  const roll=on=>ds.forEach((i,idx)=>{i.style.transitionDuration=on?(1.4+idx*0.22)+"s":"0s";i.style.transform=on?`translateY(-${30*1.25}em)`:"translateY(0)"});
  new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){roll(false);requestAnimationFrame(()=>requestAnimationFrame(()=>roll(true)))}}),{root:null,threshold:.6}).observe(sl)});
 // 바닥 버튼: 늘 같은 자리(하단에서 띄운 채)에 고정. 마지막 섹션 빛내기는 그 섹션과 함께 뺐다(2026-10-25)
-(()=>{const st=$("sticky");
+(()=>{const st=$("sticky");if(!st)return;
  const up=()=>st.classList.toggle("hide0",scrollY<400);addEventListener("scroll",up,{passive:true});up();})();
 
 // 슬롯머신 숫자 — 「32배+」(#rx). 「약 12일」(#rxd)은 2026-10-25 뺐다. 화면에서 한 번 본 뒤부터 값이 바뀔 때마다 굴린다
@@ -88,15 +88,19 @@ const slotSet=(id,t)=>{const el=$(id);el.dataset.t=t;clearTimeout(el._t);if(!el.
 {const e=$("rfd");if(e)new IntersectionObserver((es,o)=>{if(es[0].isIntersecting){e.classList.add("pl");o.disconnect()}},{root:null,threshold:.6}).observe(e)}
 ["rx"].forEach(id=>new IntersectionObserver(es=>{if(es[0].isIntersecting)$(id)._seen=true},{root:null,threshold:.8}).observe($(id)));
 
-(()=>{const SUB=won("ppr")/1e4,f=n=>(Math.round(n*10)/10).toLocaleString("ko-KR")+"만원";
- const set=v=>{v=Math.max(1000,Math.min(10000,+v||0));const p1=v*.03,p2=v*.04,mx=Math.max(p2,SUB);
+// 1년 구독료(만원) — 랜딩은 요금 섹션 마크업(#ppr)에서, 랜딩 섹션을 옮겨 실은 결제 화면은 서버 요금제를 읽은 뒤 ccSalSub 로 넣는다(2026-10-26).
+// 값이 오기 전에는 막대·배수를 마크업 그대로 둔다 — 0 으로 나눠 「Infinity배」가 서지 않게.
+(()=>{let SUB=$("ppr")?won("ppr")/1e4:0,cur=5000;const f=n=>(Math.round(n*10)/10).toLocaleString("ko-KR")+"만원";
+ const set=v=>{v=cur=Math.max(1000,Math.min(10000,+v||0));const p1=v*.03,p2=v*.04,mx=Math.max(p2,SUB);
   document.querySelectorAll("#sal .sv").forEach(i=>{if(document.activeElement!==i)i.value=v});
   document.querySelectorAll("#sal .pc button").forEach(b=>b.classList.toggle("on",+b.dataset.s===v));
   document.querySelector("#sal .sd").textContent=v.toLocaleString("ko-KR")+"만원";
+  if(!SUB)return;
   [[SUB,0],[p1,1],[p2,2]].forEach(([x,k])=>{$("h"+k).style.height=Math.max(3,x/mx*100)+"%";$("b"+k).textContent=(k?"+":"")+f(x)});
   const r=p1/SUB;slotSet("rx",(r>=10?Math.round(r):Math.round(r*10)/10)+"배+")};
  document.querySelectorAll("#sal .sv").forEach(i=>i.addEventListener("input",()=>{if(i.value!=="")set(i.value)}));
  document.querySelector("#sal .pc").addEventListener("click",e=>{const b=e.target.closest("button");if(b)set(b.dataset.s)});
+ window.ccSalSub=w=>{SUB=w/1e4;set(cur)};
  set(5000)})();
 (()=>{const sal=$("sal"),rg=sal.querySelector('input[type=range]');let demo=0;
  const fill=()=>rg.style.setProperty("--fill",((rg.value-rg.min)/(rg.max-rg.min)*100)+"%");rg.addEventListener("input",fill);fill();
@@ -111,7 +115,7 @@ document.querySelectorAll(".arw").forEach(w=>{const c=w.querySelector(".chips,.h
  c.addEventListener("click",e=>{if(e.target.closest(".chip"))w.classList.add("used")})});
 
 
-(()=>{const top=document.querySelector(".top");let last=0;
+(()=>{const top=document.querySelector(".top");if(!top)return;let last=0;
  window.addEventListener("scroll",()=>{const y=scrollY,d=y-last;if(y<60)top.classList.remove("hid");else if(d>4)top.classList.add("hid");else if(d<-4)top.classList.remove("hid");last=y},{passive:true});})();
 
 (()=>{const g=$("yg");g.innerHTML="<i></i>".repeat(250);const cells=[...g.children],n=$("ycn");let t=0,run=false;
@@ -121,9 +125,9 @@ document.querySelectorAll(".arw").forEach(w=>{const c=w.querySelector(".chips,.h
 
 
 
-new IntersectionObserver(es=>es.forEach(e=>{const w=$("stw");if(e.isIntersecting){window.stwFit&&stwFit();w.classList.remove("go");void w.offsetWidth;w.classList.add("go")}}),{root:null,threshold:.6}).observe($("stw"));
+if($("stw"))new IntersectionObserver(es=>es.forEach(e=>{const w=$("stw");if(e.isIntersecting){window.stwFit&&stwFit();w.classList.remove("go");void w.offsetWidth;w.classList.add("go")}}),{root:null,threshold:.6}).observe($("stw"));
 
-(()=>{const w=$("rvw");w.querySelectorAll(".rv").forEach((c,k)=>c.style.setProperty("--dl",(k*.38)+"s"));
+(()=>{const w=$("rvw");if(!w)return;w.querySelectorAll(".rv").forEach((c,k)=>c.style.setProperty("--dl",(k*.38)+"s"));
  const replay=()=>{w.classList.remove("in");void w.offsetWidth;setTimeout(()=>w.classList.add("in"),60)};
  let seen=false;new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3&&!seen){seen=true;replay()}else if(e.intersectionRatio===0){seen=false;w.classList.remove("in")}}),{root:null,threshold:[0,.3]}).observe(w);})();
 
@@ -131,19 +135,19 @@ new IntersectionObserver(es=>es.forEach(e=>{const w=$("stw");if(e.isIntersecting
 
 
 
-(()=>{const k=$("k2");const play=()=>{k.classList.remove("play");void k.offsetWidth;k.classList.add("play")};
+(()=>{const k=$("k2");if(!k)return;const play=()=>{k.classList.remove("play");void k.offsetWidth;k.classList.add("play")};
  let seen=false;new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.6&&!seen){seen=true;play()}else if(e.intersectionRatio===0){seen=false;k.classList.remove("play")}}),{root:null,threshold:[0,.6]}).observe(k);})();
 
-(()=>{const w=$("stw"),is=w.querySelectorAll(".s0 i"),l=is[4];const f=()=>{const x=l.offsetLeft+l.offsetWidth*0.62;w.style.setProperty("--sw",x+"px")};f();window.stwFit=f;document.fonts&&document.fonts.ready.then(f);window.addEventListener("resize",f)})();
+(()=>{const w=$("stw");if(!w)return;const is=w.querySelectorAll(".s0 i"),l=is[4];const f=()=>{const x=l.offsetLeft+l.offsetWidth*0.62;w.style.setProperty("--sw",x+"px")};f();window.stwFit=f;document.fonts&&document.fonts.ready.then(f);window.addEventListener("resize",f)})();
 
 
 
 
 
-(()=>{const sec=$("pricing"),pr=$("ppr"),FROM=won("ps"),TO=won("ppr");let t=0;const play=()=>{sec.classList.remove("in");void sec.offsetWidth;clearInterval(t);pr.textContent=TO.toLocaleString("ko-KR")+"원";setTimeout(()=>{sec.classList.add("in");if($("pa").dataset.v==="4"){const t0=performance.now();t=setInterval(()=>{const k=Math.min(1,(performance.now()-t0)/1000),v=Math.round(FROM-(FROM-TO)*(1-Math.pow(1-k,3)));pr.textContent=v.toLocaleString("ko-KR")+"원";if(k>=1)clearInterval(t)},30)}},60)};
+(()=>{const sec=$("pricing");if(!sec)return;const pr=$("ppr"),FROM=won("ps"),TO=won("ppr");let t=0;const play=()=>{sec.classList.remove("in");void sec.offsetWidth;clearInterval(t);pr.textContent=TO.toLocaleString("ko-KR")+"원";setTimeout(()=>{sec.classList.add("in");if($("pa").dataset.v==="4"){const t0=performance.now();t=setInterval(()=>{const k=Math.min(1,(performance.now()-t0)/1000),v=Math.round(FROM-(FROM-TO)*(1-Math.pow(1-k,3)));pr.textContent=v.toLocaleString("ko-KR")+"원";if(k>=1)clearInterval(t)},30)}},60)};
  let seen=false;new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.3&&!seen){seen=true;play()}else if(e.intersectionRatio===0){seen=false;sec.classList.remove("in")}}),{root:null,threshold:[0,.3]}).observe(sec.querySelector(".plan.best"));})();
 
-(()=>{const r=document.getElementById("reviews");let done=false,stop=false,raf=0;
+(()=>{const r=document.getElementById("reviews");if(!r)return;let done=false,stop=false,raf=0;
  const halt=()=>{if(stop)return;stop=true;cancelAnimationFrame(raf);r.classList.remove("rvflow")};let tx=0,ty=0;
  r.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse")halt()});
  /* ‹ › 는 #reviews 밖(형제)이라 위 멈춤이 안 걸려, 흐르는 동안 누르면 매 프레임 scrollLeft 덮어쓰기에 넘김이 지워졌다(2026-10-21 점검) */
@@ -159,8 +163,11 @@ new IntersectionObserver(es=>es.forEach(e=>{const w=$("stw");if(e.isIntersecting
 (()=>{const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>=.9)e.target.classList.add("on");else if(!e.isIntersecting)e.target.classList.remove("on")}),{root:null,rootMargin:"0px 0px -90px 0px",threshold:[0,.9]});document.querySelectorAll(".draw").forEach(x=>io.observe(x));})();
 /* 맨 위에서 더 당긴 자리 = 흰 머리줄 색 (2026-10-15 사용자 지시) — 공용 assets/overscroll-top.js 를 붙인다.
    맨 아래는 html·body 바탕(--g100, footer 와 같은 색) 그대로. */
+// 랜딩에서만 — 랜딩 섹션을 옮겨 실은 다른 화면(결제)은 자기 맨 위 색을 그대로 둔다(2026-10-26).
+if ($("sticky")) {
 document.documentElement.style.setProperty("--overscroll-top", "#fff");
 document.body.appendChild(document.createElement("script")).src = "/assets/overscroll-top.js?v=c959236e";
+}
 
 // 첫 화면 카드는 높이를 줄이고(3줄 남짓), 카드 아래 「아래로 더 보기」로 나머지를 읽는다(S2). 한 번 누르면 버튼이 가리던 줄부터 한 화면만큼 내려간다
 function moreBtn(ab){const f=document.createElement("div");f.className="mfd";const bt=document.createElement("button");bt.type="button";bt.className="mbtn";ab.append(f,bt);
@@ -194,4 +201,4 @@ PVS.forEach(mountPv);
 // 면접 질문 퀴즈 — v1(2026-10-15) 「직군 퀴즈」를 되살렸다(2026-10-25). 칩을 누르면 그 직군 질문 넷으로 바뀐다
 const QUIZ={"dev": ["결제 API에서 '멱등성'이 왜 중요할까?", "AI 코딩 시대, 코드 리뷰는 뭐가 바뀔까?", "배포와 출시는 왜 분리해야 할까?", "기술 부채, 언제 갚아야 할까?"], "uiux": ["디자인 토큰은 왜 '의미'로 이름 지을까?", "AI 기능, 신뢰받는 화면은 뭐가 다를까?", "사용성 테스트, 몇 명이면 충분할까?", "첫 화면이 비었을 때 무엇을 둘까?"], "dsn": ["로고보다 브랜드를 먼저 각인시키는 건?", "생성형 AI 이미지, 브랜드에 쓸 기준은?", "패키지에서 매대 3초가 중요한 이유는?", "글꼴이 브랜드 인상을 바꾸는 이유는?"], "mkt": ["마지막 클릭 기여 모델이 놓치는 것은?", "쿠키 없는 시대, 성과는 어떻게 잴까?", "가입자 수보다 먼저 봐야 할 숫자는?", "할인은 왜 브랜드를 갉아먹을까?"], "prd": ["북극성 지표가 하위 지표와 부딪히면?", "AI 기능, 정확도보다 먼저 정할 것은?", "기능 요청, 그대로 만들면 왜 안 될까?", "로드맵에 날짜보다 먼저 적을 것은?"], "sales": ["할인 없이 가격 저항을 넘는 방법은?", "AI 검색이 구매 검토를 어떻게 바꿀까?", "파이프라인 예측, 자꾸 빗나가는 이유는?", "고객 갱신은 언제부터 준비할까?"], "mfg": ["공정 능력 지수가 낮다는 건 무슨 뜻일까?", "디지털 트윈, 어디부터 쓰면 효과가 클까?", "불량이 반복될 때 먼저 할 일은?", "연구 과제를 멈출 기준은 언제 정할까?"], "fin": ["운전자본이 늘면 왜 현금이 줄어들까?", "결산 자동화, 사람은 무엇에 집중할까?", "이익이 나는데 현금이 부족한 이유는?", "예산 회의에서 먼저 맞출 것은?"], "hr": ["보상 밴드가 없으면 생기는 문제는?", "AI 시대, 채용 평가 기준은 어떻게 될까?", "1on1 의제는 누가 정해야 할까?", "보상 이야기는 언제 꺼내야 할까?"], "com": ["공헌이익으로 봐야 보이는 적자 상품은?", "숏폼이 상세페이지를 바꾸는 방식은?", "신규 고객보다 먼저 볼 숫자는?", "가격을 올릴 때 놓치기 쉬운 것은?"], "log": ["'채찍 효과'는 왜 생길까?", "물류 자동화, 사람 일은 어디로 옮겨갈까?", "재고를 늘리면 무엇을 잃을까?", "공급처를 하나로 몰면 생기는 위험은?"], "law": ["손해배상 한도 조항이 힘을 잃는 경우는?", "AI 규제가 세지면 기업이 먼저 할 일은?", "계약서에서 가장 먼저 볼 조항은?", "개인정보, 얼마나 모아야 할까?"], "money": ["장단기 금리 역전, 무엇을 의심할까?", "기술 투자 붐, 숫자로 가려내는 법은?", "환율이 오르면 누가 웃을까?", "종목을 많이 담으면 분산이 될까?"], "media": ["구독형과 광고형, 기획이 왜 다를까?", "알고리즘이 바뀌어도 살아남는 채널은?", "조회수보다 먼저 볼 숫자는?", "플랫폼 의존을 줄이는 방법은?"], "cx": ["고객 노력 점수가 NPS보다 나을 때는?", "AI 상담원, 어디까지 맡기면 좋을까?", "상담을 줄이는 가장 좋은 방법은?", "챗봇 도입 때 꼭 남겨 둘 것은?"], "med": ["의료 AI, 민감도와 특이도는 뭐가 다를까?", "원격 진료가 늘면 병원은 어떻게 바뀔까?", "환자 경험은 어디서 만들어질까?", "헬스 데이터가 안 이어지는 이유는?"], "build": ["주공정선이 밀리면 왜 전체가 늦을까?", "모듈러 건축이 현장을 바꾸는 방식은?", "설계 변경이 늦어지면 무엇이 커질까?", "현장 사고를 줄이는 작은 습관은?"], "space": ["같은 면적이 더 넓어 보이는 동선은?", "하이브리드 근무 시대, 사무실의 역할은?", "매장 입구 3m가 중요한 이유는?", "조명이 체류 시간을 바꾸는 방식은?"], "game": ["게임 경제에 인플레가 생기는 이유는?", "AI로 게임 개발은 무엇이 빨라질까?", "이용자가 가장 많이 떠나는 구간은?", "라이브 게임에서 신뢰를 만드는 것은?"], "career": ["연봉 협상, 먼저 숫자를 말하면 유리할까?", "1on1에서 매니저에게 꼭 물을 것은?", "성과 리뷰 전에 준비할 세 가지는?", "이직 타이밍, 무엇으로 판단할까?"]};
 function renderQuiz(k){$("quiz").innerHTML=QUIZ[k].map((q,i)=>`<li><span>Q${i+1}</span><span class="t">${q}</span></li>`).join("");const fit=()=>document.querySelectorAll("#quiz li").forEach(li=>fitLine(li,13));fit();document.fonts&&document.fonts.ready.then(fit)}
-{const qc=$("quizChips");qc.innerHTML=chipHTML(CHIP_ORDER.filter(([k])=>k!=="career"),"mkt");qc.addEventListener("click",e=>{const b=e.target.closest(".chip");if(b)renderQuiz(b.dataset.k)});renderQuiz("mkt")}
+{const qc=$("quizChips");if(qc){qc.innerHTML=chipHTML(CHIP_ORDER.filter(([k])=>k!=="career"),"mkt");qc.addEventListener("click",e=>{const b=e.target.closest(".chip");if(b)renderQuiz(b.dataset.k)});renderQuiz("mkt")}}

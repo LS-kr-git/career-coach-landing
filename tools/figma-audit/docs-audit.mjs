@@ -85,6 +85,9 @@ const softKey = (s) => key(s)
 const BLOCK = /<\/?(p|h1|h2|h3|h4|div|section|main|li|td|th|footer|header|a|span|br|strong|em)\b[^>]*>/gi;
 function webBlocks(html) {
   let s = html;
+  // 랜딩에서 옮겨 실은 섹션(tools/landing-sections)은 뺀다 — 랜딩은 2026-10-06 부터 피그마 기준이 아니고(CLAUDE.md 「기준」),
+  // 이 사본은 랜딩 원문과 같은지를 그 도구의 --check(훅 1.9겹·CI)가 본다. 표시 주석을 지우기 전에 걷어야 한다.
+  s = s.replace(/<!--landing:sections [\s\S]*?<!--\/landing:sections-->/g, ' ');
   s = s.replace(/<!--[\s\S]*?-->/g, ' ');
   s = s.replace(/<head[\s\S]*?<\/head>/i, ' ');
   s = s.replace(/<script[\s\S]*?<\/script>/gi, ' ');

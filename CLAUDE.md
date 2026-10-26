@@ -134,6 +134,7 @@ git fetch --unshallow          # 얕게 클론됐다면. 이미 깊으면 아무
 | 1.5 | `tools/roles/build.mjs --check` | 모든 푸시 (node 있을 때) | 온보딩 직군 목록 ↔ `taxonomy.json` |
 | 1.6 | `tools/mypage-data-check.mjs` | 모든 푸시 (node 있을 때) | 마이페이지 데이터 층(`assets/mypage-data.js`) ↔ 정적 마크업 (docs-audit 이 못 보는 JS 렌더 값). CI 에는 아직 없다 |
 | 1.8 | `tools/asset-version/build.mjs --check` | 모든 푸시 (node 있을 때) | `/assets/*.js·css` 주소의 판(`?v=` 내용 해시)이 지금 내용과 맞는가 (2026-10-22) |
+| 1.9 | `tools/landing-sections/build.mjs --check` | 모든 푸시 (node 있을 때) | 결제 화면에 옮겨 실은 랜딩 섹션·스타일(`assets/landing-sections.css`)이 랜딩 원문과 같은가 (2026-10-26 랜딩 v12). 랜딩 섹션·`landing-*.css` 를 고쳤으면 이 도구를 돌려 같이 커밋한다 |
 | 2a | `tools/figma-audit/docs-audit.mjs` | **`*.html` 이 하나라도 바뀐 푸시** | 약관·개인정보·가입·온보딩·마이페이지·결제 등 피그마가 기준인 화면 (커밋된 스냅샷 대조, 라이브 덤프 불필요) |
 | 2b | ~~`tools/figma-audit/audit.mjs`~~ | **2026-10-06 은퇴 · 10-13 삭제** | 랜딩 피그마 프레임이 레거시로 옮겨져 대조하지 않는다 |
 
