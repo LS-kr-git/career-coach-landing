@@ -9,12 +9,8 @@
 <!-- 미리받기 (tools/preload/build.mjs 가 만든다 — 손으로 고치지 마라) -->
 <link rel="preconnect" href="https://sxooygwggxeplzkfdbth.supabase.co" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.75.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.76.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.78.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.81.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.82.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.83.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.84.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.85.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.86.woff2" as="font" type="font/woff2" crossorigin>
@@ -24,7 +20,7 @@
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.90.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.91.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="modulepreload" href="/assets/browser-mark.js?v=55ab00c8">
-<link rel="modulepreload" href="/assets/mypage-data.js?v=969c8b97">
+<link rel="modulepreload" href="/assets/mypage-data.js?v=4737b984">
 <link rel="modulepreload" href="/assets/section-record.js?v=74658ed7">
 <link rel="modulepreload" href="/assets/skeleton.js?v=ac8118b7">
 <link rel="modulepreload" href="/assets/supabase-config.js?v=1389b656">
@@ -44,7 +40,6 @@
 <link rel="stylesheet" href="/assets/toast.css?v=ede5d5ac">
 <link rel="stylesheet" href="/assets/modal.css?v=afc88399">
 <script src="/assets/modal.js?v=028639ce" defer></script>
-<link rel="stylesheet" href="/assets/landing-sections.css?v=8e0ea4ce">
 <link rel="stylesheet" href="/assets/skeleton.css?v=13150b73">
 <script src="/assets/steady.js?v=a2c1cb99"></script>
 <style>
@@ -68,7 +63,7 @@
     min-height:100vh;min-height:100svh;padding-bottom:116px;position:relative}
 
   /* 헤더 — 뒤로가기 하나. 헤더 안에 글씨를 넣지 않는다 (CLAUDE.md 표준값) */
-  .page>.hd{position:sticky;top:0;z-index:20;display:flex;align-items:center;
+  .hd{position:sticky;top:0;z-index:20;display:flex;align-items:center;
     height:calc(48px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 12px 0;background:#fff}
   .back{width:48px;height:48px;display:flex;align-items:center;justify-content:center;
     position:relative;background:none;border:0;cursor:pointer;padding:0}
@@ -87,7 +82,7 @@
   .hl{background:linear-gradient(transparent 42%,var(--amber-200) 42%);padding:0 2px}
   /* 요금 카드 — 마이페이지 「멤버십·결제」(mypage/billing)의 카드와 같은 값이다. 한쪽을 고치면 같이 고친다 */
   .plans{display:flex;flex-direction:column;gap:12px;padding-top:6px;margin-top:24px}
-  .plans .pc{position:relative;display:flex;flex-direction:column;gap:10px;padding:16px 18px;border-radius:14px;
+  .pc{position:relative;display:flex;flex-direction:column;gap:10px;padding:16px 18px;border-radius:14px;
     background:var(--gray-50);border:1.5px solid var(--gray-50);text-align:left;font:inherit;color:inherit;
     cursor:pointer;-webkit-tap-highlight-color:transparent;width:100%}
   .pc[aria-checked="true"]{background:#fff;border-color:var(--amber-500);box-shadow:0 6px 18px rgba(15,23,42,.08)}
@@ -107,16 +102,14 @@
   .pc .amt s{color:var(--gray-400)}
   .pc .amt .pct{font-weight:700;color:#F87171}
   .pc .amt .won{font-size:16px;font-weight:500;color:var(--gray-800)}
-  .pc .amt.solo .won{font-size:26px;line-height:34px;font-weight:700;color:var(--gray-900)}
-  .pc[aria-checked="true"] .amt.solo .won{color:var(--amber-600)}
   .pc .amt .per{font-size:13px;color:var(--gray-500);margin-left:-5px}
   .pc .gift{padding-left:28px;margin-bottom:-6px;font-size:13px;line-height:18px;font-weight:700;color:var(--amber-600)}
   .pc .top .sub{font-size:13px;font-weight:600;color:var(--gray-500)}
   .pc .month{margin:2px -4px 0;background:var(--amber-50);border-radius:10px;padding:8px 12px;font-size:13px;line-height:19px;font-weight:600;color:var(--gray-700);text-align:center}
   .pc .month b{font-weight:800;color:var(--amber-700)}
 
-  /* 안심 구역 — 위 72 + 28 (구분선은 2026-10-26 사용자 지시로 뺐다 — 선은 아래 랜딩 섹션 첫머리로 옮겼다) */
-  .safe{margin-top:72px;padding-top:28px;display:flex;flex-direction:column;gap:6px}
+  /* 안심 구역 — 위 구분선까지 72, 선 아래 28 */
+  .safe{margin-top:72px;padding-top:28px;border-top:1px solid var(--gray-200);display:flex;flex-direction:column;gap:6px}
   .safe .t-title{margin-bottom:16px}
   .safe[hidden]{display:none}
   .safe-box{background:#F7FEFA;border:1px solid #A7F3D0;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:14px;list-style:none}
@@ -142,14 +135,10 @@
   .week-box{background:var(--gray-50);border-radius:16px;padding:16px 12px;display:flex;flex-direction:column;gap:14px}
   .wrow{display:flex;gap:6px;align-items:flex-start}
   .wrow .sq{width:10px;height:10px;border-radius:3px;margin-top:6px;flex:none}
-  .wrow .nm{display:flex;flex-direction:column;padding-left:14px}   /* 피그마 26판: 요일 자리를 지우고 남긴 띄어쓰기 4칸 폭 */
+  .wrow .dd{width:56px;flex:none;font-size:14px;line-height:22px;font-weight:700;color:var(--gray-900)}
+  .wrow .nm{display:flex;flex-direction:column}
   .wrow .nm b{font-size:15px;line-height:22px;font-weight:700;color:var(--gray-900)}
   .wrow .nm span{font-size:12.5px;line-height:18px;color:var(--gray-500)}
-
-  /* 랜딩 섹션 (2026-10-26 사용자 확정 · 랜딩 v12) — 요금 카드 아래 72 에 구분선, 선 아래 28 에서 첫 섹션 제목.
-     섹션 원문·스타일은 tools/landing-sections/build.mjs 가 랜딩에서 옮겨 싣는다(.lp 안에만 걸린다) */
-  .lp #pvsec{margin-top:72px;padding-top:28px;position:relative}
-  .lp #pvsec::before{content:"";position:absolute;top:0;left:var(--pad-x);right:var(--pad-x);border-top:1px solid var(--gray-200)}
 
   .band{height:12px;background:var(--gray-100)}
 
@@ -255,64 +244,12 @@
 
   <!-- 구독 신청 (기본) — 피그마 2369:1325. 요금 카드는 서버 plan 표의 살아 있는 요금제로 스크립트가 그린다 -->
   <div id="pickView">
-    <main class="pick" data-sec="요금 카드">
+    <main class="pick">
+      <div data-sec="요금 카드">
       <div class="head"><p class="eyebrow">구독권을 골라 주세요</p><h1 class="t-hero">한 달 <span class="hl">커피 한 잔</span> 보다 저렴해요</h1></div>
       <div class="plans" id="plans" role="radiogroup" aria-label="구독권" data-sk="box" style="--skh:112px;--sk2:block"></div>
-    </main>
+      </div>
 
-    <!-- 랜딩 3·4·5·6·8 섹션 (2026-10-26 사용자 확정 · 랜딩 v12 「결제페이지에 유료이유(5줄요약) 추가」). 사이를 손으로 고치지 마라 — node tools/landing-sections/build.mjs -->
-    <!--landing:sections 알림톡 미리보기|전문가 5줄 요약|1년 250개|연봉 3% 효과|하루 1시간 절약-->
-<svg width="0" height="0" style="position:absolute"><defs><path id="ccmark" d="M12.464 4.662L12.439 4.702L12.421 4.757L12.420 4.814L12.436 4.869L12.467 4.917L12.556 5.006L12.596 5.033L12.642 5.050L12.687 5.055L14.813 5.055L14.850 5.066L14.886 5.099L14.900 5.134L14.900 5.173L14.891 5.200L14.872 5.225L12.747 7.350L12.655 7.433L12.581 7.486L12.504 7.532L12.422 7.570L12.336 7.600L12.262 7.618L12.173 7.632L12.057 7.639L9.982 7.639L9.884 7.644L9.794 7.658L9.707 7.680L9.631 7.707L9.549 7.746L9.463 7.797L9.398 7.845L9.330 7.906L9.263 7.980L9.209 8.053L9.163 8.131L9.125 8.213L9.098 8.289L9.073 8.387L9.060 8.476L9.056 8.564L9.056 10.184L9.051 10.293L9.038 10.383L9.013 10.484L8.987 10.556L8.949 10.638L8.904 10.716L8.850 10.789L8.790 10.856L8.723 10.918L8.651 10.972L8.574 11.019L8.493 11.058L8.408 11.090L8.320 11.112L8.216 11.128L8.107 11.133L6.553 11.133L6.456 11.138L6.366 11.152L6.279 11.174L6.202 11.202L6.120 11.240L6.034 11.291L5.962 11.346L5.895 11.407L5.841 11.467L5.787 11.539L5.740 11.617L5.700 11.698L5.667 11.793L5.647 11.871L5.633 11.961L5.628 12.058L5.628 13.612L5.623 13.721L5.608 13.825L5.589 13.899L5.559 13.984L5.521 14.066L5.475 14.144L5.413 14.228L5.352 14.295L5.284 14.355L5.211 14.408L5.146 14.447L5.051 14.492L4.966 14.522L4.892 14.540L4.788 14.556L4.679 14.561L3.125 14.561L3.037 14.565L2.948 14.578L2.850 14.602L2.765 14.633L2.684 14.672L2.614 14.714L2.541 14.768L2.467 14.835L2.413 14.895L2.358 14.967L2.307 15.053L2.269 15.135L2.239 15.221L2.219 15.299L2.205 15.389L2.200 15.486L2.200 17.069L2.205 17.161L2.219 17.251L2.241 17.339L2.272 17.424L2.307 17.497L2.353 17.575L2.413 17.655L2.474 17.722L2.541 17.783L2.606 17.831L2.684 17.878L2.765 17.917L2.850 17.948L2.948 17.972L3.037 17.985L3.125 17.989L12.614 17.989L12.711 17.984L12.801 17.970L12.889 17.948L12.974 17.917L13.047 17.882L13.125 17.836L13.205 17.776L13.272 17.715L13.332 17.648L13.386 17.575L13.432 17.497L13.467 17.424L13.498 17.339L13.522 17.241L13.535 17.152L13.539 17.069L13.539 10.658L13.544 10.549L13.557 10.459L13.578 10.372L13.608 10.286L13.646 10.204L13.700 10.114L13.754 10.042L13.828 9.961L16.586 7.203L16.611 7.184L16.657 7.172L16.704 7.184L16.740 7.216L16.756 7.261L16.756 9.058L16.759 9.094L16.778 9.149L16.816 9.202L16.906 9.287L16.940 9.307L16.977 9.319L17.025 9.323L17.073 9.316L17.117 9.298L17.158 9.267L18.740 7.685L18.764 7.658L18.790 7.606L18.800 7.541L18.800 3.211L18.795 3.165L18.769 3.103L18.724 3.053L18.664 3.021L18.605 3.011L14.140 3.011L14.093 3.016L14.038 3.038L13.993 3.073Z" fill="#F59E0B"/></defs></svg>
-<div class="lp" id="lpsec" data-v="1"><i id="lvn" data-v="12" hidden></i><i id="chv" data-v="2" hidden></i><i id="chf" data-v="5" hidden></i><i id="wkl" data-v="4" hidden></i><i id="bgv" data-v="1" hidden></i><i id="kyb" data-v="1" hidden></i><i id="cbg" data-v="2" hidden></i><i id="cg" data-v="2" hidden></i><i id="wko" data-v="1" hidden></i><i id="hb" data-v="1" hidden></i><i id="emj" data-v="2" hidden></i><i id="bc" data-v="7" hidden></i><i id="pb" data-v="3" hidden></i><i id="ra" data-v="1" hidden></i><i id="qp" data-v="1" hidden></i><i id="az" data-v="4" hidden></i><i id="rb" data-v="3" hidden></i><i id="te" data-v="4" hidden></i><i id="je" data-v="7" hidden></i><i id="sa" data-v="4" hidden></i><i id="qg" data-v="2" hidden></i><i id="ck" data-v="1" hidden></i><i id="lk" data-v="1" hidden></i><i id="sp" data-v="2" hidden></i><i id="hs" data-v="3" hidden></i><i id="cem" data-v="1" hidden></i><i id="dn" data-v="1" hidden></i><i id="hc" data-v="4" hidden></i><i id="cdz" data-v="11" hidden></i><i id="upe" data-v="2" hidden></i><i id="hal" data-v="2" hidden></i><i id="rlx" data-v="2" hidden></i><i id="sfs" data-v="1" hidden></i><i id="s2h" data-v="3" hidden></i><i id="ce" data-v="2" hidden></i><i id="ha" data-v="2" hidden></i><i id="cb2" data-v="1" hidden></i><i id="bl" data-v="2" hidden></i><i id="fa" data-v="6" hidden></i><i id="ca" data-v="4" hidden></i><i id="ja" data-v="2" hidden></i><i id="ga" data-v="2" hidden></i><i id="wa" data-v="2" hidden></i><i id="tm" data-v="1" hidden></i><i id="pa" data-v="1" hidden></i><i id="ea" data-v="2" hidden></i><i id="aa" data-v="2" hidden></i><i id="va" data-v="2" hidden></i><i id="scv" data-v="4" hidden></i><i id="kw" data-v="2" hidden></i><i id="gone" data-v="1" hidden></i>
-<section data-sec="알림톡 미리보기" class="gap20 s-white crop pv" id="pvsec">
-  <h2>면접 대비 업계<br><span class="hl">인사이트·뉴스 5줄 요약</span></h2>
-  <p class="pvs"><span class="ck">✓</span>원하면 전문도 제공해요</p>
-<div class="pvbox" data-pv data-ix="pjob pcard pmore">
-<div class="herow" data-v="1"><i class="lkn"></i><div class="sarwb atS" hidden><button class="cpv" type="button" aria-label="이전 카톡">‹</button><button class="cnx" type="button" aria-label="다음 카톡">›</button></div><div class="lkb"><b class="lkk">마케팅·그로스</b> 직군 카톡</div>
-  <div class="pm pm-hero"><div class="sc"><div class="nbn"><span class="ap"><svg width="18" height="18" viewBox="0 0 21 21"><use href="#ccmark"/></svg></span><div><b>커리어코치</b><p>오늘의 인사이트 5줄이 도착했어요</p></div><em>지금</em></div><div class="typing"><i></i><i></i><i></i></div>
-    <div class="sb"><span>8:01</span><span class="ic"><span class="sig"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:10px"></i></span>5G<span class="bat"><i></i></span></span></div>
-    <div class="hd"><span class="bk"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="ttl"><svg width="20" height="20" viewBox="0 0 21 21"><use href="#ccmark"/></svg>커리어코치</span><span class="ics"><svg viewBox="0 0 24 24" width="21" height="21"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 15.5l4.5 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><svg viewBox="0 0 24 24" width="21" height="21"><path d="M4 6.5h16M4 12h16M4 17.5h16" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></svg></span></div>
-        <div class="dtabs"></div><div class="scrollwrap"><div class="body swipe"></div><div class="hint pvhint"><span>옆으로 밀어서 더 보기</span><b>›</b></div></div><div class="dots pvdots"><i class="on">1</i><i>2</i><i>3</i></div>
-    <div class="inp"><span class="plus">+</span><span class="field"></span><span class="hash">#</span></div>
-  </div></div>
-  </div>
-  <div class="chw arw pvchw"><span class="chint">👆 직군을 누르면 내용이 바뀌어요</span><div class="chips two pvchips" data-group="sample"></div><button class="cpv" type="button" aria-label="앞으로">‹</button><button class="cnx" type="button" aria-label="직군 더 보기">›</button><span class="fing">👆</span></div>
-  <p class="chp"><span class="cet">내 직군을 선택해 보세요</span></p>
-</div>
-</section>
-<section data-sec="전문가 5줄 요약" class="gap20 s-n100 pv" id="exsec">
-  <h2><span class="hl">면접</span>에 들어가는<br>현직자들이<br>직접 인사이트·뉴스를 선별해요</h2>
-  <p class="expn">*현직자인 관계로 본명은 가림 처리 되었습니다.</p>
-  <div id="ezl"></div>
-  <div class="chw arw pvchw" id="chw9" data-ix="xjob"><span class="chint">👆 직군을 누르면 내용이 바뀌어요</span><div class="chips two pvchips" id="exChips"></div><button class="cpv" type="button" aria-label="앞으로">‹</button><button class="cnx" type="button" aria-label="직군 더 보기">›</button><span class="fing">👆</span></div>
-  <p class="chp"><span class="cet">내 직군을 선택해 보세요</span></p>
-</section>
-<section data-sec="1년 250개" class="gap20 s-a100b c" id="sec250">
-  <div class="sal" data-v="0">
-    <p class="more">1년에 <b>250개</b>의 인사이트·뉴스를<br>더 쌓은 만큼<br><span class="ul">연봉 추가 인상</span>은 당연하죠</p>
-  </div>
-  <div class="yr"><div class="yg" id="yg"></div><div class="yl"><span>1월</span><span>6월</span><span>12월</span></div><div class="yc"><span>평일 발송 메시지 총</span><b><span id="ycn">0</span>개</b></div></div>
-</section>
-<section data-sec="연봉 3% 효과" class="gap20 s-white">
-  <h2>이직 시 <span class="hl">3%</span> 추가 인상되면<br>매년마다 구독료의 <span class="rxw" id="rx">25배+</span></h2>
-  <p class="rxn">*아래 연봉 기준</p>
-  <div class="sal" id="sal" data-v="6" data-ix="sal">
-    <label class="u1"><span>내 연봉</span><input type="number" inputmode="numeric" class="sv" value="4000" min="1000" max="30000" step="100"><em>만원</em></label>
-    <div class="u2"><div class="rvv"><span>내 연봉</span><b class="sd">5,000만원</b></div><div class="rngw"><span class="tipb">← 밀어서 내 연봉 넣어보기 →</span><span class="fing">👆</span><input type="range" class="sv" min="2000" max="10000" step="100" value="5000"></div><div class="rl"><span>2천만원</span><span>1억원</span></div></div>
-    <div class="u3"><span class="lb">내 연봉은</span><div class="pc"><button data-s="3000">3천만</button><button data-s="4000" class="on">4천만</button><button data-s="5000">5천만</button><button data-s="7000">7천만</button><button data-s="10000">1억</button></div><label class="dx">직접 입력 <input type="number" inputmode="numeric" class="sv" value="4000"> 만원</label></div>
-    <p class="u4">내 연봉은 <input type="number" inputmode="numeric" class="sv" value="4000">만원이에요</p>
-    <div class="k33 live"><div class="col"><b id="b0">4.7만</b><i id="h0"></i><span>1년<br>구독료</span></div><div class="col up"><b id="b1">120만</b><i id="h1"></i><span>연봉 3%<br>추가 인상 시</span></div><div class="col up"><b id="b2">160만</b><i id="h2"></i><span>연봉 4%<br>추가 인상 시</span></div></div>
-  </div>
-</section>
-<section data-sec="하루 1시간 절약" class="gap20 s-n100">
-  <h2>하루 1시간 분량의<br>면접 공부를<br><span class="hl">떠먹여 드려요</span></h2>
-  <div class="tvx" id="tvx"><div class="vC"><i class="ln"></i><div class="it" style="--k:0"><span class="ic">📧<em class="no">1</em></span><small>뉴스레터<br>여러 통</small></div><div class="it" style="--k:1"><span class="ic">💼<em class="no">2</em></span><small>링크드인<br>게시글</small></div><div class="it" style="--k:2"><span class="ic">📰<em class="no">3</em></span><small>해외<br>기사</small></div><div class="it" style="--k:3"><span class="ic">🗣️<em class="no">4</em></span><small>커뮤니티<br>정보</small></div></div><div class="tvo"><svg class="tvf" viewBox="0 0 400 70" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M50 0C50 40 200 30 200 70"/><path pathLength="1" d="M150 0C150 40 200 30 200 70"/><path pathLength="1" d="M250 0C250 40 200 30 200 70"/><path pathLength="1" d="M350 0C350 40 200 30 200 70"/></svg><b>💬 커리어코치 카톡 1통으로</b><p class="tvm">⏱ 읽는 데 1분</p></div></div>
-</section>
-</div>
-<!--/landing:sections-->
-    <script src="/assets/landing.js?v=94a473e4" defer></script>
-
-    <main class="pick">
       <!-- 안심 구역 (2026-10-18 신설 · 문구 근거: terms.html 제6조 · 랜딩 「부담 없이 시작해 보세요」) -->
       <section class="safe" id="safe" data-sec="환불 안심" aria-labelledby="safeTitle">
         <p class="eyebrow">부담 없이 시작해 보세요</p>
@@ -325,11 +262,11 @@
 
       <section class="week" data-sec="요일별 구성" aria-labelledby="weekTitle">
         <p class="eyebrow">받게 될 내용</p>
-        <h2 class="t-title" id="weekTitle">평일 카톡 브리핑 구성이에요</h2>
+        <h2 class="t-title" id="weekTitle">요일별로 이렇게 보내드려요</h2>
         <div class="week-box">
-          <div class="wrow"><i class="sq" style="background:#FEF3C7" aria-hidden="true"></i><span class="nm"><b>내 직무 인사이트·뉴스</b><span>내 분야의 중요 트렌드·인사이트</span></span></div>
-          <div class="wrow"><i class="sq" style="background:#DBEAFE" aria-hidden="true"></i><span class="nm"><b>커리어 아티클</b><span>모든 직군에 통하는 일과 커리어 이야기</span></span></div>
-          <div class="wrow"><i class="sq" style="background:#D1FAE5" aria-hidden="true"></i><span class="nm"><b>채용 공고 브리핑</b><span>맞춤형 최신 공고와 채용시장 트렌드</span></span></div>
+          <div class="wrow"><i class="sq" style="background:#FEF3C7" aria-hidden="true"></i><span class="dd">월·수·금</span><span class="nm"><b>내 직무 인사이트</b><span>내 분야의 중요 트렌드·인사이트</span></span></div>
+          <div class="wrow"><i class="sq" style="background:#DBEAFE" aria-hidden="true"></i><span class="dd">화</span><span class="nm"><b>일 잘하는 법·커리어</b><span>모든 직군에 통하는 일과 커리어 이야기</span></span></div>
+          <div class="wrow"><i class="sq" style="background:#D1FAE5" aria-hidden="true"></i><span class="dd">목</span><span class="nm"><b>채용 공고 브리핑</b><span>최신 7일 공고와 채용시장 트렌드</span></span></div>
         </div>
       </section>
     </main>
@@ -467,7 +404,7 @@
   import { 오류안내 } from '/assets/toast.js?v=f8247e72';
   import { 막대 } from '/assets/skeleton.js?v=ac8118b7';
   import { 섹션기록 } from '/assets/section-record.js?v=74658ed7';
-  import { getPlans, planCards, getSubscription, billingView, saveBillingKey, billingCustomerId, requireLogin, FAIL, firstSendDay, onboardingDone, 이어갈곳 } from '/assets/mypage-data.js?v=969c8b97';
+  import { getPlans, planCards, getSubscription, billingView, saveBillingKey, billingCustomerId, requireLogin, FAIL, firstSendDay, onboardingDone, 이어갈곳 } from '/assets/mypage-data.js?v=4737b984';
   // 최상위 await 을 함수로 감싼다 — iOS 14·크롬 88 이하는 최상위 await 이 문법 오류라 모듈 전체가 안 돌았다(2026-10-19 점검).
   (async function () {
   var $ = function (id) { return document.getElementById(id); };
@@ -615,15 +552,13 @@
       b.innerHTML = (c.rec ? '<span class="chip">추천 · 기간 한정 특가</span>' : '') +
         (c.gift ? '<span class="gift"></span>' : '') +
         '<span class="top"><span class="radio" aria-hidden="true"></span><span class="nm"></span>' + (c.parts ? '<span class="sub"></span>' : '') + '</span>' +
-        // 하루 금액이 없는 카드(1개월권 — 2026-10-23 사용자 확정)는 그 줄을 빼고 월 금액을 그 자리 크기로 키운다(.solo).
-        '<span class="tiers">' + (c.day ? '<span class="day"><span>하루 약</span><b></b></span>' : '') +
-        '<span class="amt' + (c.day ? '' : ' solo') + '"></span></span>' +
+        '<span class="tiers"><span class="day"><span>하루 약</span><b></b></span><span class="amt"></span></span>' +
         (c.month ? '<span class="month">☕ 한 달 <b></b></span>' : '');
       b.querySelector('.nm').textContent = c.ticket;
       if (c.gift) b.querySelector('.gift').textContent = c.gift;
       if (c.parts) b.querySelector('.sub').textContent = c.parts;
       if (c.month) b.querySelector('.month b').textContent = c.month;
-      if (c.day) b.querySelector('.day b').textContent = c.day;
+      b.querySelector('.day b').textContent = c.day;
       var amt = b.querySelector('.amt');
       if (c.strike) {
         var s = document.createElement('s'); s.textContent = c.strike; amt.appendChild(s);
@@ -649,7 +584,7 @@
   // 섹션 도달·머문 시간·인터렉션 (2026-10-26 사용자 지시 — 어드민 「가입 퍼널」의 「결제」 줄을 펼치면 보인다).
   // 세는 규칙은 랜딩과 같은 코드다(assets/section-record.js 머리말). 방문은 위 checkout_view 와 같은 조건이고,
   // 새로고침·뒤로가기로 돌아온 것은 뺀다 — 브라우저가 아래 자리로 데려다 놓아 안 읽고도 깊이 닿는다(랜딩 머리 「방문 기록」과 같은 이유).
-  // 요금 카드를 그리고 안심 구역을 가릴지 정한 **뒤에** 시작한다 — 가려진 섹션(연봉 3% 효과 · 환불 안심)을 목록에 넣으면
+  // 요금 카드를 그리고 안심 구역을 가릴지 정한 **뒤에** 시작한다 — 가려진 섹션(환불 안심)을 목록에 넣으면
   // 아무도 못 본 그 섹션이 다음 섹션에 닿은 방문 수만큼 「도달」로 세진다(검사관 ①). 가려진 섹션을 뺀 목록이 곧 구성(cv)이다.
   var 안심확인 = Promise.resolve();
   var 기록켬 = !변경요청 && !결제창다녀옴 && 'IntersectionObserver' in window;
@@ -669,10 +604,6 @@
       안심확인 = getSubscription().then(function (s) { if (s && s.status && !billingView(s).live) $('safe').hidden = true; }, function () {});
     return getPlans().then(function (plans) {
       plans.forEach(function (p) { 요금제[p.code] = p; });
-      // 랜딩 「연봉 3% 효과」 섹션의 1년 구독료 — 랜딩과 같은 12개월권 금액(assets/landing.js ccSalSub).
-      // 12개월권이 없으면 그 섹션을 숨긴다 — 두면 마크업의 옛 예시 금액·배수가 그대로 선다(검사관 ①).
-      var 일년 = plans.find(function (p) { return p.period_count === 12; });
-      if (일년 && window.ccSalSub) window.ccSalSub(일년.price_krw); else 연봉숨김();
       카드그리기(planCards(plans).reverse());   // 27판: 1개월권이 위, 12개월권(기본 선택)이 아래
       $('submit').disabled = 저장안됨;
       if (저장안됨) note('고르신 직무·근무지가 아직 저장되지 않았어요.\n잠시 후 이 화면을 다시 열어 주세요.');
@@ -683,7 +614,6 @@
                 표식 ? 'ic-' + new Date(Date.now() + 9 * 36e5).toISOString().slice(0, 10) + '-' + 표식 : undefined);
     });
   }).catch(function () {
-    연봉숨김();
     $('submit').classList.add('locked');
     // 카드 두 장 자리에 스켈레톤(줄 세 개) — 고른 것처럼 보이지 않게 라디오·배지는 그리지 않는다
     var 판 = '<div class="pc sk" aria-hidden="true">' + 막대('84px', 20)
@@ -718,7 +648,6 @@
       });
     } catch (e) { track('client_error', { msg: 'checkout_sec:' + String((e && e.message) || e).slice(0, 80) }); }   // 결제 화면은 그대로 선다
   }
-  function 연봉숨김() { var x = document.querySelector('#lpsec section[data-sec="연봉 3% 효과"]'); if (x) x.hidden = true; }
 
   /* 다시 구독 (2026-10-19 사용자 지시) — 구독한 적이 있고 지금은 아닌 사람. 구독 행은 첫 결제가 걷혀야 생기므로
      「최근 구독 행이 있다」가 곧 「결제한 적이 있다」다(첫 결제가 실패해 카드만 남은 사람은 첫 결제로 본다).
