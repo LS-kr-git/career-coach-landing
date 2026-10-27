@@ -432,8 +432,9 @@ export function priceText(plan) {
 
 /**
  * 「구독권을 골라 주세요」 카드들 — 결제 화면 26판의 요금 카드와 같은 칸이다.
- * 금액은 전부 서버 값에서 센다: 하루 금액 = 값 ÷ 날수(1개월 30 · 12개월 365, 반올림),
+ * 금액은 전부 서버 값에서 센다: 하루 금액 = 값 ÷ 날수(12개월 365, 반올림) — 1개월권은 하루 금액을 안 그린다(null, 2026-10-23 사용자 확정),
  * 정가 = 1개월 요금제 값 × 달 수, 할인율 = 1 − 값/정가(반올림). 1개월 요금제가 없으면 정가·할인율은 안 그린다.
+ * 「한 달」 금액 = 값 ÷ 달 수를 10원 단위로 반올림(54,400 → 4,530원 · 2026-10-23 사용자 확정).
  * 「추천」은 여러 달짜리에 붙고, 기본 선택도 그것이다(없으면 첫 카드). 긴 것이 먼저다.
  */
 export function planCards(plans) {
@@ -445,7 +446,7 @@ export function planCards(plans) {
     return {
       code: p.code,
       name: 기간이름(p),
-      day: wonText(Math.round(p.price_krw / 날수)),
+      day: n === 1 ? null : wonText(Math.round(p.price_krw / 날수)),
       strike: 정가 && 정가 > p.price_krw ? wonText(정가) : null,
       pct: 정가 && 정가 > p.price_krw ? `${Math.round((1 - p.price_krw / 정가) * 100)}%` : null,
       price: wonText(p.price_krw),
@@ -457,7 +458,7 @@ export function planCards(plans) {
       buy: `${n}개월권 구독하기`,
       gift: 덤달(p) ? `${덤달(p)}개월 무료 증정` : null,
       parts: 덤달(p) ? `${n - 덤달(p)}개월 + ${덤달(p)}개월` : null,
-      month: n > 1 ? wonText(Math.round(p.price_krw / n)) : null,
+      month: n > 1 ? wonText(Math.round(p.price_krw / n / 10) * 10) : null,
     };
   });
   const 고른 = 카드.findIndex((c) => c.rec);
