@@ -639,9 +639,20 @@ io.observe(document.getElementById("safesec"))})();</script>
   // Supabase 가 state 를 못 읽으면(만료·없음) 우리 콜백이 아니라 **이 첫 화면**으로 `?error=…&error_code=…` 를 붙여 보낸다
   // (GoTrue 가 사이트 주소로 돌려보낸다 — 2026-10-15 출시 검수, 라이브 재현). 그것도 실패로 보고 안내·기록한다.
   const 해시 = new URLSearchParams(location.hash.slice(1));
-  // 순서는 콜백(auth/callback 「받은오류」)과 같이 `error` 먼저 — 같은 login_fail 원장에 두 규칙이 섞이지 않게.
-  const 받은오류 = 돌아옴.get('error') || 돌아옴.get('error_code') || 해시.get('error') || 해시.get('error_code');
-  if (돌아옴.get('login') === 'fail' || 받은오류) {
+  // 순서는 콜백(auth/callback 「받은오류」)과 같다 — `access_denied`(취소)는 그대로, 그 밖은 세부 이름(`error_code`) 먼저.
+  // 같은 login_fail 원장에 두 규칙이 섞이지 않게. (2026-10-27 — `invalid_request` 하나로는 열쇠 재사용과 요청 오류가 안 갈렸다)
+  const 오류이름 = 돌아옴.get('error') || 해시.get('error');
+  const 받은오류 = (오류이름 !== 'access_denied' && (돌아옴.get('error_code') || 해시.get('error_code'))) || 오류이름;
+  // 이미 로그인된 사람에게 온 「열쇠 없음·만료」는 실패가 아니다 (2026-10-27) — 로그인을 마친 뒤 뒤로가기로 카카오 화면이
+  // 다시 열리면 이미 쓴 열쇠가 한 번 더 들어와 이렇게 돌아온다(10-22 인스타그램 · 10-26 15:03 카톡 안 브라우저). 로그인은
+  // 멀쩡한데 「로그인하지 못했어요」가 떴다. 안내 없이 주소만 정리하고, 기록은 `why: 'replay'` 로 남긴다 — 어드민 「카카오 로그인이
+  // 실패하고 있나」는 그 줄을 실패·취소에서 뺀다(career-coach 0220). 토큰만 남고 실제로는 무효인 사람이 섞여도 원장에서 가를 수 있다.
+  const 다시쓴열쇠 = 로그인됨 && (돌아옴.get('error_code') === 'bad_oauth_state' || 해시.get('error_code') === 'bad_oauth_state');
+  if (다시쓴열쇠) {
+    track('login_fail', { why: 'replay', code: 'bad_oauth_state' });
+    history.replaceState(null, '', location.pathname);
+  }
+  else if (돌아옴.get('login') === 'fail' || 받은오류) {
     const why = (돌아옴.get('why') || (받은오류 ? 'provider' : '')).replace(/[^a-z_]/g, '').slice(0, 20);
     const code = (돌아옴.get('code') || 받은오류 || '').replace(/[^A-Za-z0-9_]/g, '').slice(0, 40);
     // 로그인 열쇠(state)가 만료돼 돌아왔으면 한 번만 저절로 다시 로그인한다 (2026-10-16 사용자 지시).
