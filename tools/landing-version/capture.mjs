@@ -15,8 +15,13 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 랜딩구성, 지문, 적힌지문, 기록대조 } from './fp.mjs';
+import { 닫힌파일 } from '../closed.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
+if (닫힌파일(ROOT, 'index.html')) {
+  console.log('⏭ 서비스 종료(2026-11-03) — 종료 안내 페이지라 건너뛴다 (tools/closed.mjs)');
+  process.exit(0);
+}
 const 보관 = resolve(process.argv[2] || '');
 if (!process.argv[2] || !existsSync(보관)) throw new Error('landing-versions 가지를 펼친 폴더를 넘겨라');
 // 보관본은 한 장에 다 넣으므로 자산 주소의 판(?v=…, tools/asset-version)은 뜻이 없다 — 떼고 읽고, 떼고 맞댄다.

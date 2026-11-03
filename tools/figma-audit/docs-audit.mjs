@@ -27,6 +27,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { 닫힌파일 } from '../closed.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..', '..');
@@ -38,6 +39,8 @@ if (!existsSync(snapPath)) {
   process.exit(2);
 }
 const snap = JSON.parse(readFileSync(snapPath, 'utf8'));
+// 서비스 종료(2026-11-03) — 종료 안내로 바뀐 페이지는 피그마 화면과 맞댈 문구가 없다(tools/closed.mjs).
+snap.pages = snap.pages.filter((p) => !닫힌파일(ROOT, p.html));
 
 /* ---------- 매핑 정본은 page-figma-map.json 이다 (2026-08-08 신설) ----------
  * 프레임 id 를 이 스냅샷과 page-figma-map.json 이 **따로** 들고 있어서, 한쪽만 고치면

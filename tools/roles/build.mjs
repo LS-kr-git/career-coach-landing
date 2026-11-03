@@ -18,6 +18,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { 닫힌파일 } from '../closed.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..', '..');
@@ -25,6 +26,10 @@ const TAX = JSON.parse(readFileSync(join(HERE, 'taxonomy.json'), 'utf8'));
 const VOL = JSON.parse(readFileSync(join(HERE, 'volume.json'), 'utf8'));
 const TRK = JSON.parse(readFileSync(join(HERE, 'tracks.json'), 'utf8'));
 const PAGE = join(ROOT, 'onboarding', '1', 'index.html');
+if (닫힌파일(ROOT, 'onboarding/1/index.html')) {
+  console.log('⏭ 서비스 종료(2026-11-03) — 종료 안내 페이지라 건너뛴다 (tools/closed.mjs)');
+  process.exit(0);
+}
 /** 🔴 같은 목록을 두 화면이 쓴다 (2026-09-05).
  *  마이페이지 「채용공고 받을 직군」은 온보딩 1단계에서 고른 것을 **나중에 고치는** 화면이다.
  *  목록이 갈리면 온보딩에서 고른 직군을 설정 화면에서 못 찾는다 — 고른 값이 그대로 조회

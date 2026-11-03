@@ -11,6 +11,15 @@
 //
 // 새 열쇠 모양을 만들면 아래 「손」에 그 열쇠를 건드리는 법을 더한다. 모르는 열쇠는 실패로 센다.
 import { 서버열기, 브라우저열기, 검사기 } from '../ops-audit/harness.mjs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { 닫힌파일 } from '../closed.mjs';
+
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
+if (닫힌파일(ROOT, 'index.html')) {
+  console.log('⏭ 서비스 종료(2026-11-03) — 종료 안내 페이지라 건너뛴다 (tools/closed.mjs)');
+  process.exit(0);
+}
 
 const { server, origin } = await 서버열기();
 const 브라우저 = await 브라우저열기();
