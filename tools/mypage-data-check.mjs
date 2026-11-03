@@ -27,7 +27,13 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
+import { 닫힌파일 } from './closed.mjs';
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+if (닫힌파일(ROOT, 'mypage/index.html')) {
+  console.log('⏭ 서비스 종료(2026-11-03) — 종료 안내 페이지라 건너뛴다 (tools/closed.mjs)');
+  process.exit(0);
+}
 const data = await import(pathToFileURL(join(ROOT, 'assets', 'mypage-data.js')).href);
 
 const key = (s) => s.replace(/\s+/g, '');

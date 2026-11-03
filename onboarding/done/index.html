@@ -1,224 +1,109 @@
 <!DOCTYPE html>
-<html lang="ko"><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<script src="/assets/no-input-zoom.js?v=7bdea81a"></script>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="only light">
 <meta name="format-detection" content="telephone=no">
-<meta name="robots" content="noindex,nofollow">
+<title>커리어코치 — 서비스 종료 안내</title>
+<meta name="description" content="커리어코치 서비스가 2026년 11월 3일 종료되었습니다.">
+<meta name="robots" content="noindex">
+<!-- 이 표식이 있으면 검수 도구가 랜딩·결제·온보딩 전용 검사를 건너뛴다 (tools/closed.mjs) -->
+<meta name="cc-closed" content="2026-11-03">
+<link rel="canonical" href="https://careercoach.my/">
 <link rel="icon" type="image/svg+xml" href="/assets/logo-circle.svg">
-<title>설정 완료 — 커리어코치</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="커리어코치">
+<meta property="og:title" content="커리어코치 — 서비스 종료 안내">
+<meta property="og:description" content="커리어코치 서비스가 2026년 11월 3일 종료되었습니다.">
+<meta property="og:url" content="https://careercoach.my/">
+<meta property="og:image" content="https://careercoach.my/assets/og-logo-20261004-3.png">
 <!-- 미리받기 (tools/preload/build.mjs 가 만든다 — 손으로 고치지 마라) -->
-<link rel="preconnect" href="https://sxooygwggxeplzkfdbth.supabase.co" crossorigin>
+<link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.77.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.81.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.82.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.85.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.86.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.87.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.88.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.89.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.90.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/pretendard/woff2-dynamic-subset/PretendardVariable.subset.91.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="modulepreload" href="/assets/browser-mark.js?v=55ab00c8">
-<link rel="modulepreload" href="/assets/mypage-data.js?v=969c8b97">
-<link rel="modulepreload" href="/assets/onboarding-store.js?v=b6c28dd2">
-<link rel="modulepreload" href="/assets/supabase-config.js?v=1389b656">
-<link rel="modulepreload" href="/assets/toast.js?v=f8247e72">
-<link rel="modulepreload" href="/assets/topic-map.js?v=8f9d5bc9">
-<link rel="modulepreload" href="/assets/track.js?v=8a4c7dcf">
 <!-- /미리받기 -->
 <link rel="stylesheet" href="/assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
-<link rel="stylesheet" href="/assets/toast.css?v=ede5d5ac">
-<script src="/assets/steady.js?v=a2c1cb99"></script>
+<!-- 서비스 종료 안내 (2026-11-03 사용자 확정). ops/·terms.html·privacy.html 을 뺀 모든 페이지가 이 화면 하나다.
+     같은 파일이 그 자리마다 한 벌씩 있다 — 문구를 고치면 전부 같이 고친다. -->
 <style>
-  :root{
-    color-scheme: only light;   /* meta 와 같은 값 — CSS 로도 선언해 확실히 적용한다 */
-    --amber-50:#FFFBEB;--amber-100:#FEF3C7;--amber-200:#FDE68A;--amber-400:#FBBF24;--amber-500:#F59E0B;--amber-600:#D97706;--amber-700:#B45309;
-    --gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;--gray-300:#CBD5E1;--gray-400:#94A3B8;
-    --gray-500:#64748B;--gray-600:#475569;--gray-700:#334155;--gray-800:#1E293B;--gray-900:#0F172A;
-    /* CTA 규칙(2026-08-03) — 제품 공통. 값·근거는 CLAUDE.md "CTA 규칙" */
-    --cta-h:54px; --cta-radius:14px; --cta-fs:15px; --cta-fw:700;
-  }
-  *{margin:0;padding:0;box-sizing:border-box}
-  html{background:#fff}
-  body{font-family:'Pretendard Variable',Pretendard,'Noto Sans CJK KR',-apple-system,sans-serif;
-    background:#fff;color:var(--gray-800);-webkit-font-smoothing:antialiased}
-  /* 화면 채우기용 높이는 svh 로 고정한다 — 근거는 onboarding/3 의 같은 주석. */
-  .board{width:100%;max-width:450px;margin:0 auto;min-height:100vh;min-height:100svh;background:#fff;
-    padding-bottom:calc(100px + env(safe-area-inset-bottom))}
-  @media (min-width:451px){ body{background:var(--gray-100)}
-    .board{box-shadow:0 0 24px rgba(15,23,42,.06),0 0 64px rgba(15,23,42,.10)} }
-
-  .hd{position:sticky;top:0;z-index:20;display:flex;align-items:center;
-    height:calc(48px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 12px 0;
-    background:#fff}
-  .back{width:48px;height:48px;display:flex;align-items:center;justify-content:center;
-    border:0;background:none;padding:0;cursor:pointer;text-decoration:none;position:relative;
-    -webkit-tap-highlight-color:transparent}
-  .back svg{position:relative;z-index:1}
-  .back::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    width:36px;height:36px;border-radius:10px;background:transparent;transition:background .12s}
-  .back:active::before{background:var(--gray-100)}
-
-  .prog{display:flex;gap:5px;padding:22px 24px 0}
-  .prog i{height:3px;border-radius:99px;flex:1;
-    background-image:linear-gradient(90deg,var(--amber-400) 0%,var(--amber-600) 100%);
-    background-size:400% 100%;background-repeat:no-repeat}
-  .prog i:nth-child(1){background-position:0% 0}
-  .prog i:nth-child(2){background-position:33.3% 0}
-  .prog i:nth-child(3){background-position:66.6% 0}
-  .prog i:nth-child(4){background-position:100% 0}
-  [hidden]{display:none!important}
-
-  /* 「✓ 설정 완료」 줄은 없다(2026-10-05 확정) — 1~4단계처럼 진행 바 아래 끝 → 제목 글자 상자 위 끝 44px */
-  .title{padding:44px 24px 0;font-size:24px;line-height:32px;font-weight:700;color:var(--gray-900);letter-spacing:-0.01em}
-
-  /* 고른 값 요약 — 항목 넷(직군·연차·근무지·인사이트 주제). 피그마 2470:2492 「summary」.
-     요약 칸에서 주황은 「바꾸기」뿐이다 — 칩은 흰 바탕 + 회색 테두리. */
-  .sum{padding:10px 24px 0}
-  .it{padding:16px 0;box-shadow:inset 0 -1px 0 var(--gray-100)}
-  .it.last{box-shadow:none}
-  .it .hd2{display:flex;align-items:center;justify-content:space-between}
-  .it .k{display:flex;gap:4px;font-size:13px;line-height:18px;font-weight:600;color:var(--gray-500)}
-  .it .n{font-weight:700;color:var(--gray-400)}
-  .it .chg{font-size:13px;line-height:18px;font-weight:600;color:var(--amber-600);text-decoration:none;
-    padding:8px 0;margin:-8px 0;-webkit-tap-highlight-color:transparent}
-  .it .vals{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-  .it .vals b{padding:6px 10px;background:#fff;border:1px solid var(--gray-200);border-radius:8px;
-    font-size:13px;line-height:18px;font-weight:500;color:var(--gray-700)}
-
-  /* 요일 블록 — K1. 마이페이지 mypage/topics 의 같은 블록과 값이 같다. 요약 끝 → 제목 52px. */
-  .days-title{padding:52px 24px 0;font-size:15px;line-height:21px;font-weight:700;color:var(--gray-900)}
-  .days{margin:12px 24px 24px;background:var(--amber-50);border-radius:16px;padding:6px 16px}
-  .dy{display:flex;gap:12px;padding:12px 0}
-  .dy + .dy{box-shadow:inset 0 1px 0 var(--amber-100)}
-  .dy .wd{flex:none;width:46px;font-size:13px;line-height:20px;font-weight:600;color:var(--amber-700)}
-  .dy .nm{font-size:14px;line-height:20px;font-weight:700;color:var(--gray-900)}
-  .dy .ds{margin-top:2px;font-size:12px;line-height:17px;color:var(--gray-500)}
-
-  /* 오류 안내 — 버튼 바로 위 10px 에 공용 하단 안내 (2026-10-15 「오류 대체 화면」) */
-  #errToast{bottom:calc(84px + env(safe-area-inset-bottom));z-index:30}
-  .fade{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:450px;height:100px;
-    background:linear-gradient(180deg,rgba(255,255,255,0),#fff 55%);pointer-events:none;z-index:9}
-  .cta{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
-    width:calc(100% - 40px);max-width:410px;height:var(--cta-h);
-    display:block;text-align:center;line-height:var(--cta-h);text-decoration:none;
-    background:var(--amber-500);color:#fff;border-radius:var(--cta-radius);
-    font-size:var(--cta-fs);font-weight:var(--cta-fw);
-    box-shadow:0 12px 32px rgba(217,119,6,.28);cursor:pointer;z-index:10;
-    -webkit-tap-highlight-color:transparent}
-  .cta:active{transform:translateX(-50%) scale(.98)}
-
-</style></head><body>
-<div class="board">
-  <div class="hd"><a class="back" href="/onboarding/4/" aria-label="뒤로"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15.75 4.5L8.25 12l7.5 7.5" stroke="#475569" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
-  <div class="prog"><i></i><i></i><i></i><i></i></div>
-  <div class="title">이대로 보내드릴게요</div>
-
-  <div class="sum">
-    <div class="it" id="s-job"><div class="hd2"><div class="k"><span>직군</span><span class="n"></span></div><a class="chg" href="/onboarding/1/?from=done">바꾸기</a></div><div class="vals"></div></div>
-    <div class="it" id="s-year"><div class="hd2"><div class="k"><span>연차</span><span class="n"></span></div><a class="chg" href="/onboarding/2/?from=done">바꾸기</a></div><div class="vals"></div></div>
-    <div class="it" id="s-region"><div class="hd2"><div class="k"><span>근무지</span><span class="n"></span></div><a class="chg" href="/onboarding/3/?from=done">바꾸기</a></div><div class="vals"></div></div>
-    <div class="it" id="s-topic"><div class="hd2"><div class="k"><span>인사이트 주제</span><span class="n"></span></div><a class="chg" href="/onboarding/4/?from=done">바꾸기</a></div><div class="vals"></div></div>
-  </div>
-
-  <div class="days-title">요일별로 이렇게 보내드려요</div>
-  <div class="days">
-    <div class="dy"><div class="wd">월·수·금</div><div><div class="nm" id="mine"></div><div class="ds">내 분야의 중요 트렌드·인사이트</div></div></div>
-    <div class="dy"><div class="wd">화</div><div><div class="nm">일 잘하는 법·커리어</div><div class="ds">모든 직군에 통하는 일과 커리어 이야기</div></div></div>
-    <div class="dy"><div class="wd">목</div><div><div class="nm">채용 공고 브리핑</div><div class="ds">최신 7일 공고와 채용시장 트렌드</div></div></div>
-  </div>
-
+:root{--gray-100:#F1F5F9;--a50:#FFFBEB;--a600:#D97706;--g50:#F8FAFC;--g200:#E2E8F0;--g400:#94A3B8;--g500:#64748B;--g700:#334155;--g800:#1E293B;--g900:#0F172A}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#fff}
+body{font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',system-ui,sans-serif;color:var(--g800);-webkit-font-smoothing:antialiased}
+.page{max-width:450px;margin:0 auto;background:#fff;min-height:100vh;min-height:100svh;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:10px;padding:14px 24px;border-bottom:1px solid var(--gray-100)}
+.appicon{width:29px;height:29px;border-radius:25%;background:#fff;display:flex}
+.wmk{height:21px;width:auto;display:block}
+main{padding:28px 24px 0;flex:1}
+.badge{display:inline-block;font-size:13px;font-weight:600;color:var(--a600);background:var(--a50);padding:5px 10px;border-radius:999px}
+h1{font-size:24px;line-height:34px;font-weight:700;color:var(--g900);margin:14px 0 12px;letter-spacing:-.02em}
+.lead{font-size:15px;line-height:24px;color:var(--g700)}
+.card{margin-top:20px;border:1px solid var(--g200);border-radius:14px;padding:18px}
+.card h2{font-size:15px;font-weight:700;color:var(--g900);margin-bottom:10px}
+.card ul{list-style:none}
+.card li{font-size:14px;line-height:22px;color:var(--g700);padding-left:12px;position:relative;margin-top:6px}
+.card li::before{content:'';position:absolute;left:0;top:10px;width:4px;height:4px;border-radius:2px;background:var(--g400)}
+.card li.sub{font-size:13px;color:var(--g500)}
+.cta{display:flex;align-items:center;justify-content:center;height:54px;border-radius:14px;background:var(--g900);color:#fff;font-size:15px;font-weight:700;text-decoration:none;margin-top:24px}
+.tel{display:block;text-align:center;font-size:13px;color:var(--g500);margin-top:10px}
+footer{margin-top:36px;background:var(--g50);padding:24px 24px 40px}
+footer .biz{display:flex;flex-direction:column;gap:8px;color:var(--g500);font-size:13px;line-height:18px}
+footer .biz .co{font-weight:600}
+footer .links a{color:var(--g500);text-decoration:none}
+footer .links a[href$="privacy.html"]{font-weight:600}
+/* ===== 넓은 화면 카드 어포던스 (CLAUDE.md · 랜딩 기준값 그대로) ===== */
+@media (min-width:451px){
+  body{background:var(--gray-100)}
+  .page{box-shadow:0 0 24px rgba(15,23,42,.06), 0 0 64px rgba(15,23,42,.10)}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs><path id="ccmark" d="M12.464 4.662L12.439 4.702L12.421 4.757L12.420 4.814L12.436 4.869L12.467 4.917L12.556 5.006L12.596 5.033L12.642 5.050L12.687 5.055L14.813 5.055L14.850 5.066L14.886 5.099L14.900 5.134L14.900 5.173L14.891 5.200L14.872 5.225L12.747 7.350L12.655 7.433L12.581 7.486L12.504 7.532L12.422 7.570L12.336 7.600L12.262 7.618L12.173 7.632L12.057 7.639L9.982 7.639L9.884 7.644L9.794 7.658L9.707 7.680L9.631 7.707L9.549 7.746L9.463 7.797L9.398 7.845L9.330 7.906L9.263 7.980L9.209 8.053L9.163 8.131L9.125 8.213L9.098 8.289L9.073 8.387L9.060 8.476L9.056 8.564L9.056 10.184L9.051 10.293L9.038 10.383L9.013 10.484L8.987 10.556L8.949 10.638L8.904 10.716L8.850 10.789L8.790 10.856L8.723 10.918L8.651 10.972L8.574 11.019L8.493 11.058L8.408 11.090L8.320 11.112L8.216 11.128L8.107 11.133L6.553 11.133L6.456 11.138L6.366 11.152L6.279 11.174L6.202 11.202L6.120 11.240L6.034 11.291L5.962 11.346L5.895 11.407L5.841 11.467L5.787 11.539L5.740 11.617L5.700 11.698L5.667 11.793L5.647 11.871L5.633 11.961L5.628 12.058L5.628 13.612L5.623 13.721L5.608 13.825L5.589 13.899L5.559 13.984L5.521 14.066L5.475 14.144L5.413 14.228L5.352 14.295L5.284 14.355L5.211 14.408L5.146 14.447L5.051 14.492L4.966 14.522L4.892 14.540L4.788 14.556L4.679 14.561L3.125 14.561L3.037 14.565L2.948 14.578L2.850 14.602L2.765 14.633L2.684 14.672L2.614 14.714L2.541 14.768L2.467 14.835L2.413 14.895L2.358 14.967L2.307 15.053L2.269 15.135L2.239 15.221L2.219 15.299L2.205 15.389L2.200 15.486L2.200 17.069L2.205 17.161L2.219 17.251L2.241 17.339L2.272 17.424L2.307 17.497L2.353 17.575L2.413 17.655L2.474 17.722L2.541 17.783L2.606 17.831L2.684 17.878L2.765 17.917L2.850 17.948L2.948 17.972L3.037 17.985L3.125 17.989L12.614 17.989L12.711 17.984L12.801 17.970L12.889 17.948L12.974 17.917L13.047 17.882L13.125 17.836L13.205 17.776L13.272 17.715L13.332 17.648L13.386 17.575L13.432 17.497L13.467 17.424L13.498 17.339L13.522 17.241L13.535 17.152L13.539 17.069L13.539 10.658L13.544 10.549L13.557 10.459L13.578 10.372L13.608 10.286L13.646 10.204L13.700 10.114L13.754 10.042L13.828 9.961L16.586 7.203L16.611 7.184L16.657 7.172L16.704 7.184L16.740 7.216L16.756 7.261L16.756 9.058L16.759 9.094L16.778 9.149L16.816 9.202L16.906 9.287L16.940 9.307L16.977 9.319L17.025 9.323L17.073 9.316L17.117 9.298L17.158 9.267L18.740 7.685L18.764 7.658L18.790 7.606L18.800 7.541L18.800 3.211L18.795 3.165L18.769 3.103L18.724 3.053L18.664 3.021L18.605 3.011L14.140 3.011L14.093 3.016L14.038 3.038L13.993 3.073Z" fill="#F59E0B"/></defs></svg>
+<div class="page">
+  <div class="top"><span class="appicon"><svg width="29" height="29" viewBox="0 0 21 21" aria-hidden="true"><use href="#ccmark"/></svg></span><svg class="wmk" role="img" aria-label="커리어코치" viewBox="0 0 152.11 33.00" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M37.87 15.81L37.91 15.72L37.96 15.66L38.02 15.62L38.12 15.60L47.34 15.60L47.57 15.55L47.79 15.47L47.98 15.34L48.16 15.16L48.29 14.96L48.37 14.76L48.41 14.63L48.43 14.40L48.43 4.02L48.40 3.77L48.34 3.56L48.29 3.45L48.15 3.25L47.98 3.08L47.79 2.95L47.58 2.87L47.46 2.84L47.23 2.81L34.06 2.81L33.82 2.84L33.61 2.90L33.50 2.95L33.29 3.09L33.14 3.25L33.07 3.34L33.00 3.45L32.91 3.66L32.87 3.90L32.86 5.48L32.88 5.72L32.95 5.95L33.06 6.15L33.14 6.25L33.29 6.41L33.40 6.49L33.60 6.59L33.71 6.63L33.83 6.67L34.06 6.69L43.25 6.69L43.32 6.70L43.40 6.74L43.47 6.82L43.50 6.94L43.50 11.52L43.48 11.61L43.42 11.69L43.34 11.75L43.25 11.77L34.02 11.77L33.78 11.82L33.56 11.91L33.37 12.04L33.20 12.21L33.07 12.41L32.99 12.61L32.96 12.74L32.93 12.97L32.93 24.16L32.96 24.39L32.99 24.52L33.07 24.72L33.14 24.83L33.29 25.01L33.46 25.16L33.57 25.22L33.78 25.31L34.01 25.36L37.33 25.36L40.16 25.32L42.86 25.23L44.20 25.15L45.50 25.06L46.78 24.95L48.07 24.81L49.38 24.64L50.72 24.44L50.84 24.40L51.05 24.31L51.23 24.17L51.38 24.02L51.45 23.91L51.55 23.72L51.62 23.50L51.64 23.38L51.64 21.70L51.62 21.46L51.55 21.24L51.49 21.12L51.42 21.01L51.28 20.84L51.18 20.75L50.98 20.63L50.86 20.58L50.64 20.52L50.51 20.50L50.27 20.51L48.14 20.80L47.02 20.93L45.92 21.03L43.71 21.20L42.57 21.26L40.27 21.34L38.12 21.38L38.05 21.37L37.98 21.33L37.90 21.24L37.87 21.13ZM9.23 15.24L9.32 15.27L9.40 15.34L9.44 15.42L9.45 15.52L9.42 15.62L9.15 16.09L8.60 16.94L8.00 17.76L7.33 18.56L6.60 19.35L5.81 20.11L4.98 20.83L4.05 21.57L3.03 22.29L1.98 22.97L0.70 23.74L0.51 23.90L0.36 24.09L0.26 24.30L0.22 24.41L0.18 24.66L0.17 24.78L0.20 25.00L0.28 25.24L0.40 25.44L1.64 27.15L1.80 27.33L1.98 27.47L2.18 27.57L2.30 27.61L2.54 27.65L2.76 27.64L2.88 27.62L3.11 27.54L5.08 26.40L7.48 24.70L9.46 23.00L11.20 21.14L12.74 19.08L13.93 17.04L14.86 14.92L15.57 12.72L16.09 10.45L16.42 8.17L16.61 5.72L16.64 4.41L16.63 4.18L16.56 3.95L16.45 3.73L16.31 3.55L16.12 3.39L15.91 3.28L15.79 3.23L15.56 3.19L2.78 3.18L2.65 3.19L2.44 3.23L2.21 3.32L2.11 3.39L1.93 3.53L1.85 3.62L1.72 3.81L1.63 4.04L1.58 4.26L1.58 4.38L1.58 5.82L1.58 5.94L1.63 6.16L1.72 6.38L1.85 6.57L2.01 6.74L2.21 6.87L2.44 6.97L2.65 7.01L2.78 7.02L11.62 7.02L11.71 7.06L11.76 7.11L11.81 7.19L11.82 7.27L11.72 8.15L11.62 8.88L11.43 9.96L11.16 11.15L11.13 11.22L11.09 11.27L10.98 11.33L1.14 11.88L0.90 11.92L0.78 11.95L0.58 12.05L0.39 12.19L0.24 12.36L0.17 12.45L0.07 12.68L0.01 12.89L0.00 13.01L0.01 13.25L0.25 14.89L0.30 15.11L0.41 15.33L0.56 15.53L0.73 15.69L0.83 15.75L0.95 15.81L1.17 15.88L1.42 15.91ZM53.70 31.91L53.74 32.14L53.83 32.36L53.96 32.56L54.05 32.65L54.23 32.80L54.44 32.91L54.66 32.98L54.89 33.00L57.39 33.00L57.51 32.99L57.73 32.95L57.85 32.91L58.05 32.80L58.15 32.72L58.31 32.57L58.39 32.46L58.49 32.26L58.54 32.14L58.58 31.92L58.59 1.20L58.57 0.97L58.50 0.75L58.39 0.54L58.31 0.43L58.14 0.27L57.95 0.14L57.74 0.05L57.51 0.01L54.89 0.00L54.77 0.01L54.55 0.05L54.43 0.09L54.23 0.20L54.13 0.28L53.97 0.43L53.89 0.54L53.79 0.74L53.74 0.86L53.70 1.08ZM72.36 2.33L71.37 2.27L70.28 2.35L70.09 2.38L69.15 2.61L68.96 2.68L67.99 3.09L67.08 3.67L66.92 3.78L66.16 4.45L66.03 4.57L65.34 5.39L65.24 5.52L64.55 6.61L63.96 7.84L63.49 9.22L63.17 10.60L62.95 12.23L62.87 13.99L62.94 15.74L63.15 17.38L63.49 18.89L63.96 20.27L64.55 21.52L65.24 22.61L65.34 22.74L66.03 23.56L66.16 23.68L67.00 24.42L67.90 24.99L68.07 25.09L69.05 25.50L70.09 25.76L70.28 25.79L71.29 25.87L71.47 25.87L72.49 25.79L73.54 25.56L74.45 25.20L74.62 25.12L75.39 24.68L75.53 24.59L76.26 24.02L76.39 23.90L77.06 23.20L77.84 22.15L78.44 21.08L78.94 19.89L79.34 18.59L79.62 17.28L79.80 15.91L79.84 15.82L79.89 15.77L79.97 15.72L80.04 15.71L84.91 15.71L85.00 15.73L85.06 15.77L85.11 15.83L85.15 15.89L85.16 15.96L85.16 31.80L85.16 31.92L85.21 32.14L85.25 32.26L85.36 32.46L85.43 32.57L85.59 32.72L85.80 32.86L86.00 32.95L86.13 32.98L86.36 33.00L88.78 33.00L88.90 32.99L89.12 32.95L89.35 32.86L89.54 32.73L89.63 32.64L89.71 32.56L89.84 32.37L89.93 32.14L89.97 31.92L89.98 31.80L89.98 1.20L89.97 1.08L89.93 0.86L89.84 0.63L89.70 0.43L89.55 0.28L89.45 0.21L89.24 0.09L89.01 0.02L88.78 0.00L86.36 0.00L86.23 0.01L86.01 0.05L85.89 0.09L85.69 0.20L85.59 0.28L85.43 0.43L85.36 0.54L85.25 0.74L85.18 0.96L85.16 1.20L85.16 11.55L85.14 11.65L85.10 11.71L85.02 11.77L84.93 11.80L80.00 11.80L79.92 11.79L79.86 11.76L79.80 11.71L79.76 11.62L79.54 10.33L79.24 9.11L78.77 7.78L78.24 6.66L77.69 5.77L77.01 4.89L76.26 4.13L76.13 4.02L75.42 3.48L74.52 2.97L74.36 2.90L73.56 2.60L73.39 2.55L72.54 2.36ZM71.36 6.73L71.99 6.79L72.50 6.94L73.00 7.20L73.46 7.56L73.84 8.00L74.24 8.61L74.55 9.27L74.79 9.98L75.01 10.89L75.17 11.85L75.26 12.86L75.29 14.02L75.26 15.22L75.17 16.25L75.01 17.22L74.79 18.15L74.55 18.87L74.24 19.54L73.84 20.16L73.46 20.60L73.00 20.97L72.46 21.25L71.94 21.40L71.39 21.45L70.83 21.40L70.33 21.25L69.79 20.97L69.34 20.60L68.96 20.16L68.57 19.54L68.25 18.87L68.01 18.15L67.78 17.22L67.63 16.25L67.54 15.22L67.51 14.05L67.54 12.86L67.63 11.85L67.78 10.89L68.01 9.98L68.25 9.27L68.57 8.61L68.96 8.00L69.34 7.56L69.79 7.20L70.33 6.92L70.83 6.78ZM16.96 15.10L16.94 15.34L16.96 15.58L17.02 15.79L17.13 16.00L17.28 16.19L17.46 16.34L17.67 16.46L17.79 16.50L18.01 16.55L18.14 16.55L22.34 16.55L22.41 16.57L22.48 16.60L22.56 16.69L22.59 16.80L22.59 31.76L22.60 31.89L22.64 32.11L22.69 32.23L22.79 32.42L22.87 32.53L23.03 32.69L23.13 32.76L23.33 32.87L23.56 32.94L23.79 32.96L26.29 32.96L26.41 32.96L26.63 32.91L26.86 32.82L26.96 32.76L27.13 32.62L27.22 32.52L27.34 32.33L27.44 32.11L27.48 31.89L27.49 31.76L27.49 1.28L27.46 1.03L27.43 0.92L27.35 0.71L27.21 0.51L27.13 0.42L26.96 0.28L26.85 0.21L26.64 0.13L26.40 0.08L23.68 0.08L23.44 0.13L23.22 0.22L23.04 0.34L22.95 0.42L22.80 0.60L22.73 0.71L22.65 0.92L22.61 1.05L22.59 1.28L22.59 12.36L22.57 12.45L22.53 12.52L22.48 12.57L22.37 12.61L18.64 12.61L18.41 12.63L18.29 12.66L18.09 12.74L17.90 12.87L17.80 12.95L17.65 13.13L17.55 13.32Z" fill="#423429"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M98.01 2.75L97.78 2.79L97.56 2.88L97.45 2.95L97.27 3.10L97.12 3.28L97.02 3.48L96.95 3.70L96.93 3.83L96.92 5.41L96.93 5.54L96.97 5.76L97.06 5.97L97.20 6.18L97.37 6.35L97.55 6.47L97.66 6.52L97.88 6.59L98.13 6.61L115.47 6.62L115.54 6.64L115.61 6.71L115.65 6.77L115.67 6.87L115.64 8.56L115.57 10.46L115.54 10.56L115.49 10.61L115.40 10.66L115.33 10.68L97.28 11.22L97.04 11.25L96.82 11.32L96.71 11.38L96.52 11.51L96.43 11.60L96.29 11.78L96.19 11.99L96.15 12.12L96.12 12.34L96.13 12.59L96.39 14.41L96.43 14.53L96.53 14.75L96.66 14.93L96.75 15.02L96.94 15.16L97.16 15.26L97.39 15.32L97.62 15.33L114.97 14.41L115.05 14.42L115.11 14.45L115.18 14.51L115.23 14.60L115.23 14.69L114.93 16.93L114.76 18.02L114.45 19.75L114.45 19.98L114.50 20.20L114.54 20.32L114.65 20.51L114.79 20.69L114.97 20.84L115.18 20.95L115.40 21.02L117.91 21.30L118.15 21.30L118.37 21.26L118.48 21.22L118.70 21.10L118.80 21.03L118.96 20.88L119.10 20.67L119.18 20.46L119.21 20.35L119.35 19.65L119.64 18.00L119.88 16.47L120.07 15.00L120.21 13.61L120.32 12.27L120.40 11.02L120.48 8.73L120.49 6.60L120.49 3.94L120.47 3.70L120.40 3.48L120.29 3.27L120.22 3.18L120.06 3.02L119.87 2.89L119.75 2.83L119.52 2.76L119.29 2.74ZM126.92 26.14L127.01 26.23L127.19 26.37L127.31 26.44L127.52 26.52L127.65 26.55L127.87 26.57L128.11 26.54L128.24 26.50L128.45 26.40L129.28 25.91L130.10 25.34L130.87 24.71L131.59 24.03L132.21 23.35L132.84 22.57L133.42 21.74L133.95 20.87L134.43 19.96L134.87 19.02L135.05 18.57L135.13 18.47L135.24 18.43L135.31 18.43L135.38 18.46L135.44 18.50L135.49 18.56L135.66 18.97L136.10 19.85L136.55 20.65L137.08 21.46L137.70 22.30L138.32 23.03L138.94 23.67L139.65 24.30L140.41 24.90L141.22 25.43L142.01 25.88L142.22 25.97L142.35 26.01L142.57 26.03L142.70 26.03L142.92 25.99L143.04 25.95L143.24 25.85L143.35 25.77L143.51 25.62L143.59 25.52L144.80 23.77L144.93 23.55L145.00 23.33L145.01 23.21L145.02 23.07L145.00 22.84L144.92 22.60L144.81 22.40L144.73 22.29L144.65 22.21L144.47 22.07L144.27 21.95L143.10 21.20L142.03 20.33L141.13 19.43L140.31 18.42L139.56 17.27L138.96 16.14L138.48 14.98L138.12 13.83L137.84 12.58L137.69 11.43L137.64 10.25L137.64 9.41L137.66 9.34L137.71 9.28L137.77 9.24L137.84 9.21L143.09 9.21L143.21 9.20L143.43 9.16L143.55 9.12L143.75 9.01L143.93 8.86L144.08 8.68L144.19 8.47L144.26 8.24L144.29 8.01L144.29 6.58L144.26 6.34L144.23 6.22L144.15 6.01L144.08 5.90L143.94 5.73L143.85 5.65L143.75 5.57L143.55 5.47L143.43 5.42L143.21 5.38L137.88 5.37L137.81 5.36L137.75 5.33L137.66 5.24L137.63 5.12L137.63 2.01L137.61 1.78L137.54 1.54L137.44 1.34L137.37 1.25L137.19 1.07L137.01 0.95L136.89 0.89L136.66 0.83L136.44 0.80L133.83 0.81L133.70 0.83L133.47 0.90L133.27 1.01L133.08 1.16L132.94 1.33L132.88 1.44L132.79 1.65L132.74 1.88L132.74 5.12L132.71 5.24L132.66 5.30L132.61 5.34L132.49 5.37L127.09 5.38L126.87 5.42L126.76 5.46L126.64 5.52L126.46 5.64L126.28 5.82L126.16 6.00L126.10 6.12L126.04 6.34L126.01 6.57L126.01 8.01L126.04 8.24L126.11 8.47L126.16 8.58L126.28 8.77L126.45 8.93L126.65 9.07L126.86 9.16L126.97 9.18L127.22 9.21L132.51 9.21L132.61 9.24L132.68 9.30L132.72 9.36L132.74 9.46L132.74 10.24L132.68 11.50L132.53 12.75L132.27 13.97L131.89 15.26L131.42 16.47L130.85 17.60L130.11 18.79L129.30 19.84L128.42 20.78L127.32 21.72L126.21 22.47L125.88 22.68L125.72 22.84L125.64 22.93L125.58 23.04L125.49 23.25L125.44 23.49L125.44 23.72L125.49 23.96L125.58 24.18ZM147.25 31.84L147.27 31.97L147.34 32.19L147.45 32.40L147.60 32.58L147.78 32.73L147.99 32.84L148.22 32.90L148.45 32.93L150.90 32.93L151.03 32.92L151.25 32.88L151.37 32.83L151.57 32.73L151.67 32.65L151.83 32.49L151.91 32.39L152.01 32.19L152.06 32.07L152.10 31.85L152.11 1.23L152.08 1.01L152.02 0.78L151.91 0.58L151.83 0.47L151.66 0.31L151.47 0.18L151.26 0.09L151.03 0.04L148.45 0.04L148.32 0.04L148.10 0.09L147.98 0.13L147.78 0.24L147.68 0.31L147.52 0.47L147.45 0.58L147.34 0.77L147.30 0.89L147.25 1.11ZM94.69 25.29L94.46 25.34L94.24 25.43L94.13 25.49L93.95 25.65L93.80 25.83L93.69 26.04L93.62 26.26L93.60 26.49L93.60 28.00L93.62 28.23L93.69 28.45L93.74 28.57L93.87 28.76L94.04 28.93L94.14 29.00L94.33 29.11L94.46 29.15L94.67 29.19L122.11 29.20L122.34 29.18L122.56 29.11L122.68 29.05L122.87 28.92L123.04 28.76L123.16 28.57L123.26 28.35L123.30 28.12L123.31 26.49L123.29 26.26L123.26 26.13L123.17 25.93L123.10 25.82L123.03 25.72L122.87 25.57L122.67 25.43L122.46 25.34L122.35 25.31L122.11 25.29L109.16 25.29L109.09 25.28L109.02 25.25L108.94 25.16L108.91 25.04L108.91 18.67L108.89 18.44L108.86 18.31L108.77 18.10L108.64 17.91L108.55 17.82L108.38 17.67L108.27 17.61L108.06 17.52L107.83 17.48L105.25 17.47L105.02 17.49L104.79 17.56L104.58 17.67L104.48 17.74L104.33 17.90L104.19 18.11L104.14 18.21L104.07 18.43L104.05 18.67L104.05 25.04L104.04 25.11L104.01 25.18L103.92 25.26L103.80 25.29Z" fill="#F59E0B"/>
+</svg></div>
+  <main>
+    <span class="badge">서비스 종료 안내</span>
+    <h1>커리어코치 서비스가<br>종료되었어요</h1>
+    <p class="lead">2026년 11월 3일을 끝으로 서비스를 마쳤어요.<br>그동안 이용해 주셔서 진심으로 감사합니다.</p>
+    <section class="card">
+      <h2>💳 환불 안내</h2>
+      <ul>
+        <li>유료 구독자 모두에게 결제 금액 전액을 환불했어요.</li>
+        <li>결제하신 수단으로 자동 환불돼 따로 신청하지 않으셔도 돼요.</li>
+        <li class="sub">카드사에 따라 실제 반영까지 영업일 3~7일이 걸릴 수 있어요.</li>
+      </ul>
+    </section>
+    <section class="card">
+      <h2>📌 함께 안내드려요</h2>
+      <ul>
+        <li>새 가입과 결제는 더 이상 받지 않아요.</li>
+        <li>알림톡 발송과 정기결제는 모두 멈췄어요. 따로 해지하지 않으셔도 돼요.</li>
+        <li>회원 정보는 지체 없이 파기되며, 법령상 보관이 필요한 결제 기록만 정해진 기간 동안 보관돼요.</li>
+      </ul>
+    </section>
+    <a class="cta" href="mailto:careercoach.my@gmail.com">이메일로 문의하기</a>
+    <span class="tel">careercoach.my@gmail.com · 070-8018-9238</span>
+  </main>
+  <footer>
+    <div class="biz">
+      <div class="co">주식회사 오늘의논문</div>
+      <!-- 전자상거래법 제10조 신원정보 -->
+      <div>대표 : 이채빈<br>사업자등록번호 : 450-86-03846<br>통신판매업신고 : 2026-서울서대문-0831<br>주소 : 서울특별시 서대문구 이화여대7길 37, 3층 J15호<br>문의 : careercoach.my@gmail.com<br>전화번호 : 070-8018-9238</div>
+      <div class="links"><a href="/terms.html">이용약관</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="/privacy.html">개인정보처리방침</a></div>
+    </div>
+  </footer>
 </div>
-<div class="fade"></div>
-<a class="cta" href="/checkout/">완료</a>
-<p class="cc-toast float" id="errToast" role="alert" hidden></p>
-
-<!--roles:jobmap--><script id="cc-topic-map" type="application/json">{"tracks":["개발","UI·UX 디자인","디자인","마케팅·그로스","프로덕트·전략","세일즈·GTM","제조·R&D","재무·회계","조직·피플","커머스·리테일","물류·공급망","법률·규제","금융·마켓","미디어·콘텐츠","고객경험·CX","의료·헬스케어","건설","공간","게임"],"common":["일 잘하는 법 · 커리어(공통)"],"groups":[["마케팅_광고_홍보",3],["IT_개발",0],["AI_데이터",0],["디자인",2],["기획_전략_경영",4],["영업",5],["상품기획_MD",9],["게임",18],["미디어_엔터_방송",13],["인사_노무_HRD_총무",8],["회계_세무_재무",7],["엔지니어링_연구_RND",6],["무역_물류_유통",10],["법률_법무_컴플라이언스",11],["고객상담_TM",14],["생산_기능",6],["건설_건축",16],["교육",-1],["의료_보건",15],["서비스",-1],["식음료",-1],["은행_보험_카드_캐피탈",12],["증권_운용",12],["운송_배송",10],["공공_복지",-1]],"jobs":{"마케팅기획_전략":["마케팅기획·전략",0,-1],"퍼포먼스마케팅":["퍼포먼스마케팅",0,-1],"콘텐츠마케팅":["콘텐츠마케팅",0,-1],"SNS마케팅":["SNS마케팅",0,-1],"브랜드마케팅":["브랜드마케팅",0,-1],"CRM마케팅":["CRM마케팅",0,-1],"글로벌마케팅":["글로벌마케팅",0,-1],"광고기획_AE":["광고기획·AE",0,-1],"홍보_PR":["홍보·PR",0,-1],"전시_행사마케팅":["전시·행사마케팅",0,-1],"기타마케팅":["기타",0,-1],"서버_백엔드":["서버·백엔드",1,-1],"프론트엔드":["프론트엔드",1,-1],"웹풀스택":["웹풀스택",1,-1],"안드로이드":["안드로이드",1,-1],"iOS":["iOS",1,-1],"크로스플랫폼":["크로스플랫폼",1,-1],"DBA":["DBA",1,-1],"DevOps_SRE":["DevOps·SRE",1,-1],"시스템_네트워크":["시스템·네트워크",1,-1],"시스템소프트웨어":["시스템SW",1,-1],"소프트웨어엔지니어":["소프트웨어",1,-1],"정보보호_보안":["정보보호·보안",1,-1],"임베디드소프트웨어":["임베디드SW",1,-1],"로봇SW":["로봇SW",1,-1],"QA_테스트":["QA·테스트",1,-1],"사물인터넷_IoT":["IoT",1,-1],"응용프로그램":["응용프로그램",1,-1],"블록체인":["블록체인",1,-1],"개발PM":["개발PM",1,-1],"웹퍼블리싱":["웹퍼블리싱",1,-1],"VR_AR_3D":["VR·AR·3D",1,-1],"ERP_SAP":["ERP·SAP",1,-1],"그래픽스":["그래픽스",1,-1],"하드웨어엔지니어":["하드웨어",1,-1],"기타IT_개발":["기타",1,-1],"데이터분석가":["데이터분석",2,-1],"데이터사이언티스트":["데이터사이언스",2,-1],"데이터엔지니어":["데이터엔지니어",2,-1],"머신러닝엔지니어":["머신러닝",2,-1],"멀티모달엔지니어":["멀티모달",2,-1],"생성형AI":["생성형AI",2,-1],"영상_음성AI":["영상·음성AI",2,-1],"자율주행":["자율주행",2,-1],"컴퓨터비전":["컴퓨터비전",2,-1],"AI비즈니스":["AI비즈니스",2,-1],"AI서비스기획":["AI서비스기획",2,-1],"AI리서치":["AI리서치",2,-1],"NLP":["NLP",2,-1],"LLM":["LLM",2,-1],"MLOps":["MLOps",2,-1],"RAG":["RAG",2,-1],"기타AI_데이터":["기타",2,-1],"웹디자인":["웹디자인",3,1],"UXUI_프로덕트":["UX·UI·프로덕트",3,1],"디자인리서치":["디자인리서치",3,1],"그래픽_시각":["그래픽·시각",3,-1],"일러스트레이터":["일러스트",3,-1],"브랜딩_BI_BX":["브랜딩·BI·BX",3,-1],"공간_실내_VMD":["공간·실내·VMD",3,17],"산업_제품":["산업·제품",3,-1],"패키지":["패키지",3,-1],"광고_콘텐츠":["광고·콘텐츠",3,-1],"영상_모션":["영상·모션",3,-1],"3D_VFX":["3D·VFX",3,-1],"출판_편집":["출판·편집",3,-1],"건축_공공_조경디자인":["건축·공공·조경",3,-1],"패션_텍스타일":["패션·텍스타일",3,-1],"기타디자인":["기타",3,-1],"PM_PO":["PM·PO",4,-1],"서비스_상품기획":["서비스·상품기획",4,-1],"사업_전략기획":["사업·전략기획",4,-1],"컨설팅":["컨설팅",4,-1],"기술기획":["기술기획",4,-1],"사업개발_분석":["사업개발·분석",4,-1],"프로젝트매니저":["프로젝트매니저",4,-1],"운영관리_OM":["운영관리·OM",4,-1],"경영지원":["경영지원",4,-1],"기타기획_전략_경영":["기타",4,-1],"B2C영업":["B2C영업",5,-1],"B2B영업":["B2B영업",5,-1],"일반영업":["일반영업",5,-1],"영업관리_지원":["영업관리",5,-1],"기술_IT영업":["기술·IT영업",5,-1],"금융_보험영업":["금융·보험영업",5,-1],"해외영업":["해외영업",5,-1],"제약_의료영업":["제약·의료영업",5,-1],"기타영업":["기타",5,-1],"상품기획":["상품기획",6,-1],"온라인MD":["온라인MD",6,-1],"식품MD":["식품MD",6,-1],"패션MD":["패션MD",6,-1],"뷰티MD":["뷰티MD",6,-1],"영업MD":["영업MD",6,-1],"리테일MD":["리테일MD",6,-1],"기타상품기획_MD":["기타",6,-1],"게임기획_PM":["게임기획·PM",7,-1],"게임운영":["게임운영",7,-1],"게임QA":["게임QA",7,-1],"게임개발_클라이언트":["게임개발·클라이언트",7,-1],"게임개발_서버":["게임개발·서버",7,-1],"게임개발_모바일":["게임개발·모바일",7,-1],"테크니컬아티스트":["테크니컬아티스트",7,-1],"게임아트":["게임아트",7,-1],"게임3D모델링":["게임3D모델링",7,-1],"게임애니메이션":["게임애니메이션",7,-1],"게임이펙트_FX":["게임이펙트·FX",7,-1],"게임인터페이스":["게임인터페이스",7,-1],"게임연출_영상":["게임연출·영상",7,-1],"게임사운드":["게임사운드",7,-1],"기타게임":["기타",7,-1],"PD_감독":["PD·감독",8,-1],"콘텐츠기획_에디터":["콘텐츠기획·에디터",8,-1],"방송작가":["방송작가",8,-1],"촬영감독_카메라":["촬영감독·카메라",8,-1],"영상편집":["영상편집",8,-1],"CG_모션그래픽":["CG·모션그래픽",8,-1],"사운드디자이너":["사운드디자이너",8,-1],"기자_리포터":["기자·리포터",8,-1],"아나운서_쇼호스트":["아나운서·쇼호스트",8,-1],"성우_나래이터":["성우·나래이터",8,-1],"크리에이터_인플루언서":["크리에이터",8,-1],"모델_연기자":["모델·연기자",8,-1],"사진작가":["사진작가",8,-1],"방송기술_중계":["방송기술·중계",8,-1],"송출_편성":["송출·편성",8,-1],"아티스트매니지먼트":["아티스트매니지먼트",8,-1],"배급_제작사":["배급·제작사",8,-1],"음원_음반":["음원·음반",8,-1],"웹툰_웹소설":["웹툰·웹소설",8,-1],"출판":["출판",8,-1],"통_번역":["통역·번역",8,-1],"전시기획_큐레이터":["전시기획",8,-1],"기타미디어_엔터":["기타",8,-1],"인사기획":["인사기획",9,-1],"평가_보상":["평가·보상",9,-1],"HRD_조직문화":["HRD·조직문화",9,-1],"리크루터_헤드헌터":["리크루터",9,-1],"노무관리":["노무관리",9,-1],"총무_비서":["총무·비서",9,-1],"기타HR_총무":["기타",9,-1],"재무":["재무",10,-1],"회계":["회계",10,-1],"세무":["세무",10,-1],"IR_공시":["IR·공시",10,-1],"경리_회계보조":["경리·회계",10,-1],"기타회계_재무_세무":["기타",10,-1],"반도체_디스플레이":["반도체·디스플레이",11,-1],"전기_전자_제어":["전기·전자·제어",11,-1],"통신기술_네트워크구축":["통신기술·네트워크",11,-1],"기계":["기계",11,-1],"기계설계_CAD":["기계설계·CAD",11,-1],"자동차":["자동차",11,-1],"조선_항공_우주":["조선·항공·우주",11,-1],"금속_철강":["금속·철강",11,-1],"화학":["화학",11,-1],"화장품":["화장품",11,-1],"바이오_제약":["바이오·제약",11,-1],"식품":["식품",11,-1],"에너지":["에너지",11,-1],"환경":["환경",11,-1],"기타엔지니어링_RND":["기타",11,-1],"해외_상사영업":["상사영업",12,-1],"수출입관리_사무":["수출입관리",12,-1],"관세사":["관세사",12,-1],"무역금융":["무역금융",12,-1],"포워딩":["포워딩",12,-1],"구매_조달":["구매·조달",12,-1],"물류_SCM":["물류·SCM",12,-1],"입출고_포장":["입출고·포장",12,-1],"자재_재고관리":["자재·재고",12,-1],"운송":["운송",12,-1],"유통관리":["유통관리",12,-1],"설비_시설관리":["설비·시설",12,-1],"기타무역_물류_유통":["기타",12,-1],"변호사":["변호사",13,-1],"변리사":["변리사",13,-1],"법무":["법무",13,-1],"컴플라이언스":["컴플라이언스",13,-1],"내부감사":["내부감사",13,-1],"ESG_윤리":["ESG·윤리",13,-1],"특허_IP":["특허·IP",13,-1],"기타법률":["기타",13,-1],"인바운드":["인바운드",14,-1],"아웃바운드":["아웃바운드",14,-1],"CS":["CS",14,-1],"CX매니저":["CX매니저",14,-1],"기타고객상담":["기타",14,-1],"생산":["생산",15,-1],"공무":["공무",15,-1],"설비":["설비",15,-1],"환경안전":["환경안전",15,-1],"물류":["물류",15,-1],"품질":["품질",15,-1],"건설_공사_프로젝트":["건설·공사",15,-1],"설계_CAD_CAM":["CAD·CAM",15,-1],"시설관리":["시설관리",15,-1],"기타생산_기능직":["기타",15,-1],"건축설계_시공":["건축설계·시공",16,-1],"토목_측량_조경_환경":["토목·측량·조경",16,-1],"기계_전기_소방_설비":["기계·전기·소방",16,-1],"설계_감리_시공_공무":["설계·감리·시공",16,-1],"안전_품질_재료":["안전·품질·재료",16,-1],"사무_관리_전산":["사무·관리",16,-1],"건설특수_일용직":["건설특수",16,-1],"기타건설_건축":["기타",16,-1],"유치원_보육교사":["유치원·보육",17,-1],"기간제_사립교사":["기간제·사립",17,-1],"방과후_시간교사":["방과후·시간",17,-1],"대학교수_강사":["대학교수",17,-1],"교직원_조교":["교직원·조교",17,-1],"입시학원강사":["입시학원강사",17,-1],"국어_외국어강사":["어학강사",17,-1],"기술_전문강사":["전문강사",17,-1],"학습지_방문교사":["학습지·방문",17,-1],"학원상담_운영":["학원상담·운영",17,-1],"교재개발_교수설계":["교재개발",17,-1],"기타교육":["기타",17,-1],"의사":["의사",18,-1],"한의사":["한의사",18,-1],"수의사":["수의사",18,-1],"약사_약무보조":["약사",18,-1],"간호사":["간호사",18,-1],"간호조무사":["간호조무사",18,-1],"치위생사":["치위생사",18,-1],"응급구조사":["응급구조사",18,-1],"물리치료_작업치료":["물리·작업치료",18,-1],"영상의학_임상병리_검사":["영상의학·임상병리",18,-1],"영양사_임상영양사":["영양사",18,-1],"의료미용_에스테틱":["의료미용",18,-1],"병원행정_접수_수납":["병원행정",18,-1],"요양보호사":["요양보호사",18,-1],"조리원":["조리원",18,-1],"안경_검안사":["검안사",18,-1],"기타의료_보건":["기타",18,-1],"설치_수리기사":["설치·수리",19,-1],"주차_주유":["주차·주유",19,-1],"가사도우미":["가사도우미",19,-1],"애견미용_훈련":["애견미용",19,-1],"경호_경비":["경호·경비",19,-1],"호텔서비스":["호텔서비스",19,-1],"관광서비스":["관광서비스",19,-1],"항공서비스":["항공서비스",19,-1],"매장관리":["매장관리",19,-1],"안내_리셉션":["리셉션",19,-1],"헤어디자이너":["헤어디자이너",19,-1],"메이크업_네일":["메이크업·네일",19,-1],"피부관리":["피부관리",19,-1],"마사지_체형관리":["체형관리",19,-1],"웨딩플래너":["웨딩플래너",19,-1],"환경미화원":["환경미화원",19,-1],"기타서비스":["기타",19,-1],"식품가공_개발":["식품가공",20,-1],"주방조리":["주방조리",20,-1],"제과_제빵":["제과·제빵",20,-1],"음료_주류":["음료·주류",20,-1],"매장운영":["매장운영",20,-1],"서비스_홀스태프":["홀스태프",20,-1],"식음컨설팅_지원":["식음컨설팅",20,-1],"기타식음료":["기타",20,-1],"은행":["은행",21,-1],"카드사":["카드사",21,-1],"캐피탈":["캐피탈",21,-1],"보험설계":["보험설계",21,-1],"계리":["계리",21,-1],"손해사정":["손해사정",21,-1],"언더라이팅_심사":["언더라이팅",21,-1],"청구_보상":["청구·보상",21,-1],"보험상품개발":["보험상품개발",21,-1],"기타은행_보험":["기타",21,-1],"운용_트레이딩":["운용·트레이딩",22,-1],"리스크_준법_심사":["리스크·준법",22,-1],"VC_PE":["VC·PE",22,-1],"증권IB":["증권IB",22,-1],"부동산_인프라금융":["부동산금융",22,-1],"PB_WM":["PB·WM",22,-1],"경영지원_관리":["경영지원",22,-1],"금융상품개발_영업":["금융상품개발",22,-1],"기타증권_운용":["기타",22,-1],"배송_배달":["배송·배달",23,-1],"승객운송":["승객운송",23,-1],"물류운송":["물류운송",23,-1],"전문운전":["전문운전",23,-1],"배차관리":["배차관리",23,-1],"기타운전_운송":["기타",23,-1],"행정_사무_운영":["행정·사무",24,-1],"기술_전산_시설":["기술·전산",24,-1],"복지_사회서비스":["복지·사회",24,-1],"교육_연구":["교육·연구",24,-1],"공공안전":["공공안전",24,-1],"상담_심리":["상담·심리",24,-1],"종교":["종교",24,-1],"아동_청소년복지":["아동·청소년",24,-1],"노인_여성복지":["노인·여성",24,-1],"자원봉사":["자원봉사",24,-1],"기타공공_복지":["기타",24,-1]}}</script><!--/roles:jobmap-->
-
-<script type="module">
-  import { pageView } from '/assets/track.js?v=8a4c7dcf';
-  pageView('onboarding_step', { step: 'done' });
-</script>
-<script type="module">
-  // 앞 네 화면이 모아 둔 선택값을 읽어 확인시킨다 — assets/onboarding-store.js.
-  // 주제 고르기는 2026-10-05 결정으로 4단계(/onboarding/4/)로 옮겨 갔다. 이 화면은 확인만 한다.
-  import { readState, retryPending, complete, 상한 } from '/assets/onboarding-store.js?v=b6c28dd2';
-  import { 오류안내 } from '/assets/toast.js?v=f8247e72';
-  import { 이어갈곳판정 } from '/assets/mypage-data.js?v=969c8b97';
-  // 직군 → 주제. 표는 tools/roles/tracks.json 이 정본이고 build.mjs 가 위 blob 을 만든다.
-  // 푸는 규칙은 발송 경로(`ops/send.py` 「트랙과_직군」)와 같다 — assets/topic-map.js 한 곳에 있다.
-  import { readTopicMap, trackFromJobs } from '/assets/topic-map.js?v=8f9d5bc9';
-
-  const MAP = readTopicMap();
-  const state = readState();
-  // 이 브라우저에 고른 값이 없으면(주소로 바로 열었거나 저장소가 비었다) 확인할 것이 없다 — 1단계로 보낸다.
-  // 그대로 두면 「아직 못 정했어요」만 보이는 채 완료 버튼이 살아 있고, 결제 화면이 다시 1단계로 돌려보낸다(2026-10-15 출시 검수).
-  if (!complete(state)) { window.ccLeave?.(); location.replace(이어갈곳판정(false, null, state)); }   // 빠진 첫 단계로(2026-10-16)
-  // 4단계에서 직접 고른 주제가 없으면(=직군에 맞춰) 직군이 정하는 주제가 실제로 받는 주제다.
-  const topic = state.topic || trackFromJobs(MAP, state.jobs);
-
-  // ① 고른 값 요약 — 값 전부를 칩으로. 없는 값은 항목을 통째로 감춘다 — 빈 칸이 남으면 고장으로 보인다.
-  const esc = (t) => { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; };
-  const put = (id, values) => {
-    const el = document.getElementById(id);
-    if (!values.length) { el.hidden = true; return; }
-    el.querySelector('.n').textContent = values.length > 1 ? String(values.length) : '';
-    el.querySelector('.vals').innerHTML = values.map((v) => `<b>${esc(v)}</b>`).join('');
-  };
-  put('s-job', state.jobs.map((c) => (MAP.jobs[c] || [c])[0]));
-  put('s-year', state.years === null ? [] : [state.yearsMax === null || state.yearsMax === state.years
-    ? `${state.years}년` : `${state.years}~${state.yearsMax}년`]);
-  put('s-region', state.regions);
-  put('s-topic', [topic || '아직 못 정했어요']);
-  // 마지막으로 보이는 항목 아래에는 선을 긋지 않는다(감춘 항목이 있어도).
-  const shown = [...document.querySelectorAll('.sum .it')].filter((el) => !el.hidden);
-  if (shown.length) shown[shown.length - 1].classList.add('last');
-
-  // ② 요일 블록의 월·수·금 줄 — 발송 편성 그대로. 공통 주제를 골랐으면 월·수·금도 그 트랙이다
-  //    (마이페이지 mypage/topics 와 같은 이름 규칙).
-  document.getElementById('mine').textContent = !topic ? '아직 못 정했어요'
-    : (MAP.common.includes(topic) ? '일 잘하는 법·커리어' : topic) + ' 인사이트';
-
-  // ③ 지난 저장이 실패한 채 남아 있으면 여기서 다시 보낸다.
-  // 🔴 **완료 CTA 가 이 약속을 기다린다** (2026-09-11 검사관 ①). 그냥 링크로 두면 누르는 순간
-  //    페이지가 떠나며 RPC 가 끊긴다. 결제 화면(/checkout/)은 retryPending() 을 부르지 않으므로
-  //    여기서 끊기면 재시도는 사용자가 마이페이지에 닿을 때까지 미뤄진다.
-  let 재시도 = retryPending();
-  const cta = document.querySelector('.cta');
-  let 가는중 = false;
-  // 결제 화면에서 뒤로 와 bfcache 로 되살아나면(iOS 사파리) 떠날 때 세운 표시가 그대로라 「완료」가 영영 안 눌린다(2026-10-15 출시 검수).
-  addEventListener('pageshow', (e) => {
-    if (!e.persisted) return;
-    가는중 = false; cta.removeAttribute('aria-busy');
-    재시도 = retryPending();
-  });
-  // 앞 단계 저장이 실패한 채 들어왔고 여기서 다시 보낸 것도 실패했으면 「완료」를 누르기 전에 알린다
-  // (2026-10-15 「오류 대체 화면」 D1 B안). 이미 「완료」를 눌렀으면 그쪽(D2)이 말한다.
-  재시도.then((r) => {
-    if (r && r.status === 'error' && !가는중) 오류안내(document.getElementById('errToast'), '설정을 아직 저장하지 못했어요.\n완료를 누르면 다시 저장할게요');
-  }, () => {});
-  cta.addEventListener('click', (e) => {
-    e.preventDefault();
-    if (가는중) return;
-    가는중 = true;
-    cta.setAttribute('aria-busy', 'true');
-    // 저장이 실패했으면 넘어가지 않는다 — 저장 안 된 채 결제로 가면 결제 화면(S13)에서 막힌다 (2026-10-15 「오류 대체 화면」 D2).
-    // 다시 누르면 다시 보낸다. 그 밖의 결과(보낼 것 없음·로그인 전 등)는 전처럼 넘어간다.
-    // 8초 넘게 붙잡히면 저장 실패와 같이 말하고 버튼을 푼다(D2 — 저장 안 된 채 결제로 넘기지 않는다). 아직 도는 저장은 그대로 두고
-    // 다음 누름이 같은 저장을 다시 기다린다 — 새로 보내면 겹쳐 `busy` 로 튕긴다.
-    상한(재시도.catch(() => ({ status: 'error' }))).then((r) => {
-      if (r && r.status === 'slow') {
-        가는중 = false;
-        cta.removeAttribute('aria-busy');
-        오류안내(document.getElementById('errToast'), '설정을 저장하지 못했어요. 다시 눌러 주세요');
-        return;
-      }
-      if (r && r.status === 'error') {
-        가는중 = false;
-        cta.removeAttribute('aria-busy');
-        오류안내(document.getElementById('errToast'), '설정을 저장하지 못했어요. 다시 눌러 주세요');
-        재시도 = retryPending();
-        return;
-      }
-      location.href = cta.getAttribute('href');
-    });
-  });
-</script>
-</body></html>
+</body>
+</html>

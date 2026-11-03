@@ -25,6 +25,7 @@ import { dirname, resolve, join, posix } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import vm from 'node:vm';
 import { 랜딩구성, 지문, 적힌지문, 기록대조 } from '../landing-version/fp.mjs';
+import { 닫힘, 닫힌파일 } from '../closed.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..', '..');
@@ -224,7 +225,7 @@ for (const page of pages) {
   /* 랜딩 로딩 속도 장치 — 아래 섹션 나중에 그리기 (2026-10-15 사용자 지시 「랜딩이 바뀌어도 항상 유지」).
      랜딩을 다시 만들거나 섹션을 늘리고 줄여도 이 두 줄은 남아야 한다. 실제로 첫 화면에서 섹션을 미루는지는
      shift-audit 의 「아래 섹션 미룸」이 화면을 열어 본다 — 여기는 지워졌는지를 매 푸시 본다. */
-  if (page === 'index.html') {
+  if (page === 'index.html' && !닫힘(raw)) {
     const code = live.replace(/\/\*[\s\S]*?\*\//g, '');
     const styles = [...code.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)].map((m) => m[1]).join('');
     const scripts = [...code.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)].map((m) => m[1].replace(/^\s*\/\/.*$/gm, '')).join('');
@@ -249,7 +250,7 @@ for (const page of pages) {
   }
   /* 랜딩 버전 지문 (2026-10-15) — 어드민 「랜딩 섹션 도달률」이 이 값으로 버전을 가른다. 섹션 구성·제목·시안 값을
      바꾸고 지문을 안 고치면 새 랜딩의 방문이 옛 버전에 섞인다. 섹션마다 이름(data-sec)이 있어야 어드민 줄 이름이 선다. */
-  if (page === 'index.html') {
+  if (page === 'index.html' && !닫힘(raw)) {
     const 구성 = 랜딩구성(raw), 적힌 = 적힌지문(raw), 값 = 지문(구성);
     const 이름 = 구성.섹션.map((x) => x.이름);
     if (적힌 !== 값) {
@@ -402,7 +403,9 @@ const PRICE_ALLOW = {
   })();
   const won = (n) => n.toLocaleString('en-US') + '원';
 
-  if (서버요금.못읽음) {
+  if (닫힌파일(ROOT, SHOWN_AT[0])) {
+    // 서비스 종료(2026-11-03) — 랜딩에 요금이 없고 살아 있는 요금제도 0개다. 맞댈 것이 없다.
+  } else if (서버요금.못읽음) {
     // CI 에서는 막는다 — PC 는 네트워크가 없을 수 있어 경고로 둔다(막으면 --no-verify 로 여섯 겹이 통째로 꺼진다).
     add(process.env.CI ? 'BLOCK' : 'WARN', '요금 대조', SHOWN_AT[0],
         `서버 요금제를 못 읽었습니다 (${서버요금.못읽음})`,
